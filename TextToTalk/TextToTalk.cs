@@ -37,10 +37,12 @@ namespace TextToTalk
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
-            if (!this.config.Enabled) return;
-            if (this.config.DisabledChatTypes.Contains(type)) return;
-
+#if DEBUG
             PluginLog.Log("Chat message from type {0}: {1}", type, message.TextValue);
+#endif
+
+            if (!this.config.Enabled) return;
+            if (!this.config.EnabledChatTypes.Contains((int)type)) return;
 
             this.speechSynthesizer.Rate = this.config.Rate;
             this.speechSynthesizer.Volume = this.config.Volume;

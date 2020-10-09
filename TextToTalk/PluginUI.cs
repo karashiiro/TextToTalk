@@ -92,17 +92,17 @@ namespace TextToTalk
                     enumValue = (XivChatType) (int) Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
                 }
 
-                var selected = !this.config.DisabledChatTypes.Contains(enumValue);
+                var selected = this.config.EnabledChatTypes.Contains((int)enumValue);
                 if (!ImGui.Checkbox(channel == "PvPTeam" ? "PvP Team" : SplitWords(channel), ref selected)) continue;
-                var inDisabled = this.config.DisabledChatTypes.Contains(enumValue);
-                if (inDisabled)
+                var inEnabled = this.config.EnabledChatTypes.Contains((int)enumValue);
+                if (inEnabled)
                 {
-                    this.config.DisabledChatTypes.Remove(enumValue);
+                    this.config.EnabledChatTypes.Remove((int)enumValue);
                     this.config.Save();
                 }
                 else
                 {
-                    this.config.DisabledChatTypes.Add(enumValue);
+                    this.config.EnabledChatTypes.Add((int)enumValue);
                     this.config.Save();
                 }
             }
