@@ -40,6 +40,8 @@ namespace TextToTalk
             if (!this.config.Enabled) return;
             if (this.config.DisabledChatTypes.Contains(type)) return;
 
+            PluginLog.Log("Chat message from type {0}: {1}", type, message.TextValue);
+
             this.speechSynthesizer.Rate = this.config.Rate;
             this.speechSynthesizer.Volume = this.config.Volume;
             this.speechSynthesizer.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Adult);

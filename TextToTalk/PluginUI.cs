@@ -23,7 +23,7 @@ namespace TextToTalk
             if (!ConfigVisible)
                 return;
 
-            ImGui.SetNextWindowSize(new Vector2(500, 400));
+            ImGui.SetNextWindowSize(new Vector2(520, 400));
             ImGui.Begin("TextToTalk Configuration", ImGuiWindowFlags.NoResize);
             {
                 if (ImGui.BeginTabBar("TextToTalk##tabbar"))
@@ -79,10 +79,19 @@ namespace TextToTalk
 
         private void DrawChannelSettings()
         {
-            var channels = Enum.GetNames(typeof(XivChatType));
+            var channels = Enum.GetNames(typeof(XivChatType)).Concat(Enum.GetNames(typeof(AdditionalChatTypes.Enum)));
             foreach (var channel in channels)
             {
-                var enumValue = (XivChatType) Enum.Parse(typeof(XivChatType), channel);
+                XivChatType enumValue;
+                try
+                {
+                    enumValue = (XivChatType) Enum.Parse(typeof(XivChatType), channel);
+                }
+                catch (ArgumentException)
+                {
+                    enumValue = (XivChatType) (int) Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
+                }
+
                 var selected = !this.config.DisabledChatTypes.Contains(enumValue);
                 if (!ImGui.Checkbox(channel == "PvPTeam" ? "PvP Team" : SplitWords(channel), ref selected)) continue;
                 var inDisabled = this.config.DisabledChatTypes.Contains(enumValue);
