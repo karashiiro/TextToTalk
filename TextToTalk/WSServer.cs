@@ -6,7 +6,7 @@ using WebSocketSharp.Server;
 
 namespace TextToTalk
 {
-    public class WSServer
+    public class WsServer
     {
         private readonly WebSocketServer server;
         private readonly ServerBehavior behavior;
@@ -14,7 +14,7 @@ namespace TextToTalk
         public int Port { get; } = FreeTcpPort();
         public bool Active { get; private set; }
 
-        public WSServer()
+        public WsServer()
         {
             this.server = new WebSocketServer($"ws://localhost:{Port}");
             this.behavior = new ServerBehavior();

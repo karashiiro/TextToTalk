@@ -16,7 +16,7 @@ namespace TextToTalk
         private PluginUI ui;
 
         private SpeechSynthesizer speechSynthesizer;
-        private WSServer wsServer;
+        private WsServer wsServer;
 
         public string Name => "TextToTalk";
 
@@ -27,7 +27,7 @@ namespace TextToTalk
             this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            this.wsServer = new WSServer();
+            this.wsServer = new WsServer();
 
             this.ui = new PluginUI(this.config, this.wsServer);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.DrawConfig;
@@ -71,7 +71,12 @@ namespace TextToTalk
             {
                 this.speechSynthesizer.Rate = this.config.Rate;
                 this.speechSynthesizer.Volume = this.config.Volume;
-                this.speechSynthesizer.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Adult);
+
+                if (this.speechSynthesizer.Voice.Name != this.config.VoiceName)
+                {
+                    this.speechSynthesizer.SelectVoice(this.config.VoiceName);
+                }
+
                 this.speechSynthesizer.SpeakAsync(textValue);
             }
         }

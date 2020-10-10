@@ -10,8 +10,10 @@ namespace TextToTalk
 {
     public class PluginUI
     {
+        private static readonly SpeechSynthesizer DummySynthesizer = new SpeechSynthesizer();
+
         private readonly PluginConfiguration config;
-        private readonly WSServer wsServer;
+        private readonly WsServer wsServer;
         private bool configVisible;
 
         public bool ConfigVisible
@@ -20,7 +22,7 @@ namespace TextToTalk
             set => this.configVisible = value;
         }
 
-        public PluginUI(PluginConfiguration config, WSServer wsServer)
+        public PluginUI(PluginConfiguration config, WsServer wsServer)
         {
             this.config = config;
             this.wsServer = wsServer;
@@ -89,18 +91,12 @@ namespace TextToTalk
                 this.config.Save();
             }
 
-            var gender = this.config.GenderIndex;
-            var voiceGenders = Enum.GetNames(typeof(VoiceGender));
-            if (ImGui.Combo("Voice Gender (from installed)", ref gender, voiceGenders, voiceGenders.Length))
+            var voiceName = this.config.VoiceName;
+            var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv.Enabled).ToList();
+            var voiceIndex = voices.FindIndex(iv => iv.VoiceInfo.Name == voiceName);
+            if (ImGui.Combo("Voice", ref voiceIndex, voices.Select(iv => iv.VoiceInfo.Name).ToArray(), voices.Count()))
             {
-                this.config.GenderIndex = gender;
-            }
-
-            var age = this.config.AgeIndex;
-            var voiceAges = Enum.GetNames(typeof(VoiceAge));
-            if (ImGui.Combo("Voice Age (from installed)", ref age, voiceAges, voiceAges.Length))
-            {
-                this.config.AgeIndex = age;
+                this.config.VoiceName = voices[voiceIndex].VoiceInfo.Name;
             }
         }
 

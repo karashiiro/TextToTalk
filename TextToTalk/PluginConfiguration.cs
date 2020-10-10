@@ -21,8 +21,8 @@ namespace TextToTalk
 
         public int Rate { get; set; }
         public int Volume { get; set; }
-        public int GenderIndex { get; set; }
-        public int AgeIndex { get; set; }
+
+        public string VoiceName { get; set; }
 
         public bool UseWebsocket { get; set; }
 
@@ -47,6 +47,8 @@ namespace TextToTalk
             using var ss = new SpeechSynthesizer();
             Rate = ss.Rate;
             Volume = ss.Volume;
+
+            VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name;
         }
 
         public void Initialize(DalamudPluginInterface pluginInterface)
