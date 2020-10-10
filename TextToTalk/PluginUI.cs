@@ -12,8 +12,13 @@ namespace TextToTalk
     {
         private readonly PluginConfiguration config;
         private readonly WSServer wsServer;
+        private bool configVisible;
 
-        public bool ConfigVisible { get; set; }
+        public bool ConfigVisible
+        {
+            get => this.configVisible;
+            set => this.configVisible = value;
+        }
 
         public PluginUI(PluginConfiguration config, WSServer wsServer)
         {
@@ -27,7 +32,7 @@ namespace TextToTalk
                 return;
 
             ImGui.SetNextWindowSize(new Vector2(520, 400));
-            ImGui.Begin("TextToTalk Configuration", ImGuiWindowFlags.NoResize);
+            ImGui.Begin("TextToTalk Configuration", ref this.configVisible, ImGuiWindowFlags.NoResize);
             {
                 if (ImGui.BeginTabBar("TextToTalk##tabbar"))
                 {
