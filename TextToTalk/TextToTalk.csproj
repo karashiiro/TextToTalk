@@ -7,6 +7,12 @@
     <FileVersion>0.1.0.0</FileVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+    <PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="WebSocketSharpFork" Version="1.0.4" />
   </ItemGroup>
