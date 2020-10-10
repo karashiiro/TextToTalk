@@ -198,6 +198,7 @@ namespace TextToTalk
                 if (listItems[j].ShouldRemove)
                 {
                     listItems.RemoveAt(j);
+                    this.config.Save();
                 }
             }
 
