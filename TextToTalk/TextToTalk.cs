@@ -42,6 +42,10 @@ namespace TextToTalk
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
             var textValue = message.TextValue;
+            if (sender != null && sender.TextValue != string.Empty)
+            {
+                textValue = $"{sender.TextValue} says {textValue}";
+            }
 
 #if DEBUG
             PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
@@ -69,6 +73,23 @@ namespace TextToTalk
                 this.speechSynthesizer.Volume = this.config.Volume;
                 this.speechSynthesizer.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Adult);
                 this.speechSynthesizer.SpeakAsync(textValue);
+            }
+        }
+
+        [Command("/canceltts")]
+        [HelpMessage("Cancel all queued TTS messages.")]
+        public void CancelTts(string command, string args)
+        {
+            if (this.config.UseWebsocket)
+            {
+                this.wsServer.Cancel();
+#if DEBUG
+                PluginLog.Log("Canceled TTS over WebSocket server.");
+#endif
+            }
+            else
+            {
+                this.speechSynthesizer.SpeakAsyncCancelAll();
             }
         }
 

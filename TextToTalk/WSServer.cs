@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 using WebSocketSharp.Server;
 
 namespace TextToTalk
@@ -23,7 +24,17 @@ namespace TextToTalk
         public void Broadcast(string message)
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
-            this.behavior.SendMessage(message);
+
+            var ipcMessage = new IpcMessage(IpcMessageType.Say, message);
+            this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
+        }
+
+        public void Cancel()
+        {
+            if (!Active) throw new InvalidOperationException("Server is not active!");
+
+            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty);
+            this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
         public void Start()
@@ -55,6 +66,25 @@ namespace TextToTalk
             {
                 Send(message);
             }
+        }
+
+        [Serializable]
+        private class IpcMessage
+        {
+            public string Type { get; set; }
+            public string Payload { get; set; }
+
+            public IpcMessage(IpcMessageType type, string payload)
+            {
+                Type = type.ToString();
+                Payload = payload;
+            }
+        }
+
+        private enum IpcMessageType
+        {
+            Say,
+            Cancel,
         }
     }
 }
