@@ -4,7 +4,6 @@ using Dalamud.Plugin;
 using System;
 using System.Linq;
 using System.Speech.Synthesis;
-using System.Text.RegularExpressions;
 using TextToTalk.Attributes;
 
 namespace TextToTalk
