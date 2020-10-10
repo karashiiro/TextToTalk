@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Speech.Synthesis;
 using Dalamud.Configuration;
 using Dalamud.Game.Chat;
@@ -22,6 +23,8 @@ namespace TextToTalk
         public int Volume { get; set; }
         public int GenderIndex { get; set; }
         public int AgeIndex { get; set; }
+
+        public bool UseWebsocket { get; set; }
 
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
 
@@ -49,10 +52,12 @@ namespace TextToTalk
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
             this.pluginInterface = pluginInterface;
+            EnabledChatTypes = EnabledChatTypes.Distinct().ToList();
         }
 
         public void Save()
         {
+            EnabledChatTypes = EnabledChatTypes.Distinct().ToList();
             this.pluginInterface.SavePluginConfig(this);
         }
     }

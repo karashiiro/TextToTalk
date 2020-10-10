@@ -17,6 +17,7 @@ namespace TextToTalk
         private PluginUI ui;
 
         private SpeechSynthesizer speechSynthesizer;
+        private WSServer wsServer;
 
         public string Name => "TextToTalk";
 
@@ -27,7 +28,9 @@ namespace TextToTalk
             this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            this.ui = new PluginUI(this.config);
+            this.wsServer = new WSServer();
+
+            this.ui = new PluginUI(this.config, this.wsServer);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.DrawConfig;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += (sender, args) => this.ui.ConfigVisible = true;
 
@@ -49,13 +52,34 @@ namespace TextToTalk
             if (this.config.Bad.Count > 0 && this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
 
             var typeAccepted = this.config.EnabledChatTypes.Contains((int)type);
-            var goodMatch = this.config.Good.Count > 0 && this.config.Good.Where(t => t.Text != "").Any(t => t.Match(textValue));
+            var goodMatch = this.config.Good.Count > 0 && this.config.Good
+                .Where(t => t.Text != "")
+                .Any(t => t.Match(textValue));
             if (!(this.config.EnableAllChatTypes || typeAccepted) || !goodMatch) return;
 
-            this.speechSynthesizer.Rate = this.config.Rate;
-            this.speechSynthesizer.Volume = this.config.Volume;
-            this.speechSynthesizer.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Adult);
-            this.speechSynthesizer.SpeakAsync(message.TextValue);
+            if (this.config.UseWebsocket && !this.wsServer.Active)
+            {
+                this.wsServer.Start();
+            }
+            else if (!this.config.UseWebsocket && this.wsServer.Active)
+            {
+                this.wsServer.Stop();
+            }
+
+            if (this.config.UseWebsocket)
+            {
+                this.wsServer.Broadcast(textValue);
+#if DEBUG
+                PluginLog.Log("Sent message {0} on WebSocket server.", textValue);
+#endif
+            }
+            else
+            {
+                this.speechSynthesizer.Rate = this.config.Rate;
+                this.speechSynthesizer.Volume = this.config.Volume;
+                this.speechSynthesizer.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Adult);
+                this.speechSynthesizer.SpeakAsync(textValue);
+            }
         }
 
         [Command("/toggletts")]
@@ -77,20 +101,21 @@ namespace TextToTalk
         #region IDisposable Support
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                this.commandManager.Dispose();
+            if (!disposing) return;
 
-                this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
-                this.speechSynthesizer.Dispose();
+            this.commandManager.Dispose();
 
-                this.pluginInterface.SavePluginConfig(this.config);
+            this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
+            this.speechSynthesizer.Dispose();
 
-                this.pluginInterface.UiBuilder.OnOpenConfigUi -= (sender, args) => this.ui.ConfigVisible = true;
-                this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.DrawConfig;
+            this.wsServer.Stop();
 
-                this.pluginInterface.Dispose();
-            }
+            this.pluginInterface.SavePluginConfig(this.config);
+
+            this.pluginInterface.UiBuilder.OnOpenConfigUi -= (sender, args) => this.ui.ConfigVisible = true;
+            this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.DrawConfig;
+
+            this.pluginInterface.Dispose();
         }
 
         public void Dispose()

@@ -11,12 +11,14 @@ namespace TextToTalk
     public class PluginUI
     {
         private readonly PluginConfiguration config;
+        private readonly WSServer wsServer;
 
         public bool ConfigVisible { get; set; }
 
-        public PluginUI(PluginConfiguration config)
+        public PluginUI(PluginConfiguration config, WSServer wsServer)
         {
             this.config = config;
+            this.wsServer = wsServer;
         }
 
         public void DrawConfig()
@@ -55,6 +57,14 @@ namespace TextToTalk
 
         private void DrawSynthesizerSettings()
         {
+            var useWebsocket = this.config.UseWebsocket;
+            if (ImGui.Checkbox("Use WebSocket", ref useWebsocket))
+            {
+                this.config.UseWebsocket = useWebsocket;
+            }
+            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
+            if (useWebsocket) return;
+
             var rate = this.config.Rate;
             if (ImGui.SliderInt("Rate", ref rate, -10, 10))
             {
