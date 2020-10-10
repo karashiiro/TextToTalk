@@ -61,6 +61,11 @@ namespace TextToTalk
             if (ImGui.Checkbox("Use WebSocket", ref useWebsocket))
             {
                 this.config.UseWebsocket = useWebsocket;
+
+                if (this.config.UseWebsocket)
+                    this.wsServer.Start();
+                else
+                    this.wsServer.Stop();
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
             if (useWebsocket) return;

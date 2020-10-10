@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using WebSocketSharp.Server;
 
@@ -21,6 +22,7 @@ namespace TextToTalk
 
         public void Broadcast(string message)
         {
+            if (!Active) throw new InvalidOperationException("Server is not active!");
             this.behavior.SendMessage(message);
         }
 
