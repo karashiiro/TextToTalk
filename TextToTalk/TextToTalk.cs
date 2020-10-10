@@ -1,8 +1,10 @@
-﻿using System;
-using System.Speech.Synthesis;
-using Dalamud.Game.Chat;
+﻿using Dalamud.Game.Chat;
 using Dalamud.Game.Chat.SeStringHandling;
 using Dalamud.Plugin;
+using System;
+using System.Linq;
+using System.Speech.Synthesis;
+using System.Text.RegularExpressions;
 using TextToTalk.Attributes;
 
 namespace TextToTalk
@@ -12,7 +14,7 @@ namespace TextToTalk
         private DalamudPluginInterface pluginInterface;
         private PluginCommandManager<TextToTalk> commandManager;
         private PluginConfiguration config;
-        private PluginUI ui;    
+        private PluginUI ui;
 
         private SpeechSynthesizer speechSynthesizer;
 
@@ -37,12 +39,18 @@ namespace TextToTalk
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
+            var textValue = message.TextValue;
+
 #if DEBUG
-            PluginLog.Log("Chat message from type {0}: {1}", type, message.TextValue);
+            PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
 #endif
 
             if (!this.config.Enabled) return;
-            if (!this.config.EnabledChatTypes.Contains((int)type)) return;
+            if (this.config.Bad.Count > 0 && this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
+
+            var typeAccepted = this.config.EnabledChatTypes.Contains((int)type);
+            var goodMatch = this.config.Good.Count > 0 && this.config.Good.Where(t => t.Text != "").Any(t => t.Match(textValue));
+            if (!(this.config.EnableAllChatTypes || typeAccepted) || !goodMatch) return;
 
             this.speechSynthesizer.Rate = this.config.Rate;
             this.speechSynthesizer.Volume = this.config.Volume;

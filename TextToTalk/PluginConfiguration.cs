@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Speech.Synthesis;
 using Dalamud.Configuration;
 using Dalamud.Game.Chat;
@@ -15,9 +13,10 @@ namespace TextToTalk
 
         public bool Enabled { get; set; }
         
+        public bool EnableAllChatTypes { get; set; }
         public IList<int> EnabledChatTypes { get; set; }
-        public IList<string> Bad { get; set; }
-        public IList<string> Good { get; set; }
+        public IList<Trigger> Bad { get; set; }
+        public IList<Trigger> Good { get; set; }
 
         public int Rate { get; set; }
         public int Volume { get; set; }
@@ -39,8 +38,8 @@ namespace TextToTalk
                 (int) AdditionalChatTypes.Enum.BeneficialEffectOnYouEnded,
                 (int) AdditionalChatTypes.Enum.BeneficialEffectOnOtherPlayer,
             };
-            Bad = new List<string>();
-            Good = new List<string>();
+            Bad = new List<Trigger>();
+            Good = new List<Trigger>();
 
             using var ss = new SpeechSynthesizer();
             Rate = ss.Rate;

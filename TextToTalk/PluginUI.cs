@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.Chat;
 using ImGuiNET;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Speech.Synthesis;
@@ -37,6 +38,12 @@ namespace TextToTalk
                     if (ImGui.BeginTabItem("Channel Settings"))
                     {
                         DrawChannelSettings();
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Triggers/Exclusions"))
+                    {
+                        DrawTriggersExclusions();
                         ImGui.EndTabItem();
                     }
                 }
@@ -79,6 +86,14 @@ namespace TextToTalk
 
         private void DrawChannelSettings()
         {
+            var enableAll = this.config.EnableAllChatTypes;
+            if (ImGui.Checkbox("Enable all (including undocumented)", ref enableAll))
+            {
+                this.config.EnableAllChatTypes = enableAll;
+            }
+            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
+            if (enableAll) return;
+
             var channels = Enum.GetNames(typeof(XivChatType)).Concat(Enum.GetNames(typeof(AdditionalChatTypes.Enum)));
             foreach (var channel in channels)
             {
@@ -114,6 +129,62 @@ namespace TextToTalk
                 .Select(c => c)
                 .Skip(1)
                 .Aggregate("" + oneWord[0], (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <='9' ? " " + c : "" + c));
+        }
+
+        private void DrawTriggersExclusions()
+        {
+            var enableAll = this.config.EnableAllChatTypes;
+            if (ImGui.Checkbox("Enable all chat types (including undocumented)", ref enableAll))
+            {
+                this.config.EnableAllChatTypes = enableAll;
+            }
+            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
+            ImGui.Dummy(new Vector2(0, 5));
+
+            ExpandyList("Trigger", this.config.Good);
+            ExpandyList("Exclusion", this.config.Bad);
+        }
+
+        private void ExpandyList(string kind, IList<Trigger> listItems)
+        {
+            ImGui.Text($"{kind}s");
+
+            for (var i = 0; i < listItems.Count; i++)
+            {
+                var str = listItems[i].Text;
+                if (ImGui.InputTextWithHint($"###TextToTalk{kind}{i}", $"Enter {kind} here...", ref str, 100))
+                {
+                    listItems[i].Text = str;
+                    this.config.Save();
+                }
+                
+                ImGui.SameLine();
+                var isRegex = listItems[i].IsRegex;
+                if (ImGui.Checkbox($"Regex###TextToTalkRegex{kind}{i}", ref isRegex))
+                {
+                    listItems[i].IsRegex = isRegex;
+                    this.config.Save();
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button($"Remove###TextToTalkRemove{kind}{i}"))
+                {
+                    listItems[i].ShouldRemove = true;
+                }
+            }
+
+            for (var j = 0; j < listItems.Count; j++)
+            {
+                if (listItems[j].ShouldRemove)
+                {
+                    listItems.RemoveAt(j);
+                }
+            }
+
+            if (ImGui.Button($"Add {kind}"))
+            {
+                listItems.Add(new Trigger());
+            }
         }
     }
 }
