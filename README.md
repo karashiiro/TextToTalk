@@ -26,3 +26,8 @@ TTS cancel:
 ```
 
 The WebSocket address is shown under the configuration checkbox.
+
+## Screenshots
+![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/0.png)
+![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/1.png)
+![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/2.png)
