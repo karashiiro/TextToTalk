@@ -13,6 +13,8 @@ namespace TextToTalk
         public int Version { get; set; }
 
         public bool Enabled { get; set; }
+
+        public bool FirstTime { get; set; }
         
         public bool EnableAllChatTypes { get; set; }
         public IList<int> EnabledChatTypes { get; set; }
@@ -32,15 +34,6 @@ namespace TextToTalk
         {
             Enabled = true;
 
-            EnabledChatTypes = new List<int>
-            {
-                (int) XivChatType.Say,
-                (int) XivChatType.Shout,
-                (int) XivChatType.Party,
-                (int) AdditionalChatTypes.Enum.BeneficialEffectOnYou,
-                (int) AdditionalChatTypes.Enum.BeneficialEffectOnYouEnded,
-                (int) AdditionalChatTypes.Enum.BeneficialEffectOnOtherPlayer,
-            };
             Bad = new List<Trigger>();
             Good = new List<Trigger>();
 
@@ -54,12 +47,26 @@ namespace TextToTalk
         public void Initialize(DalamudPluginInterface pluginInterface)
         {
             this.pluginInterface = pluginInterface;
-            EnabledChatTypes = EnabledChatTypes.Distinct().ToList();
+
+            if (!FirstTime)
+            {
+                EnabledChatTypes = new List<int>
+                {
+                    (int) XivChatType.Say,
+                    (int) XivChatType.Shout,
+                    (int) XivChatType.Party,
+                    (int) AdditionalChatTypes.Enum.BeneficialEffectOnYou,
+                    (int) AdditionalChatTypes.Enum.BeneficialEffectOnYouEnded,
+                    (int) AdditionalChatTypes.Enum.BeneficialEffectOnOtherPlayer,
+                };
+                FirstTime = true;
+            }
+
+            this.pluginInterface.SavePluginConfig(this);
         }
 
         public void Save()
         {
-            EnabledChatTypes = EnabledChatTypes.Distinct().ToList();
             this.pluginInterface.SavePluginConfig(this);
         }
     }
