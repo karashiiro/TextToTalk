@@ -1,5 +1,5 @@
 # TextToTalk
-Chat TTS plugin for Dalamud. Has support for triggers/exclusions, and WebSocket support for external interfacing.
+Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, and WebSocket support for external interfacing.
 
 ## Commands
 * `/tttconfig`: Opens the configuration window.
