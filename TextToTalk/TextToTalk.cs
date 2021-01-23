@@ -54,11 +54,11 @@ namespace TextToTalk
             if (!this.config.Enabled) return;
             if (this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
 
-            var typeAccepted = this.config.EnableAllChatTypes || this.config.EnabledChatTypes.Contains((int)type);
-            var goodMatch = this.config.Good.Count > 0 && this.config.Good
+            var typeAccepted = this.config.EnabledChatTypes.Contains((int)type);
+            var goodMatch = this.config.Good
                 .Where(t => t.Text != "")
                 .Any(t => t.Match(textValue));
-            if (!typeAccepted || !goodMatch) return;
+            if (!(this.config.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
             if (this.config.UseWebsocket)
             {
