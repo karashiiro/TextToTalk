@@ -5,7 +5,16 @@
         // These should be added to Dalamud proper
         public enum Enum
         {
-            NpcDialogue = 61,
+            NPCDialogue = 61,
+            LootMessage = 62,
+            CharacterProgress = 64,
+            Loot = 65,
+            Crafting = 66,
+            Gathering = 67,
+            NPCAnnouncement = 68,
+            FCAnnouncement = 69,
+            FCLogin = 70,
+            RetainerSale = 71,
             PartyFinderState = 72,
             ActionUsedOnYou = 2091,
             FailedActionUsedOnYou = 2218,
