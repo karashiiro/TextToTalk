@@ -66,6 +66,16 @@ namespace TextToTalk
             {
                 Send(message);
             }
+            
+            // Enable re-use of a websocket if the client disconnects
+            protected override void OnClose(WebSocketSharp.CloseEventArgs e)
+            {
+                base.OnClose(e);
+
+                var targetType = typeof(WebSocketBehavior);
+                var base_websocket = targetType.GetField("_websocket", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                base_websocket.SetValue(this, null);
+            }
         }
 
         [Serializable]
