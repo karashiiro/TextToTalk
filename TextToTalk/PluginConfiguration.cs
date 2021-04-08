@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Speech.Synthesis;
 using Dalamud.Configuration;
-using Dalamud.Game.Chat;
+using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Newtonsoft.Json;
 

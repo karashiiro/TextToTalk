@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.Chat;
+﻿using Dalamud.Game.Text;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
