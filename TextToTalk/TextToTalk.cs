@@ -31,7 +31,7 @@ namespace TextToTalk
 
             this.ui = new PluginUI(this.config, this.wsServer);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.DrawConfig;
-            this.pluginInterface.UiBuilder.OnOpenConfigUi += (sender, args) => this.ui.ConfigVisible = true;
+            this.pluginInterface.UiBuilder.OnOpenConfigUi += (_, _) => this.ui.ConfigVisible = true;
 
             this.speechSynthesizer = new SpeechSynthesizer();
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
@@ -44,7 +44,10 @@ namespace TextToTalk
             var textValue = message.TextValue;
             if (sender != null && sender.TextValue != string.Empty)
             {
-                textValue = $"{sender.TextValue} says {textValue}";
+                if (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue)
+                {
+                    textValue = $"{sender.TextValue} says {textValue}";
+                }
             }
 
 #if DEBUG

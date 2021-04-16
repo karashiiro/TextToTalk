@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <AssemblyVersion>1.1.4.0</AssemblyVersion>
-    <FileVersion>1.1.4.0</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -39,6 +39,6 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if $(ConfigurationName) == Debug (&#xD;&#xA;  echo Running Debug Post Build&#xD;&#xA;  echo Killing Dalamud&#xD;&#xA;  curl &quot;http://localhost:37435/unload_dalamud&quot; 2&gt;NUL&#xD;&#xA;  waitfor NothingAtAll /t 2 2&gt;NUL&#xD;&#xA;  echo Copying to DevPlugins&#xD;&#xA;  xcopy &quot;$(TargetPath)\..&quot; &quot;%25appdata%25\XIVLauncher\devPlugins&quot; /Y /E&#xD;&#xA;  echo Injecting Dalamud&#xD;&#xA;  C:&#xD;&#xA;  cd &quot;%25appdata%25\XIVLauncher\addon\Hooks&quot;&#xD;&#xA;  %25appdata%25\XIVLauncher\addon\Hooks\Dalamud.Injector.exe&#xD;&#xA;  exit /b 0&#xD;&#xA;)" />
+    <Exec Command="if $(ConfigurationName) == Debug (&#xD;&#xA;  echo Running Debug Post Build (Please have Dalamud closed)&#xD;&#xA;  echo Copying to DevPlugins&#xD;&#xA;  xcopy &quot;$(TargetPath)\..&quot; &quot;%25appdata%25\XIVLauncher\devPlugins&quot; /Y /E&#xD;&#xA;  exit /b 0&#xD;&#xA;)" />
   </Target>
 </Project>

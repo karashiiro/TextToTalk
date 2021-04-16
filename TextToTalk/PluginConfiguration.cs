@@ -28,6 +28,8 @@ namespace TextToTalk
 
         public bool UseWebsocket { get; set; }
 
+        public bool NameNpcWithSay { get; set; } = true;
+
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
 
         public PluginConfiguration()

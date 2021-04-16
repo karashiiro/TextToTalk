@@ -103,6 +103,14 @@ namespace TextToTalk
             {
                 this.config.VoiceName = voices[voiceIndex].VoiceInfo.Name;
             }
+
+            ImGui.Text(""); // Empty line
+            var nameNpcWithSay = this.config.NameNpcWithSay;
+            if (ImGui.Checkbox("Include \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
+            {
+                this.config.NameNpcWithSay = nameNpcWithSay;
+                this.config.Save();
+            }
         }
 
         private void DrawChannelSettings()
