@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Speech.Synthesis;
+using System.Text;
 
 namespace TextToTalk
 {
@@ -154,10 +155,24 @@ namespace TextToTalk
 
         private static string SplitWords(string oneWord)
         {
-            return oneWord
+            var words = oneWord
                 .Select(c => c)
                 .Skip(1)
-                .Aggregate("" + oneWord[0], (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <='9' ? " " + c : "" + c));
+                .Aggregate("" + oneWord[0], (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <='9' ? " " + c : "" + c))
+                .Split(' ');
+
+            var finalWords = new StringBuilder(oneWord.Length + 3);
+            for (var i = 0; i < words.Length - 1; i++)
+            {
+                finalWords.Append(words[i]);
+                if (words[i].Length == 1 && words[i + 1].Length == 1)
+                {
+                    continue;
+                }
+                finalWords.Append(" ");
+            }
+
+            return finalWords.Append(words.Last()).ToString();
         }
 
         private void DrawTriggersExclusions()
