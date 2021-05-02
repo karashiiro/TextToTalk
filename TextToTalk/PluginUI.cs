@@ -93,14 +93,14 @@ namespace TextToTalk
             }
 
             var voiceName = this.config.VoiceName;
-            var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv.Enabled).ToList();
-            var voiceIndex = voices.FindIndex(iv => iv.VoiceInfo.Name == voiceName);
+            var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
+            var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
             if (ImGui.Combo("Voice",
                             ref voiceIndex,
                             voices
-                                .Select(iv => $"{iv.VoiceInfo.Name} ({iv.VoiceInfo.Culture.TwoLetterISOLanguageName.ToUpperInvariant()})")
+                                .Select(iv => $"{iv?.VoiceInfo?.Name} ({iv?.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
                                 .ToArray(),
-                            voices.Count()))
+                            voices.Count))
             {
                 this.config.VoiceName = voices[voiceIndex].VoiceInfo.Name;
             }
