@@ -46,7 +46,7 @@ namespace TextToTalk
             {
                 if (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue)
                 {
-                    textValue = $"{sender.TextValue} says {textValue}";
+                    return;
                 }
             }
 
