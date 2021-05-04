@@ -3,7 +3,12 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Speech.Synthesis;
+using System.Text;
+using Dalamud.Game.Internal;
+using Dalamud.Game.Internal.Gui.Addon;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Attributes;
 
 namespace TextToTalk
@@ -14,6 +19,8 @@ namespace TextToTalk
         private PluginCommandManager<TextToTalk> commandManager;
         private PluginConfiguration config;
         private PluginUI ui;
+
+        private Addon talkAddonInterface;
 
         private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
@@ -32,11 +39,31 @@ namespace TextToTalk
             this.ui = new PluginUI(this.config, this.wsServer);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.DrawConfig;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += (_, _) => this.ui.ConfigVisible = true;
-
+            
             this.speechSynthesizer = new SpeechSynthesizer();
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
 
+            this.pluginInterface.Framework.OnUpdateEvent += OnFrameworkUpdate;
+
             this.commandManager = new PluginCommandManager<TextToTalk>(this, this.pluginInterface);
+        }
+
+        private unsafe void OnFrameworkUpdate(Framework framework)
+        {
+            if (this.talkAddonInterface.Address == IntPtr.Zero)
+            {
+                this.talkAddonInterface = this.pluginInterface.Framework.Gui.GetAddonByName("Talk", 1);
+                return;
+            }
+
+            var talkAddon = Marshal.PtrToStructure<AddonTalk>(this.talkAddonInterface.Address);
+            var textPtr = talkAddon.AtkTextNode228->NodeText.StringPtr;
+            var textLength = talkAddon.AtkTextNode228->NodeText.StringLength;
+            if (textLength > 0)
+            {
+                var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
+                PluginLog.Log(text);
+            }
         }
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
