@@ -25,6 +25,8 @@ namespace TextToTalk
         private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
 
+        private IntPtr lastTextPtr;
+
         public string Name => "TextToTalk";
 
         public void Initialize(DalamudPluginInterface pluginInterface)
@@ -58,12 +60,16 @@ namespace TextToTalk
 
             var talkAddon = Marshal.PtrToStructure<AddonTalk>(this.talkAddonInterface.Address);
             var textPtr = talkAddon.AtkTextNode228->NodeText.StringPtr;
+            var managedTextPtr = (IntPtr)textPtr;
+            if (managedTextPtr == this.lastTextPtr) return;
+
+            this.lastTextPtr = managedTextPtr;
+
             var textLength = talkAddon.AtkTextNode228->NodeText.StringLength;
-            if (textLength > 0)
-            {
-                var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
-                PluginLog.Log(text);
-            }
+            if (textLength <= 0) return;
+
+            var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
+            PluginLog.Log(text); // Replace with TTS if this works
         }
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
