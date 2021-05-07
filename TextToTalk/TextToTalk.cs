@@ -1,14 +1,13 @@
-﻿using Dalamud.Game.Text;
+﻿using Dalamud.Game.Internal;
+using Dalamud.Game.Internal.Gui.Addon;
+using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Speech.Synthesis;
 using System.Text;
-using Dalamud.Game.Internal;
-using Dalamud.Game.Internal.Gui.Addon;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Attributes;
 
 namespace TextToTalk
@@ -29,9 +28,9 @@ namespace TextToTalk
 
         public string Name => "TextToTalk";
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public void Initialize(DalamudPluginInterface pi)
         {
-            this.pluginInterface = pluginInterface;
+            this.pluginInterface = pi;
 
             this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
@@ -41,7 +40,7 @@ namespace TextToTalk
             this.ui = new PluginUI(this.config, this.wsServer);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.DrawConfig;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += (_, _) => this.ui.ConfigVisible = true;
-            
+
             this.speechSynthesizer = new SpeechSynthesizer();
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
 
@@ -52,20 +51,26 @@ namespace TextToTalk
 
         private unsafe void OnFrameworkUpdate(Framework framework)
         {
-            if (this.talkAddonInterface.Address == IntPtr.Zero)
+            if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
             {
                 this.talkAddonInterface = this.pluginInterface.Framework.Gui.GetAddonByName("Talk", 1);
                 return;
             }
 
-            var talkAddon = Marshal.PtrToStructure<AddonTalk>(this.talkAddonInterface.Address);
-            var textPtr = talkAddon.AtkTextNode228->NodeText.StringPtr;
-            var managedTextPtr = (IntPtr)textPtr;
-            if (managedTextPtr == this.lastTextPtr) return;
+            var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
 
+            // Will be null when there's no Talk window open
+            byte* textPtr;
+            if (talkAddon->AtkTextNode228 != null)
+                textPtr = talkAddon->AtkTextNode228->NodeText.StringPtr;
+            else return;
+
+            var managedTextPtr = (IntPtr)textPtr;
+
+            if (managedTextPtr == this.lastTextPtr) return;
             this.lastTextPtr = managedTextPtr;
 
-            var textLength = talkAddon.AtkTextNode228->NodeText.StringLength;
+            var textLength = talkAddon->AtkTextNode228->NodeText.StringLength;
             if (textLength <= 0) return;
 
             var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
