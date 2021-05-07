@@ -24,7 +24,7 @@ namespace TextToTalk
         private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
 
-        private IntPtr lastTextPtr;
+        private IntPtr lastTextNodePtr;
 
         public string Name => "TextToTalk";
 
@@ -58,19 +58,17 @@ namespace TextToTalk
             }
 
             var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
+            
+            var textNodePtr = talkAddon->AtkTextNode228;
+            if (textNodePtr == null) return;
 
-            // Will be null when there's no Talk window open
-            byte* textPtr;
-            if (talkAddon->AtkTextNode228 != null)
-                textPtr = talkAddon->AtkTextNode228->NodeText.StringPtr;
-            else return;
+            var managedTextPtr = (IntPtr)textNodePtr;
+            if (managedTextPtr == this.lastTextNodePtr) return;
+            this.lastTextNodePtr = managedTextPtr;
+            PluginLog.Log("New text found.");
 
-            var managedTextPtr = (IntPtr)textPtr;
-
-            if (managedTextPtr == this.lastTextPtr) return;
-            this.lastTextPtr = managedTextPtr;
-
-            var textLength = talkAddon->AtkTextNode228->NodeText.StringLength;
+            var textPtr = textNodePtr->NodeText.StringPtr;
+            var textLength = textNodePtr->NodeText.StringLength;
             if (textLength <= 0) return;
 
             var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
