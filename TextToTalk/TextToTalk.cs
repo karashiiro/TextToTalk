@@ -148,12 +148,31 @@ namespace TextToTalk
         }
 
         [Command("/toggletts")]
-        [HelpMessage("Toggle TextToTalk's Text-to-Speech.")]
+        [HelpMessage("Toggle TextToTalk's text-to-speech.")]
         public void ToggleTts(string command, string args)
         {
-            this.config.Enabled = !this.config.Enabled;
+            if (this.config.Enabled)
+                DisableTts();
+            else
+                EnableTts();
+        }
+
+        [Command("/disabletts")]
+        [HelpMessage("Disable TextToTalk's text-to-speech.")]
+        public void DisableTts(string command = "", string args = "")
+        {
+            this.config.Enabled = false;
             var chat = this.pluginInterface.Framework.Gui.Chat;
-            chat.Print($"TTS {(this.config.Enabled ? "enabled" : "disabled")}.");
+            chat.Print("TTS disabled.");
+        }
+
+        [Command("/enabletts")]
+        [HelpMessage("Enable TextToTalk's text-to-speech.")]
+        public void EnableTts(string command = "", string args = "")
+        {
+            this.config.Enabled = true;
+            var chat = this.pluginInterface.Framework.Gui.Chat;
+            chat.Print("TTS enabled.");
         }
 
         [Command("/tttconfig")]
