@@ -24,7 +24,7 @@ namespace TextToTalk
         private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
 
-        private string lastText;
+        private string lastQuestText;
 
         public string Name => "TextToTalk";
 
@@ -63,8 +63,8 @@ namespace TextToTalk
             var talkAddonText = TalkUtils.ReadTalkAddon(talkAddon);
             var text = talkAddonText.Text;
 
-            if (this.lastText == talkAddonText.Text) return;
-            this.lastText = text;
+            if (this.lastQuestText == talkAddonText.Text) return;
+            this.lastQuestText = text;
 
 #if DEBUG
             PluginLog.Log($"NPC text found: {text}");
@@ -81,6 +81,8 @@ namespace TextToTalk
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
             var textValue = message.TextValue;
+            if (this.lastQuestText == textValue) return;
+
             if (sender != null && sender.TextValue != string.Empty)
             {
                 if (ShouldSaySender(type))
