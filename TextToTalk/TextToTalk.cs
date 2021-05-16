@@ -24,7 +24,7 @@ namespace TextToTalk
         private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
 
-        private IntPtr lastTextNodePtr;
+        private string lastText;
 
         public string Name => "TextToTalk";
 
@@ -58,21 +58,39 @@ namespace TextToTalk
             }
 
             var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
-            
+            if (talkAddon == null) return;
+
             var textNodePtr = talkAddon->AtkTextNode228;
             if (textNodePtr == null) return;
 
-            var managedTextPtr = (IntPtr)textNodePtr;
-            if (managedTextPtr == this.lastTextNodePtr) return;
-            this.lastTextNodePtr = managedTextPtr;
-            PluginLog.Log("New text found.");
-
             var textPtr = textNodePtr->NodeText.StringPtr;
-            var textLength = textNodePtr->NodeText.StringLength;
+            var textLength = textNodePtr->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
             if (textLength <= 0) return;
 
             var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
-            PluginLog.Log(text); // Replace with TTS if this works
+
+            if (this.lastText == text) return;
+            this.lastText = text;
+
+#if DEBUG
+            PluginLog.Log($"NPC text found: {text}");
+#endif
+
+            if (ShouldSaySender())
+            {
+                var speakerNameNodePtr = talkAddon->AtkTextNode220;
+                if (speakerNameNodePtr == null) return;
+
+                var speakerNamePtr = speakerNameNodePtr->NodeText.StringPtr;
+                var speakerNameLength = speakerNameNodePtr->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
+                if (speakerNameLength <= 0) return;
+
+                var speakerName = Encoding.UTF8.GetString(speakerNamePtr, (int)speakerNameLength);
+
+                text = $"{speakerName} says {text}";
+            }
+
+            Say(text);
         }
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
@@ -80,9 +98,9 @@ namespace TextToTalk
             var textValue = message.TextValue;
             if (sender != null && sender.TextValue != string.Empty)
             {
-                if (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue)
+                if (ShouldSaySender(type))
                 {
-                    return;
+                    textValue = $"{sender.TextValue} says {textValue}";
                 }
             }
 
@@ -99,6 +117,11 @@ namespace TextToTalk
                 .Any(t => t.Match(textValue));
             if (!(this.config.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
+            Say(textValue);
+        }
+
+        private void Say(string textValue)
+        {
             if (this.config.UseWebsocket)
             {
                 this.wsServer.Broadcast(textValue);
@@ -118,6 +141,16 @@ namespace TextToTalk
 
                 this.speechSynthesizer.SpeakAsync(textValue);
             }
+        }
+
+        private bool ShouldSaySender()
+        {
+            return this.config.NameNpcWithSay;
+        }
+
+        private bool ShouldSaySender(XivChatType type)
+        {
+            return this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue;
         }
 
         [Command("/canceltts")]
