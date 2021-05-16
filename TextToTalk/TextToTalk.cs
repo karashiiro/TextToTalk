@@ -7,8 +7,8 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using System.Speech.Synthesis;
-using System.Text;
 using TextToTalk.Attributes;
+using TextToTalk.Talk;
 
 namespace TextToTalk
 {
@@ -60,16 +60,10 @@ namespace TextToTalk
             var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
             if (talkAddon == null) return;
 
-            var textNodePtr = talkAddon->AtkTextNode228;
-            if (textNodePtr == null) return;
+            var talkAddonText = TalkUtils.ReadTalkAddon(talkAddon);
+            var text = talkAddonText.Text;
 
-            var textPtr = textNodePtr->NodeText.StringPtr;
-            var textLength = textNodePtr->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
-            if (textLength <= 0) return;
-
-            var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
-
-            if (this.lastText == text) return;
+            if (this.lastText == talkAddonText.Text) return;
             this.lastText = text;
 
 #if DEBUG
@@ -78,16 +72,7 @@ namespace TextToTalk
 
             if (ShouldSaySender())
             {
-                var speakerNameNodePtr = talkAddon->AtkTextNode220;
-                if (speakerNameNodePtr == null) return;
-
-                var speakerNamePtr = speakerNameNodePtr->NodeText.StringPtr;
-                var speakerNameLength = speakerNameNodePtr->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
-                if (speakerNameLength <= 0) return;
-
-                var speakerName = Encoding.UTF8.GetString(speakerNamePtr, (int)speakerNameLength);
-
-                text = $"{speakerName} says {text}";
+                text = $"{talkAddonText.Speaker} says {text}";
             }
 
             Say(text);
@@ -143,16 +128,6 @@ namespace TextToTalk
             }
         }
 
-        private bool ShouldSaySender()
-        {
-            return this.config.NameNpcWithSay;
-        }
-
-        private bool ShouldSaySender(XivChatType type)
-        {
-            return this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue;
-        }
-
         [Command("/canceltts")]
         [HelpMessage("Cancel all queued TTS messages.")]
         public void CancelTts(string command, string args)
@@ -184,6 +159,16 @@ namespace TextToTalk
         public void ToggleConfig(string command, string args)
         {
             this.ui.ConfigVisible = !this.ui.ConfigVisible;
+        }
+
+        private bool ShouldSaySender()
+        {
+            return this.config.NameNpcWithSay;
+        }
+
+        private bool ShouldSaySender(XivChatType type)
+        {
+            return this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue;
         }
 
         #region IDisposable Support
