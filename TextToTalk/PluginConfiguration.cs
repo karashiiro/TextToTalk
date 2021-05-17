@@ -15,7 +15,11 @@ namespace TextToTalk
         public bool Enabled { get; set; }
 
         public bool FirstTime { get; set; }
-        
+
+        public bool UseKeybind { get; set; }
+        public VirtualKey.Enum ModifierKey { get; set; }
+        public VirtualKey.Enum MajorKey { get; set; }
+
         public bool EnableAllChatTypes { get; set; }
         public IList<int> EnabledChatTypes { get; set; }
         public IList<Trigger> Bad { get; set; }
@@ -42,6 +46,9 @@ namespace TextToTalk
             using var ss = new SpeechSynthesizer();
             Rate = ss.Rate;
             Volume = ss.Volume;
+
+            ModifierKey = VirtualKey.Enum.VkControl;
+            MajorKey = VirtualKey.Enum.VkN;
 
             VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name;
         }

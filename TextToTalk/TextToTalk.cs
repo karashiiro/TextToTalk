@@ -39,17 +39,36 @@ namespace TextToTalk
 
             this.ui = new PluginUI(this.config, this.wsServer);
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.DrawConfig;
-            this.pluginInterface.UiBuilder.OnOpenConfigUi += (_, _) => this.ui.ConfigVisible = true;
+            this.pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
 
             this.speechSynthesizer = new SpeechSynthesizer();
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
 
-            this.pluginInterface.Framework.OnUpdateEvent += OnFrameworkUpdate;
+            this.pluginInterface.Framework.OnUpdateEvent += PollTalkAddon;
+            this.pluginInterface.Framework.OnUpdateEvent += CheckKeybindPressed;
 
             this.commandManager = new PluginCommandManager<TextToTalk>(this, this.pluginInterface);
         }
 
-        private unsafe void OnFrameworkUpdate(Framework framework)
+        private bool keysDown;
+        private void CheckKeybindPressed(Framework framework)
+        {
+            if (!this.config.UseKeybind) return;
+
+            if (this.pluginInterface.ClientState.KeyState[(byte)this.config.ModifierKey] &&
+                this.pluginInterface.ClientState.KeyState[(byte)this.config.MajorKey])
+            {
+                if (this.keysDown) return;
+
+                this.keysDown = true;
+                ToggleTts();
+                return;
+            }
+
+            this.keysDown = false;
+        }
+
+        private unsafe void PollTalkAddon(Framework framework)
         {
             if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
             {
@@ -148,7 +167,7 @@ namespace TextToTalk
 
         [Command("/toggletts")]
         [HelpMessage("Toggle TextToTalk's text-to-speech.")]
-        public void ToggleTts(string command, string args)
+        public void ToggleTts(string command = "", string args = "")
         {
             if (this.config.Enabled)
                 DisableTts();
@@ -183,6 +202,11 @@ namespace TextToTalk
             this.ui.ConfigVisible = !this.ui.ConfigVisible;
         }
 
+        private void OpenConfigUi(object sender, EventArgs args)
+        {
+            this.ui.ConfigVisible = true;
+        }
+
         private bool ShouldSaySender()
         {
             return this.config.NameNpcWithSay;
@@ -200,6 +224,9 @@ namespace TextToTalk
 
             this.commandManager.Dispose();
 
+            this.pluginInterface.Framework.OnUpdateEvent -= PollTalkAddon;
+            this.pluginInterface.Framework.OnUpdateEvent -= CheckKeybindPressed;
+
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
             this.speechSynthesizer.Dispose();
 
@@ -207,7 +234,7 @@ namespace TextToTalk
 
             this.pluginInterface.SavePluginConfig(this.config);
 
-            this.pluginInterface.UiBuilder.OnOpenConfigUi -= (sender, args) => this.ui.ConfigVisible = true;
+            this.pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
             this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.DrawConfig;
 
             this.pluginInterface.Dispose();

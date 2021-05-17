@@ -65,6 +65,29 @@ namespace TextToTalk
 
         private void DrawSynthesizerSettings()
         {
+            var useKeybind = this.config.UseKeybind;
+            if (ImGui.Checkbox("Enable Keybind", ref useKeybind))
+            {
+                this.config.UseKeybind = useKeybind;
+            }
+
+            ImGui.PushItemWidth(100f);
+            var kItem1 = VirtualKey.EnumToIndex(this.config.ModifierKey);
+            if (ImGui.Combo("##TextToTalkKeybind1", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
+            {
+                this.config.ModifierKey = VirtualKey.IndexToEnum(kItem1);
+                this.config.Save();
+            }
+            ImGui.SameLine();
+            var kItem2 = VirtualKey.EnumToIndex(this.config.MajorKey) - 3;
+            if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
+            {
+                this.config.MajorKey = VirtualKey.IndexToEnum(kItem2) + 3;
+                this.config.Save();
+            }
+            ImGui.PopItemWidth();
+
+            ImGui.Text("");
             var useWebsocket = this.config.UseWebsocket;
             if (ImGui.Checkbox("Use WebSocket", ref useWebsocket))
             {
@@ -76,36 +99,38 @@ namespace TextToTalk
                     this.wsServer.Stop();
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
-            if (useWebsocket) return;
-
-            var rate = this.config.Rate;
-            if (ImGui.SliderInt("Rate", ref rate, -10, 10))
+            
+            if (!useWebsocket)
             {
-                this.config.Rate = rate;
-                this.config.Save();
+                var rate = this.config.Rate;
+                if (ImGui.SliderInt("Rate", ref rate, -10, 10))
+                {
+                    this.config.Rate = rate;
+                    this.config.Save();
+                }
+
+                var volume = this.config.Volume;
+                if (ImGui.SliderInt("Volume", ref volume, 0, 100))
+                {
+                    this.config.Volume = volume;
+                    this.config.Save();
+                }
+
+                var voiceName = this.config.VoiceName;
+                var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
+                var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
+                if (ImGui.Combo("Voice",
+                    ref voiceIndex,
+                    voices
+                        .Select(iv => $"{iv?.VoiceInfo?.Name} ({iv?.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
+                        .ToArray(),
+                    voices.Count))
+                {
+                    this.config.VoiceName = voices[voiceIndex].VoiceInfo.Name;
+                }
             }
 
-            var volume = this.config.Volume;
-            if (ImGui.SliderInt("Volume", ref volume, 0, 100))
-            {
-                this.config.Volume = volume;
-                this.config.Save();
-            }
-
-            var voiceName = this.config.VoiceName;
-            var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
-            var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
-            if (ImGui.Combo("Voice",
-                            ref voiceIndex,
-                            voices
-                                .Select(iv => $"{iv?.VoiceInfo?.Name} ({iv?.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
-                                .ToArray(),
-                            voices.Count))
-            {
-                this.config.VoiceName = voices[voiceIndex].VoiceInfo.Name;
-            }
-
-            ImGui.Text(""); // Empty line
+            ImGui.Text("");
             var nameNpcWithSay = this.config.NameNpcWithSay;
             if (ImGui.Checkbox("Include \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
             {
