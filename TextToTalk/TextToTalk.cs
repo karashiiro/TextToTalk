@@ -72,6 +72,7 @@ namespace TextToTalk
         private unsafe void PollTalkAddon(Framework framework)
         {
             if (!this.config.Enabled) return;
+            if (!this.config.ReadFromQuestTalkAddon) return;
 
             if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
             {
