@@ -34,6 +34,8 @@ namespace TextToTalk
 
         public bool NameNpcWithSay { get; set; } = true;
 
+        public bool DisallowMultipleSay { get; set; }
+
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
 
         public PluginConfiguration()

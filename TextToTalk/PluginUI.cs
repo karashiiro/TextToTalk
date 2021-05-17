@@ -69,6 +69,7 @@ namespace TextToTalk
             if (ImGui.Checkbox("Enable Keybind", ref useKeybind))
             {
                 this.config.UseKeybind = useKeybind;
+                this.config.Save();
             }
 
             ImGui.PushItemWidth(100f);
@@ -92,6 +93,7 @@ namespace TextToTalk
             if (ImGui.Checkbox("Use WebSocket", ref useWebsocket))
             {
                 this.config.UseWebsocket = useWebsocket;
+                this.config.Save();
 
                 if (this.config.UseWebsocket)
                     this.wsServer.Start();
@@ -127,6 +129,7 @@ namespace TextToTalk
                     voices.Count))
                 {
                     this.config.VoiceName = voices[voiceIndex].VoiceInfo.Name;
+                    this.config.Save();
                 }
             }
 
@@ -135,6 +138,13 @@ namespace TextToTalk
             if (ImGui.Checkbox("Include \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
             {
                 this.config.NameNpcWithSay = nameNpcWithSay;
+                this.config.Save();
+            }
+
+            var disallowMultipleSay = this.config.DisallowMultipleSay;
+            if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
+            {
+                this.config.DisallowMultipleSay = disallowMultipleSay;
                 this.config.Save();
             }
         }

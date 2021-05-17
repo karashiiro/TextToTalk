@@ -25,6 +25,7 @@ namespace TextToTalk
         private WsServer wsServer;
 
         private string lastQuestText;
+        private string lastSpeaker;
 
         public string Name => "TextToTalk";
 
@@ -70,6 +71,8 @@ namespace TextToTalk
 
         private unsafe void PollTalkAddon(Framework framework)
         {
+            if (!this.config.Enabled) return;
+
             if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
             {
                 this.talkAddonInterface = this.pluginInterface.Framework.Gui.GetAddonByName("Talk", 1);
@@ -82,16 +85,20 @@ namespace TextToTalk
             var talkAddonText = TalkUtils.ReadTalkAddon(talkAddon);
             var text = talkAddonText.Text;
 
-            if (this.lastQuestText == talkAddonText.Text) return;
-            this.lastQuestText = text;
+            if (talkAddonText.Text == "" || IsDuplicateQuestText(talkAddonText.Text)) return;
+            SetLastQuestText(text);
 
 #if DEBUG
             PluginLog.Log($"NPC text found: {text}");
 #endif
 
-            if (ShouldSaySender())
+            if (talkAddonText.Speaker != "" && ShouldSaySender())
             {
-                text = $"{talkAddonText.Speaker} says {text}";
+                if (!this.config.DisallowMultipleSay || !IsSameSpeaker(talkAddonText.Speaker))
+                {
+                    text = $"{talkAddonText.Speaker} says {text}";
+                    SetLastSpeaker(talkAddonText.Speaker);
+                }
             }
 
             Say(text);
@@ -99,14 +106,20 @@ namespace TextToTalk
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
+            if (!this.config.Enabled) return;
+
             var textValue = message.TextValue;
-            if (this.lastQuestText == textValue) return;
+            if (IsDuplicateQuestText(textValue)) return;
 
             if (sender != null && sender.TextValue != string.Empty)
             {
                 if (ShouldSaySender(type))
                 {
-                    textValue = $"{sender.TextValue} says {textValue}";
+                    if (!this.config.DisallowMultipleSay || !IsSameSpeaker(sender.TextValue))
+                    {
+                        textValue = $"{sender.TextValue} says {textValue}";
+                        SetLastSpeaker(sender.TextValue);
+                    }
                 }
             }
 
@@ -114,7 +127,6 @@ namespace TextToTalk
             PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
 #endif
 
-            if (!this.config.Enabled) return;
             if (this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
 
             var typeAccepted = this.config.EnabledChatTypes.Contains((int)type);
@@ -205,6 +217,26 @@ namespace TextToTalk
         private void OpenConfigUi(object sender, EventArgs args)
         {
             this.ui.ConfigVisible = true;
+        }
+
+        private bool IsDuplicateQuestText(string text)
+        {
+            return this.lastQuestText == text;
+        }
+
+        private void SetLastQuestText(string text)
+        {
+            this.lastQuestText = text;
+        }
+
+        private bool IsSameSpeaker(string speaker)
+        {
+            return this.lastSpeaker == speaker;
+        }
+
+        private void SetLastSpeaker(string speaker)
+        {
+            this.lastSpeaker = speaker;
         }
 
         private bool ShouldSaySender()
