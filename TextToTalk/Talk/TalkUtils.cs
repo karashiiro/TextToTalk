@@ -21,7 +21,8 @@ namespace TextToTalk.Talk
             var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
             if (textLength <= 0) return "";
 
-            var text = Encoding.UTF8.GetString(textPtr, (int)textLength);
+            var text = Encoding.UTF8.GetString(textPtr, (int)textLength)
+                .Replace("????", ""); // Newlines are weird - this removes them after they've already been unsuccessfully parsed
             return text;
         }
     }
