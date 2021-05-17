@@ -137,13 +137,12 @@ namespace TextToTalk
             if (this.config.UseWebsocket)
             {
                 this.wsServer.Cancel();
-#if DEBUG
                 PluginLog.Log("Canceled TTS over WebSocket server.");
-#endif
             }
             else
             {
                 this.speechSynthesizer.SpeakAsyncCancelAll();
+                PluginLog.Log("Canceled SpeechSynthesizer TTS.");
             }
         }
 
@@ -164,6 +163,7 @@ namespace TextToTalk
             this.config.Enabled = false;
             var chat = this.pluginInterface.Framework.Gui.Chat;
             chat.Print("TTS disabled.");
+            PluginLog.Log("TTS disabled.");
         }
 
         [Command("/enabletts")]
@@ -173,6 +173,7 @@ namespace TextToTalk
             this.config.Enabled = true;
             var chat = this.pluginInterface.Framework.Gui.Chat;
             chat.Print("TTS enabled.");
+            PluginLog.Log("TTS enabled.");
         }
 
         [Command("/tttconfig")]
