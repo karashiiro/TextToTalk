@@ -14,8 +14,6 @@ namespace TextToTalk
 
         public bool Enabled { get; set; }
 
-        public bool FirstTime { get; set; }
-        
         public bool EnableAllChatTypes { get; set; }
         public IList<int> EnabledChatTypes { get; set; }
         public IList<Trigger> Bad { get; set; }
@@ -29,6 +27,11 @@ namespace TextToTalk
         public bool UseWebsocket { get; set; }
 
         public bool NameNpcWithSay { get; set; } = true;
+
+        public bool ReadFromQuestTalkAddon { get; set; } = true;
+
+        [JsonProperty]
+        private bool FirstTime { get; set; }
 
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
 
