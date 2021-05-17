@@ -135,7 +135,7 @@ namespace TextToTalk
 
             ImGui.Text("");
             var readFromQuestTalkAddon = this.config.ReadFromQuestTalkAddon;
-            if (ImGui.Checkbox("Read NPC dialogue from the dialogue window instead of chat", ref readFromQuestTalkAddon))
+            if (ImGui.Checkbox("Read NPC dialogue from the dialogue window", ref readFromQuestTalkAddon))
             {
                 this.config.ReadFromQuestTalkAddon = readFromQuestTalkAddon;
                 this.config.Save();
