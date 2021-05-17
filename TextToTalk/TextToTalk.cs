@@ -118,6 +118,7 @@ namespace TextToTalk
                 {
                     if (!this.config.DisallowMultipleSay || !IsSameSpeaker(sender.TextValue))
                     {
+                        this.lastQuestText = textValue;
                         textValue = $"{sender.TextValue} says {textValue}";
                         SetLastSpeaker(sender.TextValue);
                     }
