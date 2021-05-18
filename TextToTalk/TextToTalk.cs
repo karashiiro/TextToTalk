@@ -83,14 +83,14 @@ namespace TextToTalk
             var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
             if (talkAddon == null) return;
 
-            var talkAddonText = TalkUtils.ReadTalkAddon(talkAddon);
+            var talkAddonText = TalkUtils.ReadTalkAddon(this.pluginInterface.Data, talkAddon);
             var text = talkAddonText.Text;
 
             if (talkAddonText.Text == "" || IsDuplicateQuestText(talkAddonText.Text)) return;
             SetLastQuestText(text);
 
 #if DEBUG
-            PluginLog.Log($"NPC text found: {text}");
+            PluginLog.Log($"NPC text found: \"{text}\"");
 #endif
 
             if (talkAddonText.Speaker != "" && ShouldSaySender())
@@ -118,7 +118,7 @@ namespace TextToTalk
                 {
                     if (!this.config.DisallowMultipleSay || !IsSameSpeaker(sender.TextValue))
                     {
-                        this.lastQuestText = textValue;
+                        SetLastQuestText(textValue);
                         textValue = $"{sender.TextValue} says {textValue}";
                         SetLastSpeaker(sender.TextValue);
                     }

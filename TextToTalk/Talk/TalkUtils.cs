@@ -1,29 +1,37 @@
-﻿using System.Text;
+﻿using System;
+using System.Runtime.InteropServices;
+using Dalamud.Data;
+using Dalamud.Game.Text.SeStringHandling;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace TextToTalk.Talk
 {
-    public class TalkUtils
+    public static class TalkUtils
     {
-        public static unsafe TalkAddonText ReadTalkAddon(AddonTalk* talkAddon)
+        public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
         {
             return new()
             {
-                Speaker = ReadTextNode(talkAddon->AtkTextNode220),
-                Text = ReadTextNode(talkAddon->AtkTextNode228),
+                Speaker = ReadTextNode(data, talkAddon->AtkTextNode220),
+                Text = ReadTextNode(data, talkAddon->AtkTextNode228),
             };
         }
 
-        private static unsafe string ReadTextNode(AtkTextNode* textNode)
+        private static SeStringManager StringManager { get; set; }
+
+        private static unsafe string ReadTextNode(DataManager data, AtkTextNode* textNode)
         {
+            StringManager ??= new SeStringManager(data);
+            
             var textPtr = textNode->NodeText.StringPtr;
             var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
             if (textLength <= 0) return "";
 
-            var text = Encoding.UTF8.GetString(textPtr, (int)textLength)
-                .Replace("????", ""); // Newlines are weird - this removes them after they've already been unsuccessfully parsed
-            return text;
+            var textBytes = new byte[textLength];
+            Marshal.Copy((IntPtr)textPtr, textBytes, 0, (int)textLength);
+            var seString = StringManager.Parse(textBytes);
+            return seString.TextValue;
         }
     }
 }
