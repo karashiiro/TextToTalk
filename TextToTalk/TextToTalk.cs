@@ -118,7 +118,10 @@ namespace TextToTalk
                 {
                     if (!this.config.DisallowMultipleSay || !IsSameSpeaker(sender.TextValue))
                     {
-                        SetLastQuestText(textValue);
+                        if ((int)type == (int)AdditionalChatTypes.Enum.NPCDialogue)
+                        {
+                            SetLastQuestText(textValue);
+                        }
                         textValue = $"{sender.TextValue} says {textValue}";
                         SetLastSpeaker(sender.TextValue);
                     }
