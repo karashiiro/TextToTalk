@@ -24,7 +24,18 @@ namespace TextToTalk.UI
             {
                 var window = windowInfo.Instance;
                 var visible = windowInfo.Visible;
+
+                if (!visible)
+                {
+                    continue;
+                }
+                
                 window.Draw(ref visible);
+
+                if (windowInfo.Visible != visible)
+                {
+                    windowInfo.Visible = visible;
+                }
             }
         }
 
