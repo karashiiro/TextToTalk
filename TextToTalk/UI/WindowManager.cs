@@ -107,6 +107,7 @@ namespace TextToTalk.UI
             }
 
             instance.ForeignWindowOpenRequested += OnWindowOpenRequested;
+            instance.ForeignWindowReferenceRequested += OnWindowReferenceRequested;
 
             this.windows.Add(new WindowInfo
             {
@@ -123,6 +124,15 @@ namespace TextToTalk.UI
         {
             var windowInfo = this.windows.First(w => windowType.IsInstanceOfType(w.Instance));
             windowInfo.Visible = true;
+        }
+
+        /// <summary>
+        /// Callback method called when an installed <see cref="ImmediateModeWindow"/> requests that another window be returned.
+        /// </summary>
+        /// <param name="windowType">The type of the window to be returned.</param>
+        public object OnWindowReferenceRequested(Type windowType)
+        {
+            return this.windows.First(w => windowType.IsInstanceOfType(w.Instance)).Instance;
         }
 
         /// <summary>

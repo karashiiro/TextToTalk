@@ -48,17 +48,14 @@ namespace TextToTalk.UI
 
                 if (ImGui.Button($"{EnableAllText}##VoiceUnlockerButton2"))
                 {
-                    // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-                    if (VoiceUnlockerRunner.Execute())
-                    {
-                        PluginLog.Log("Registry modification succeeded.");
-                    }
-                    else
-                    {
-                        PluginLog.Log("VoiceUnlocker failed to start. No registry modifications were made.");
-                    }
+                    var resultWindow = GetWindow<UnlockerResultWindow>();
+
+                    resultWindow.Text = VoiceUnlockerRunner.Execute()
+                        ? "Registry modification succeeded. Changes will be applied once the game is restarted."
+                        : "VoiceUnlocker failed to start. No registry modifications were made.";
 
                     visible = false;
+                    OpenWindow<UnlockerResultWindow>();
                 }
 
                 ImGui.TextColored(HintColor, "Administrative privileges will be requested");

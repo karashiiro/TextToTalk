@@ -46,6 +46,7 @@ namespace TextToTalk
             this.ui.InstallService(this.wsServer);
             this.ui.InstallService(this.speechSynthesizer);
 
+            this.ui.InstallWindow<UnlockerResultWindow>(false);
             this.ui.InstallWindow<VoiceUnlockerWindow>(false);
             this.ui.InstallWindow<ConfigurationWindow>(true);
 
