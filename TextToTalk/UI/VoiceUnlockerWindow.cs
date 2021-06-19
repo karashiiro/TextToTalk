@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace TextToTalk.UI
 {
-    public class VoiceUnlockerWindow : IImmediateModeWindow
+    public class VoiceUnlockerWindow : ImmediateModeWindow
     {
         private const string ManualTutorialText = "Manual Tutorial";
         private const string EnableAllText = "Enable all system voices";
@@ -17,14 +17,14 @@ namespace TextToTalk.UI
 
         public SpeechSynthesizerContainer SynthesizerContainer { get; set; }
 
-        public void Draw(ref bool visible)
+        public override void Draw(ref bool visible)
         {
             ImGui.PushStyleColor(ImGuiCol.TitleBgActive, Red);
             ImGui.PushStyleColor(ImGuiCol.CheckMark, Red);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, LightRed);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, DarkRed);
 
-            ImGui.SetNextWindowSize(new Vector2(480, 340));
+            ImGui.SetNextWindowSize(new Vector2(480, 320));
             ImGui.Begin("VoiceUnlocker", ref visible, ImGuiWindowFlags.NoResize);
             {
                 ImGui.TextWrapped("This modification has only been tested on Windows 10.");
@@ -52,18 +52,22 @@ namespace TextToTalk.UI
                 {
                     if (VoiceUnlockerRunner.Execute())
                     {
-                        PluginLog.Log("Modification succeeded.");
+                        PluginLog.Log("Registry modification succeeded.");
                         SynthesizerContainer.RegenerateSynthesizer();
                     }
                     else
                     {
-                        PluginLog.Log("The modification program failed to start. No modifications were made.");
+                        PluginLog.Log("VoiceUnlocker failed to start. No registry modifications were made.");
                     }
+
+                    visible = false;
                 }
 
                 ImGui.TextColored(HintColor, "Administrative privileges will be requested");
             }
             ImGui.End();
+
+            ImGui.PopStyleColor(4);
         }
     }
 }

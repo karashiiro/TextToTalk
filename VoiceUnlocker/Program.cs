@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
 namespace VoiceUnlocker
@@ -9,7 +10,7 @@ namespace VoiceUnlocker
         private const string SpeechTokensPath = @"SOFTWARE\Microsoft\Speech\Voices\Tokens";
         private const string SpeechSysWOW64TokensPath = @"SOFTWARE\WOW6432Node\Microsoft\SPEECH\Voices\Tokens";
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             // Open mobile voices registry
             using var speechOneCoreTokens = Registry.LocalMachine.OpenSubKey(SpeechOneCoreTokensPath);
@@ -38,6 +39,9 @@ namespace VoiceUnlocker
                 CopyRegistryKey(mobileVoiceInfo, x86VoiceInfo);
             }
 
+            // Notify other windows of the change so that the registry is reloaded
+            SHChangeNotify(0x7FFFFFFF, 0, IntPtr.Zero, IntPtr.Zero);
+
             Console.WriteLine("Done!");
         }
 
@@ -58,5 +62,8 @@ namespace VoiceUnlocker
                 CopyRegistryKey(nextSrcSubKey, nextDstSubKey);
             }
         }
+
+        [DllImport("shell32.dll")]
+        private static extern void SHChangeNotify(int wEventId, int uFlags, IntPtr dwItem1, IntPtr dwItem2);
     }
 }

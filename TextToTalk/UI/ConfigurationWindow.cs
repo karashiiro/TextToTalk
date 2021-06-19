@@ -8,15 +8,15 @@ using ImGuiNET;
 
 namespace TextToTalk.UI
 {
-    public class ConfigurationWindow : IImmediateModeWindow
+    public class ConfigurationWindow : ImmediateModeWindow
     {
         public PluginConfiguration Configuration { get; set; }
         public WsServer WebSocketServer { get; set; }
         public SpeechSynthesizerContainer SynthesizerContainer { get; set; }
 
-        public void Draw(ref bool visible)
+        public override void Draw(ref bool visible)
         {
-            ImGui.SetNextWindowSize(new Vector2(520, 400));
+            ImGui.SetNextWindowSize(new Vector2(520, 420));
             ImGui.Begin("TextToTalk Configuration", ref visible, ImGuiWindowFlags.NoResize);
             {
                 if (ImGui.BeginTabBar("TextToTalk##tabbar"))
@@ -112,6 +112,12 @@ namespace TextToTalk.UI
                 {
                     Configuration.VoiceName = voices[voiceIndex].VoiceInfo.Name;
                     Configuration.Save();
+                }
+
+                ImGui.Spacing();
+                if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
+                {
+                    OpenWindow<VoiceUnlockerWindow>();
                 }
             }
 
