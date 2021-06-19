@@ -39,9 +39,6 @@ namespace VoiceUnlocker
                 CopyRegistryKey(mobileVoiceInfo, x86VoiceInfo);
             }
 
-            // Notify other windows of the change so that the registry is reloaded
-            SHChangeNotify(0x7FFFFFFF, 0, IntPtr.Zero, IntPtr.Zero);
-
             Console.WriteLine("Done!");
         }
 
@@ -62,8 +59,5 @@ namespace VoiceUnlocker
                 CopyRegistryKey(nextSrcSubKey, nextDstSubKey);
             }
         }
-
-        [DllImport("shell32.dll")]
-        private static extern void SHChangeNotify(int wEventId, int uFlags, IntPtr dwItem1, IntPtr dwItem2);
     }
 }

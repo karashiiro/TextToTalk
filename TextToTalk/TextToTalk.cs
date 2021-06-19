@@ -22,7 +22,7 @@ namespace TextToTalk
 
         private Addon talkAddonInterface;
 
-        private SpeechSynthesizerContainer synthesizerContainer;
+        private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
 
         private string lastQuestText;
@@ -38,13 +38,13 @@ namespace TextToTalk
             this.config.Initialize(this.pluginInterface);
 
             this.wsServer = new WsServer();
-            this.synthesizerContainer = new SpeechSynthesizerContainer();
+            this.speechSynthesizer = new SpeechSynthesizer();
 
             this.ui = new WindowManager();
 
             this.ui.InstallService(this.config);
             this.ui.InstallService(this.wsServer);
-            this.ui.InstallService(this.synthesizerContainer);
+            this.ui.InstallService(this.speechSynthesizer);
 
             this.ui.InstallWindow<VoiceUnlockerWindow>(false);
             this.ui.InstallWindow<ConfigurationWindow>(true);
@@ -163,15 +163,15 @@ namespace TextToTalk
             }
             else
             {
-                this.synthesizerContainer.Synthesizer.Rate = this.config.Rate;
-                this.synthesizerContainer.Synthesizer.Volume = this.config.Volume;
+                this.speechSynthesizer.Rate = this.config.Rate;
+                this.speechSynthesizer.Volume = this.config.Volume;
 
-                if (this.synthesizerContainer.Synthesizer.Voice.Name != this.config.VoiceName)
+                if (this.speechSynthesizer.Voice.Name != this.config.VoiceName)
                 {
-                    this.synthesizerContainer.Synthesizer.SelectVoice(this.config.VoiceName);
+                    this.speechSynthesizer.SelectVoice(this.config.VoiceName);
                 }
 
-                this.synthesizerContainer.Synthesizer.SpeakAsync(textValue);
+                this.speechSynthesizer.SpeakAsync(textValue);
             }
         }
 
@@ -186,7 +186,7 @@ namespace TextToTalk
             }
             else
             {
-                this.synthesizerContainer.Synthesizer.SpeakAsyncCancelAll();
+                this.speechSynthesizer.SpeakAsyncCancelAll();
                 PluginLog.Log("Canceled SpeechSynthesizer TTS.");
             }
         }

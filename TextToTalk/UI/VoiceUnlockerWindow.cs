@@ -15,8 +15,6 @@ namespace TextToTalk.UI
         private static readonly Vector4 DarkRed = ImGui.ColorConvertU32ToFloat4(0xFF00007D);
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
-        public SpeechSynthesizerContainer SynthesizerContainer { get; set; }
-
         public override void Draw(ref bool visible)
         {
             ImGui.PushStyleColor(ImGuiCol.TitleBgActive, Red);
@@ -50,10 +48,10 @@ namespace TextToTalk.UI
 
                 if (ImGui.Button($"{EnableAllText}##VoiceUnlockerButton2"))
                 {
+                    // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
                     if (VoiceUnlockerRunner.Execute())
                     {
                         PluginLog.Log("Registry modification succeeded.");
-                        SynthesizerContainer.RegenerateSynthesizer();
                     }
                     else
                     {

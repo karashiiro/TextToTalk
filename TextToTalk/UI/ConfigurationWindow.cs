@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Speech.Synthesis;
 using System.Text;
 using Dalamud.Game.Text;
 using ImGuiNET;
@@ -12,7 +13,7 @@ namespace TextToTalk.UI
     {
         public PluginConfiguration Configuration { get; set; }
         public WsServer WebSocketServer { get; set; }
-        public SpeechSynthesizerContainer SynthesizerContainer { get; set; }
+        public SpeechSynthesizer Synthesizer { get; set; }
 
         public override void Draw(ref bool visible)
         {
@@ -101,7 +102,7 @@ namespace TextToTalk.UI
                 }
 
                 var voiceName = Configuration.VoiceName;
-                var voices = SynthesizerContainer.Synthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
+                var voices = Synthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
                 var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
                 if (ImGui.Combo("Voice",
                     ref voiceIndex,
