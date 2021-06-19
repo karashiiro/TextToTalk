@@ -51,7 +51,7 @@ namespace TextToTalk.UI
                     var resultWindow = GetWindow<UnlockerResultWindow>();
 
                     resultWindow.Text = VoiceUnlockerRunner.Execute()
-                        ? "Registry modification succeeded. Changes will be applied once the game is restarted."
+                        ? "Registry modification succeeded. Changes will be applied upon restarting the game."
                         : "VoiceUnlocker failed to start. No registry modifications were made.";
 
                     visible = false;
