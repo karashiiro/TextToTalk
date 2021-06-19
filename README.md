@@ -5,6 +5,8 @@ Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support 
 * `/tttconfig`: Opens the configuration window.
 * `/canceltts`: Cancel all queued TTS messages.
 * `/toggletts`: Turns TTS on or off.
+* `/disabletts`: Turns TTS off.
+* `/enabletts`: Turns TTS on.
 
 ## WebSocket Interfacing
 TextToTalk can optionally open a WebSocket server to serve messages over. There are currently two JSON-format messages that can be sent:
