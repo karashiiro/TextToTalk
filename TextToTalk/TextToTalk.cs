@@ -46,9 +46,9 @@ namespace TextToTalk
             this.ui.InstallService(this.wsServer);
             this.ui.InstallService(this.speechSynthesizer);
 
-            this.ui.InstallWindow<UnlockerResultWindow>(false);
-            this.ui.InstallWindow<VoiceUnlockerWindow>(false);
-            this.ui.InstallWindow<ConfigurationWindow>(true);
+            this.ui.InstallWindow<UnlockerResultWindow>(initiallyVisible: false);
+            this.ui.InstallWindow<VoiceUnlockerWindow>(initiallyVisible: false);
+            this.ui.InstallWindow<ConfigurationWindow>(initiallyVisible: false);
 
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
