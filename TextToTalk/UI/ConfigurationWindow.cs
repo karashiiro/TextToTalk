@@ -1,41 +1,23 @@
-﻿using Dalamud.Game.Text;
-using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Speech.Synthesis;
 using System.Text;
+using Dalamud.Game.Text;
+using ImGuiNET;
 
-namespace TextToTalk
+namespace TextToTalk.UI
 {
-    public class PluginUI
+    public class ConfigurationWindow : IImguiWindow
     {
-        private static readonly SpeechSynthesizer DummySynthesizer = new();
+        public PluginConfiguration Configuration { get; set; }
+        public WsServer WebSocketServer { get; set; }
+        public SpeechSynthesizerContainer SynthesizerContainer { get; set; }
 
-        private readonly PluginConfiguration config;
-        private readonly WsServer wsServer;
-        private bool configVisible;
-
-        public bool ConfigVisible
+        public void Draw(ref bool visible)
         {
-            get => this.configVisible;
-            set => this.configVisible = value;
-        }
-
-        public PluginUI(PluginConfiguration config, WsServer wsServer)
-        {
-            this.config = config;
-            this.wsServer = wsServer;
-        }
-
-        public void DrawConfig()
-        {
-            if (!ConfigVisible)
-                return;
-
             ImGui.SetNextWindowSize(new Vector2(520, 400));
-            ImGui.Begin("TextToTalk Configuration", ref this.configVisible, ImGuiWindowFlags.NoResize);
+            ImGui.Begin("TextToTalk Configuration", ref visible, ImGuiWindowFlags.NoResize);
             {
                 if (ImGui.BeginTabBar("TextToTalk##tabbar"))
                 {
@@ -65,61 +47,61 @@ namespace TextToTalk
 
         private void DrawSynthesizerSettings()
         {
-            var useKeybind = this.config.UseKeybind;
+            var useKeybind = Configuration.UseKeybind;
             if (ImGui.Checkbox("Enable Keybind", ref useKeybind))
             {
-                this.config.UseKeybind = useKeybind;
-                this.config.Save();
+                Configuration.UseKeybind = useKeybind;
+                Configuration.Save();
             }
 
             ImGui.PushItemWidth(100f);
-            var kItem1 = VirtualKey.EnumToIndex(this.config.ModifierKey);
+            var kItem1 = VirtualKey.EnumToIndex(Configuration.ModifierKey);
             if (ImGui.Combo("##TextToTalkKeybind1", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
             {
-                this.config.ModifierKey = VirtualKey.IndexToEnum(kItem1);
-                this.config.Save();
+                Configuration.ModifierKey = VirtualKey.IndexToEnum(kItem1);
+                Configuration.Save();
             }
             ImGui.SameLine();
-            var kItem2 = VirtualKey.EnumToIndex(this.config.MajorKey) - 3;
+            var kItem2 = VirtualKey.EnumToIndex(Configuration.MajorKey) - 3;
             if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
             {
-                this.config.MajorKey = VirtualKey.IndexToEnum(kItem2) + 3;
-                this.config.Save();
+                Configuration.MajorKey = VirtualKey.IndexToEnum(kItem2) + 3;
+                Configuration.Save();
             }
             ImGui.PopItemWidth();
 
             ImGui.Text("");
-            var useWebsocket = this.config.UseWebsocket;
+            var useWebsocket = Configuration.UseWebsocket;
             if (ImGui.Checkbox("Use WebSocket", ref useWebsocket))
             {
-                this.config.UseWebsocket = useWebsocket;
-                this.config.Save();
+                Configuration.UseWebsocket = useWebsocket;
+                Configuration.Save();
 
-                if (this.config.UseWebsocket)
-                    this.wsServer.Start();
+                if (Configuration.UseWebsocket)
+                    WebSocketServer.Start();
                 else
-                    this.wsServer.Stop();
+                    WebSocketServer.Stop();
             }
-            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
+            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(WebSocketServer.Active ? "Started" : "Will start")} on ws://localhost:{WebSocketServer.Port}");
 
             if (!useWebsocket)
             {
-                var rate = this.config.Rate;
+                var rate = Configuration.Rate;
                 if (ImGui.SliderInt("Rate", ref rate, -10, 10))
                 {
-                    this.config.Rate = rate;
-                    this.config.Save();
+                    Configuration.Rate = rate;
+                    Configuration.Save();
                 }
 
-                var volume = this.config.Volume;
+                var volume = Configuration.Volume;
                 if (ImGui.SliderInt("Volume", ref volume, 0, 100))
                 {
-                    this.config.Volume = volume;
-                    this.config.Save();
+                    Configuration.Volume = volume;
+                    Configuration.Save();
                 }
 
-                var voiceName = this.config.VoiceName;
-                var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
+                var voiceName = Configuration.VoiceName;
+                var voices = SynthesizerContainer.Synthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
                 var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
                 if (ImGui.Combo("Voice",
                     ref voiceIndex,
@@ -128,41 +110,41 @@ namespace TextToTalk
                         .ToArray(),
                     voices.Count))
                 {
-                    this.config.VoiceName = voices[voiceIndex].VoiceInfo.Name;
-                    this.config.Save();
+                    Configuration.VoiceName = voices[voiceIndex].VoiceInfo.Name;
+                    Configuration.Save();
                 }
             }
 
             ImGui.Text("");
-            var readFromQuestTalkAddon = this.config.ReadFromQuestTalkAddon;
+            var readFromQuestTalkAddon = Configuration.ReadFromQuestTalkAddon;
             if (ImGui.Checkbox("Read NPC dialogue from the dialogue window", ref readFromQuestTalkAddon))
             {
-                this.config.ReadFromQuestTalkAddon = readFromQuestTalkAddon;
-                this.config.Save();
+                Configuration.ReadFromQuestTalkAddon = readFromQuestTalkAddon;
+                Configuration.Save();
             }
 
             ImGui.Text("");
-            var nameNpcWithSay = this.config.NameNpcWithSay;
+            var nameNpcWithSay = Configuration.NameNpcWithSay;
             if (ImGui.Checkbox("Include \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
             {
-                this.config.NameNpcWithSay = nameNpcWithSay;
-                this.config.Save();
+                Configuration.NameNpcWithSay = nameNpcWithSay;
+                Configuration.Save();
             }
 
-            var disallowMultipleSay = this.config.DisallowMultipleSay;
+            var disallowMultipleSay = Configuration.DisallowMultipleSay;
             if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
             {
-                this.config.DisallowMultipleSay = disallowMultipleSay;
-                this.config.Save();
+                Configuration.DisallowMultipleSay = disallowMultipleSay;
+                Configuration.Save();
             }
         }
 
         private void DrawChannelSettings()
         {
-            var enableAll = this.config.EnableAllChatTypes;
+            var enableAll = Configuration.EnableAllChatTypes;
             if (ImGui.Checkbox("Enable all (including undocumented)", ref enableAll))
             {
-                this.config.EnableAllChatTypes = enableAll;
+                Configuration.EnableAllChatTypes = enableAll;
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             if (enableAll) return;
@@ -180,18 +162,18 @@ namespace TextToTalk
                     enumValue = (XivChatType)(int)Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
                 }
 
-                var selected = this.config.EnabledChatTypes.Contains((int)enumValue);
+                var selected = Configuration.EnabledChatTypes.Contains((int)enumValue);
                 if (!ImGui.Checkbox(channel == "PvPTeam" ? "PvP Team" : SplitWords(channel), ref selected)) continue;
-                var inEnabled = this.config.EnabledChatTypes.Contains((int)enumValue);
+                var inEnabled = Configuration.EnabledChatTypes.Contains((int)enumValue);
                 if (inEnabled)
                 {
-                    this.config.EnabledChatTypes.Remove((int)enumValue);
-                    this.config.Save();
+                    Configuration.EnabledChatTypes.Remove((int)enumValue);
+                    Configuration.Save();
                 }
                 else
                 {
-                    this.config.EnabledChatTypes.Add((int)enumValue);
-                    this.config.Save();
+                    Configuration.EnabledChatTypes.Add((int)enumValue);
+                    Configuration.Save();
                 }
             }
         }
@@ -220,16 +202,16 @@ namespace TextToTalk
 
         private void DrawTriggersExclusions()
         {
-            var enableAll = this.config.EnableAllChatTypes;
+            var enableAll = Configuration.EnableAllChatTypes;
             if (ImGui.Checkbox("Enable all chat types (including undocumented)", ref enableAll))
             {
-                this.config.EnableAllChatTypes = enableAll;
+                Configuration.EnableAllChatTypes = enableAll;
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             ImGui.Dummy(new Vector2(0, 5));
 
-            ExpandyList("Trigger", this.config.Good);
-            ExpandyList("Exclusion", this.config.Bad);
+            ExpandyList("Trigger", Configuration.Good);
+            ExpandyList("Exclusion", Configuration.Bad);
         }
 
         private void ExpandyList(string kind, IList<Trigger> listItems)
@@ -242,7 +224,7 @@ namespace TextToTalk
                 if (ImGui.InputTextWithHint($"###TextToTalk{kind}{i}", $"Enter {kind} here...", ref str, 100))
                 {
                     listItems[i].Text = str;
-                    this.config.Save();
+                    Configuration.Save();
                 }
 
                 ImGui.SameLine();
@@ -250,7 +232,7 @@ namespace TextToTalk
                 if (ImGui.Checkbox($"Regex###TextToTalkRegex{kind}{i}", ref isRegex))
                 {
                     listItems[i].IsRegex = isRegex;
-                    this.config.Save();
+                    Configuration.Save();
                 }
 
                 ImGui.SameLine();
@@ -265,7 +247,7 @@ namespace TextToTalk
                 if (listItems[j].ShouldRemove)
                 {
                     listItems.RemoveAt(j);
-                    this.config.Save();
+                    Configuration.Save();
                 }
             }
 

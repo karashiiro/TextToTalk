@@ -9,6 +9,7 @@ using System.Linq;
 using System.Speech.Synthesis;
 using TextToTalk.Attributes;
 using TextToTalk.Talk;
+using TextToTalk.UI;
 
 namespace TextToTalk
 {
@@ -17,7 +18,7 @@ namespace TextToTalk
         private DalamudPluginInterface pluginInterface;
         private PluginCommandManager<TextToTalk> commandManager;
         private PluginConfiguration config;
-        private PluginUI ui;
+        private UIManager ui;
 
         private Addon talkAddonInterface;
 
@@ -37,12 +38,19 @@ namespace TextToTalk
             this.config.Initialize(this.pluginInterface);
 
             this.wsServer = new WsServer();
+            this.speechSynthesizer = new SpeechSynthesizer();
 
-            this.ui = new PluginUI(this.config, this.wsServer);
-            this.pluginInterface.UiBuilder.OnBuildUi += this.ui.DrawConfig;
+            this.ui = new UIManager();
+
+            this.ui.InstallService(this.config);
+            this.ui.InstallService(this.wsServer);
+            this.ui.InstallService(new SpeechSynthesizerContainer { Synthesizer = this.speechSynthesizer });
+
+            this.ui.InstallWindow<ConfigurationWindow>(false);
+
+            this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
 
-            this.speechSynthesizer = new SpeechSynthesizer();
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
 
             this.pluginInterface.Framework.OnUpdateEvent += PollTalkAddon;
@@ -216,12 +224,12 @@ namespace TextToTalk
         [HelpMessage("Toggle TextToTalk's configuration window.")]
         public void ToggleConfig(string command, string args)
         {
-            this.ui.ConfigVisible = !this.ui.ConfigVisible;
+            this.ui.ToggleWindow<ConfigurationWindow>();
         }
 
         private void OpenConfigUi(object sender, EventArgs args)
         {
-            this.ui.ConfigVisible = true;
+            this.ui.ShowWindow<ConfigurationWindow>();
         }
 
         private bool IsDuplicateQuestText(string text)
@@ -272,7 +280,9 @@ namespace TextToTalk
             this.pluginInterface.SavePluginConfig(this.config);
 
             this.pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
-            this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.DrawConfig;
+            this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.Draw;
+
+            this.ui.Dispose();
 
             this.pluginInterface.Dispose();
         }
