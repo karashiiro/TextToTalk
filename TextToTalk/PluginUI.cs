@@ -11,7 +11,7 @@ namespace TextToTalk
 {
     public class PluginUI
     {
-        private static readonly SpeechSynthesizer DummySynthesizer = new SpeechSynthesizer();
+        private static readonly SpeechSynthesizer DummySynthesizer = new();
 
         private readonly PluginConfiguration config;
         private readonly WsServer wsServer;
