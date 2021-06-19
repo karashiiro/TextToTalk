@@ -1,5 +1,4 @@
-﻿using Dalamud.Plugin;
-using ImGuiNET;
+﻿using ImGuiNET;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -7,7 +6,7 @@ namespace TextToTalk.UI
 {
     public class VoiceUnlockerWindow : ImmediateModeWindow
     {
-        private const string ManualTutorialText = "Manual Tutorial";
+        private const string ManualTutorialText = "Manual tutorial";
         private const string EnableAllText = "Enable all system voices";
 
         private static readonly Vector4 Red = ImGui.ColorConvertU32ToFloat4(0xFF0000FF);
