@@ -18,7 +18,7 @@ namespace TextToTalk
         private DalamudPluginInterface pluginInterface;
         private PluginCommandManager<TextToTalk> commandManager;
         private PluginConfiguration config;
-        private UIManager ui;
+        private WindowManager ui;
 
         private Addon talkAddonInterface;
 
@@ -40,7 +40,7 @@ namespace TextToTalk
             this.wsServer = new WsServer();
             this.speechSynthesizer = new SpeechSynthesizer();
 
-            this.ui = new UIManager();
+            this.ui = new WindowManager();
 
             this.ui.InstallService(this.config);
             this.ui.InstallService(this.wsServer);

@@ -1,6 +1,6 @@
 ﻿namespace TextToTalk.UI
 {
-    public interface IImguiWindow
+    public interface IImmediateModeWindow
     {
         public void Draw(ref bool visible);
     }

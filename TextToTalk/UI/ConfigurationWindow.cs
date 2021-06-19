@@ -8,7 +8,7 @@ using ImGuiNET;
 
 namespace TextToTalk.UI
 {
-    public class ConfigurationWindow : IImguiWindow
+    public class ConfigurationWindow : IImmediateModeWindow
     {
         public PluginConfiguration Configuration { get; set; }
         public WsServer WebSocketServer { get; set; }
