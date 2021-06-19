@@ -101,7 +101,7 @@ namespace TextToTalk
                     this.wsServer.Stop();
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
-            
+
             if (!useWebsocket)
             {
                 var rate = this.config.Rate;
@@ -173,11 +173,11 @@ namespace TextToTalk
                 XivChatType enumValue;
                 try
                 {
-                    enumValue = (XivChatType) Enum.Parse(typeof(XivChatType), channel);
+                    enumValue = (XivChatType)Enum.Parse(typeof(XivChatType), channel);
                 }
                 catch (ArgumentException)
                 {
-                    enumValue = (XivChatType) (int) Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
+                    enumValue = (XivChatType)(int)Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
                 }
 
                 var selected = this.config.EnabledChatTypes.Contains((int)enumValue);
@@ -201,7 +201,7 @@ namespace TextToTalk
             var words = oneWord
                 .Select(c => c)
                 .Skip(1)
-                .Aggregate("" + oneWord[0], (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <='9' ? " " + c : "" + c))
+                .Aggregate("" + oneWord[0], (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ? " " + c : "" + c))
                 .Split(' ');
 
             var finalWords = new StringBuilder(oneWord.Length + 3);
@@ -244,7 +244,7 @@ namespace TextToTalk
                     listItems[i].Text = str;
                     this.config.Save();
                 }
-                
+
                 ImGui.SameLine();
                 var isRegex = listItems[i].IsRegex;
                 if (ImGui.Checkbox($"Regex###TextToTalkRegex{kind}{i}", ref isRegex))
