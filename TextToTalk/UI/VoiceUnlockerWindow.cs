@@ -1,0 +1,69 @@
+﻿using Dalamud.Plugin;
+using ImGuiNET;
+using System.Diagnostics;
+using System.Numerics;
+
+namespace TextToTalk.UI
+{
+    public class VoiceUnlockerWindow : IImmediateModeWindow
+    {
+        private const string ManualTutorialText = "Manual Tutorial";
+        private const string EnableAllText = "Enable all system voices";
+
+        private static readonly Vector4 Red = ImGui.ColorConvertU32ToFloat4(0xFF0000FF);
+        private static readonly Vector4 LightRed = ImGui.ColorConvertU32ToFloat4(0xFF8A8AFF);
+        private static readonly Vector4 DarkRed = ImGui.ColorConvertU32ToFloat4(0xFF00007D);
+        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
+
+        public SpeechSynthesizerContainer SynthesizerContainer { get; set; }
+
+        public void Draw(ref bool visible)
+        {
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, Red);
+            ImGui.PushStyleColor(ImGuiCol.CheckMark, Red);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, LightRed);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, DarkRed);
+
+            ImGui.SetNextWindowSize(new Vector2(480, 340));
+            ImGui.Begin("VoiceUnlocker", ref visible, ImGuiWindowFlags.NoResize);
+            {
+                ImGui.TextWrapped("This modification has only been tested on Windows 10.");
+                ImGui.TextWrapped("This function will enable all system TTS voices by " +
+                                  "copying keys between sections of your system registry. " +
+                                  "This modification may not be automatically undone. If " +
+                                  "you would like to perform this modification manually, " +
+                                  $"please click the \"{ManualTutorialText}\" button.");
+                ImGui.TextWrapped("If you would like to proceed with the automatic " +
+                                  $"configuration, please click the \"{EnableAllText}\" " +
+                                  "button. System instability related to registry modifications " +
+                                  "you have performed previously are not taken into account, " +
+                                  "and support will not be provided for those use cases.");
+
+                ImGui.Spacing();
+
+                if (ImGui.Button($"{ManualTutorialText}##VoiceUnlockerButton1"))
+                {
+                    Process.Start("https://www.reddit.com/r/Windows10/comments/96dx8z/how_unlock_all_windows_10_hidden_tts_voices_for/");
+                }
+
+                ImGui.Spacing();
+
+                if (ImGui.Button($"{EnableAllText}##VoiceUnlockerButton2"))
+                {
+                    if (VoiceUnlockerRunner.Execute())
+                    {
+                        PluginLog.Log("Modification succeeded.");
+                        SynthesizerContainer.RegenerateSynthesizer();
+                    }
+                    else
+                    {
+                        PluginLog.Log("The modification program failed to start. No modifications were made.");
+                    }
+                }
+
+                ImGui.TextColored(HintColor, "Administrative privileges will be requested");
+            }
+            ImGui.End();
+        }
+    }
+}

@@ -22,7 +22,7 @@ namespace TextToTalk
 
         private Addon talkAddonInterface;
 
-        private SpeechSynthesizer speechSynthesizer;
+        private SpeechSynthesizerContainer synthesizerContainer;
         private WsServer wsServer;
 
         private string lastQuestText;
@@ -38,14 +38,15 @@ namespace TextToTalk
             this.config.Initialize(this.pluginInterface);
 
             this.wsServer = new WsServer();
-            this.speechSynthesizer = new SpeechSynthesizer();
+            this.synthesizerContainer = new SpeechSynthesizerContainer();
 
             this.ui = new WindowManager();
 
             this.ui.InstallService(this.config);
             this.ui.InstallService(this.wsServer);
-            this.ui.InstallService(new SpeechSynthesizerContainer { Synthesizer = this.speechSynthesizer });
+            this.ui.InstallService(this.synthesizerContainer);
 
+            this.ui.InstallWindow<VoiceUnlockerWindow>(true);
             this.ui.InstallWindow<ConfigurationWindow>(false);
 
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
@@ -162,15 +163,15 @@ namespace TextToTalk
             }
             else
             {
-                this.speechSynthesizer.Rate = this.config.Rate;
-                this.speechSynthesizer.Volume = this.config.Volume;
+                this.synthesizerContainer.Synthesizer.Rate = this.config.Rate;
+                this.synthesizerContainer.Synthesizer.Volume = this.config.Volume;
 
-                if (this.speechSynthesizer.Voice.Name != this.config.VoiceName)
+                if (this.synthesizerContainer.Synthesizer.Voice.Name != this.config.VoiceName)
                 {
-                    this.speechSynthesizer.SelectVoice(this.config.VoiceName);
+                    this.synthesizerContainer.Synthesizer.SelectVoice(this.config.VoiceName);
                 }
 
-                this.speechSynthesizer.SpeakAsync(textValue);
+                this.synthesizerContainer.Synthesizer.SpeakAsync(textValue);
             }
         }
 
@@ -185,7 +186,7 @@ namespace TextToTalk
             }
             else
             {
-                this.speechSynthesizer.SpeakAsyncCancelAll();
+                this.synthesizerContainer.Synthesizer.SpeakAsyncCancelAll();
                 PluginLog.Log("Canceled SpeechSynthesizer TTS.");
             }
         }
@@ -273,7 +274,6 @@ namespace TextToTalk
             this.pluginInterface.Framework.OnUpdateEvent -= CheckKeybindPressed;
 
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
-            this.speechSynthesizer.Dispose();
 
             this.wsServer.Stop();
 
