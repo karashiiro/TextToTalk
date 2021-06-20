@@ -22,6 +22,8 @@ namespace TextToTalk.Talk
 
         private static unsafe string ReadTextNode(DataManager data, AtkTextNode* textNode)
         {
+            if (textNode == null) return "";
+
             StringManager ??= new SeStringManager(data);
             
             var textPtr = textNode->NodeText.StringPtr;
