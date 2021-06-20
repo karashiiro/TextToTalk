@@ -1,5 +1,4 @@
 ﻿using Dalamud.CrystalTower.Commands;
-using Dalamud.CrystalTower.Commands.Attributes;
 using Dalamud.CrystalTower.DependencyInjection;
 using Dalamud.CrystalTower.UI;
 using Dalamud.Game.Internal;
@@ -11,6 +10,7 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using System.Speech.Synthesis;
+using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI;
 
@@ -51,6 +51,7 @@ namespace TextToTalk
             this.serviceCollection.AddService(this.speechSynthesizer);
 
             this.ui = new WindowManager(this.serviceCollection);
+            this.serviceCollection.AddService(this.ui, shouldDispose: false);
 
             this.ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
             this.ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
@@ -65,7 +66,7 @@ namespace TextToTalk
             this.pluginInterface.Framework.OnUpdateEvent += CheckKeybindPressed;
 
             this.commandManager = new CommandManager(pi, this.serviceCollection);
-            this.commandManager.AddCommandModule<TextToTalk>();
+            this.commandManager.AddCommandModule<MainCommandModule>();
         }
 
         private bool keysDown;
@@ -79,7 +80,10 @@ namespace TextToTalk
                 if (this.keysDown) return;
 
                 this.keysDown = true;
-                ToggleTts();
+
+                var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
+                commandModule.ToggleTts();
+
                 return;
             }
 
@@ -181,59 +185,6 @@ namespace TextToTalk
 
                 this.speechSynthesizer.SpeakAsync(textValue);
             }
-        }
-
-        [Command("/canceltts")]
-        [HelpMessage("Cancel all queued TTS messages.")]
-        public void CancelTts(string command, string args)
-        {
-            if (this.config.UseWebsocket)
-            {
-                this.wsServer.Cancel();
-                PluginLog.Log("Canceled TTS over WebSocket server.");
-            }
-            else
-            {
-                this.speechSynthesizer.SpeakAsyncCancelAll();
-                PluginLog.Log("Canceled SpeechSynthesizer TTS.");
-            }
-        }
-
-        [Command("/toggletts")]
-        [HelpMessage("Toggle TextToTalk's text-to-speech.")]
-        public void ToggleTts(string command = "", string args = "")
-        {
-            if (this.config.Enabled)
-                DisableTts();
-            else
-                EnableTts();
-        }
-
-        [Command("/disabletts")]
-        [HelpMessage("Disable TextToTalk's text-to-speech.")]
-        public void DisableTts(string command = "", string args = "")
-        {
-            this.config.Enabled = false;
-            var chat = this.pluginInterface.Framework.Gui.Chat;
-            chat.Print("TTS disabled.");
-            PluginLog.Log("TTS disabled.");
-        }
-
-        [Command("/enabletts")]
-        [HelpMessage("Enable TextToTalk's text-to-speech.")]
-        public void EnableTts(string command = "", string args = "")
-        {
-            this.config.Enabled = true;
-            var chat = this.pluginInterface.Framework.Gui.Chat;
-            chat.Print("TTS enabled.");
-            PluginLog.Log("TTS enabled.");
-        }
-
-        [Command("/tttconfig")]
-        [HelpMessage("Toggle TextToTalk's configuration window.")]
-        public void ToggleConfig(string command, string args)
-        {
-            this.ui.ToggleWindow<ConfigurationWindow>();
         }
 
         private void OpenConfigUi(object sender, EventArgs args)
