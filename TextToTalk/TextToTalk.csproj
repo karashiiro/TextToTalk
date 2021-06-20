@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <Version>1.4.0.0</Version>
+    <Version>1.4.1.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -21,6 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dalamud.CrystalTower" Version="1.0.0" />
     <PackageReference Include="DalamudPackager" Version="1.2.1" />
     <PackageReference Include="WebSocketSharpFork" Version="1.0.4" />
   </ItemGroup>

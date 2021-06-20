@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Dalamud.CrystalTower.UI;
+using Dalamud.Game.Text;
+using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Speech.Synthesis;
 using System.Text;
-using Dalamud.Game.Text;
-using ImGuiNET;
 
 namespace TextToTalk.UI
 {

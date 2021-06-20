@@ -1,4 +1,8 @@
-﻿using Dalamud.Game.Internal;
+﻿using Dalamud.CrystalTower.Commands;
+using Dalamud.CrystalTower.Commands.Attributes;
+using Dalamud.CrystalTower.DependencyInjection;
+using Dalamud.CrystalTower.UI;
+using Dalamud.Game.Internal;
 using Dalamud.Game.Internal.Gui.Addon;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -7,7 +11,6 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using System.Speech.Synthesis;
-using TextToTalk.Attributes;
 using TextToTalk.Talk;
 using TextToTalk.UI;
 
@@ -16,14 +19,16 @@ namespace TextToTalk
     public class TextToTalk : IDalamudPlugin
     {
         private DalamudPluginInterface pluginInterface;
-        private PluginCommandManager<TextToTalk> commandManager;
         private PluginConfiguration config;
         private WindowManager ui;
+        private CommandManager commandManager;
 
         private Addon talkAddonInterface;
 
         private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
+
+        private PluginServiceCollection serviceCollection;
 
         private string lastQuestText;
         private string lastSpeaker;
@@ -40,15 +45,16 @@ namespace TextToTalk
             this.wsServer = new WsServer();
             this.speechSynthesizer = new SpeechSynthesizer();
 
-            this.ui = new WindowManager();
+            this.serviceCollection = new PluginServiceCollection();
+            this.serviceCollection.AddService(this.config);
+            this.serviceCollection.AddService(this.wsServer);
+            this.serviceCollection.AddService(this.speechSynthesizer);
 
-            this.ui.InstallService(this.config);
-            this.ui.InstallService(this.wsServer);
-            this.ui.InstallService(this.speechSynthesizer);
+            this.ui = new WindowManager(this.serviceCollection);
 
-            this.ui.InstallWindow<UnlockerResultWindow>(initiallyVisible: false);
-            this.ui.InstallWindow<VoiceUnlockerWindow>(initiallyVisible: false);
-            this.ui.InstallWindow<ConfigurationWindow>(initiallyVisible: false);
+            this.ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
+            this.ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
+            this.ui.AddWindow<ConfigurationWindow>(initiallyVisible: false);
 
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
@@ -58,7 +64,8 @@ namespace TextToTalk
             this.pluginInterface.Framework.OnUpdateEvent += PollTalkAddon;
             this.pluginInterface.Framework.OnUpdateEvent += CheckKeybindPressed;
 
-            this.commandManager = new PluginCommandManager<TextToTalk>(this, this.pluginInterface);
+            this.commandManager = new CommandManager(pi, this.serviceCollection);
+            this.commandManager.AddCommandModule<TextToTalk>();
         }
 
         private bool keysDown;
@@ -284,6 +291,8 @@ namespace TextToTalk
             this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.Draw;
 
             this.ui.Dispose();
+
+            this.serviceCollection.Dispose();
 
             this.pluginInterface.Dispose();
         }
