@@ -27,11 +27,9 @@ namespace TextToTalk
 
         private SpeechSynthesizer speechSynthesizer;
         private WsServer wsServer;
+        private SharedState sharedState;
 
         private PluginServiceCollection serviceCollection;
-
-        private string lastQuestText;
-        private string lastSpeaker;
 
         public string Name => "TextToTalk";
 
@@ -44,10 +42,12 @@ namespace TextToTalk
 
             this.wsServer = new WsServer();
             this.speechSynthesizer = new SpeechSynthesizer();
+            this.sharedState = new SharedState();
 
             this.serviceCollection = new PluginServiceCollection();
             this.serviceCollection.AddService(this.config);
             this.serviceCollection.AddService(this.wsServer);
+            this.serviceCollection.AddService(this.sharedState);
             this.serviceCollection.AddService(this.speechSynthesizer);
             this.serviceCollection.AddService(this.pluginInterface, shouldDispose: false);
 
@@ -197,22 +197,22 @@ namespace TextToTalk
 
         private bool IsDuplicateQuestText(string text)
         {
-            return this.lastQuestText == text;
+            return this.sharedState.LastQuestText == text;
         }
 
         private void SetLastQuestText(string text)
         {
-            this.lastQuestText = text;
+            this.sharedState.LastQuestText = text;
         }
 
         private bool IsSameSpeaker(string speaker)
         {
-            return this.lastSpeaker == speaker;
+            return this.sharedState.LastSpeaker == speaker;
         }
 
         private void SetLastSpeaker(string speaker)
         {
-            this.lastSpeaker = speaker;
+            this.sharedState.LastSpeaker = speaker;
         }
 
         private bool ShouldSaySender()

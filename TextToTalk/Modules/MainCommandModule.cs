@@ -10,6 +10,7 @@ namespace TextToTalk.Modules
     {
         public DalamudPluginInterface PluginInterface { get; set; }
         public PluginConfiguration Config { get; set; }
+        public SharedState State { get; set; }
         public SpeechSynthesizer Synthesizer { get; set; }
         public WindowManager Windows { get; set; }
         public WsServer WebsocketServer { get; set; }
@@ -45,6 +46,8 @@ namespace TextToTalk.Modules
         public void DisableTts(string command = "", string args = "")
         {
             Config.Enabled = false;
+            State.LastSpeaker = "";
+            State.LastQuestText = "";
             var chat = PluginInterface.Framework.Gui.Chat;
             chat.Print("TTS disabled.");
             PluginLog.Log("TTS disabled.");
