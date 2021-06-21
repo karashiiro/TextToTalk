@@ -49,6 +49,7 @@ namespace TextToTalk
             this.serviceCollection.AddService(this.config);
             this.serviceCollection.AddService(this.wsServer);
             this.serviceCollection.AddService(this.speechSynthesizer);
+            this.serviceCollection.AddService(this.pluginInterface, shouldDispose: false);
 
             this.ui = new WindowManager(this.serviceCollection);
             this.serviceCollection.AddService(this.ui, shouldDispose: false);
