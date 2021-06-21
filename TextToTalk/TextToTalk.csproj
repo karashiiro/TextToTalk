@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dalamud.CrystalTower" Version="1.1.1" />
+    <PackageReference Include="Dalamud.CrystalTower" Version="1.2.0" />
     <PackageReference Include="DalamudPackager" Version="1.2.1" />
     <PackageReference Include="WebSocketSharpFork" Version="1.0.4" />
   </ItemGroup>
