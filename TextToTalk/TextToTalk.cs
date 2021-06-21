@@ -167,7 +167,7 @@ namespace TextToTalk
 
         private void Say(string textValue)
         {
-            var cleanText = TalkUtils.StripUnspeakableText(textValue);
+            var cleanText = TalkUtils.StripSSMLTokens(textValue);
 
             if (this.config.UseWebsocket)
             {

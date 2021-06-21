@@ -36,7 +36,7 @@ namespace TextToTalk.Talk
             return seString.TextValue;
         }
 
-        public static string StripUnspeakableText(string text)
+        public static string StripSSMLTokens(string text)
         {
             return text
                 // TextToTalk#17 "<sigh>"
