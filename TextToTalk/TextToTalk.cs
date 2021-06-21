@@ -167,9 +167,11 @@ namespace TextToTalk
 
         private void Say(string textValue)
         {
+            var cleanText = TalkUtils.StripUnspeakableText(textValue);
+
             if (this.config.UseWebsocket)
             {
-                this.wsServer.Broadcast(textValue);
+                this.wsServer.Broadcast(cleanText);
 #if DEBUG
                 PluginLog.Log("Sent message {0} on WebSocket server.", textValue);
 #endif
@@ -183,8 +185,6 @@ namespace TextToTalk
                 {
                     this.speechSynthesizer.SelectVoice(this.config.VoiceName);
                 }
-
-                var cleanText = TalkUtils.StripUnspeakableText(textValue);
 
                 this.speechSynthesizer.SpeakAsync(cleanText);
             }
