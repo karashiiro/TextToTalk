@@ -35,5 +35,13 @@ namespace TextToTalk.Talk
             var seString = StringManager.Parse(textBytes);
             return seString.TextValue;
         }
+
+        public static string StripUnspeakableText(string text)
+        {
+            return text
+                // TextToTalk#17 "<sigh>"
+                .Replace("<", "")
+                .Replace(">", "");
+        }
     }
 }

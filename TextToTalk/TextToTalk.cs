@@ -184,7 +184,9 @@ namespace TextToTalk
                     this.speechSynthesizer.SelectVoice(this.config.VoiceName);
                 }
 
-                this.speechSynthesizer.SpeakAsync(textValue);
+                var cleanText = TalkUtils.StripUnspeakableText(textValue);
+
+                this.speechSynthesizer.SpeakAsync(cleanText);
             }
         }
 
