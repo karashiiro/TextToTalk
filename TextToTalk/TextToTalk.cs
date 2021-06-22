@@ -156,11 +156,13 @@ namespace TextToTalk
 
             if (this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
 
-            var typeAccepted = this.config.EnabledChatTypes.Contains((int)type);
+            var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
+
+            var typeAccepted = chatTypes.EnabledChatTypes.Contains((int)type);
             var goodMatch = this.config.Good
                 .Where(t => t.Text != "")
                 .Any(t => t.Match(textValue));
-            if (!(this.config.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
+            if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
             Say(textValue);
         }
