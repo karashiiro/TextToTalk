@@ -56,6 +56,7 @@ namespace TextToTalk
 
             this.ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
             this.ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
+            this.ui.AddWindow<PresetModificationWindow>(initiallyVisible: false);
             this.ui.AddWindow<ConfigurationWindow>(initiallyVisible: false);
 
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;

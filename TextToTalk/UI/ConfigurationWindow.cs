@@ -151,6 +151,44 @@ namespace TextToTalk.UI
         {
             var currentConfiguration = Configuration.GetCurrentEnabledChatTypesPreset();
 
+            var presets = Configuration.EnabledChatTypesPresets.ToList();
+            presets.Sort(((a, b) => b.Id - a.Id));
+            var presetIndex = presets.IndexOf(currentConfiguration);
+            if (ImGui.Combo("Preset##TTT1", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+            {
+                Configuration.CurrentPresetId = presets[presetIndex].Id;
+                Configuration.Save();
+            }
+
+            if (ImGui.Button("New preset#TTT2"))
+            {
+                var newPreset = Configuration.NewChatTypesPreset();
+                var presetModificationWindow = GetWindow<PresetModificationWindow>();
+                presetModificationWindow.PresetId = newPreset.Id;
+                OpenWindow<PresetModificationWindow>();
+            }
+
+            ImGui.SameLine();
+
+            if (ImGui.Button("Edit#TTT3"))
+            {
+                var presetModificationWindow = GetWindow<PresetModificationWindow>();
+                presetModificationWindow.PresetId = Configuration.CurrentPresetId;
+                OpenWindow<PresetModificationWindow>();
+            }
+
+            ImGui.SameLine();
+
+            if (ImGui.Button("Delete#TTT3"))
+            {
+                if (Configuration.EnabledChatTypesPresets.Count == 1)
+                {
+                    return;
+                }
+            }
+
+            ImGui.Spacing();
+
             var enableAll = currentConfiguration.EnableAllChatTypes;
             if (ImGui.Checkbox("Enable all (including undocumented)", ref enableAll))
             {

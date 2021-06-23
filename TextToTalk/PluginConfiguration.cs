@@ -33,8 +33,8 @@ namespace TextToTalk
         public IList<Trigger> Bad { get; set; }
         public IList<Trigger> Good { get; set; }
 
-        public string CurrentEnabledChatTypesPreset { get; set; }
-        public IDictionary<string, EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
+        public int CurrentPresetId { get; set; }
+        public IList<EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
 
         public int Rate { get; set; }
         public int Volume { get; set; }
@@ -69,9 +69,8 @@ namespace TextToTalk
 
             ModifierKey = VirtualKey.Enum.VkControl;
             MajorKey = VirtualKey.Enum.VkN;
-
-            CurrentEnabledChatTypesPreset = DefaultEnabledChatTypesPreset;
-            EnabledChatTypesPresets = new Dictionary<string, EnabledChatTypesPreset>();
+            
+            EnabledChatTypesPresets = new List<EnabledChatTypesPreset>();
 
             VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name;
         }
@@ -82,8 +81,9 @@ namespace TextToTalk
 
             if (!FirstTime)
             {
-                EnabledChatTypesPresets[DefaultEnabledChatTypesPreset] = new EnabledChatTypesPreset
+                EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
                 {
+                    Id = 0,
                     EnabledChatTypes = new List<int>
                     {
                         (int) XivChatType.Say,
@@ -93,7 +93,8 @@ namespace TextToTalk
                         (int) AdditionalChatTypes.Enum.BeneficialEffectOnYouEnded,
                         (int) AdditionalChatTypes.Enum.BeneficialEffectOnOtherPlayer,
                     },
-                };
+                    Name = DefaultEnabledChatTypesPreset,
+                });
 
                 FirstTime = true;
                 MigratedTo1_5 = true;
@@ -101,15 +102,17 @@ namespace TextToTalk
 
             if (FirstTime && !MigratedTo1_5)
             {
-                EnabledChatTypesPresets[DefaultEnabledChatTypesPreset] = new EnabledChatTypesPreset
+                EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
                 {
+                    Id = 0,
 #pragma warning disable CS1062 // The best overloaded Add method for the collection initializer element is obsolete
 #pragma warning disable 618
                     EnableAllChatTypes = EnableAllChatTypes,
                     EnabledChatTypes = EnabledChatTypes,
 #pragma warning restore 618
 #pragma warning restore CS1062 // The best overloaded Add method for the collection initializer element is obsolete
-                };
+                    Name = DefaultEnabledChatTypesPreset,
+                });
 
                 MigratedTo1_5 = true;
             }
@@ -124,12 +127,27 @@ namespace TextToTalk
 
         public EnabledChatTypesPreset GetCurrentEnabledChatTypesPreset()
         {
-            return EnabledChatTypesPresets[CurrentEnabledChatTypesPreset];
+            return EnabledChatTypesPresets.First(p => p.Id == CurrentPresetId);
         }
 
-        public void SetCurrentEnabledChatTypesPreset(string presetName)
+        public EnabledChatTypesPreset NewChatTypesPreset()
         {
-            CurrentEnabledChatTypesPreset = presetName;
+            var highestId = EnabledChatTypesPresets.Select(p => p.Id).Max();
+            var preset = new EnabledChatTypesPreset
+            {
+                Id = highestId + 1,
+                EnabledChatTypes = new List<int>(),
+                Name = "New preset",
+            };
+
+            EnabledChatTypesPresets.Add(preset);
+
+            return preset;
+        }
+
+        public void SetCurrentEnabledChatTypesPreset(int presetId)
+        {
+            CurrentPresetId = presetId;
         }
     }
 }
