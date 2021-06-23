@@ -24,6 +24,11 @@ namespace TextToTalk.UI
                     preset.Name = presetName;
                     Configuration.Save();
                 }
+
+                if (ImGui.Button("Close###TTT6"))
+                {
+                    visible = false;
+                }
             }
             ImGui.End();
         }
