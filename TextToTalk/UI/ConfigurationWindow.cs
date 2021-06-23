@@ -149,10 +149,12 @@ namespace TextToTalk.UI
 
         private void DrawChannelSettings()
         {
-            var enableAll = Configuration.EnableAllChatTypes;
+            var currentConfiguration = Configuration.GetCurrentEnabledChatTypesPreset();
+
+            var enableAll = currentConfiguration.EnableAllChatTypes;
             if (ImGui.Checkbox("Enable all (including undocumented)", ref enableAll))
             {
-                Configuration.EnableAllChatTypes = enableAll;
+                currentConfiguration.EnableAllChatTypes = enableAll;
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             if (enableAll) return;
@@ -170,17 +172,17 @@ namespace TextToTalk.UI
                     enumValue = (XivChatType)(int)Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
                 }
 
-                var selected = Configuration.EnabledChatTypes.Contains((int)enumValue);
+                var selected = currentConfiguration.EnabledChatTypes.Contains((int)enumValue);
                 if (!ImGui.Checkbox(channel == "PvPTeam" ? "PvP Team" : SplitWords(channel), ref selected)) continue;
-                var inEnabled = Configuration.EnabledChatTypes.Contains((int)enumValue);
+                var inEnabled = currentConfiguration.EnabledChatTypes.Contains((int)enumValue);
                 if (inEnabled)
                 {
-                    Configuration.EnabledChatTypes.Remove((int)enumValue);
+                    currentConfiguration.EnabledChatTypes.Remove((int)enumValue);
                     Configuration.Save();
                 }
                 else
                 {
-                    Configuration.EnabledChatTypes.Add((int)enumValue);
+                    currentConfiguration.EnabledChatTypes.Add((int)enumValue);
                     Configuration.Save();
                 }
             }
@@ -210,10 +212,12 @@ namespace TextToTalk.UI
 
         private void DrawTriggersExclusions()
         {
-            var enableAll = Configuration.EnableAllChatTypes;
+            var currentConfiguration = Configuration.GetCurrentEnabledChatTypesPreset();
+
+            var enableAll = currentConfiguration.EnableAllChatTypes;
             if (ImGui.Checkbox("Enable all chat types (including undocumented)", ref enableAll))
             {
-                Configuration.EnableAllChatTypes = enableAll;
+                currentConfiguration.EnableAllChatTypes = enableAll;
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             ImGui.Dummy(new Vector2(0, 5));
