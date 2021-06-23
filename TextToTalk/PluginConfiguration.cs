@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Speech.Synthesis;
-using Dalamud.Configuration;
+﻿using Dalamud.Configuration;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Speech.Synthesis;
 // ReSharper disable InconsistentNaming
 
 namespace TextToTalk
@@ -69,7 +69,7 @@ namespace TextToTalk
 
             ModifierKey = VirtualKey.Enum.VkControl;
             MajorKey = VirtualKey.Enum.VkN;
-            
+
             EnabledChatTypesPresets = new List<EnabledChatTypesPreset>();
 
             VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name;
