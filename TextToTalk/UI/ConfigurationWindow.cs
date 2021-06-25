@@ -173,18 +173,17 @@ namespace TextToTalk.UI
             if (ImGui.Button("Edit#TTT3"))
             {
                 var presetModificationWindow = GetWindow<PresetModificationWindow>();
-                presetModificationWindow.PresetId = Configuration.CurrentPresetId;
+                presetModificationWindow.PresetId = currentConfiguration.Id;
                 OpenWindow<PresetModificationWindow>();
             }
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Delete#TTT3"))
+            if (Configuration.EnabledChatTypesPresets.Count > 1 && ImGui.Button("Delete#TTT4"))
             {
-                if (Configuration.EnabledChatTypesPresets.Count == 1)
-                {
-                    return;
-                }
+                var otherPreset = Configuration.EnabledChatTypesPresets.First(p => p.Id != currentConfiguration.Id);
+                Configuration.SetCurrentEnabledChatTypesPreset(otherPreset.Id);
+                Configuration.EnabledChatTypesPresets.Remove(currentConfiguration);
             }
 
             ImGui.Spacing();

@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using Dalamud.CrystalTower.UI;
+﻿using Dalamud.CrystalTower.UI;
 using ImGuiNET;
+using System.Linq;
 using System.Numerics;
 
 namespace TextToTalk.UI
