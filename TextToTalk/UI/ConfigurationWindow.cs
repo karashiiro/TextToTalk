@@ -152,7 +152,7 @@ namespace TextToTalk.UI
             var currentConfiguration = Configuration.GetCurrentEnabledChatTypesPreset();
 
             var presets = Configuration.EnabledChatTypesPresets.ToList();
-            presets.Sort(((a, b) => b.Id - a.Id));
+            presets.Sort((a, b) => a.Id - b.Id);
             var presetIndex = presets.IndexOf(currentConfiguration);
             if (ImGui.Combo("Preset##TTT1", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
             {
