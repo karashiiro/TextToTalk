@@ -21,8 +21,9 @@ namespace TextToTalk.UI
             ImGui.PushStyleColor(ImGuiCol.CheckMark, Red);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, LightRed);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, DarkRed);
-            
-            ImGui.Begin("VoiceUnlocker", ref visible, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize);
+
+            ImGui.SetNextWindowSize(new Vector2(480, 320));
+            ImGui.Begin("VoiceUnlocker", ref visible, ImGuiWindowFlags.NoResize);
             {
                 ImGui.TextWrapped("This modification has only been tested on Windows 10.");
                 ImGui.TextWrapped("This function will enable all system TTS voices by " +
