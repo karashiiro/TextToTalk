@@ -13,10 +13,9 @@ namespace TextToTalk.UI
 
         public override void Draw(ref bool visible)
         {
-            ImGui.SetNextWindowSize(new Vector2(320, 140));
-            ImGui.Begin("Preset##TTT5", ref visible, ImGuiWindowFlags.NoResize);
+            ImGui.Begin("Preset##TTT5", ref visible, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize);
             {
-                var preset = Configuration.EnabledChatTypesPresets.First(p => p.Id == PresetId);
+                var preset = Configuration.EnabledChatTypesPresets.FirstOrDefault(p => p.Id == PresetId);
 
                 var presetName = preset.Name;
                 if (ImGui.InputText("Name##TTT4", ref presetName, 200))
