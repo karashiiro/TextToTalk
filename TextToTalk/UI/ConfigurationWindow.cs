@@ -282,6 +282,7 @@ namespace TextToTalk.UI
             if (ImGui.Checkbox("Enable all chat types (including undocumented)", ref enableAll))
             {
                 currentConfiguration.EnableAllChatTypes = enableAll;
+                Configuration.Save();
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             ImGui.Dummy(new Vector2(0, 5));
