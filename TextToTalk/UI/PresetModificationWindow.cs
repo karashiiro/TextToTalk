@@ -13,7 +13,7 @@ namespace TextToTalk.UI
 
         public override void Draw(ref bool visible)
         {
-            ImGui.SetNextWindowSize(new Vector2(320, 90));
+            ImGui.SetNextWindowSize(new Vector2(320, 140));
             ImGui.Begin("Preset##TTT5", ref visible, ImGuiWindowFlags.NoResize);
             {
                 var preset = Configuration.EnabledChatTypesPresets.First(p => p.Id == PresetId);
