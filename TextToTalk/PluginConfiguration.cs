@@ -6,13 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
+using TextToTalk.Migrations;
+
 // ReSharper disable InconsistentNaming
 
 namespace TextToTalk
 {
     public class PluginConfiguration : IPluginConfiguration
     {
-        private const string DefaultEnabledChatTypesPreset = "Default";
+        private const string DefaultPreset = "Default";
 
         public int Version { get; set; }
 
@@ -37,10 +39,17 @@ namespace TextToTalk
         public int CurrentPresetId { get; set; }
         public IList<EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
 
+        [Obsolete("Use VoicePresets.")]
         public int Rate { get; set; }
+        
+        [Obsolete("Use VoicePresets.")]
         public int Volume { get; set; }
-
+        
+        [Obsolete("Use VoicePresets.")]
         public string VoiceName { get; set; }
+
+        public int CurrentVoicePresetId { get; set; }
+        public IList<VoicePreset> VoicePresets { get; set; }
 
         public bool UseWebsocket { get; set; }
 
@@ -64,14 +73,8 @@ namespace TextToTalk
             Bad = new List<Trigger>();
             Good = new List<Trigger>();
 
-            using var ss = new SpeechSynthesizer();
-            Rate = ss.Rate;
-            Volume = ss.Volume;
-
             ModifierKey = VirtualKey.Enum.VkControl;
             MajorKey = VirtualKey.Enum.VkN;
-
-            VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name;
         }
 
         public void Initialize(DalamudPluginInterface pi)
@@ -79,6 +82,7 @@ namespace TextToTalk
             this.pluginInterface = pi;
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
+            VoicePresets ??= new List<VoicePreset>();
 
             if (!FirstTime)
             {
@@ -94,10 +98,20 @@ namespace TextToTalk
                         (int) AdditionalChatTypes.Enum.BeneficialEffectOnYouEnded,
                         (int) AdditionalChatTypes.Enum.BeneficialEffectOnOtherPlayer,
                     },
-                    Name = DefaultEnabledChatTypesPreset,
+                    Name = DefaultPreset,
                     UseKeybind = false,
                     ModifierKey = VirtualKey.Enum.VkShift,
                     MajorKey = VirtualKey.Enum.Vk0,
+                });
+
+                using var ss = new SpeechSynthesizer();
+                VoicePresets.Add(new VoicePreset
+                {
+                    Id = 0,
+                    Rate = ss.Rate,
+                    Volume = ss.Volume,
+                    VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name,
+                    Name = DefaultPreset,
                 });
 
                 FirstTime = true;
@@ -106,21 +120,7 @@ namespace TextToTalk
 
             if (FirstTime && !MigratedTo1_5)
             {
-                EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
-                {
-                    Id = 0,
-#pragma warning disable CS1062 // The best overloaded Add method for the collection initializer element is obsolete
-#pragma warning disable 618
-                    EnableAllChatTypes = EnableAllChatTypes,
-                    EnabledChatTypes = EnabledChatTypes.ToList(),
-#pragma warning restore 618
-#pragma warning restore CS1062 // The best overloaded Add method for the collection initializer element is obsolete
-                    Name = DefaultEnabledChatTypesPreset,
-                    UseKeybind = false,
-                    ModifierKey = VirtualKey.Enum.VkShift,
-                    MajorKey = VirtualKey.Enum.Vk0,
-                });
-
+                new Migration1_5().Migrate(this);
                 MigratedTo1_5 = true;
             }
 
@@ -158,6 +158,35 @@ namespace TextToTalk
         public void SetCurrentEnabledChatTypesPreset(int presetId)
         {
             CurrentPresetId = presetId;
+        }
+
+        public VoicePreset GetCurrentVoicePreset()
+        {
+            return VoicePresets.First(p => p.Id == CurrentVoicePresetId);
+        }
+
+        public VoicePreset NewVoicePreset()
+        {
+            using var ss = new SpeechSynthesizer();
+
+            var highestId = VoicePresets.Select(p => p.Id).Max();
+            var preset = new VoicePreset
+            {
+                Id = highestId + 1,
+                Rate = ss.Rate,
+                Volume = ss.Volume,
+                VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name,
+                Name = "New preset",
+            };
+
+            VoicePresets.Add(preset);
+
+            return preset;
+        }
+
+        public void SetCurrentVoicePreset(int presetId)
+        {
+            CurrentVoicePresetId = presetId;
         }
     }
 }

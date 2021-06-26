@@ -200,12 +200,14 @@ namespace TextToTalk
             }
             else
             {
-                this.speechSynthesizer.Rate = this.config.Rate;
-                this.speechSynthesizer.Volume = this.config.Volume;
+                var voicePreset = this.config.GetCurrentVoicePreset();
 
-                if (this.speechSynthesizer.Voice.Name != this.config.VoiceName)
+                this.speechSynthesizer.Rate = voicePreset.Rate;
+                this.speechSynthesizer.Volume = voicePreset.Volume;
+
+                if (this.speechSynthesizer.Voice.Name != voicePreset.VoiceName)
                 {
-                    this.speechSynthesizer.SelectVoice(this.config.VoiceName);
+                    this.speechSynthesizer.SelectVoice(voicePreset.VoiceName);
                 }
 
                 this.speechSynthesizer.SpeakAsync(cleanText);

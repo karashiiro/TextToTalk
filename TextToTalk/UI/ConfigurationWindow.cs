@@ -88,21 +88,49 @@ namespace TextToTalk.UI
 
             if (!useWebsocket)
             {
-                var rate = Configuration.Rate;
+                var currentVoicePreset = Configuration.GetCurrentVoicePreset();
+
+                var presets = Configuration.VoicePresets.ToList();
+                presets.Sort((a, b) => a.Id - b.Id);
+                var presetIndex = presets.IndexOf(currentVoicePreset);
+                if (ImGui.Combo("Preset##TTTVoice1", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                {
+                    Configuration.CurrentVoicePresetId = presets[presetIndex].Id;
+                    Configuration.Save();
+                }
+
+                if (ImGui.Button("New preset##TTTVoice2"))
+                {
+                    var newPreset = Configuration.NewChatTypesPreset();
+                    Configuration.SetCurrentVoicePreset(newPreset.Id);
+                }
+
+                if (Configuration.EnabledChatTypesPresets.Count > 1)
+                {
+                    ImGui.SameLine();
+                    if (ImGui.Button("Delete##TTTVoice3"))
+                    {
+                        var otherPreset = Configuration.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+                        Configuration.SetCurrentVoicePreset(otherPreset.Id);
+                        Configuration.VoicePresets.Remove(currentVoicePreset);
+                    }
+                }
+
+                var rate = currentVoicePreset.Rate;
                 if (ImGui.SliderInt("Rate", ref rate, -10, 10))
                 {
-                    Configuration.Rate = rate;
+                    currentVoicePreset.Rate = rate;
                     Configuration.Save();
                 }
 
-                var volume = Configuration.Volume;
+                var volume = currentVoicePreset.Volume;
                 if (ImGui.SliderInt("Volume", ref volume, 0, 100))
                 {
-                    Configuration.Volume = volume;
+                    currentVoicePreset.Volume = volume;
                     Configuration.Save();
                 }
 
-                var voiceName = Configuration.VoiceName;
+                var voiceName = currentVoicePreset.VoiceName;
                 var voices = Synthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
                 var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
                 if (ImGui.Combo("Voice",
@@ -112,7 +140,7 @@ namespace TextToTalk.UI
                         .ToArray(),
                     voices.Count))
                 {
-                    Configuration.VoiceName = voices[voiceIndex].VoiceInfo.Name;
+                    currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
                     Configuration.Save();
                 }
 
@@ -149,11 +177,11 @@ namespace TextToTalk.UI
 
         private void DrawChannelSettings()
         {
-            var currentConfiguration = Configuration.GetCurrentEnabledChatTypesPreset();
+            var currentEnabledChatTypesPreset = Configuration.GetCurrentEnabledChatTypesPreset();
 
             var presets = Configuration.EnabledChatTypesPresets.ToList();
             presets.Sort((a, b) => a.Id - b.Id);
-            var presetIndex = presets.IndexOf(currentConfiguration);
+            var presetIndex = presets.IndexOf(currentEnabledChatTypesPreset);
             if (ImGui.Combo("Preset##TTT1", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
             {
                 Configuration.CurrentPresetId = presets[presetIndex].Id;
@@ -179,18 +207,18 @@ namespace TextToTalk.UI
                 ImGui.SameLine();
                 if (ImGui.Button("Delete##TTT4"))
                 {
-                    var otherPreset = Configuration.EnabledChatTypesPresets.First(p => p.Id != currentConfiguration.Id);
+                    var otherPreset = Configuration.EnabledChatTypesPresets.First(p => p.Id != currentEnabledChatTypesPreset.Id);
                     Configuration.SetCurrentEnabledChatTypesPreset(otherPreset.Id);
-                    Configuration.EnabledChatTypesPresets.Remove(currentConfiguration);
+                    Configuration.EnabledChatTypesPresets.Remove(currentEnabledChatTypesPreset);
                 }
             }
 
             ImGui.Spacing();
 
-            var enableAll = currentConfiguration.EnableAllChatTypes;
+            var enableAll = currentEnabledChatTypesPreset.EnableAllChatTypes;
             if (ImGui.Checkbox("Enable all (including undocumented)", ref enableAll))
             {
-                currentConfiguration.EnableAllChatTypes = enableAll;
+                currentEnabledChatTypesPreset.EnableAllChatTypes = enableAll;
             }
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             if (enableAll) return;
@@ -208,17 +236,17 @@ namespace TextToTalk.UI
                     enumValue = (XivChatType)(int)Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
                 }
 
-                var selected = currentConfiguration.EnabledChatTypes.Contains((int)enumValue);
+                var selected = currentEnabledChatTypesPreset.EnabledChatTypes.Contains((int)enumValue);
                 if (!ImGui.Checkbox(channel == "PvPTeam" ? "PvP Team" : SplitWords(channel), ref selected)) continue;
-                var inEnabled = currentConfiguration.EnabledChatTypes.Contains((int)enumValue);
+                var inEnabled = currentEnabledChatTypesPreset.EnabledChatTypes.Contains((int)enumValue);
                 if (inEnabled)
                 {
-                    currentConfiguration.EnabledChatTypes.Remove((int)enumValue);
+                    currentEnabledChatTypesPreset.EnabledChatTypes.Remove((int)enumValue);
                     Configuration.Save();
                 }
                 else
                 {
-                    currentConfiguration.EnabledChatTypes.Add((int)enumValue);
+                    currentEnabledChatTypesPreset.EnabledChatTypes.Add((int)enumValue);
                     Configuration.Save();
                 }
             }
