@@ -18,7 +18,7 @@ namespace TextToTalk.UI
 
         public override void Draw(ref bool visible)
         {
-            ImGui.SetNextWindowSize(new Vector2(520, 420));
+            ImGui.SetNextWindowSize(new Vector2(520, 480));
             ImGui.Begin("TextToTalk Configuration", ref visible, ImGuiWindowFlags.NoResize);
             {
                 if (ImGui.BeginTabBar("TextToTalk##tabbar"))
