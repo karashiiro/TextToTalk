@@ -165,6 +165,7 @@ namespace TextToTalk.UI
                 var newPreset = Configuration.NewChatTypesPreset();
                 var presetModificationWindow = GetWindow<PresetModificationWindow>();
                 presetModificationWindow.PresetId = newPreset.Id;
+                Configuration.SetCurrentEnabledChatTypesPreset(newPreset.Id);
                 OpenWindow<PresetModificationWindow>();
             }
 
