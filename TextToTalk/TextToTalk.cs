@@ -18,6 +18,12 @@ namespace TextToTalk
 {
     public class TextToTalk : IDalamudPlugin
     {
+#if DEBUG
+        private const bool InitiallyVisible = true;
+#else
+        private const bool InitiallyVisible = false;
+#endif
+
         private DalamudPluginInterface pluginInterface;
         private PluginConfiguration config;
         private WindowManager ui;
@@ -57,7 +63,7 @@ namespace TextToTalk
             this.ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
             this.ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
             this.ui.AddWindow<PresetModificationWindow>(initiallyVisible: false);
-            this.ui.AddWindow<ConfigurationWindow>(initiallyVisible: false);
+            this.ui.AddWindow<ConfigurationWindow>(InitiallyVisible);
 
             this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
             this.pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
@@ -66,6 +72,7 @@ namespace TextToTalk
 
             this.pluginInterface.Framework.OnUpdateEvent += PollTalkAddon;
             this.pluginInterface.Framework.OnUpdateEvent += CheckKeybindPressed;
+            this.pluginInterface.Framework.OnUpdateEvent += CheckPresetKeybindPressed;
 
             this.commandManager = new CommandManager(pi, this.serviceCollection);
             this.commandManager.AddCommandModule<MainCommandModule>();
@@ -90,6 +97,20 @@ namespace TextToTalk
             }
 
             this.keysDown = false;
+        }
+
+        private void CheckPresetKeybindPressed(Framework framework)
+        {
+            foreach (var preset in this.config.EnabledChatTypesPresets)
+            {
+                if (!preset.UseKeybind) continue;
+
+                if (this.pluginInterface.ClientState.KeyState[(byte)preset.ModifierKey] &&
+                    this.pluginInterface.ClientState.KeyState[(byte)preset.MajorKey])
+                {
+                    this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
+                }
+            }
         }
 
         private unsafe void PollTalkAddon(Framework framework)
