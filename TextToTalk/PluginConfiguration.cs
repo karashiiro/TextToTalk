@@ -52,7 +52,7 @@ namespace TextToTalk
         /// <summary>
         /// <c>true</c> if it is not the first time, <c>false</c> if the first time handler has run before. This was named horribly.
         /// </summary>
-        private bool FirstTime { get; set; }
+        public bool FirstTime { get; set; }
 
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
 
@@ -70,14 +70,14 @@ namespace TextToTalk
             ModifierKey = VirtualKey.Enum.VkControl;
             MajorKey = VirtualKey.Enum.VkN;
 
-            EnabledChatTypesPresets = new List<EnabledChatTypesPreset>();
-
             VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name;
         }
 
         public void Initialize(DalamudPluginInterface pi)
         {
             this.pluginInterface = pi;
+
+            EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
 
             if (!FirstTime)
             {
