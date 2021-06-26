@@ -25,6 +25,10 @@ namespace TextToTalk
         [Obsolete("Use EnabledChatTypesPresets.")]
         public bool EnableAllChatTypes { get; set; }
 
+        [Obsolete("Use EnabledChatTypesPresets.")]
+        // ReSharper disable once CollectionNeverUpdated.Global
+        public IList<int> EnabledChatTypes { get; set; }
+
         public bool MigratedTo1_5 { get; set; }
 
         public IList<Trigger> Bad { get; set; }
