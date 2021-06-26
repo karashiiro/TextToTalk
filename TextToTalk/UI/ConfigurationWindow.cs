@@ -67,7 +67,7 @@ namespace TextToTalk.UI
             var kItem2 = VirtualKey.EnumToIndex(Configuration.MajorKey) - 3;
             if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
             {
-                Configuration.MajorKey = VirtualKey.IndexToEnum(kItem2) + 3;
+                Configuration.MajorKey = VirtualKey.IndexToEnum(kItem2 + 3);
                 Configuration.Save();
             }
             ImGui.PopItemWidth();

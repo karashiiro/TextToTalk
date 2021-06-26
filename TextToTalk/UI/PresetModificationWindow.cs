@@ -42,7 +42,7 @@ namespace TextToTalk.UI
                 var kItem2 = VirtualKey.EnumToIndex(preset.MajorKey) - 3;
                 if (ImGui.Combo("Preset Enable Keybind##PresetKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
                 {
-                    preset.MajorKey = VirtualKey.IndexToEnum(kItem2) + 3;
+                    preset.MajorKey = VirtualKey.IndexToEnum(kItem2 + 3);
                     Configuration.Save();
                 }
                 ImGui.PopItemWidth();
