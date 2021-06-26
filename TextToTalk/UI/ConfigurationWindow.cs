@@ -163,8 +163,6 @@ namespace TextToTalk.UI
             if (ImGui.Button("New preset##TTT2"))
             {
                 var newPreset = Configuration.NewChatTypesPreset();
-                var presetModificationWindow = GetWindow<PresetModificationWindow>();
-                presetModificationWindow.PresetId = newPreset.Id;
                 Configuration.SetCurrentEnabledChatTypesPreset(newPreset.Id);
                 OpenWindow<PresetModificationWindow>();
             }
@@ -173,8 +171,6 @@ namespace TextToTalk.UI
 
             if (ImGui.Button("Edit##TTT3"))
             {
-                var presetModificationWindow = GetWindow<PresetModificationWindow>();
-                presetModificationWindow.PresetId = currentConfiguration.Id;
                 OpenWindow<PresetModificationWindow>();
             }
 

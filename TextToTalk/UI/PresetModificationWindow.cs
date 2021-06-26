@@ -9,13 +9,11 @@ namespace TextToTalk.UI
     {
         public PluginConfiguration Configuration { get; set; }
 
-        public int PresetId { get; set; }
-
         public override void Draw(ref bool visible)
         {
             ImGui.Begin("Preset##TTT5", ref visible, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize);
             {
-                var preset = Configuration.EnabledChatTypesPresets.FirstOrDefault(p => p.Id == PresetId);
+                var preset = Configuration.GetCurrentEnabledChatTypesPreset();
 
                 var presetName = preset.Name;
                 if (ImGui.InputText("Name##TTT4", ref presetName, 200))
