@@ -11,5 +11,11 @@ namespace TextToTalk
         public IList<int> EnabledChatTypes { get; set; }
 
         public string Name { get; set; }
+
+        public bool UseKeybind { get; set; }
+
+        public VirtualKey.Enum ModifierKey { get; set; }
+
+        public VirtualKey.Enum MajorKey { get; set; }
     }
 }
