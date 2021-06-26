@@ -108,7 +108,7 @@ namespace TextToTalk
 #pragma warning disable CS1062 // The best overloaded Add method for the collection initializer element is obsolete
 #pragma warning disable 618
                     EnableAllChatTypes = EnableAllChatTypes,
-                    EnabledChatTypes = EnabledChatTypes,
+                    EnabledChatTypes = EnabledChatTypes.ToList(),
 #pragma warning restore 618
 #pragma warning restore CS1062 // The best overloaded Add method for the collection initializer element is obsolete
                     Name = DefaultEnabledChatTypesPreset,
@@ -117,7 +117,7 @@ namespace TextToTalk
                 MigratedTo1_5 = true;
             }
 
-            this.pluginInterface.SavePluginConfig(this);
+            Save();
         }
 
         public void Save()
