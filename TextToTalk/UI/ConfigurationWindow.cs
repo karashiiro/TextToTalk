@@ -101,7 +101,7 @@ namespace TextToTalk.UI
 
                 if (ImGui.Button("New preset##TTTVoice2"))
                 {
-                    var newPreset = Configuration.NewChatTypesPreset();
+                    var newPreset = Configuration.NewVoicePreset();
                     Configuration.SetCurrentVoicePreset(newPreset.Id);
                 }
 
