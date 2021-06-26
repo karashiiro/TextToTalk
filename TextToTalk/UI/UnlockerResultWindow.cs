@@ -9,8 +9,9 @@ namespace TextToTalk.UI
         public string Text { get; set; }
 
         public override void Draw(ref bool visible)
-        {;
-            ImGui.Begin("VoiceUnlocker Result", ref visible, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize);
+        {
+            ImGui.SetNextWindowSize(new Vector2(320, 90));
+            ImGui.Begin("VoiceUnlocker Result", ref visible, ImGuiWindowFlags.NoResize);
             {
                 ImGui.TextWrapped(Text);
             }
