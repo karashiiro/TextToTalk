@@ -95,6 +95,9 @@ namespace TextToTalk
                         (int) AdditionalChatTypes.Enum.BeneficialEffectOnOtherPlayer,
                     },
                     Name = DefaultEnabledChatTypesPreset,
+                    UseKeybind = false,
+                    ModifierKey = VirtualKey.Enum.VkShift,
+                    MajorKey = VirtualKey.Enum.Vk0,
                 });
 
                 FirstTime = true;
@@ -116,7 +119,6 @@ namespace TextToTalk
                     UseKeybind = false,
                     ModifierKey = VirtualKey.Enum.VkShift,
                     MajorKey = VirtualKey.Enum.Vk0,
-
                 });
 
                 MigratedTo1_5 = true;
