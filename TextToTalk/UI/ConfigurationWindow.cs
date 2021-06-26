@@ -160,7 +160,7 @@ namespace TextToTalk.UI
                 Configuration.Save();
             }
 
-            if (ImGui.Button("New preset#TTT2"))
+            if (ImGui.Button("New preset##TTT2"))
             {
                 var newPreset = Configuration.NewChatTypesPreset();
                 var presetModificationWindow = GetWindow<PresetModificationWindow>();
@@ -170,17 +170,16 @@ namespace TextToTalk.UI
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Edit#TTT3"))
+            if (ImGui.Button("Edit##TTT3"))
             {
                 var presetModificationWindow = GetWindow<PresetModificationWindow>();
                 presetModificationWindow.PresetId = currentConfiguration.Id;
                 OpenWindow<PresetModificationWindow>();
             }
 
-            ImGui.SameLine();
-
-            if (Configuration.EnabledChatTypesPresets.Count > 1 && ImGui.Button("Delete#TTT4"))
+            if (Configuration.EnabledChatTypesPresets.Count > 1 && ImGui.Button("Delete##TTT4"))
             {
+                ImGui.SameLine();
                 var otherPreset = Configuration.EnabledChatTypesPresets.First(p => p.Id != currentConfiguration.Id);
                 Configuration.SetCurrentEnabledChatTypesPreset(otherPreset.Id);
                 Configuration.EnabledChatTypesPresets.Remove(currentConfiguration);
