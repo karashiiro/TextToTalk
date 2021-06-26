@@ -177,12 +177,15 @@ namespace TextToTalk.UI
                 OpenWindow<PresetModificationWindow>();
             }
 
-            if (Configuration.EnabledChatTypesPresets.Count > 1 && ImGui.Button("Delete##TTT4"))
+            if (Configuration.EnabledChatTypesPresets.Count > 1)
             {
                 ImGui.SameLine();
-                var otherPreset = Configuration.EnabledChatTypesPresets.First(p => p.Id != currentConfiguration.Id);
-                Configuration.SetCurrentEnabledChatTypesPreset(otherPreset.Id);
-                Configuration.EnabledChatTypesPresets.Remove(currentConfiguration);
+                if (ImGui.Button("Delete##TTT4"))
+                {
+                    var otherPreset = Configuration.EnabledChatTypesPresets.First(p => p.Id != currentConfiguration.Id);
+                    Configuration.SetCurrentEnabledChatTypesPreset(otherPreset.Id);
+                    Configuration.EnabledChatTypesPresets.Remove(currentConfiguration);
+                }
             }
 
             ImGui.Spacing();
