@@ -139,6 +139,9 @@ namespace TextToTalk
                 Id = highestId + 1,
                 EnabledChatTypes = new List<int>(),
                 Name = "New preset",
+                UseKeybind = false,
+                ModifierKey = VirtualKey.Enum.VkShift,
+                MajorKey = VirtualKey.Enum.Vk0,
             };
 
             EnabledChatTypesPresets.Add(preset);

@@ -92,14 +92,7 @@ namespace TextToTalk
 
         public static int EnumToIndex(Enum value)
         {
-            try
-            {
-                return Array.IndexOf(Names, value.ToString().Substring(2));
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return 0;
-            }
+            return Array.IndexOf(Names, value.ToString().Substring(2));
         }
 
         public static Enum IndexToEnum(int i)

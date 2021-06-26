@@ -101,10 +101,8 @@ namespace TextToTalk
 
         private void CheckPresetKeybindPressed(Framework framework)
         {
-            foreach (var preset in this.config.EnabledChatTypesPresets)
+            foreach (var preset in this.config.EnabledChatTypesPresets.Where(p => p.UseKeybind))
             {
-                if (!preset.UseKeybind) continue;
-
                 if (this.pluginInterface.ClientState.KeyState[(byte)preset.ModifierKey] &&
                     this.pluginInterface.ClientState.KeyState[(byte)preset.MajorKey])
                 {
