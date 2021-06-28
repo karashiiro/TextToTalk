@@ -55,6 +55,8 @@ namespace TextToTalk
 
         public bool NameNpcWithSay { get; set; } = true;
 
+        public bool EnableNameWithSay { get; set; } = true;
+
         public bool DisallowMultipleSay { get; set; }
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;

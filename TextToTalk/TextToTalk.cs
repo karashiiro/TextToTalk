@@ -241,12 +241,12 @@ namespace TextToTalk
 
         private bool ShouldSaySender()
         {
-            return this.config.NameNpcWithSay;
+            return this.config.EnableNameWithSay && this.config.NameNpcWithSay;
         }
 
         private bool ShouldSaySender(XivChatType type)
         {
-            return this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue;
+            return this.config.EnableNameWithSay && (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue);
         }
 
         #region IDisposable Support

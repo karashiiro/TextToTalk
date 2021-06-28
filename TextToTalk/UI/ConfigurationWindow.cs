@@ -72,7 +72,7 @@ namespace TextToTalk.UI
             }
             ImGui.PopItemWidth();
 
-            ImGui.Text("");
+            ImGui.Spacing();
             var useWebsocket = Configuration.UseWebsocket;
             if (ImGui.Checkbox("Use WebSocket", ref useWebsocket))
             {
@@ -151,7 +151,7 @@ namespace TextToTalk.UI
                 }
             }
 
-            ImGui.Text("");
+            ImGui.Spacing();
             var readFromQuestTalkAddon = Configuration.ReadFromQuestTalkAddon;
             if (ImGui.Checkbox("Read NPC dialogue from the dialogue window", ref readFromQuestTalkAddon))
             {
@@ -159,19 +159,31 @@ namespace TextToTalk.UI
                 Configuration.Save();
             }
 
-            ImGui.Text("");
-            var nameNpcWithSay = Configuration.NameNpcWithSay;
-            if (ImGui.Checkbox("Include \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
+            ImGui.Spacing();
+            var enableNameWithSay = Configuration.EnableNameWithSay;
+            if (ImGui.Checkbox("Enable \"X says:\" when people speak", ref enableNameWithSay))
             {
-                Configuration.NameNpcWithSay = nameNpcWithSay;
+                Configuration.EnableNameWithSay = enableNameWithSay;
                 Configuration.Save();
             }
 
-            var disallowMultipleSay = Configuration.DisallowMultipleSay;
-            if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
+            if (enableNameWithSay)
             {
-                Configuration.DisallowMultipleSay = disallowMultipleSay;
-                Configuration.Save();
+                ImGui.Spacing();
+                ImGui.Indent();
+                var nameNpcWithSay = Configuration.NameNpcWithSay;
+                if (ImGui.Checkbox("Also say \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
+                {
+                    Configuration.NameNpcWithSay = nameNpcWithSay;
+                    Configuration.Save();
+                }
+
+                var disallowMultipleSay = Configuration.DisallowMultipleSay;
+                if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
+                {
+                    Configuration.DisallowMultipleSay = disallowMultipleSay;
+                    Configuration.Save();
+                }
             }
         }
 
