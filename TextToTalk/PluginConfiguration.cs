@@ -41,10 +41,10 @@ namespace TextToTalk
 
         [Obsolete("Use VoicePresets.")]
         public int Rate { get; set; }
-        
+
         [Obsolete("Use VoicePresets.")]
         public int Volume { get; set; }
-        
+
         [Obsolete("Use VoicePresets.")]
         public string VoiceName { get; set; }
 
@@ -60,6 +60,12 @@ namespace TextToTalk
         public bool DisallowMultipleSay { get; set; }
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;
+
+        public bool UseGenderedVoicePresets { get; set; }
+
+        public int MaleVoicePresetId { get; set; }
+
+        public int FemaleVoicePresetId { get; set; }
 
         /// <summary>
         /// <c>true</c> if it is not the first time, <c>false</c> if the first time handler has run before. This was named horribly.
@@ -165,6 +171,16 @@ namespace TextToTalk
         public VoicePreset GetCurrentVoicePreset()
         {
             return VoicePresets.First(p => p.Id == CurrentVoicePresetId);
+        }
+
+        public VoicePreset GetCurrentMaleVoicePreset()
+        {
+            return VoicePresets.FirstOrDefault(p => p.Id == MaleVoicePresetId);
+        }
+
+        public VoicePreset GetCurrentFemaleVoicePreset()
+        {
+            return VoicePresets.FirstOrDefault(p => p.Id == FemaleVoicePresetId);
         }
 
         public VoicePreset NewVoicePreset()

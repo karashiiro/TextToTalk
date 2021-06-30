@@ -92,6 +92,7 @@ namespace TextToTalk.UI
 
                 var presets = Configuration.VoicePresets.ToList();
                 presets.Sort((a, b) => a.Id - b.Id);
+
                 var presetIndex = presets.IndexOf(currentVoicePreset);
                 if (ImGui.Combo("Preset##TTTVoice1", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
                 {
@@ -142,6 +143,32 @@ namespace TextToTalk.UI
                 {
                     currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
                     Configuration.Save();
+                }
+
+                ImGui.Spacing();
+
+                var useGenderedVoicePresets = Configuration.UseGenderedVoicePresets;
+                if (ImGui.Checkbox("Use gendered voice presets", ref useGenderedVoicePresets))
+                {
+                    Configuration.UseGenderedVoicePresets = useGenderedVoicePresets;
+                    Configuration.Save();
+                }
+
+                if (useGenderedVoicePresets)
+                {
+                    var malePresetIndex = presets.IndexOf(currentVoicePreset);
+                    if (ImGui.Combo("Male preset##TTTVoice4", ref malePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                    {
+                        Configuration.MaleVoicePresetId = presets[malePresetIndex].Id;
+                        Configuration.Save();
+                    }
+                    
+                    var femalePresetIndex = presets.IndexOf(currentVoicePreset);
+                    if (ImGui.Combo("Female preset##TTTVoice5", ref femalePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                    {
+                        Configuration.FemaleVoicePresetId = presets[femalePresetIndex].Id;
+                        Configuration.Save();
+                    }
                 }
 
                 ImGui.Spacing();

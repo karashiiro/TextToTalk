@@ -1,6 +1,7 @@
 ﻿using Dalamud.CrystalTower.Commands;
 using Dalamud.CrystalTower.DependencyInjection;
 using Dalamud.CrystalTower.UI;
+using Dalamud.Game.ClientState.Actors.Types;
 using Dalamud.Game.Internal;
 using Dalamud.Game.Internal.Gui.Addon;
 using Dalamud.Game.Text;
@@ -9,7 +10,9 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Speech.Synthesis;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI;
@@ -144,7 +147,9 @@ namespace TextToTalk
                 }
             }
 
-            Say(text);
+            var speaker = this.pluginInterface.ClientState.Targets.CurrentTarget;
+
+            Say(speaker, text);
         }
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
@@ -184,10 +189,14 @@ namespace TextToTalk
                 .Any(t => t.Match(textValue));
             if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
-            Say(textValue);
+            var playerPayload = sender?.Payloads.FirstOrDefault(payload => payload is PlayerPayload) as PlayerPayload;
+            var speaker = this.pluginInterface.ClientState.Actors
+                .FirstOrDefault(a => a.Name == playerPayload?.DisplayedName);
+
+            Say(speaker, textValue);
         }
 
-        private void Say(string textValue)
+        private void Say(Actor speaker, string textValue)
         {
             var cleanText = TalkUtils.StripSSMLTokens(textValue);
 
@@ -198,18 +207,33 @@ namespace TextToTalk
                 PluginLog.Log("Sent message {0} on WebSocket server.", textValue);
 #endif
             }
+            else if (speaker != null && this.config.UseGenderedVoicePresets)
+            {
+                var actorStructProp = typeof(Actor)
+                    .GetProperty("ActorStruct", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (actorStructProp == null)
+                {
+                    PluginLog.Warning("Failed to retrieve actor struct accessor.");
+                    return;
+                }
+
+                var actorStruct = (Dalamud.Game.ClientState.Structs.Actor)actorStructProp.GetValue(speaker);
+                var actorGender = (Gender)actorStruct.Customize[1];
+
+                var voicePreset = actorGender switch
+                {
+                    Gender.Male => this.config.GetCurrentMaleVoicePreset(),
+                    Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
+                    _ => this.config.GetCurrentVoicePreset(),
+                };
+
+                this.speechSynthesizer.UseVoicePreset(voicePreset);
+                this.speechSynthesizer.SpeakAsync(cleanText);
+            }
             else
             {
                 var voicePreset = this.config.GetCurrentVoicePreset();
-
-                this.speechSynthesizer.Rate = voicePreset.Rate;
-                this.speechSynthesizer.Volume = voicePreset.Volume;
-
-                if (this.speechSynthesizer.Voice.Name != voicePreset.VoiceName)
-                {
-                    this.speechSynthesizer.SelectVoice(voicePreset.VoiceName);
-                }
-
+                this.speechSynthesizer.UseVoicePreset(voicePreset);
                 this.speechSynthesizer.SpeakAsync(cleanText);
             }
         }
