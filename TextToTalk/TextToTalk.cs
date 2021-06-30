@@ -147,7 +147,8 @@ namespace TextToTalk
                 }
             }
 
-            var speaker = this.pluginInterface.ClientState.Targets.CurrentTarget;
+            var speaker = this.pluginInterface.ClientState.Actors
+                .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
 
             Say(speaker, text);
         }
@@ -169,6 +170,7 @@ namespace TextToTalk
                         {
                             SetLastQuestText(textValue);
                         }
+
                         textValue = $"{sender.TextValue} says {textValue}";
                         SetLastSpeaker(sender.TextValue);
                     }
