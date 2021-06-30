@@ -134,10 +134,6 @@ namespace TextToTalk
             if (talkAddonText.Text == "" || IsDuplicateQuestText(talkAddonText.Text)) return;
             SetLastQuestText(text);
 
-#if DEBUG
-            PluginLog.Log($"NPC text found: \"{text}\"");
-#endif
-
             if (talkAddonText.Speaker != "" && ShouldSaySender())
             {
                 if (!this.config.DisallowMultipleSay || !IsSameSpeaker(talkAddonText.Speaker))
