@@ -187,9 +187,9 @@ namespace TextToTalk
                 .Any(t => t.Match(textValue));
             if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
-            var playerPayload = sender?.Payloads.FirstOrDefault(payload => payload is PlayerPayload) as PlayerPayload;
+            var senderText = sender?.TextValue; // Can't access in lambda
             var speaker = this.pluginInterface.ClientState.Actors
-                .FirstOrDefault(a => a.Name == playerPayload?.DisplayedName);
+                .FirstOrDefault(a => a.Name == senderText);
 
             Say(speaker, textValue);
         }
