@@ -160,14 +160,17 @@ namespace TextToTalk.UI
 
                     if (useGenderedVoicePresets)
                     {
-                        var malePresetIndex = presets.IndexOf(currentVoicePreset);
+                        var currentMaleVoicePreset = Configuration.GetCurrentMaleVoicePreset();
+                        var currentFemaleVoicePreset = Configuration.GetCurrentFemaleVoicePreset();
+
+                        var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
                         if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
                         {
                             Configuration.MaleVoicePresetId = presets[malePresetIndex].Id;
                             Configuration.Save();
                         }
 
-                        var femalePresetIndex = presets.IndexOf(currentVoicePreset);
+                        var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
                         if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
                         {
                             Configuration.FemaleVoicePresetId = presets[femalePresetIndex].Id;
