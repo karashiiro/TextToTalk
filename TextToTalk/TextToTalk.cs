@@ -160,6 +160,10 @@ namespace TextToTalk
             var textValue = message.TextValue;
             if (IsDuplicateQuestText(textValue)) return;
 
+#if DEBUG
+            PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
+#endif
+
             if (sender != null && sender.TextValue != string.Empty)
             {
                 if (ShouldSaySender(type))
@@ -176,10 +180,6 @@ namespace TextToTalk
                     }
                 }
             }
-
-#if DEBUG
-            PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
-#endif
 
             if (this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
 
