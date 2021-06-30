@@ -1,14 +1,17 @@
 ﻿using Dalamud.CrystalTower.Commands;
 using Dalamud.CrystalTower.DependencyInjection;
 using Dalamud.CrystalTower.UI;
+using Dalamud.Game.ClientState.Actors.Types;
 using Dalamud.Game.Internal;
 using Dalamud.Game.Internal.Gui.Addon;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Speech.Synthesis;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
@@ -131,10 +134,6 @@ namespace TextToTalk
             if (talkAddonText.Text == "" || IsDuplicateQuestText(talkAddonText.Text)) return;
             SetLastQuestText(text);
 
-#if DEBUG
-            PluginLog.Log($"NPC text found: \"{text}\"");
-#endif
-
             if (talkAddonText.Speaker != "" && ShouldSaySender())
             {
                 if (!this.config.DisallowMultipleSay || !IsSameSpeaker(talkAddonText.Speaker))
@@ -144,7 +143,10 @@ namespace TextToTalk
                 }
             }
 
-            Say(text);
+            var speaker = this.pluginInterface.ClientState.Actors
+                .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
+
+            Say(speaker, text);
         }
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
@@ -153,6 +155,10 @@ namespace TextToTalk
 
             var textValue = message.TextValue;
             if (IsDuplicateQuestText(textValue)) return;
+
+#if DEBUG
+            PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
+#endif
 
             if (sender != null && sender.TextValue != string.Empty)
             {
@@ -164,15 +170,12 @@ namespace TextToTalk
                         {
                             SetLastQuestText(textValue);
                         }
+
                         textValue = $"{sender.TextValue} says {textValue}";
                         SetLastSpeaker(sender.TextValue);
                     }
                 }
             }
-
-#if DEBUG
-            PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
-#endif
 
             if (this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
 
@@ -184,34 +187,67 @@ namespace TextToTalk
                 .Any(t => t.Match(textValue));
             if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
-            Say(textValue);
+            var senderText = sender?.TextValue; // Can't access in lambda
+            var speaker = this.pluginInterface.ClientState.Actors
+                .FirstOrDefault(a => a.Name == senderText);
+
+            Say(speaker, textValue);
         }
 
-        private void Say(string textValue)
+        private void Say(Actor speaker, string textValue)
         {
             var cleanText = TalkUtils.StripSSMLTokens(textValue);
 
             if (this.config.UseWebsocket)
-            {
-                this.wsServer.Broadcast(cleanText);
-#if DEBUG
-                PluginLog.Log("Sent message {0} on WebSocket server.", textValue);
-#endif
-            }
+                SayWebSocket(speaker, cleanText);
+            else if (speaker != null && this.config.UseGenderedVoicePresets)
+                SayGendered(speaker, cleanText);
             else
+                SayNotGendered(cleanText);
+        }
+
+        private void SayWebSocket(Actor speaker, string cleanText)
+        {
+            this.wsServer.Broadcast(GetActorGender(speaker), cleanText);
+#if DEBUG
+            PluginLog.Log("Sent message {0} on WebSocket server.", cleanText);
+#endif
+        }
+
+        private void SayGendered(Actor speaker, string cleanText)
+        {
+            var voicePreset = GetActorGender(speaker) switch
             {
-                var voicePreset = this.config.GetCurrentVoicePreset();
+                Gender.Male => this.config.GetCurrentMaleVoicePreset(),
+                Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
+                _ => this.config.GetCurrentVoicePreset(),
+            };
 
-                this.speechSynthesizer.Rate = voicePreset.Rate;
-                this.speechSynthesizer.Volume = voicePreset.Volume;
+            this.speechSynthesizer.UseVoicePreset(voicePreset);
+            this.speechSynthesizer.SpeakAsync(cleanText);
+        }
 
-                if (this.speechSynthesizer.Voice.Name != voicePreset.VoiceName)
-                {
-                    this.speechSynthesizer.SelectVoice(voicePreset.VoiceName);
-                }
+        private void SayNotGendered(string cleanText)
+        {
+            var voicePreset = this.config.GetCurrentVoicePreset();
+            this.speechSynthesizer.UseVoicePreset(voicePreset);
+            this.speechSynthesizer.SpeakAsync(cleanText);
+        }
 
-                this.speechSynthesizer.SpeakAsync(cleanText);
+        private static Gender GetActorGender(Actor actor)
+        {
+            var actorStructProp = typeof(Actor)
+                .GetProperty("ActorStruct", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (actorStructProp == null)
+            {
+                PluginLog.Warning("Failed to retrieve actor struct accessor.");
+                return Gender.None;
             }
+
+            var actorStruct = (Dalamud.Game.ClientState.Structs.Actor)actorStructProp.GetValue(actor);
+            var actorGender = (Gender)actorStruct.Customize[1];
+
+            return actorGender;
         }
 
         private void OpenConfigUi(object sender, EventArgs args)

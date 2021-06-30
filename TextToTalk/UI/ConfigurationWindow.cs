@@ -49,140 +49,177 @@ namespace TextToTalk.UI
 
         private void DrawSynthesizerSettings()
         {
-            var useKeybind = Configuration.UseKeybind;
-            if (ImGui.Checkbox("Enable Keybind", ref useKeybind))
+            if (ImGui.CollapsingHeader("Keybinds##TextToTalkKeybind1"))
             {
-                Configuration.UseKeybind = useKeybind;
-                Configuration.Save();
-            }
-
-            ImGui.PushItemWidth(100f);
-            var kItem1 = VirtualKey.EnumToIndex(Configuration.ModifierKey);
-            if (ImGui.Combo("##TextToTalkKeybind1", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
-            {
-                Configuration.ModifierKey = VirtualKey.IndexToEnum(kItem1);
-                Configuration.Save();
-            }
-            ImGui.SameLine();
-            var kItem2 = VirtualKey.EnumToIndex(Configuration.MajorKey) - 3;
-            if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind2", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
-            {
-                Configuration.MajorKey = VirtualKey.IndexToEnum(kItem2 + 3);
-                Configuration.Save();
-            }
-            ImGui.PopItemWidth();
-
-            ImGui.Spacing();
-            var useWebsocket = Configuration.UseWebsocket;
-            if (ImGui.Checkbox("Use WebSocket", ref useWebsocket))
-            {
-                Configuration.UseWebsocket = useWebsocket;
-                Configuration.Save();
-
-                if (Configuration.UseWebsocket)
-                    WebSocketServer.Start();
-                else
-                    WebSocketServer.Stop();
-            }
-            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(WebSocketServer.Active ? "Started" : "Will start")} on ws://localhost:{WebSocketServer.Port}");
-
-            if (!useWebsocket)
-            {
-                var currentVoicePreset = Configuration.GetCurrentVoicePreset();
-
-                var presets = Configuration.VoicePresets.ToList();
-                presets.Sort((a, b) => a.Id - b.Id);
-                var presetIndex = presets.IndexOf(currentVoicePreset);
-                if (ImGui.Combo("Preset##TTTVoice1", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                var useKeybind = Configuration.UseKeybind;
+                if (ImGui.Checkbox("Enable Keybind##TextToTalkKeybind2", ref useKeybind))
                 {
-                    Configuration.CurrentVoicePresetId = presets[presetIndex].Id;
+                    Configuration.UseKeybind = useKeybind;
                     Configuration.Save();
                 }
 
-                if (ImGui.Button("New preset##TTTVoice2"))
+                ImGui.PushItemWidth(100f);
+                var kItem1 = VirtualKey.EnumToIndex(Configuration.ModifierKey);
+                if (ImGui.Combo("##TextToTalkKeybind3", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
                 {
-                    var newPreset = Configuration.NewVoicePreset();
-                    Configuration.SetCurrentVoicePreset(newPreset.Id);
+                    Configuration.ModifierKey = VirtualKey.IndexToEnum(kItem1);
+                    Configuration.Save();
                 }
-
-                if (Configuration.EnabledChatTypesPresets.Count > 1)
+                ImGui.SameLine();
+                var kItem2 = VirtualKey.EnumToIndex(Configuration.MajorKey) - 3;
+                if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind4", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
                 {
-                    ImGui.SameLine();
-                    if (ImGui.Button("Delete##TTTVoice3"))
+                    Configuration.MajorKey = VirtualKey.IndexToEnum(kItem2 + 3);
+                    Configuration.Save();
+                }
+                ImGui.PopItemWidth();
+            }
+
+            if (ImGui.CollapsingHeader("Voices##TTTVoice1", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                var useWebsocket = Configuration.UseWebsocket;
+                if (ImGui.Checkbox("Use WebSocket##TTTVoice2", ref useWebsocket))
+                {
+                    Configuration.UseWebsocket = useWebsocket;
+                    Configuration.Save();
+
+                    if (Configuration.UseWebsocket)
+                        WebSocketServer.Start();
+                    else
+                        WebSocketServer.Stop();
+                }
+                ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(WebSocketServer.Active ? "Started" : "Will start")} on ws://localhost:{WebSocketServer.Port}");
+
+                if (!useWebsocket)
+                {
+                    var currentVoicePreset = Configuration.GetCurrentVoicePreset();
+
+                    var presets = Configuration.VoicePresets.ToList();
+                    presets.Sort((a, b) => a.Id - b.Id);
+
+                    var presetIndex = presets.IndexOf(currentVoicePreset);
+                    if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
                     {
-                        var otherPreset = Configuration.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
-                        Configuration.SetCurrentVoicePreset(otherPreset.Id);
-                        Configuration.VoicePresets.Remove(currentVoicePreset);
+                        Configuration.CurrentVoicePresetId = presets[presetIndex].Id;
+                        Configuration.Save();
+                    }
+
+                    if (ImGui.Button("New preset##TTTVoice4"))
+                    {
+                        var newPreset = Configuration.NewVoicePreset();
+                        Configuration.SetCurrentVoicePreset(newPreset.Id);
+                    }
+
+                    if (Configuration.EnabledChatTypesPresets.Count > 1)
+                    {
+                        ImGui.SameLine();
+                        if (ImGui.Button("Delete##TTTVoice5"))
+                        {
+                            var otherPreset = Configuration.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+                            Configuration.SetCurrentVoicePreset(otherPreset.Id);
+                            Configuration.VoicePresets.Remove(currentVoicePreset);
+                        }
+                    }
+
+                    var rate = currentVoicePreset.Rate;
+                    if (ImGui.SliderInt("Rate##TTTVoice6", ref rate, -10, 10))
+                    {
+                        currentVoicePreset.Rate = rate;
+                        Configuration.Save();
+                    }
+
+                    var volume = currentVoicePreset.Volume;
+                    if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 100))
+                    {
+                        currentVoicePreset.Volume = volume;
+                        Configuration.Save();
+                    }
+
+                    var voiceName = currentVoicePreset.VoiceName;
+                    var voices = Synthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
+                    var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
+                    if (ImGui.Combo("Voice##TTTVoice8",
+                        ref voiceIndex,
+                        voices
+                            .Select(iv => $"{iv?.VoiceInfo?.Name} ({iv?.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
+                            .ToArray(),
+                        voices.Count))
+                    {
+                        currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
+                        Configuration.Save();
+                    }
+
+                    ImGui.Spacing();
+
+                    var useGenderedVoicePresets = Configuration.UseGenderedVoicePresets;
+                    if (ImGui.Checkbox("Use gendered voice presets##TTTVoice9", ref useGenderedVoicePresets))
+                    {
+                        Configuration.UseGenderedVoicePresets = useGenderedVoicePresets;
+                        Configuration.Save();
+                    }
+
+                    if (useGenderedVoicePresets)
+                    {
+                        var currentMaleVoicePreset = Configuration.GetCurrentMaleVoicePreset();
+                        var currentFemaleVoicePreset = Configuration.GetCurrentFemaleVoicePreset();
+
+                        var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
+                        if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                        {
+                            Configuration.MaleVoicePresetId = presets[malePresetIndex].Id;
+                            Configuration.Save();
+                        }
+
+                        var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
+                        if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                        {
+                            Configuration.FemaleVoicePresetId = presets[femalePresetIndex].Id;
+                            Configuration.Save();
+                        }
+                    }
+
+                    ImGui.Spacing();
+                    if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
+                    {
+                        OpenWindow<VoiceUnlockerWindow>();
                     }
                 }
+            }
 
-                var rate = currentVoicePreset.Rate;
-                if (ImGui.SliderInt("Rate", ref rate, -10, 10))
+            if (ImGui.CollapsingHeader("Dialogue"))
+            {
+                var readFromQuestTalkAddon = Configuration.ReadFromQuestTalkAddon;
+                if (ImGui.Checkbox("Read NPC dialogue from the dialogue window", ref readFromQuestTalkAddon))
                 {
-                    currentVoicePreset.Rate = rate;
-                    Configuration.Save();
-                }
-
-                var volume = currentVoicePreset.Volume;
-                if (ImGui.SliderInt("Volume", ref volume, 0, 100))
-                {
-                    currentVoicePreset.Volume = volume;
-                    Configuration.Save();
-                }
-
-                var voiceName = currentVoicePreset.VoiceName;
-                var voices = Synthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
-                var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
-                if (ImGui.Combo("Voice",
-                    ref voiceIndex,
-                    voices
-                        .Select(iv => $"{iv?.VoiceInfo?.Name} ({iv?.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
-                        .ToArray(),
-                    voices.Count))
-                {
-                    currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
+                    Configuration.ReadFromQuestTalkAddon = readFromQuestTalkAddon;
                     Configuration.Save();
                 }
 
                 ImGui.Spacing();
-                if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
+                var enableNameWithSay = Configuration.EnableNameWithSay;
+                if (ImGui.Checkbox("Enable \"X says:\" when people speak", ref enableNameWithSay))
                 {
-                    OpenWindow<VoiceUnlockerWindow>();
-                }
-            }
-
-            ImGui.Spacing();
-            var readFromQuestTalkAddon = Configuration.ReadFromQuestTalkAddon;
-            if (ImGui.Checkbox("Read NPC dialogue from the dialogue window", ref readFromQuestTalkAddon))
-            {
-                Configuration.ReadFromQuestTalkAddon = readFromQuestTalkAddon;
-                Configuration.Save();
-            }
-
-            ImGui.Spacing();
-            var enableNameWithSay = Configuration.EnableNameWithSay;
-            if (ImGui.Checkbox("Enable \"X says:\" when people speak", ref enableNameWithSay))
-            {
-                Configuration.EnableNameWithSay = enableNameWithSay;
-                Configuration.Save();
-            }
-
-            if (enableNameWithSay)
-            {
-                ImGui.Spacing();
-                ImGui.Indent();
-                var nameNpcWithSay = Configuration.NameNpcWithSay;
-                if (ImGui.Checkbox("Also say \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
-                {
-                    Configuration.NameNpcWithSay = nameNpcWithSay;
+                    Configuration.EnableNameWithSay = enableNameWithSay;
                     Configuration.Save();
                 }
 
-                var disallowMultipleSay = Configuration.DisallowMultipleSay;
-                if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
+                if (enableNameWithSay)
                 {
-                    Configuration.DisallowMultipleSay = disallowMultipleSay;
-                    Configuration.Save();
+                    ImGui.Spacing();
+                    ImGui.Indent();
+                    var nameNpcWithSay = Configuration.NameNpcWithSay;
+                    if (ImGui.Checkbox("Also say \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
+                    {
+                        Configuration.NameNpcWithSay = nameNpcWithSay;
+                        Configuration.Save();
+                    }
+
+                    var disallowMultipleSay = Configuration.DisallowMultipleSay;
+                    if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
+                    {
+                        Configuration.DisallowMultipleSay = disallowMultipleSay;
+                        Configuration.Save();
+                    }
                 }
             }
         }

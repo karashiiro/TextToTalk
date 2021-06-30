@@ -21,11 +21,11 @@ namespace TextToTalk
             this.server.AddWebSocketService("/Messages", () => this.behavior);
         }
 
-        public void Broadcast(string message)
+        public void Broadcast(Gender speakerGender, string message)
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(IpcMessageType.Say, message);
+            var ipcMessage = new IpcMessage(IpcMessageType.Say, message, speakerGender);
             this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -33,7 +33,7 @@ namespace TextToTalk
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty);
+            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, Gender.None);
             this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -73,8 +73,8 @@ namespace TextToTalk
                 base.OnClose(e);
 
                 var targetType = typeof(WebSocketBehavior);
-                var base_websocket = targetType.GetField("_websocket", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                base_websocket.SetValue(this, null);
+                var baseWebsocket = targetType.GetField("_websocket", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                baseWebsocket?.SetValue(this, null);
             }
         }
 
@@ -83,11 +83,13 @@ namespace TextToTalk
         {
             public string Type { get; set; }
             public string Payload { get; set; }
+            public sbyte SpeakerGender { get; set; }
 
-            public IpcMessage(IpcMessageType type, string payload)
+            public IpcMessage(IpcMessageType type, string payload, Gender speakerGender)
             {
                 Type = type.ToString();
                 Payload = payload;
+                SpeakerGender = (sbyte)speakerGender;
             }
         }
 
