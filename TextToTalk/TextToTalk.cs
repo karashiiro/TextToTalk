@@ -214,7 +214,7 @@ namespace TextToTalk
         {
             this.wsServer.Broadcast(GetActorGender(speaker), cleanText);
 #if DEBUG
-            PluginLog.Log("Sent message {0} on WebSocket server.", textValue);
+            PluginLog.Log("Sent message {0} on WebSocket server.", cleanText);
 #endif
         }
 
