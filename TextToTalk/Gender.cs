@@ -1,7 +1,8 @@
 ﻿namespace TextToTalk
 {
-    public enum Gender : byte
+    public enum Gender : sbyte
     {
+        None = -1,
         Male,
         Female,
     }

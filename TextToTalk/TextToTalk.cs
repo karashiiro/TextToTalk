@@ -203,41 +203,55 @@ namespace TextToTalk
             var cleanText = TalkUtils.StripSSMLTokens(textValue);
 
             if (this.config.UseWebsocket)
-            {
-                this.wsServer.Broadcast(cleanText);
-#if DEBUG
-                PluginLog.Log("Sent message {0} on WebSocket server.", textValue);
-#endif
-            }
+                SayWebSocket(speaker, cleanText);
             else if (speaker != null && this.config.UseGenderedVoicePresets)
-            {
-                var actorStructProp = typeof(Actor)
-                    .GetProperty("ActorStruct", BindingFlags.NonPublic | BindingFlags.Instance);
-                if (actorStructProp == null)
-                {
-                    PluginLog.Warning("Failed to retrieve actor struct accessor.");
-                    return;
-                }
-
-                var actorStruct = (Dalamud.Game.ClientState.Structs.Actor)actorStructProp.GetValue(speaker);
-                var actorGender = (Gender)actorStruct.Customize[1];
-
-                var voicePreset = actorGender switch
-                {
-                    Gender.Male => this.config.GetCurrentMaleVoicePreset(),
-                    Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
-                    _ => this.config.GetCurrentVoicePreset(),
-                };
-
-                this.speechSynthesizer.UseVoicePreset(voicePreset);
-                this.speechSynthesizer.SpeakAsync(cleanText);
-            }
+                SayGendered(speaker, cleanText);
             else
+                SayNotGendered(cleanText);
+        }
+
+        private void SayWebSocket(Actor speaker, string cleanText)
+        {
+            this.wsServer.Broadcast(GetActorGender(speaker), cleanText);
+#if DEBUG
+            PluginLog.Log("Sent message {0} on WebSocket server.", textValue);
+#endif
+        }
+
+        private void SayGendered(Actor speaker, string cleanText)
+        {
+            var voicePreset = GetActorGender(speaker) switch
             {
-                var voicePreset = this.config.GetCurrentVoicePreset();
-                this.speechSynthesizer.UseVoicePreset(voicePreset);
-                this.speechSynthesizer.SpeakAsync(cleanText);
+                Gender.Male => this.config.GetCurrentMaleVoicePreset(),
+                Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
+                _ => this.config.GetCurrentVoicePreset(),
+            };
+
+            this.speechSynthesizer.UseVoicePreset(voicePreset);
+            this.speechSynthesizer.SpeakAsync(cleanText);
+        }
+
+        private void SayNotGendered(string cleanText)
+        {
+            var voicePreset = this.config.GetCurrentVoicePreset();
+            this.speechSynthesizer.UseVoicePreset(voicePreset);
+            this.speechSynthesizer.SpeakAsync(cleanText);
+        }
+
+        private static Gender GetActorGender(Actor actor)
+        {
+            var actorStructProp = typeof(Actor)
+                .GetProperty("ActorStruct", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (actorStructProp == null)
+            {
+                PluginLog.Warning("Failed to retrieve actor struct accessor.");
+                return Gender.None;
             }
+
+            var actorStruct = (Dalamud.Game.ClientState.Structs.Actor)actorStructProp.GetValue(actor);
+            var actorGender = (Gender)actorStruct.Customize[1];
+
+            return actorGender;
         }
 
         private void OpenConfigUi(object sender, EventArgs args)
