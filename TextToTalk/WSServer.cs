@@ -1,21 +1,39 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Net;
 using System.Net.Sockets;
-using Newtonsoft.Json;
 using WebSocketSharp.Server;
 
 namespace TextToTalk
 {
     public class WsServer
     {
-        private readonly WebSocketServer server;
         private readonly ServerBehavior behavior;
 
-        public int Port { get; } = FreeTcpPort();
+        private WebSocketServer server;
+
+        private int port;
+        public int Port
+        {
+            get => port; private set => port = value switch
+            {
+                < IPEndPoint.MinPort or > IPEndPoint.MaxPort
+                    => throw new ArgumentOutOfRangeException($"Port must be at least {IPEndPoint.MinPort} and at most {IPEndPoint.MaxPort}."),
+                // Using the first free port in case of 0 is conventional
+                // and ensures that we know what port is ultimately used.
+                // We can't pass 0 to the server anyways, since it throws
+                // if the input is less than 1.
+                0 => FreeTcpPort(),
+                _ => value,
+            };
+        }
+
         public bool Active { get; private set; }
 
-        public WsServer()
+        public WsServer(int port)
         {
+            Port = port;
+
             this.server = new WebSocketServer($"ws://localhost:{Port}");
             this.behavior = new ServerBehavior();
             this.server.AddWebSocketService("/Messages", () => this.behavior);
@@ -51,6 +69,15 @@ namespace TextToTalk
             this.server.Stop();
         }
 
+        public void RestartWithPort(int newPort)
+        {
+            Port = newPort;
+            Stop();
+            this.server = new WebSocketServer($"ws://localhost:{Port}");
+            this.server.AddWebSocketService("/Messages", () => this.behavior);
+            Start();
+        }
+
         private static int FreeTcpPort()
         {
             var l = new TcpListener(IPAddress.Loopback, 0);
@@ -66,7 +93,7 @@ namespace TextToTalk
             {
                 Send(message);
             }
-            
+
             // Enable re-use of a websocket if the client disconnects
             protected override void OnClose(WebSocketSharp.CloseEventArgs e)
             {

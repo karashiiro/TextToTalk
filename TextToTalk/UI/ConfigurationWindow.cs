@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Speech.Synthesis;
 using System.Text;
+using Dalamud.Plugin;
 
 namespace TextToTalk.UI
 {
@@ -77,20 +78,55 @@ namespace TextToTalk.UI
 
             if (ImGui.CollapsingHeader("Voices##TTTVoice1", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                var useWebsocket = Configuration.UseWebsocket;
-                if (ImGui.Checkbox("Use WebSocket##TTTVoice2", ref useWebsocket))
+                var backends = Enum.GetNames(typeof(TTSBackend)).Select(SplitWords).ToArray();
+                var backend = Configuration.Backend;
+                var backendIndex = Array.IndexOf(backends, backend.ToString());
+
+                if (ImGui.Combo("Voice backend##TTTVoice2", ref backendIndex, backends, backends.Length))
                 {
-                    Configuration.UseWebsocket = useWebsocket;
-                    Configuration.Save();
+                    if (Enum.TryParse(backends[backendIndex].Replace(" ", ""), out TTSBackend newBackend))
+                    {
+                        Configuration.Backend = newBackend;
+                        Configuration.Save();
 
-                    if (Configuration.UseWebsocket)
-                        WebSocketServer.Start();
+                        if (Configuration.Backend == TTSBackend.Websocket)
+                        {
+                            WebSocketServer.Start();
+                        }
+                        else
+                        {
+                            WebSocketServer.Stop();
+                        }
+                    }
                     else
-                        WebSocketServer.Stop();
+                    {
+                        PluginLog.Error($"Failed to parse TTS backend \"{backends[backendIndex]}\".");
+                    }
                 }
-                ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(WebSocketServer.Active ? "Started" : "Will start")} on ws://localhost:{WebSocketServer.Port}");
 
-                if (!useWebsocket)
+                if (Configuration.Backend == TTSBackend.Websocket)
+                {
+                    var port = Configuration.WebsocketPort;
+                    var inputBuffer = new byte[5];
+                    Array.Copy(Encoding.UTF8.GetBytes(port.ToString()), inputBuffer, 5);
+
+                    if (ImGui.InputText("Port##TTTVoice12", inputBuffer, (uint)inputBuffer.Length, ImGuiInputTextFlags.CharsDecimal))
+                    {
+                        if (int.TryParse(null, out var newPort))
+                        {
+                            Configuration.WebsocketPort = newPort;
+                        }
+                        else
+                        {
+                            PluginLog.Error("Failed to parse port!");
+                        }
+
+                        WebSocketServer.RestartWithPort(Configuration.WebsocketPort);
+                    }
+
+                    ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(WebSocketServer.Active ? "Started" : "Will start")} on ws://localhost:{WebSocketServer.Port}");
+                }
+                else
                 {
                     var currentVoicePreset = Configuration.GetCurrentVoicePreset();
 

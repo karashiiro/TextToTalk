@@ -2,8 +2,13 @@
 
 namespace TextToTalk.Migrations
 {
-    public class Migration1_5 : IMigration
+    public class Migration1_5 : IConfigurationMigration
     {
+        public bool ShouldMigrate(PluginConfiguration config)
+        {
+            return !config.MigratedTo1_5;
+        }
+
         public void Migrate(PluginConfiguration config)
         {
             config.EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
@@ -33,6 +38,8 @@ namespace TextToTalk.Migrations
 #pragma warning restore 618
 #pragma warning restore CS1062 // The best overloaded Add method for the collection initializer element is obsolete
             });
+
+            config.MigratedTo1_5 = true;
         }
     }
 }

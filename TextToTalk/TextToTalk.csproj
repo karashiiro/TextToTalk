@@ -56,7 +56,6 @@
 
   <ItemGroup>
     <Folder Include="Modules\" />
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -49,7 +49,7 @@ namespace TextToTalk
             this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            this.wsServer = new WsServer();
+            this.wsServer = new WsServer(this.config.WebsocketPort);
             this.speechSynthesizer = new SpeechSynthesizer();
             this.sharedState = new SharedState();
 
@@ -198,7 +198,7 @@ namespace TextToTalk
         {
             var cleanText = TalkUtils.StripSSMLTokens(textValue);
 
-            if (this.config.UseWebsocket)
+            if (this.config.Backend == TTSBackend.Websocket)
                 SayWebSocket(speaker, cleanText);
             else if (speaker != null && this.config.UseGenderedVoicePresets)
                 SayGendered(speaker, cleanText);

@@ -16,28 +16,13 @@ namespace TextToTalk
     {
         private const string DefaultPreset = "Default";
 
-        public int Version { get; set; }
-
-        public bool Enabled { get; set; }
-
-        public bool UseKeybind { get; set; }
-        public VirtualKey.Enum ModifierKey { get; set; }
-        public VirtualKey.Enum MajorKey { get; set; }
-
+        #region Obsolete Members
         [Obsolete("Use EnabledChatTypesPresets.")]
         public bool EnableAllChatTypes { get; set; }
 
         [Obsolete("Use EnabledChatTypesPresets.")]
         // ReSharper disable once CollectionNeverUpdated.Global
         public IList<int> EnabledChatTypes { get; set; }
-
-        public bool MigratedTo1_5 { get; set; }
-
-        public IList<Trigger> Bad { get; set; }
-        public IList<Trigger> Good { get; set; }
-
-        public int CurrentPresetId { get; set; }
-        public IList<EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
 
         [Obsolete("Use VoicePresets.")]
         public int Rate { get; set; }
@@ -48,10 +33,40 @@ namespace TextToTalk
         [Obsolete("Use VoicePresets.")]
         public string VoiceName { get; set; }
 
+        [Obsolete("Use Backend.")]
+        public bool UseWebsocket { get; set; }
+
+        /// <summary>
+        /// <c>true</c> if it is not the first time, <c>false</c> if the first time handler has not run before. This was named horribly.
+        /// </summary>
+        [Obsolete("Use InitializedEver.")]
+        public bool FirstTime { get; set; }
+        #endregion
+
+        public int Version { get; set; }
+
+        public bool Enabled { get; set; }
+
+        public bool UseKeybind { get; set; }
+        public VirtualKey.Enum ModifierKey { get; set; }
+        public VirtualKey.Enum MajorKey { get; set; }
+
+        public bool MigratedTo1_5 { get; set; }
+
+        public bool MigratedTo1_6 { get; set; }
+
+        public IList<Trigger> Bad { get; set; }
+        public IList<Trigger> Good { get; set; }
+
+        public int CurrentPresetId { get; set; }
+        public IList<EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
+
         public int CurrentVoicePresetId { get; set; }
         public IList<VoicePreset> VoicePresets { get; set; }
 
-        public bool UseWebsocket { get; set; }
+        public TTSBackend Backend { get; set; }
+
+        public int WebsocketPort { get; set; }
 
         public bool NameNpcWithSay { get; set; } = true;
 
@@ -67,10 +82,14 @@ namespace TextToTalk
 
         public int FemaleVoicePresetId { get; set; }
 
-        /// <summary>
-        /// <c>true</c> if it is not the first time, <c>false</c> if the first time handler has run before. This was named horribly.
-        /// </summary>
-        public bool FirstTime { get; set; }
+        [JsonIgnore]
+        public bool InitializedEver
+        {
+#pragma warning disable 618
+            get => FirstTime;
+            set => FirstTime = value;
+#pragma warning restore 618
+        }
 
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
 
@@ -92,7 +111,7 @@ namespace TextToTalk
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
             VoicePresets ??= new List<VoicePreset>();
 
-            if (!FirstTime)
+            if (!InitializedEver)
             {
                 EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
                 {
@@ -122,14 +141,21 @@ namespace TextToTalk
                     Name = DefaultPreset,
                 });
 
-                FirstTime = true;
+                InitializedEver = true;
                 MigratedTo1_5 = true;
+                //MigratedTo1_6 = true;
             }
 
-            if (FirstTime && !MigratedTo1_5)
+            if (InitializedEver)
             {
-                new Migration1_5().Migrate(this);
-                MigratedTo1_5 = true;
+                var migrations = new IConfigurationMigration[] { new Migration1_5(), /*new Migration1_6()*/ };
+                foreach (var migration in migrations)
+                {
+                    if (migration.ShouldMigrate(this))
+                    {
+                        migration.Migrate(this);
+                    }
+                }
             }
 
             Save();
