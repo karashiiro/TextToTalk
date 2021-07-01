@@ -143,12 +143,12 @@ namespace TextToTalk
 
                 InitializedEver = true;
                 MigratedTo1_5 = true;
-                //MigratedTo1_6 = true;
+                MigratedTo1_6 = true;
             }
 
             if (InitializedEver)
             {
-                var migrations = new IConfigurationMigration[] { new Migration1_5(), /*new Migration1_6()*/ };
+                var migrations = new IConfigurationMigration[] { new Migration1_5(), new Migration1_6() };
                 foreach (var migration in migrations)
                 {
                     if (migration.ShouldMigrate(this))
