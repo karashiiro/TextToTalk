@@ -10,6 +10,7 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Speech.Synthesis;
 using TextToTalk.GameEnums;
@@ -40,6 +41,8 @@ namespace TextToTalk
 
         private PluginServiceCollection serviceCollection;
 
+        private bool failedToBindPort;
+
         public string Name => "TextToTalk";
 
         public void Initialize(DalamudPluginInterface pi)
@@ -49,7 +52,29 @@ namespace TextToTalk
             this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            this.wsServer = new WSServer(this.config.WebsocketPort);
+            try
+            {
+                this.wsServer = new WSServer(this.config.WebsocketPort);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                this.wsServer = new WSServer(0);
+                this.failedToBindPort = true;
+            }
+
+            if (this.config.Backend == TTSBackend.Websocket)
+            {
+                try
+                {
+                    this.wsServer.Start();
+                }
+                catch (SocketException)
+                {
+                    this.wsServer = new WSServer(0);
+                    this.failedToBindPort = true;
+                }
+            }
+
             this.speechSynthesizer = new SpeechSynthesizer();
             this.sharedState = new SharedState();
 
@@ -72,6 +97,7 @@ namespace TextToTalk
             this.pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
 
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
+            this.pluginInterface.Framework.Gui.Chat.OnChatMessage += CheckFailedToBindPort;
 
             this.pluginInterface.Framework.OnUpdateEvent += PollTalkAddon;
             this.pluginInterface.Framework.OnUpdateEvent += CheckKeybindPressed;
@@ -149,6 +175,17 @@ namespace TextToTalk
             Say(speaker, text);
         }
 
+        private bool notifiedFailedToBindPort;
+        private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+        {
+            if (!this.pluginInterface.ClientState.IsLoggedIn || !this.failedToBindPort || this.notifiedFailedToBindPort) return;
+            var chat = this.pluginInterface.Framework.Gui.Chat;
+            chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
+                       "Please close the owner of that port and reload the Websocket server, " +
+                       "or select a different port.");
+            this.notifiedFailedToBindPort = true;
+        }
+
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
             if (!this.config.Enabled) return;
@@ -208,10 +245,17 @@ namespace TextToTalk
 
         private void SayWebSocket(Actor speaker, string cleanText)
         {
-            this.wsServer.Broadcast(GetActorGender(speaker), cleanText);
+            try
+            {
+                this.wsServer.Broadcast(GetActorGender(speaker), cleanText);
 #if DEBUG
-            PluginLog.Log("Sent message {0} on WebSocket server.", cleanText);
+                PluginLog.Log("Sent message {0} on WebSocket server.", cleanText);
 #endif
+            }
+            catch (Exception e)
+            {
+                PluginLog.Error(e, "Failed to send message over Websocket.");
+            }
         }
 
         private void SayGendered(Actor speaker, string cleanText)
@@ -294,7 +338,9 @@ namespace TextToTalk
 
             this.pluginInterface.Framework.OnUpdateEvent -= PollTalkAddon;
             this.pluginInterface.Framework.OnUpdateEvent -= CheckKeybindPressed;
+            this.pluginInterface.Framework.OnUpdateEvent -= CheckPresetKeybindPressed;
 
+            this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= CheckFailedToBindPort;
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
 
             this.wsServer.Stop();

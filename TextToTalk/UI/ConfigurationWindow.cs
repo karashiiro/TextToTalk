@@ -5,6 +5,7 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Numerics;
 using System.Speech.Synthesis;
 using System.Text;
@@ -108,24 +109,42 @@ namespace TextToTalk.UI
                 if (Configuration.Backend == TTSBackend.Websocket)
                 {
                     var port = Configuration.WebsocketPort;
-                    var inputBuffer = new byte[5];
-                    Array.Copy(Encoding.UTF8.GetBytes(port.ToString()), inputBuffer, 5);
+                    var portBytes = Encoding.UTF8.GetBytes(port.ToString());
+                    var inputBuffer = new byte[6]; // One extra byte for the null terminator
+                    Array.Copy(portBytes, inputBuffer, portBytes.Length > inputBuffer.Length ? inputBuffer.Length : portBytes.Length);
 
                     if (ImGui.InputText("Port##TTTVoice12", inputBuffer, (uint)inputBuffer.Length, ImGuiInputTextFlags.CharsDecimal))
                     {
-                        if (int.TryParse(null, out var newPort))
+                        if (int.TryParse(Encoding.UTF8.GetString(inputBuffer), out var newPort))
                         {
-                            Configuration.WebsocketPort = newPort;
+                            try
+                            {
+                                WebSocketServer.RestartWithPort(newPort);
+                                Configuration.WebsocketPort = newPort;
+                            }
+                            catch (ArgumentOutOfRangeException)
+                            {
+                                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Port out of range");
+                            }
+                            catch (SocketException)
+                            {
+                                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Port already taken");
+                            }
                         }
                         else
                         {
-                            PluginLog.Error("Failed to parse port!");
+                            PluginLog.LogError("Failed to parse port!");
                         }
-
-                        WebSocketServer.RestartWithPort(Configuration.WebsocketPort);
                     }
 
                     ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(WebSocketServer.Active ? "Started" : "Will start")} on ws://localhost:{WebSocketServer.Port}");
+
+                    ImGui.Spacing();
+
+                    if (ImGui.Button("Restart server##TTTVoice13"))
+                    {
+                        WebSocketServer.RestartWithPort(Configuration.WebsocketPort);
+                    }
                 }
                 else
                 {
