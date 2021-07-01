@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
+using TextToTalk.GameEnums;
 using TextToTalk.Migrations;
 
 // ReSharper disable InconsistentNaming
@@ -121,9 +122,9 @@ namespace TextToTalk
                         (int) XivChatType.Say,
                         (int) XivChatType.Shout,
                         (int) XivChatType.Party,
-                        (int) AdditionalChatTypes.Enum.BeneficialEffectOnYou,
-                        (int) AdditionalChatTypes.Enum.BeneficialEffectOnYouEnded,
-                        (int) AdditionalChatTypes.Enum.BeneficialEffectOnOtherPlayer,
+                        (int) AdditionalChatType.BeneficialEffectOnYou,
+                        (int) AdditionalChatType.BeneficialEffectOnYouEnded,
+                        (int) AdditionalChatType.BeneficialEffectOnOtherPlayer,
                     },
                     Name = DefaultPreset,
                     UseKeybind = false,

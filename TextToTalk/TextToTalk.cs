@@ -6,13 +6,13 @@ using Dalamud.Game.Internal;
 using Dalamud.Game.Internal.Gui.Addon;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Speech.Synthesis;
+using TextToTalk.GameEnums;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI;
@@ -166,7 +166,7 @@ namespace TextToTalk
                 {
                     if (!this.config.DisallowMultipleSay || !IsSameSpeaker(sender.TextValue))
                     {
-                        if ((int)type == (int)AdditionalChatTypes.Enum.NPCDialogue)
+                        if ((int)type == (int)AdditionalChatType.NPCDialogue)
                         {
                             SetLastQuestText(textValue);
                         }
@@ -282,7 +282,7 @@ namespace TextToTalk
 
         private bool ShouldSaySender(XivChatType type)
         {
-            return this.config.EnableNameWithSay && (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatTypes.Enum.NPCDialogue);
+            return this.config.EnableNameWithSay && (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
         }
 
         #region IDisposable Support

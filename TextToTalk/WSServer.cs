@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using TextToTalk.GameEnums;
 using WebSocketSharp.Server;
 
 namespace TextToTalk

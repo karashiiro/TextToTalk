@@ -1,5 +1,6 @@
 ﻿using Dalamud.CrystalTower.UI;
 using Dalamud.Game.Text;
+using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Numerics;
 using System.Speech.Synthesis;
 using System.Text;
-using Dalamud.Plugin;
+using TextToTalk.GameEnums;
 
 namespace TextToTalk.UI
 {
@@ -308,7 +309,7 @@ namespace TextToTalk.UI
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             if (enableAll) return;
 
-            var channels = Enum.GetNames(typeof(XivChatType)).Concat(Enum.GetNames(typeof(AdditionalChatTypes.Enum)));
+            var channels = Enum.GetNames(typeof(XivChatType)).Concat(Enum.GetNames(typeof(AdditionalChatType)));
             foreach (var channel in channels)
             {
                 XivChatType enumValue;
@@ -318,7 +319,7 @@ namespace TextToTalk.UI
                 }
                 catch (ArgumentException)
                 {
-                    enumValue = (XivChatType)(int)Enum.Parse(typeof(AdditionalChatTypes.Enum), channel);
+                    enumValue = (XivChatType)(int)Enum.Parse(typeof(AdditionalChatType), channel);
                 }
 
                 var selected = currentEnabledChatTypesPreset.EnabledChatTypes.Contains((int)enumValue);

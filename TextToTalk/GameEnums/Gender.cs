@@ -1,4 +1,4 @@
-﻿namespace TextToTalk
+﻿namespace TextToTalk.GameEnums
 {
     public enum Gender : sbyte
     {
