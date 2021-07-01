@@ -14,7 +14,7 @@ namespace TextToTalk.UI
     public class ConfigurationWindow : ImmediateModeWindow
     {
         public PluginConfiguration Configuration { get; set; }
-        public WsServer WebSocketServer { get; set; }
+        public WSServer WebSocketServer { get; set; }
         public SpeechSynthesizer Synthesizer { get; set; }
 
         public override void Draw(ref bool visible)

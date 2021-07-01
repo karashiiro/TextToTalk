@@ -35,7 +35,7 @@ namespace TextToTalk
         private Addon talkAddonInterface;
 
         private SpeechSynthesizer speechSynthesizer;
-        private WsServer wsServer;
+        private WSServer wsServer;
         private SharedState sharedState;
 
         private PluginServiceCollection serviceCollection;
@@ -49,7 +49,7 @@ namespace TextToTalk
             this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            this.wsServer = new WsServer(this.config.WebsocketPort);
+            this.wsServer = new WSServer(this.config.WebsocketPort);
             this.speechSynthesizer = new SpeechSynthesizer();
             this.sharedState = new SharedState();
 

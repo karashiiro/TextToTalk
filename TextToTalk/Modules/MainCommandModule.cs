@@ -13,7 +13,7 @@ namespace TextToTalk.Modules
         public SharedState State { get; set; }
         public SpeechSynthesizer Synthesizer { get; set; }
         public WindowManager Windows { get; set; }
-        public WsServer WebsocketServer { get; set; }
+        public WSServer WebsocketServer { get; set; }
 
         [Command("/canceltts")]
         [HelpMessage("Cancel all queued TTS messages.")]
