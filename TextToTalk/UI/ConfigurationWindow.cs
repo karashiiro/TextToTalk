@@ -86,13 +86,13 @@ namespace TextToTalk.UI
                 ImGui.PopItemWidth();
             }
 
-            if (ImGui.CollapsingHeader("Voices##TTTVoice1", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader("Voices##TTTVoicePre1", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 var backends = Enum.GetNames(typeof(TTSBackend)).Select(SplitWords).ToArray();
                 var backend = Configuration.Backend;
                 var backendIndex = Array.IndexOf(backends, backend.ToString());
 
-                if (ImGui.Combo("Voice backend##TTTVoice2", ref backendIndex, backends, backends.Length))
+                if (ImGui.Combo("Voice backend##TTTVoicePre2", ref backendIndex, backends, backends.Length))
                 {
                     if (Enum.TryParse(backends[backendIndex].Replace(" ", ""), out TTSBackend newBackend))
                     {

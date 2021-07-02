@@ -1,4 +1,5 @@
-﻿using Dalamud.Configuration;
+﻿using Amazon.Polly;
+using Dalamud.Configuration;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Newtonsoft.Json;
@@ -83,6 +84,14 @@ namespace TextToTalk
         public int MaleVoicePresetId { get; set; }
 
         public int FemaleVoicePresetId { get; set; }
+
+        public string PollyVoice { get; set; }
+
+        public string PollyVoiceMale { get; set; }
+
+        public string PollyVoiceFemale { get; set; }
+
+        public string PollyEngine { get; set; } = Engine.Neural;
 
         [JsonIgnore]
         public bool InitializedEver

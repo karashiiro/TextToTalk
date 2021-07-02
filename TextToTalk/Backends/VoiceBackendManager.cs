@@ -1,4 +1,5 @@
 ﻿using System;
+using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.GameEnums;
@@ -44,7 +45,8 @@ namespace TextToTalk.Backends
             {
                 TTSBackend.System => new SystemBackend(this.config),
                 TTSBackend.Websocket => new WebsocketBackend(this.config),
-                TTSBackend.AmazonPolly or _ => throw new NotImplementedException(),
+                TTSBackend.AmazonPolly => new AmazonPollyBackend(this.config),
+                _ => throw new NotImplementedException(),
             };
         }
 

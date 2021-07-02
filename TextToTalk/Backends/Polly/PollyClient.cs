@@ -1,21 +1,37 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using Amazon;
+﻿using Amazon;
 using Amazon.Polly;
 using Amazon.Polly.Model;
 using Amazon.Runtime;
 using NAudio.Wave;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
-namespace TextToTalk
+namespace TextToTalk.Backends.Polly
 {
-    public class PollyClient
+    public class PollyClient : IDisposable
     {
         private readonly AmazonPollyClient client;
+
+        private WaveOut waveOut;
 
         public PollyClient(string accessKey, string secretKey, RegionEndpoint region)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
+        }
+
+        public IList<Voice> GetVoicesForEngine(Engine engine)
+        {
+            var voicesReq = new DescribeVoicesRequest
+            {
+                Engine = engine,
+            };
+
+            var voicesRes = this.client.DescribeVoices(voicesReq);
+
+            return voicesRes.Voices;
         }
 
         public async Task Say(VoiceId voice, string text)
@@ -37,7 +53,7 @@ namespace TextToTalk
             using var mp3Reader = new Mp3FileReader(responseStream);
             using var waveStream = WaveFormatConversionStream.CreatePcmStream(mp3Reader);
             using var blockAlignmentStream = new BlockAlignReductionStream(waveStream);
-            using var waveOut = new WaveOut();
+            this.waveOut = new WaveOut();
 
             waveOut.Init(blockAlignmentStream);
             waveOut.Play();
@@ -46,6 +62,26 @@ namespace TextToTalk
             {
                 await Task.Delay(100);
             }
+
+            this.waveOut.Dispose();
+            this.waveOut = null;
+        }
+
+        public void Cancel()
+        {
+            try
+            {
+                this.waveOut?.Stop();
+            }
+            catch (ObjectDisposedException) { }
+        }
+
+        public void Dispose()
+        {
+            Cancel();
+
+            this.client.Dispose();
+            this.waveOut?.Dispose();
         }
     }
 }

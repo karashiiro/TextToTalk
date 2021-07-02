@@ -109,15 +109,17 @@ namespace TextToTalk.Backends.System
                 var currentMaleVoicePreset = this.config.GetCurrentMaleVoicePreset();
                 var currentFemaleVoicePreset = this.config.GetCurrentFemaleVoicePreset();
 
+                var presetArray = presets.Select(p => p.Name).ToArray();
+
                 var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
-                if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presetArray, presets.Count))
                 {
                     this.config.MaleVoicePresetId = presets[malePresetIndex].Id;
                     this.config.Save();
                 }
 
                 var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
-                if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+                if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presetArray, presets.Count))
                 {
                     this.config.FemaleVoicePresetId = presets[femalePresetIndex].Id;
                     this.config.Save();
