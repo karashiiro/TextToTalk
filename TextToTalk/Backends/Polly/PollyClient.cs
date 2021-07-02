@@ -67,13 +67,15 @@ namespace TextToTalk.Backends.Polly
             this.waveOut = null;
         }
 
-        public void Cancel()
+        public Task Cancel()
         {
             try
             {
                 this.waveOut?.Stop();
             }
             catch (ObjectDisposedException) { }
+
+            return Task.CompletedTask;
         }
 
         public void Dispose()

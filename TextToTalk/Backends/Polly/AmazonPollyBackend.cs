@@ -64,7 +64,7 @@ namespace TextToTalk.Backends.Polly
 
         public override void CancelSay()
         {
-            this.polly.Cancel();
+            _ = this.polly.Cancel();
         }
 
         public override void DrawSettings(ImExposedFunctions helpers)
