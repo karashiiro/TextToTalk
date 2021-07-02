@@ -10,6 +10,7 @@ namespace TextToTalk.Backends
     public class VoiceBackendManager : VoiceBackend
     {
         private readonly PluginConfiguration config;
+        private readonly SharedState sharedState;
 
         private VoiceBackend backend;
 
@@ -50,7 +51,7 @@ namespace TextToTalk.Backends
             return backendKind switch
             {
                 TTSBackend.System => new SystemBackend(this.config),
-                TTSBackend.Websocket => new WebsocketBackend(this.config),
+                TTSBackend.Websocket => new WebsocketBackend(this.config, this.sharedState),
                 TTSBackend.AmazonPolly => new AmazonPollyBackend(this.config),
                 _ => throw new NotImplementedException(),
             };

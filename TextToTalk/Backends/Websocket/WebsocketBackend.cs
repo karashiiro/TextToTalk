@@ -15,9 +15,7 @@ namespace TextToTalk.Backends.Websocket
         private readonly WSServer wsServer;
         private readonly PluginConfiguration config;
 
-        public SharedState SharedState { get; set; }
-
-        public WebsocketBackend(PluginConfiguration config)
+        public WebsocketBackend(PluginConfiguration config, SharedState sharedState)
         {
             try
             {
@@ -27,7 +25,7 @@ namespace TextToTalk.Backends.Websocket
             catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
             {
                 this.wsServer = new WSServer(0);
-                SharedState.WSFailedToBindPort = true;
+                sharedState.WSFailedToBindPort = true;
             }
 
             this.config = config;
