@@ -39,7 +39,7 @@ namespace TextToTalk.Backends.Websocket
             {
                 this.wsServer.Broadcast(gender, text);
 #if DEBUG
-                PluginLog.Log("Sent message {0} on WebSocket server.", cleanText);
+                PluginLog.Log("Sent message {0} on WebSocket server.", text);
 #endif
             }
             catch (Exception e)
