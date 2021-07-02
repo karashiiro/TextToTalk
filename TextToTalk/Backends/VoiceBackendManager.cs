@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
@@ -37,6 +38,11 @@ namespace TextToTalk.Backends
         {
             this.backend?.Dispose();
             this.backend = CreateBackendFor(backendKind);
+        }
+
+        public Vector4 GetBackendTitleBarColor()
+        {
+            return this.backend.TitleBarColor;
         }
 
         private VoiceBackend CreateBackendFor(TTSBackend backendKind)

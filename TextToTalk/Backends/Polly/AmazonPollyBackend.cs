@@ -32,6 +32,8 @@ namespace TextToTalk.Backends.Polly
 
         public AmazonPollyBackend(PluginConfiguration config)
         {
+            TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
+
             var credentials = CredentialManager.GetCredentials(CredentialsTarget);
 
             if (credentials != null)

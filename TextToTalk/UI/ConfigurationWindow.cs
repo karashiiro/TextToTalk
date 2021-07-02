@@ -29,6 +29,11 @@ namespace TextToTalk.UI
 
         public override void Draw(ref bool visible)
         {
+            var titleBarColor = BackendManager.GetBackendTitleBarColor();
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, titleBarColor != default
+                ? titleBarColor
+                : ImGui.ColorConvertU32ToFloat4(ImGui.GetColorU32(ImGuiCol.TitleBgActive)));
+
             ImGui.SetNextWindowSize(new Vector2(520, 480));
             ImGui.Begin("TextToTalk Configuration", ref visible, ImGuiWindowFlags.NoResize);
             {
@@ -56,6 +61,8 @@ namespace TextToTalk.UI
                 ImGui.EndTabBar();
             }
             ImGui.End();
+
+            ImGui.PopStyleColor();
         }
 
         private void DrawSynthesizerSettings()
