@@ -5,10 +5,9 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Numerics;
-using System.Speech.Synthesis;
 using System.Text;
+using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.UI
@@ -16,8 +15,17 @@ namespace TextToTalk.UI
     public class ConfigurationWindow : ImmediateModeWindow
     {
         public PluginConfiguration Configuration { get; set; }
-        public WSServer WebSocketServer { get; set; }
-        public SpeechSynthesizer Synthesizer { get; set; }
+        public VoiceBackendManager BackendManager { get; set; }
+
+        private readonly ImExposedFunctions helpers;
+
+        public ConfigurationWindow()
+        {
+            this.helpers = new ImExposedFunctions
+            {
+                OpenVoiceUnlockerWindow = OpenWindow<VoiceUnlockerWindow>,
+            };
+        }
 
         public override void Draw(ref bool visible)
         {
@@ -91,14 +99,7 @@ namespace TextToTalk.UI
                         Configuration.Backend = newBackend;
                         Configuration.Save();
 
-                        if (Configuration.Backend == TTSBackend.Websocket)
-                        {
-                            WebSocketServer.Start();
-                        }
-                        else
-                        {
-                            WebSocketServer.Stop();
-                        }
+                        BackendManager.SetBackend(newBackend);
                     }
                     else
                     {
@@ -106,140 +107,8 @@ namespace TextToTalk.UI
                     }
                 }
 
-                if (Configuration.Backend == TTSBackend.Websocket)
-                {
-                    var port = Configuration.WebsocketPort;
-                    var portBytes = Encoding.UTF8.GetBytes(port.ToString());
-                    var inputBuffer = new byte[6]; // One extra byte for the null terminator
-                    Array.Copy(portBytes, inputBuffer, portBytes.Length > inputBuffer.Length ? inputBuffer.Length : portBytes.Length);
-
-                    if (ImGui.InputText("Port##TTTVoice12", inputBuffer, (uint)inputBuffer.Length, ImGuiInputTextFlags.CharsDecimal))
-                    {
-                        if (int.TryParse(Encoding.UTF8.GetString(inputBuffer), out var newPort))
-                        {
-                            try
-                            {
-                                WebSocketServer.RestartWithPort(newPort);
-                                Configuration.WebsocketPort = newPort;
-                            }
-                            catch (ArgumentOutOfRangeException)
-                            {
-                                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Port out of range");
-                            }
-                            catch (SocketException)
-                            {
-                                ImGui.TextColored(new Vector4(1, 0, 0, 1), "Port already taken");
-                            }
-                        }
-                        else
-                        {
-                            PluginLog.LogError("Failed to parse port!");
-                        }
-                    }
-
-                    ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(WebSocketServer.Active ? "Started" : "Will start")} on ws://localhost:{WebSocketServer.Port}");
-
-                    ImGui.Spacing();
-
-                    if (ImGui.Button("Restart server##TTTVoice13"))
-                    {
-                        WebSocketServer.RestartWithPort(Configuration.WebsocketPort);
-                    }
-                }
-                else
-                {
-                    var currentVoicePreset = Configuration.GetCurrentVoicePreset();
-
-                    var presets = Configuration.VoicePresets.ToList();
-                    presets.Sort((a, b) => a.Id - b.Id);
-
-                    var presetIndex = presets.IndexOf(currentVoicePreset);
-                    if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
-                    {
-                        Configuration.CurrentVoicePresetId = presets[presetIndex].Id;
-                        Configuration.Save();
-                    }
-
-                    if (ImGui.Button("New preset##TTTVoice4"))
-                    {
-                        var newPreset = Configuration.NewVoicePreset();
-                        Configuration.SetCurrentVoicePreset(newPreset.Id);
-                    }
-
-                    if (Configuration.EnabledChatTypesPresets.Count > 1)
-                    {
-                        ImGui.SameLine();
-                        if (ImGui.Button("Delete##TTTVoice5"))
-                        {
-                            var otherPreset = Configuration.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
-                            Configuration.SetCurrentVoicePreset(otherPreset.Id);
-                            Configuration.VoicePresets.Remove(currentVoicePreset);
-                        }
-                    }
-
-                    var rate = currentVoicePreset.Rate;
-                    if (ImGui.SliderInt("Rate##TTTVoice6", ref rate, -10, 10))
-                    {
-                        currentVoicePreset.Rate = rate;
-                        Configuration.Save();
-                    }
-
-                    var volume = currentVoicePreset.Volume;
-                    if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 100))
-                    {
-                        currentVoicePreset.Volume = volume;
-                        Configuration.Save();
-                    }
-
-                    var voiceName = currentVoicePreset.VoiceName;
-                    var voices = Synthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
-                    var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
-                    if (ImGui.Combo("Voice##TTTVoice8",
-                        ref voiceIndex,
-                        voices
-                            .Select(iv => $"{iv?.VoiceInfo?.Name} ({iv?.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
-                            .ToArray(),
-                        voices.Count))
-                    {
-                        currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
-                        Configuration.Save();
-                    }
-
-                    ImGui.Spacing();
-
-                    var useGenderedVoicePresets = Configuration.UseGenderedVoicePresets;
-                    if (ImGui.Checkbox("Use gendered voice presets##TTTVoice9", ref useGenderedVoicePresets))
-                    {
-                        Configuration.UseGenderedVoicePresets = useGenderedVoicePresets;
-                        Configuration.Save();
-                    }
-
-                    if (useGenderedVoicePresets)
-                    {
-                        var currentMaleVoicePreset = Configuration.GetCurrentMaleVoicePreset();
-                        var currentFemaleVoicePreset = Configuration.GetCurrentFemaleVoicePreset();
-
-                        var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
-                        if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
-                        {
-                            Configuration.MaleVoicePresetId = presets[malePresetIndex].Id;
-                            Configuration.Save();
-                        }
-
-                        var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
-                        if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
-                        {
-                            Configuration.FemaleVoicePresetId = presets[femalePresetIndex].Id;
-                            Configuration.Save();
-                        }
-                    }
-
-                    ImGui.Spacing();
-                    if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
-                    {
-                        OpenWindow<VoiceUnlockerWindow>();
-                    }
-                }
+                // Draw the settings for the specific backend we're using.
+                BackendManager.DrawSettings(this.helpers);
             }
 
             if (ImGui.CollapsingHeader("Dialogue"))

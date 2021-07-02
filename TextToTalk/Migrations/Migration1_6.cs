@@ -1,4 +1,6 @@
-﻿namespace TextToTalk.Migrations
+﻿using TextToTalk.Backends;
+
+namespace TextToTalk.Migrations
 {
     public class Migration1_6 : IConfigurationMigration
     {

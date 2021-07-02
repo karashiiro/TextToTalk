@@ -2,10 +2,11 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using TextToTalk.GameEnums;
 using WebSocketSharp.Server;
 
-namespace TextToTalk
+namespace TextToTalk.Backends.Websocket
 {
     public class WSServer
     {
@@ -101,7 +102,7 @@ namespace TextToTalk
                 base.OnClose(e);
 
                 var targetType = typeof(WebSocketBehavior);
-                var baseWebsocket = targetType.GetField("_websocket", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                var baseWebsocket = targetType.GetField("_websocket", BindingFlags.Instance | BindingFlags.NonPublic);
                 baseWebsocket?.SetValue(this, null);
             }
         }

@@ -10,9 +10,8 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
-using System.Net.Sockets;
 using System.Reflection;
-using System.Speech.Synthesis;
+using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
@@ -32,16 +31,13 @@ namespace TextToTalk
         private PluginConfiguration config;
         private WindowManager ui;
         private CommandManager commandManager;
+        private VoiceBackendManager backendManager;
 
         private Addon talkAddonInterface;
 
-        private SpeechSynthesizer speechSynthesizer;
-        private WSServer wsServer;
         private SharedState sharedState;
 
         private PluginServiceCollection serviceCollection;
-
-        private bool failedToBindPort;
 
         public string Name => "TextToTalk";
 
@@ -52,37 +48,14 @@ namespace TextToTalk
             this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            try
-            {
-                this.wsServer = new WSServer(this.config.WebsocketPort);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                this.wsServer = new WSServer(0);
-                this.failedToBindPort = true;
-            }
-
-            if (this.config.Backend == TTSBackend.Websocket)
-            {
-                try
-                {
-                    this.wsServer.Start();
-                }
-                catch (SocketException)
-                {
-                    this.wsServer = new WSServer(0);
-                    this.failedToBindPort = true;
-                }
-            }
-
-            this.speechSynthesizer = new SpeechSynthesizer();
             this.sharedState = new SharedState();
+
+            this.backendManager = new VoiceBackendManager(this.config);
 
             this.serviceCollection = new PluginServiceCollection();
             this.serviceCollection.AddService(this.config);
-            this.serviceCollection.AddService(this.wsServer);
+            this.serviceCollection.AddService(this.backendManager);
             this.serviceCollection.AddService(this.sharedState);
-            this.serviceCollection.AddService(this.speechSynthesizer);
             this.serviceCollection.AddService(this.pluginInterface, shouldDispose: false);
 
             this.ui = new WindowManager(this.serviceCollection);
@@ -178,7 +151,7 @@ namespace TextToTalk
         private bool notifiedFailedToBindPort;
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
-            if (!this.pluginInterface.ClientState.IsLoggedIn || !this.failedToBindPort || this.notifiedFailedToBindPort) return;
+            if (!this.pluginInterface.ClientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
             var chat = this.pluginInterface.Framework.Gui.Chat;
             chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
                        "Please close the owner of that port and reload the Websocket server, " +
@@ -234,52 +207,14 @@ namespace TextToTalk
         private void Say(Actor speaker, string textValue)
         {
             var cleanText = TalkUtils.StripSSMLTokens(textValue);
-
-            if (this.config.Backend == TTSBackend.Websocket)
-                SayWebSocket(speaker, cleanText);
-            else if (speaker != null && this.config.UseGenderedVoicePresets)
-                SayGendered(speaker, cleanText);
-            else
-                SayNotGendered(cleanText);
-        }
-
-        private void SayWebSocket(Actor speaker, string cleanText)
-        {
-            try
-            {
-                this.wsServer.Broadcast(GetActorGender(speaker), cleanText);
-#if DEBUG
-                PluginLog.Log("Sent message {0} on WebSocket server.", cleanText);
-#endif
-            }
-            catch (Exception e)
-            {
-                PluginLog.Error(e, "Failed to send message over Websocket.");
-            }
-        }
-
-        private void SayGendered(Actor speaker, string cleanText)
-        {
-            var voicePreset = GetActorGender(speaker) switch
-            {
-                Gender.Male => this.config.GetCurrentMaleVoicePreset(),
-                Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
-                _ => this.config.GetCurrentVoicePreset(),
-            };
-
-            this.speechSynthesizer.UseVoicePreset(voicePreset);
-            this.speechSynthesizer.SpeakAsync(cleanText);
-        }
-
-        private void SayNotGendered(string cleanText)
-        {
-            var voicePreset = this.config.GetCurrentVoicePreset();
-            this.speechSynthesizer.UseVoicePreset(voicePreset);
-            this.speechSynthesizer.SpeakAsync(cleanText);
+            var gender = GetActorGender(speaker);
+            this.backendManager.Say(gender, cleanText);
         }
 
         private static Gender GetActorGender(Actor actor)
         {
+            if (actor == null) return Gender.None;
+
             var actorStructProp = typeof(Actor)
                 .GetProperty("ActorStruct", BindingFlags.NonPublic | BindingFlags.Instance);
             if (actorStructProp == null)
@@ -342,8 +277,6 @@ namespace TextToTalk
 
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= CheckFailedToBindPort;
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
-
-            this.wsServer.Stop();
 
             this.pluginInterface.SavePluginConfig(this.config);
 

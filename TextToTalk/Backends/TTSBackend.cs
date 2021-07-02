@@ -1,4 +1,4 @@
-﻿namespace TextToTalk
+﻿namespace TextToTalk.Backends
 {
     public enum TTSBackend
     {

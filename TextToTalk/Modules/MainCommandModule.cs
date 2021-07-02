@@ -1,7 +1,7 @@
 ﻿using Dalamud.CrystalTower.Commands.Attributes;
-using Dalamud.Plugin;
-using System.Speech.Synthesis;
 using Dalamud.CrystalTower.UI;
+using Dalamud.Plugin;
+using TextToTalk.Backends;
 using TextToTalk.UI;
 
 namespace TextToTalk.Modules
@@ -11,24 +11,14 @@ namespace TextToTalk.Modules
         public DalamudPluginInterface PluginInterface { get; set; }
         public PluginConfiguration Config { get; set; }
         public SharedState State { get; set; }
-        public SpeechSynthesizer Synthesizer { get; set; }
         public WindowManager Windows { get; set; }
-        public WSServer WebsocketServer { get; set; }
+        public VoiceBackendManager BackendManager { get; set; }
 
         [Command("/canceltts")]
         [HelpMessage("Cancel all queued TTS messages.")]
         public void CancelTts(string command, string args)
         {
-            if (Config.UseWebsocket)
-            {
-                WebsocketServer.Cancel();
-                PluginLog.Log("Canceled TTS over WebSocket server.");
-            }
-            else
-            {
-                Synthesizer.SpeakAsyncCancelAll();
-                PluginLog.Log("Canceled SpeechSynthesizer TTS.");
-            }
+            BackendManager.CancelSay();
         }
 
         [Command("/toggletts")]
