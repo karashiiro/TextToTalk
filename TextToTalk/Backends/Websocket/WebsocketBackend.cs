@@ -10,6 +10,8 @@ namespace TextToTalk.Backends.Websocket
 {
     public class WebsocketBackend : VoiceBackend
     {
+        private static readonly Vector4 Red = new(1, 0, 0, 1);
+
         private readonly WSServer wsServer;
         private readonly PluginConfiguration config;
 
@@ -70,11 +72,11 @@ namespace TextToTalk.Backends.Websocket
                     }
                     catch (ArgumentOutOfRangeException)
                     {
-                        ImGui.TextColored(new Vector4(1, 0, 0, 1), "Port out of range");
+                        ImGui.TextColored(Red, "Port out of range");
                     }
                     catch (SocketException)
                     {
-                        ImGui.TextColored(new Vector4(1, 0, 0, 1), "Port already taken");
+                        ImGui.TextColored(Red, "Port already taken");
                     }
                 }
                 else

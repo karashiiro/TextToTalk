@@ -93,6 +93,8 @@ namespace TextToTalk
 
         public string PollyEngine { get; set; } = Engine.Neural;
 
+        public string PollyRegion { get; set; }
+
         [JsonIgnore]
         public bool InitializedEver
         {

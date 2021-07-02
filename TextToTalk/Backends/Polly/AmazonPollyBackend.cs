@@ -16,12 +16,16 @@ namespace TextToTalk.Backends.Polly
     {
         private const string CredentialsTarget = "TextToTalk_AccessKeys_AmazonPolly";
 
-        private static readonly Vector4 HintColor = new Vector4(0.7f, 0.7f, 0.7f, 1.0f);
+        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
+        private static readonly Vector4 Red = new(1, 0, 0, 1);
+
+        private static readonly string[] Regions = RegionEndpoint.EnumerableAllRegions.Select(r => r.SystemName).ToArray();
+        private static readonly string[] Engines = { Engine.Neural, Engine.Standard };
 
         private readonly PluginConfiguration config;
-        private readonly IList<Voice> voices;
 
         private PollyClient polly;
+        private IList<Voice> voices;
 
         private string accessKey = string.Empty;
         private string secretKey = string.Empty;
@@ -65,8 +69,15 @@ namespace TextToTalk.Backends.Polly
 
         public override void DrawSettings(ImExposedFunctions helpers)
         {
-            ImGui.InputTextWithHint("##TTTAccessKey", "Access key", ref this.accessKey, 100, ImGuiInputTextFlags.Password);
-            ImGui.InputTextWithHint("##TTTSecretKey", "Secret key", ref this.secretKey, 100, ImGuiInputTextFlags.Password);
+            var region = this.config.PollyRegion;
+            var regionIndex = Array.IndexOf(Regions, region);
+            if (ImGui.Combo("Region##TTTPollyRegion", ref regionIndex, Regions, Regions.Length))
+            {
+                this.config.PollyRegion = Regions[regionIndex];
+            }
+
+            ImGui.InputTextWithHint("##TTTPollyAccessKey", "Access key", ref this.accessKey, 100, ImGuiInputTextFlags.Password);
+            ImGui.InputTextWithHint("##TTTPollySecretKey", "Secret key", ref this.secretKey, 100, ImGuiInputTextFlags.Password);
 
             if (ImGui.Button("Save##TTTSavePollyAuth"))
             {
@@ -79,16 +90,29 @@ namespace TextToTalk.Backends.Polly
 
             ImGui.TextColored(HintColor, "Credentials secured with Windows Credential Manager");
 
-            var voiceArray = voices.Select(v => v.Name).ToArray();
-            var voiceIdArray = voices.Select(v => v.Id).ToArray();
+            var engine = this.config.PollyEngine;
+            var engineIndex = Array.IndexOf(Engines, engine);
+            if (ImGui.Combo("Engine##TTTPollyEngine", ref engineIndex, Engines, Engines.Length))
+            {
+                this.config.PollyEngine = Engines[engineIndex];
+                this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
+            }
+
+            var voiceArray = this.voices.Select(v => v.Name).ToArray();
+            var voiceIdArray = this.voices.Select(v => v.Id).ToArray();
 
             var currentVoiceId = this.config.PollyVoice;
 
             var voiceIndex = Array.IndexOf(voiceIdArray, currentVoiceId);
-            if (ImGui.Combo("Male voice##TTTVoice3", ref voiceIndex, voiceArray, voices.Count))
+            if (ImGui.Combo("Voice##TTTVoice1", ref voiceIndex, voiceArray, this.voices.Count))
             {
                 this.config.PollyVoice = voiceIdArray[voiceIndex];
                 this.config.Save();
+            }
+
+            if (this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoice) == null)
+            {
+                ImGui.TextColored(Red, "Voice not supported on this engine");
             }
 
             var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
@@ -104,17 +128,27 @@ namespace TextToTalk.Backends.Polly
                 var currentFemaleVoiceId = this.config.PollyVoiceFemale;
 
                 var maleVoiceIndex = Array.IndexOf(voiceIdArray, currentMaleVoiceId);
-                if (ImGui.Combo("Male voice##TTTVoice3", ref maleVoiceIndex, voiceArray, voices.Count))
+                if (ImGui.Combo("Male voice##TTTVoice3", ref maleVoiceIndex, voiceArray, this.voices.Count))
                 {
                     this.config.PollyVoiceMale = voiceIdArray[maleVoiceIndex];
                     this.config.Save();
                 }
 
+                if (this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceMale) == null)
+                {
+                    ImGui.TextColored(Red, "Voice not supported on this engine");
+                }
+
                 var femaleVoiceIndex = Array.IndexOf(voiceIdArray, currentFemaleVoiceId);
-                if (ImGui.Combo("Female voice##TTTVoice4", ref femaleVoiceIndex, voiceArray, voices.Count))
+                if (ImGui.Combo("Female voice##TTTVoice4", ref femaleVoiceIndex, voiceArray, this.voices.Count))
                 {
                     this.config.PollyVoiceFemale = voiceIdArray[femaleVoiceIndex];
                     this.config.Save();
+                }
+
+                if (this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceFemale) == null)
+                {
+                    ImGui.TextColored(Red, "Voice not supported on this engine");
                 }
             }
         }
