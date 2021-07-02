@@ -74,6 +74,7 @@ namespace TextToTalk.Backends.Polly
             if (ImGui.Combo("Region##TTTPollyRegion", ref regionIndex, Regions, Regions.Length))
             {
                 this.config.PollyRegion = Regions[regionIndex];
+                this.config.Save();
             }
 
             ImGui.InputTextWithHint("##TTTPollyAccessKey", "Access key", ref this.accessKey, 100, ImGuiInputTextFlags.Password);
@@ -95,6 +96,8 @@ namespace TextToTalk.Backends.Polly
             if (ImGui.Combo("Engine##TTTPollyEngine", ref engineIndex, Engines, Engines.Length))
             {
                 this.config.PollyEngine = Engines[engineIndex];
+                this.config.Save();
+
                 this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
             }
 
