@@ -50,7 +50,7 @@ namespace TextToTalk
 
             this.sharedState = new SharedState();
 
-            this.backendManager = new VoiceBackendManager(this.config);
+            this.backendManager = new VoiceBackendManager(this.config, this.sharedState);
 
             this.serviceCollection = new PluginServiceCollection();
             this.serviceCollection.AddService(this.config);

@@ -14,9 +14,10 @@ namespace TextToTalk.Backends
 
         private VoiceBackend backend;
 
-        public VoiceBackendManager(PluginConfiguration config)
+        public VoiceBackendManager(PluginConfiguration config, SharedState sharedState)
         {
             this.config = config;
+            this.sharedState = sharedState;
             this.backend = CreateBackendFor(this.config.Backend);
         }
 
