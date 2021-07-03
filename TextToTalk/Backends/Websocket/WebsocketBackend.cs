@@ -17,10 +17,11 @@ namespace TextToTalk.Backends.Websocket
 
         public WebsocketBackend(PluginConfiguration config, SharedState sharedState)
         {
+            this.config = config;
+
             try
             {
                 this.wsServer = new WSServer(this.config.WebsocketPort);
-                this.wsServer.Start();
             }
             catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
             {
@@ -28,7 +29,7 @@ namespace TextToTalk.Backends.Websocket
                 sharedState.WSFailedToBindPort = true;
             }
 
-            this.config = config;
+            this.wsServer.Start();
         }
 
         public override void Say(Gender gender, string text)
