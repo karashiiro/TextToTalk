@@ -1,6 +1,6 @@
 ﻿using System.Speech.Synthesis;
 
-namespace TextToTalk
+namespace TextToTalk.Backends.System
 {
     public static class SpeechSynthesizerExtensions
     {

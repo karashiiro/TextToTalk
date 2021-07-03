@@ -23,7 +23,7 @@ namespace TextToTalk.Backends.System
             {
                 Gender.Male => this.config.GetCurrentMaleVoicePreset(),
                 Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
-                _ => this.config.GetCurrentVoicePreset(),
+                _ => this.config.GetCurrentUngenderedVoicePreset(),
             };
 
             this.speechSynthesizer.UseVoicePreset(voicePreset);
@@ -95,6 +95,11 @@ namespace TextToTalk.Backends.System
                 this.config.Save();
             }
 
+            if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
+            {
+                helpers.OpenVoiceUnlockerWindow?.Invoke();
+            }
+
             ImGui.Spacing();
 
             var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
@@ -106,10 +111,18 @@ namespace TextToTalk.Backends.System
 
             if (useGenderedVoicePresets)
             {
+                var currentUngenderedVoicePreset = this.config.GetCurrentUngenderedVoicePreset();
                 var currentMaleVoicePreset = this.config.GetCurrentMaleVoicePreset();
                 var currentFemaleVoicePreset = this.config.GetCurrentFemaleVoicePreset();
 
                 var presetArray = presets.Select(p => p.Name).ToArray();
+
+                var ungenderedPresetIndex = presets.IndexOf(currentUngenderedVoicePreset);
+                if (ImGui.Combo("Ungendered preset##TTTVoice12", ref ungenderedPresetIndex, presetArray, presets.Count))
+                {
+                    this.config.UngenderedVoicePresetId = presets[ungenderedPresetIndex].Id;
+                    this.config.Save();
+                }
 
                 var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
                 if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presetArray, presets.Count))
@@ -124,12 +137,6 @@ namespace TextToTalk.Backends.System
                     this.config.FemaleVoicePresetId = presets[femalePresetIndex].Id;
                     this.config.Save();
                 }
-            }
-
-            ImGui.Spacing();
-            if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
-            {
-                helpers.OpenVoiceUnlockerWindow?.Invoke();
             }
         }
 

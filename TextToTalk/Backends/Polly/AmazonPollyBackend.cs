@@ -96,6 +96,8 @@ namespace TextToTalk.Backends.Polly
 
             ImGui.TextColored(HintColor, "Credentials secured with Windows Credential Manager");
 
+            ImGui.Spacing();
+
             var engine = this.config.PollyEngine;
             var engineIndex = Array.IndexOf(Engines, engine);
             if (ImGui.Combo("Engine##TTTPollyEngine", ref engineIndex, Engines, Engines.Length))
@@ -118,9 +120,9 @@ namespace TextToTalk.Backends.Polly
                 this.config.Save();
             }
 
-            if (this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoice) == null)
+            if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoice) == null)
             {
-                ImGui.TextColored(Red, "Voice not supported on this engine");
+                ImGuiVoiceNotSupported();
             }
 
             var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
@@ -132,8 +134,21 @@ namespace TextToTalk.Backends.Polly
 
             if (useGenderedVoicePresets)
             {
+                var currentUngenderedVoiceId = this.config.PollyVoiceUngendered;
                 var currentMaleVoiceId = this.config.PollyVoiceMale;
                 var currentFemaleVoiceId = this.config.PollyVoiceFemale;
+
+                var ungenderedVoiceIndex = Array.IndexOf(voiceIdArray, currentUngenderedVoiceId);
+                if (ImGui.Combo("Ungendered voice##TTTVoice3", ref ungenderedVoiceIndex, voiceArray, this.voices.Count))
+                {
+                    this.config.PollyVoiceUngendered = voiceIdArray[ungenderedVoiceIndex];
+                    this.config.Save();
+                }
+
+                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceUngendered) == null)
+                {
+                    ImGuiVoiceNotSupported();
+                }
 
                 var maleVoiceIndex = Array.IndexOf(voiceIdArray, currentMaleVoiceId);
                 if (ImGui.Combo("Male voice##TTTVoice3", ref maleVoiceIndex, voiceArray, this.voices.Count))
@@ -142,9 +157,9 @@ namespace TextToTalk.Backends.Polly
                     this.config.Save();
                 }
 
-                if (this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceMale) == null)
+                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceMale) == null)
                 {
-                    ImGui.TextColored(Red, "Voice not supported on this engine");
+                    ImGuiVoiceNotSupported();
                 }
 
                 var femaleVoiceIndex = Array.IndexOf(voiceIdArray, currentFemaleVoiceId);
@@ -154,11 +169,16 @@ namespace TextToTalk.Backends.Polly
                     this.config.Save();
                 }
 
-                if (this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceFemale) == null)
+                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceFemale) == null)
                 {
-                    ImGui.TextColored(Red, "Voice not supported on this engine");
+                    ImGuiVoiceNotSupported();
                 }
             }
+        }
+
+        private static void ImGuiVoiceNotSupported()
+        {
+            ImGui.TextColored(Red, "Voice not supported on this engine");
         }
 
         protected override void Dispose(bool disposing)

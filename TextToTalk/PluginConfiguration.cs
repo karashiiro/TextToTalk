@@ -81,11 +81,15 @@ namespace TextToTalk
 
         public bool UseGenderedVoicePresets { get; set; }
 
+        public int UngenderedVoicePresetId { get; set; }
+
         public int MaleVoicePresetId { get; set; }
 
         public int FemaleVoicePresetId { get; set; }
 
         public string PollyVoice { get; set; }
+
+        public string PollyVoiceUngendered { get; set; }
 
         public string PollyVoiceMale { get; set; }
 
@@ -210,6 +214,11 @@ namespace TextToTalk
         public VoicePreset GetCurrentVoicePreset()
         {
             return VoicePresets.First(p => p.Id == CurrentVoicePresetId);
+        }
+
+        public VoicePreset GetCurrentUngenderedVoicePreset()
+        {
+            return VoicePresets.FirstOrDefault(p => p.Id == UngenderedVoicePresetId);
         }
 
         public VoicePreset GetCurrentMaleVoicePreset()
