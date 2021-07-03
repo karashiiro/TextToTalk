@@ -139,7 +139,7 @@ namespace TextToTalk.Backends.Polly
                 var currentFemaleVoiceId = this.config.PollyVoiceFemale;
 
                 var ungenderedVoiceIndex = Array.IndexOf(voiceIdArray, currentUngenderedVoiceId);
-                if (ImGui.Combo("Ungendered voice##TTTVoice3", ref ungenderedVoiceIndex, voiceArray, this.voices.Count))
+                if (ImGui.Combo("Ungendered voice##TTTVoice5", ref ungenderedVoiceIndex, voiceArray, this.voices.Count))
                 {
                     this.config.PollyVoiceUngendered = voiceIdArray[ungenderedVoiceIndex];
                     this.config.Save();
