@@ -7,6 +7,6 @@
       AssemblyName="$(AssemblyName)"
       MakeZip="true"
       ManifestType="yaml"
-      Include="TextToTalk.json;TextToTalk.dll;TextToTalk.pdb;VoiceUnlocker.exe;VoiceUnlocker.exe.config;VoiceUnlocker.pdb"/>
+      Include="TextToTalk.json;TextToTalk.dll;TextToTalk.pdb;VoiceUnlocker.exe;VoiceUnlocker.exe.config;VoiceUnlocker.pdb;log4net.dll"/>
   </Target>
 </Project>

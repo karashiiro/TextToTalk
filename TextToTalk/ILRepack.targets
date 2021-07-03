@@ -7,10 +7,6 @@
       <InputAssemblies Include="$(OutputPath)\*.dll" />
     </ItemGroup>
 
-    <ItemGroup>
-      <DoNotInternalizeAssemblies Include="VoiceUnlocker" />
-    </ItemGroup>
-
     <ILRepack
       Parallel="true"
       DebugInfo="true"
