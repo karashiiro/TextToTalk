@@ -4,7 +4,13 @@
 
     <ItemGroup>
       <InputAssemblies Include="$(OutputPath)$(TargetName)$(TargetExt)" />
-      <InputAssemblies Include="$(OutputPath)\*.dll" />
+      <InputAssemblies Include="$(OutputPath)\AdysTech*.dll" />
+      <InputAssemblies Include="$(OutputPath)\AWSSDK*.dll" />
+      <InputAssemblies Include="$(OutputPath)\Dalamud*.dll" />
+      <InputAssemblies Include="$(OutputPath)\Microsoft*.dll" />
+      <InputAssemblies Include="$(OutputPath)\NAudio*.dll" />
+      <InputAssemblies Include="$(OutputPath)\System*.dll" />
+      <InputAssemblies Include="$(OutputPath)\websocket-sharp*.dll" />
     </ItemGroup>
 
     <ILRepack
