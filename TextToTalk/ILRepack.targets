@@ -3,7 +3,7 @@
   <Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
 
     <ItemGroup>
-      <InputAssemblies Include="$(OutputPath)\TextToTalk.dll" />
+      <InputAssemblies Include="$(OutputPath)$(TargetName)$(TargetExt)" />
       <InputAssemblies Include="$(OutputPath)\*.dll" />
     </ItemGroup>
 
@@ -13,12 +13,12 @@
 
     <ILRepack
       Parallel="true"
+      DebugInfo="true"
       Internalize="true"
       InputAssemblies="@(InputAssemblies)"
       LibraryPath="$(OutputPath);$(AppData)\XIVLauncher\addon\Hooks\dev"
       TargetKind="Dll"
-      OutputFile="$(OutputPath)\$(AssemblyName).dll"
+      OutputFile="$(OutputPath)$(TargetName)$(TargetExt)"
       />
-
   </Target>
 </Project>
