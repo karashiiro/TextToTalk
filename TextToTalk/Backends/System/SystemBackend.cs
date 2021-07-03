@@ -1,4 +1,5 @@
-﻿using Dalamud.Plugin;
+﻿using System.Collections.Generic;
+using Dalamud.Plugin;
 using ImGuiNET;
 using System.Linq;
 using System.Speech.Synthesis;
@@ -8,12 +9,20 @@ namespace TextToTalk.Backends.System
 {
     public class SystemBackend : VoiceBackend
     {
-        private readonly SpeechSynthesizer speechSynthesizer;
+        // Using the same speech synthesizer with different presets at the same time
+        // might cause issues.
+        private readonly IDictionary<Gender, SpeechSynthesizer> speechSynthesizers;
+
         private readonly PluginConfiguration config;
 
         public SystemBackend(PluginConfiguration config)
         {
-            this.speechSynthesizer = new SpeechSynthesizer();
+            this.speechSynthesizers = new Dictionary<Gender, SpeechSynthesizer>
+            {
+                {Gender.None, new()},
+                {Gender.Female, new()},
+                {Gender.Male, new()},
+            };
             this.config = config;
         }
 
@@ -26,13 +35,14 @@ namespace TextToTalk.Backends.System
                 _ => this.config.GetCurrentUngenderedVoicePreset(),
             };
 
-            this.speechSynthesizer.UseVoicePreset(voicePreset);
-            this.speechSynthesizer.SpeakAsync(text);
+            this.speechSynthesizers[gender].UseVoicePreset(voicePreset);
+            this.speechSynthesizers[gender].SpeakAsync(text);
         }
 
         public override void CancelSay()
         {
-            this.speechSynthesizer.SpeakAsyncCancelAll();
+            foreach (var synthesizer in this.speechSynthesizers.Values)
+                synthesizer.SpeakAsyncCancelAll();
             PluginLog.Log("Canceled SpeechSynthesizer TTS.");
         }
 
@@ -82,7 +92,7 @@ namespace TextToTalk.Backends.System
             }
 
             var voiceName = currentVoicePreset.VoiceName;
-            var voices = this.speechSynthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
+            var voices = this.speechSynthesizers[Gender.None].GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
             var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
             if (ImGui.Combo("Voice##TTTVoice8",
                 ref voiceIndex,
@@ -144,7 +154,8 @@ namespace TextToTalk.Backends.System
         {
             if (disposing)
             {
-                this.speechSynthesizer.Dispose();
+                foreach (var synthesizer in this.speechSynthesizers.Values)
+                    synthesizer.Dispose();
             }
         }
     }
