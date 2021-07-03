@@ -3,6 +3,7 @@
   <Target Name="ILRepacker" AfterTargets="Build">
 
     <ItemGroup>
+      <InputAssemblies Include="$(OutputPath)\TextToTalk.dll" />
       <InputAssemblies Include="$(OutputPath)\*.dll" />
     </ItemGroup>
 
