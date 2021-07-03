@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <Version>1.6.0.1</Version>
+    <Version>1.6.0.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -58,5 +58,9 @@
     </Reference>
     <Reference Include="System.Speech" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
+    <Exec Command="echo Running Debug Post Build (Please have Dalamud closed)&#xD;&#xA;  echo Copying to DevPlugins&#xD;&#xA;  xcopy &quot;$(TargetPath)\..&quot; &quot;%25appdata%25\XIVLauncher\devPlugins&quot; /Y /E&#xD;&#xA;  exit /b 0&#xD;&#xA;)" />
+  </Target>
 
 </Project>
