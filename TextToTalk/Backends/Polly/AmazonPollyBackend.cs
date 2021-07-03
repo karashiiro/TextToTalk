@@ -41,11 +41,14 @@ namespace TextToTalk.Backends.Polly
                 this.accessKey = credentials.UserName;
                 this.secretKey = credentials.Password;
                 this.polly = new PollyClient(credentials.UserName, credentials.Password, RegionEndpoint.EUWest1);
+                this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
+            }
+            else
+            {
+                this.voices = new List<Voice>();
             }
 
             this.config = config;
-
-            this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
         }
 
         public override void Say(Gender gender, string text)

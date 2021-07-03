@@ -95,13 +95,14 @@ namespace TextToTalk.UI
 
             if (ImGui.CollapsingHeader("Voices##TTTVoicePre1", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                var backends = Enum.GetNames(typeof(TTSBackend)).Select(SplitWords).ToArray();
+                var backends = Enum.GetNames(typeof(TTSBackend));
+                var backendsDisplay = backends.Select(SplitWords).ToArray();
                 var backend = Configuration.Backend;
                 var backendIndex = Array.IndexOf(backends, backend.ToString());
 
-                if (ImGui.Combo("Voice backend##TTTVoicePre2", ref backendIndex, backends, backends.Length))
+                if (ImGui.Combo("Voice backend##TTTVoicePre2", ref backendIndex, backendsDisplay, backends.Length))
                 {
-                    if (Enum.TryParse(backends[backendIndex].Replace(" ", ""), out TTSBackend newBackend))
+                    if (Enum.TryParse(backends[backendIndex], out TTSBackend newBackend))
                     {
                         Configuration.Backend = newBackend;
                         Configuration.Save();
