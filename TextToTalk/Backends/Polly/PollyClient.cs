@@ -2,25 +2,24 @@
 using Amazon.Polly;
 using Amazon.Polly.Model;
 using Amazon.Runtime;
-using NAudio.Wave;
+using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Dalamud.Plugin;
 
 namespace TextToTalk.Backends.Polly
 {
     public class PollyClient : IDisposable
     {
         private readonly AmazonPollyClient client;
-
-        private WaveOut waveOut;
+        private readonly SoundQueue soundQueue;
 
         public PollyClient(string accessKey, string secretKey, RegionEndpoint region)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
+            this.soundQueue = new SoundQueue();
         }
 
         public IList<Voice> GetVoicesForEngine(Engine engine)
@@ -58,44 +57,23 @@ namespace TextToTalk.Backends.Polly
                 return;
             }
 
-            using var responseStream = new MemoryStream();
+            var responseStream = new MemoryStream();
             await res.AudioStream.CopyToAsync(responseStream);
             responseStream.Seek(0, SeekOrigin.Begin);
 
-            using var mp3Reader = new Mp3FileReader(responseStream);
-            using var waveStream = WaveFormatConversionStream.CreatePcmStream(mp3Reader);
-            using var blockAlignmentStream = new BlockAlignReductionStream(waveStream);
-            this.waveOut = new WaveOut();
-
-            waveOut.Init(blockAlignmentStream);
-            waveOut.Play();
-
-            while (waveOut.PlaybackState == PlaybackState.Playing)
-            {
-                await Task.Delay(100);
-            }
-
-            this.waveOut.Dispose();
-            this.waveOut = null;
+            this.soundQueue.EnqueueSound(responseStream);
         }
 
         public Task Cancel()
         {
-            try
-            {
-                this.waveOut?.Stop();
-            }
-            catch (ObjectDisposedException) { }
-
+            this.soundQueue.CancelAllSounds();
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
-            Cancel();
-
             this.client.Dispose();
-            this.waveOut?.Dispose();
+            this.soundQueue.Dispose();
         }
     }
 }
