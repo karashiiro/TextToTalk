@@ -32,6 +32,8 @@ namespace TextToTalk.Backends.Polly
 
         public AmazonPollyBackend(PluginConfiguration config)
         {
+            this.config = config;
+
             TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
             var credentials = CredentialManager.GetCredentials(CredentialsTarget);
@@ -47,8 +49,6 @@ namespace TextToTalk.Backends.Polly
             {
                 this.voices = new List<Voice>();
             }
-
-            this.config = config;
         }
 
         public override void Say(Gender gender, string text)
@@ -64,7 +64,7 @@ namespace TextToTalk.Backends.Polly
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
 
-            _ = this.polly.Say(voiceId, text);
+            _ = this.polly.Say(this.config.PollyEngine, voiceId, text);
         }
 
         public override void CancelSay()
@@ -85,13 +85,21 @@ namespace TextToTalk.Backends.Polly
             ImGui.InputTextWithHint("##TTTPollyAccessKey", "Access key", ref this.accessKey, 100, ImGuiInputTextFlags.Password);
             ImGui.InputTextWithHint("##TTTPollySecretKey", "Secret key", ref this.secretKey, 100, ImGuiInputTextFlags.Password);
 
-            if (ImGui.Button("Save##TTTSavePollyAuth"))
+            if (ImGui.Button("Save and Login##TTTSavePollyAuth"))
             {
                 var credentials = new NetworkCredential(this.accessKey, this.secretKey);
                 CredentialManager.SaveCredentials(CredentialsTarget, credentials);
 
-                this.polly?.Dispose();
-                this.polly = new PollyClient(this.accessKey, this.secretKey, RegionEndpoint.EUWest1);
+                var regionEndpoint = RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion);
+                if (regionEndpoint == null)
+                {
+                    ImGui.TextColored(Red, "Region invalid!");
+                }
+                else
+                {
+                    this.polly?.Dispose();
+                    this.polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint);
+                }
             }
 
             ImGui.TextColored(HintColor, "Credentials secured with Windows Credential Manager");
@@ -110,20 +118,6 @@ namespace TextToTalk.Backends.Polly
 
             var voiceArray = this.voices.Select(v => v.Name).ToArray();
             var voiceIdArray = this.voices.Select(v => v.Id).ToArray();
-
-            var currentVoiceId = this.config.PollyVoice;
-
-            var voiceIndex = Array.IndexOf(voiceIdArray, currentVoiceId);
-            if (ImGui.Combo("Voice##TTTVoice1", ref voiceIndex, voiceArray, this.voices.Count))
-            {
-                this.config.PollyVoice = voiceIdArray[voiceIndex];
-                this.config.Save();
-            }
-
-            if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoice) == null)
-            {
-                ImGuiVoiceNotSupported();
-            }
 
             var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
             if (ImGui.Checkbox("Use gendered voices##TTTVoice2", ref useGenderedVoicePresets))
@@ -170,6 +164,21 @@ namespace TextToTalk.Backends.Polly
                 }
 
                 if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceFemale) == null)
+                {
+                    ImGuiVoiceNotSupported();
+                }
+            }
+            else
+            {
+                var currentVoiceId = this.config.PollyVoice;
+                var voiceIndex = Array.IndexOf(voiceIdArray, currentVoiceId);
+                if (ImGui.Combo("Voice##TTTVoice1", ref voiceIndex, voiceArray, this.voices.Count))
+                {
+                    this.config.PollyVoice = voiceIdArray[voiceIndex];
+                    this.config.Save();
+                }
+
+                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoice) == null)
                 {
                     ImGuiVoiceNotSupported();
                 }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Dalamud.Plugin;
 
 namespace TextToTalk.Backends.Polly
 {
@@ -34,18 +35,29 @@ namespace TextToTalk.Backends.Polly
             return voicesRes.Voices;
         }
 
-        public async Task Say(VoiceId voice, string text)
+        public async Task Say(Engine engine, VoiceId voice, string text)
         {
             var req = new SynthesizeSpeechRequest
             {
                 Text = text,
                 VoiceId = voice,
+                Engine = engine,
                 OutputFormat = OutputFormat.Mp3,
                 SampleRate = "8000",
                 TextType = TextType.Text,
             };
 
-            var res = await this.client.SynthesizeSpeechAsync(req);
+            SynthesizeSpeechResponse res;
+            try
+            {
+                res = await this.client.SynthesizeSpeechAsync(req);
+            }
+            catch (Exception e)
+            {
+                PluginLog.LogError(e, "Synthesis request failed in {0}.", nameof(PollyClient));
+                return;
+            }
+
             using var responseStream = new MemoryStream();
             await res.AudioStream.CopyToAsync(responseStream);
             responseStream.Seek(0, SeekOrigin.Begin);
