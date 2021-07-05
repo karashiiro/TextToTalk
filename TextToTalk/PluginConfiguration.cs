@@ -101,6 +101,8 @@ namespace TextToTalk
 
         public int PollySampleRate { get; set; } = 22050;
 
+        public float PollyVolume { get; set; } = 1.0f;
+
         [JsonIgnore]
         public bool InitializedEver
         {

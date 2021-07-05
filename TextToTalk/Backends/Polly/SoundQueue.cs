@@ -8,7 +8,7 @@ namespace TextToTalk.Backends.Polly
 {
     public class SoundQueue : IDisposable
     {
-        private readonly ConcurrentQueue<MemoryStream> queuedSounds;
+        private readonly ConcurrentQueue<SoundQueueItem> queuedSounds;
         private readonly Thread soundThread;
 
         private WaveOut waveOut;
@@ -16,7 +16,7 @@ namespace TextToTalk.Backends.Polly
 
         public SoundQueue()
         {
-            this.queuedSounds = new ConcurrentQueue<MemoryStream>();
+            this.queuedSounds = new ConcurrentQueue<SoundQueueItem>();
             this.active = true;
             this.soundThread = new Thread(PlaySoundLoop);
             this.soundThread.Start();
@@ -26,13 +26,13 @@ namespace TextToTalk.Backends.Polly
         {
             while (active)
             {
-                if (!this.queuedSounds.TryDequeue(out var nextStream))
+                if (!this.queuedSounds.TryDequeue(out var nextItem))
                 {
                     Thread.Sleep(100);
                     continue;
                 }
 
-                using var mp3Reader = new Mp3FileReader(nextStream);
+                using var mp3Reader = new Mp3FileReader(nextItem.Data);
                 using var waveStream = WaveFormatConversionStream.CreatePcmStream(mp3Reader);
                 using var blockAlignmentStream = new BlockAlignReductionStream(waveStream);
 
@@ -40,7 +40,10 @@ namespace TextToTalk.Backends.Polly
                 {
                     Thread.Sleep(100);
                 }
-                this.waveOut = new WaveOut();
+                this.waveOut = new WaveOut
+                {
+                    Volume = nextItem.Volume,
+                };
 
                 this.waveOut.Init(blockAlignmentStream);
                 this.waveOut.Play();
@@ -53,21 +56,25 @@ namespace TextToTalk.Backends.Polly
                 this.waveOut.Dispose();
                 this.waveOut = null;
 
-                nextStream.Dispose();
+                nextItem.Data.Dispose();
             }
         }
 
-        public void EnqueueSound(MemoryStream stream)
+        public void EnqueueSound(MemoryStream data, float volume)
         {
-            this.queuedSounds.Enqueue(stream);
+            this.queuedSounds.Enqueue(new SoundQueueItem
+            {
+                Data = data,
+                Volume = volume,
+            });
         }
 
         public void CancelAllSounds()
         {
             while (this.queuedSounds.Count > 0)
             {
-                this.queuedSounds.TryDequeue(out var nextStream);
-                nextStream.Dispose();
+                this.queuedSounds.TryDequeue(out var nextItem);
+                nextItem.Data.Dispose();
             }
             StopWaveOut();
         }
@@ -87,6 +94,13 @@ namespace TextToTalk.Backends.Polly
             this.soundThread.Join();
             CancelAllSounds();
             this.waveOut?.Dispose();
+        }
+
+        private class SoundQueueItem
+        {
+            public MemoryStream Data { get; set; }
+
+            public float Volume { get; set; }
         }
     }
 }

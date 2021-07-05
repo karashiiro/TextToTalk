@@ -34,7 +34,7 @@ namespace TextToTalk.Backends.Polly
             return voicesRes.Voices;
         }
 
-        public async Task Say(Engine engine, VoiceId voice, int sampleRate, string text)
+        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, string text)
         {
             var req = new SynthesizeSpeechRequest
             {
@@ -61,7 +61,7 @@ namespace TextToTalk.Backends.Polly
             await res.AudioStream.CopyToAsync(responseStream);
             responseStream.Seek(0, SeekOrigin.Begin);
 
-            this.soundQueue.EnqueueSound(responseStream);
+            this.soundQueue.EnqueueSound(responseStream, volume);
         }
 
         public Task Cancel()

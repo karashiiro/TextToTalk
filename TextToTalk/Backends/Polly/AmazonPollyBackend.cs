@@ -64,7 +64,7 @@ namespace TextToTalk.Backends.Polly
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
 
-            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, text);
+            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, text);
         }
 
         public override void CancelSay()
