@@ -34,7 +34,7 @@ namespace TextToTalk.Backends.Polly
             return voicesRes.Voices;
         }
 
-        public async Task Say(Engine engine, VoiceId voice, string text)
+        public async Task Say(Engine engine, VoiceId voice, int sampleRate, string text)
         {
             var req = new SynthesizeSpeechRequest
             {
@@ -42,7 +42,7 @@ namespace TextToTalk.Backends.Polly
                 VoiceId = voice,
                 Engine = engine,
                 OutputFormat = OutputFormat.Mp3,
-                SampleRate = "8000",
+                SampleRate = sampleRate.ToString(),
                 TextType = TextType.Text,
             };
 

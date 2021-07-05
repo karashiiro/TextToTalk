@@ -99,6 +99,8 @@ namespace TextToTalk
 
         public string PollyRegion { get; set; }
 
+        public int PollySampleRate { get; set; } = 22050;
+
         [JsonIgnore]
         public bool InitializedEver
         {
