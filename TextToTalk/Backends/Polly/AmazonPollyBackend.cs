@@ -116,6 +116,22 @@ namespace TextToTalk.Backends.Polly
                 this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
             }
 
+            var validSampleRates = new[] { "8000", "16000", "22050", "24000" };
+            var sampleRate = this.config.PollySampleRate.ToString();
+            var sampleRateIndex = Array.IndexOf(validSampleRates, sampleRate);
+            if (ImGui.Combo("Sample rate##TTTVoice6", ref sampleRateIndex, validSampleRates, validSampleRates.Length))
+            {
+                this.config.PollySampleRate = int.Parse(validSampleRates[sampleRateIndex]);
+                this.config.Save();
+            }
+
+            var volume = (int)(this.config.PollyVolume * 100);
+            if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 100))
+            {
+                this.config.PollyVolume = (float)Math.Round((double)volume / 100, 2);
+                this.config.Save();
+            }
+
             var voiceArray = this.voices.Select(v => v.Name).ToArray();
             var voiceIdArray = this.voices.Select(v => v.Id).ToArray();
 
