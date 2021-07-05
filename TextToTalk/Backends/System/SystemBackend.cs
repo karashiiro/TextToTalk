@@ -9,21 +9,15 @@ namespace TextToTalk.Backends.System
 {
     public class SystemBackend : VoiceBackend
     {
-        // Using the same speech synthesizer with different presets at the same time
-        // might cause issues.
-        private readonly IDictionary<Gender, SpeechSynthesizer> speechSynthesizers;
+        private static readonly SpeechSynthesizer DummySynthesizer = new();
 
         private readonly PluginConfiguration config;
+        private readonly SoundQueue soundQueue;
 
         public SystemBackend(PluginConfiguration config)
         {
-            this.speechSynthesizers = new Dictionary<Gender, SpeechSynthesizer>
-            {
-                {Gender.None, new()},
-                {Gender.Female, new()},
-                {Gender.Male, new()},
-            };
             this.config = config;
+            this.soundQueue = new SoundQueue();
         }
 
         public override void Say(Gender gender, string text)
@@ -35,14 +29,12 @@ namespace TextToTalk.Backends.System
                 _ => this.config.GetCurrentUngenderedVoicePreset(),
             };
 
-            this.speechSynthesizers[gender].UseVoicePreset(voicePreset);
-            this.speechSynthesizers[gender].SpeakAsync(text);
+            this.soundQueue.EnqueueSound(voicePreset, text);
         }
 
         public override void CancelSay()
         {
-            foreach (var synthesizer in this.speechSynthesizers.Values)
-                synthesizer.SpeakAsyncCancelAll();
+            this.soundQueue.CancelAllSounds();
             PluginLog.Log("Canceled SpeechSynthesizer TTS.");
         }
 
@@ -92,7 +84,7 @@ namespace TextToTalk.Backends.System
             }
 
             var voiceName = currentVoicePreset.VoiceName;
-            var voices = this.speechSynthesizers[Gender.None].GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
+            var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
             var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
             if (ImGui.Combo("Voice##TTTVoice8",
                 ref voiceIndex,
@@ -154,8 +146,7 @@ namespace TextToTalk.Backends.System
         {
             if (disposing)
             {
-                foreach (var synthesizer in this.speechSynthesizers.Values)
-                    synthesizer.Dispose();
+                this.soundQueue.Dispose();
             }
         }
     }
