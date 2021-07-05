@@ -43,7 +43,7 @@ namespace TextToTalk.Backends.Polly
                 Engine = engine,
                 OutputFormat = OutputFormat.Mp3,
                 SampleRate = sampleRate.ToString(),
-                TextType = TextType.Text,
+                TextType = TextType.Ssml,
             };
 
             SynthesizeSpeechResponse res;
