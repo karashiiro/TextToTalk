@@ -103,6 +103,8 @@ namespace TextToTalk
 
         public float PollyVolume { get; set; } = 1.0f;
 
+        public int PollyPlaybackRate { get; set; } = 100;
+
         [JsonIgnore]
         public bool InitializedEver
         {

@@ -64,6 +64,8 @@ namespace TextToTalk.Backends.Polly
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
 
+            text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
+
             _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, text);
         }
 
@@ -122,6 +124,14 @@ namespace TextToTalk.Backends.Polly
             if (ImGui.Combo("Sample rate##TTTVoice6", ref sampleRateIndex, validSampleRates, validSampleRates.Length))
             {
                 this.config.PollySampleRate = int.Parse(validSampleRates[sampleRateIndex]);
+                this.config.Save();
+            }
+
+            var playbackRate = this.config.PollyPlaybackRate;
+            if (ImGui.SliderInt("Playback rate##TTTVoice8", ref playbackRate, 20, 200, "%d%%",
+                ImGuiSliderFlags.AlwaysClamp))
+            {
+                this.config.PollyPlaybackRate = playbackRate;
                 this.config.Save();
             }
 
