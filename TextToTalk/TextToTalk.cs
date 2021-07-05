@@ -207,7 +207,7 @@ namespace TextToTalk
         private void Say(Actor speaker, string textValue)
         {
             var cleanText = TalkUtils.StripSSMLTokens(textValue);
-            var gender = GetActorGender(speaker);
+            var gender = this.config.UseGenderedVoicePresets ? GetActorGender(speaker) : Gender.None;
             this.backendManager.Say(gender, cleanText);
         }
 
