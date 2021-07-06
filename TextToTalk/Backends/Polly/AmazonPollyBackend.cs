@@ -165,7 +165,7 @@ namespace TextToTalk.Backends.Polly
                     this.config.Save();
                 }
 
-                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceUngendered) == null)
+                if (this.voices.Count > 0 && !this.voices.Any(v => v.Id == this.config.PollyVoiceUngendered))
                 {
                     ImGuiVoiceNotSupported();
                 }
@@ -177,7 +177,7 @@ namespace TextToTalk.Backends.Polly
                     this.config.Save();
                 }
 
-                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceMale) == null)
+                if (this.voices.Count > 0 && !this.voices.Any(v => v.Id == this.config.PollyVoiceMale))
                 {
                     ImGuiVoiceNotSupported();
                 }
@@ -189,7 +189,7 @@ namespace TextToTalk.Backends.Polly
                     this.config.Save();
                 }
 
-                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoiceFemale) == null)
+                if (this.voices.Count > 0 && !this.voices.Any(v => v.Id == this.config.PollyVoiceFemale))
                 {
                     ImGuiVoiceNotSupported();
                 }
@@ -204,7 +204,7 @@ namespace TextToTalk.Backends.Polly
                     this.config.Save();
                 }
 
-                if (this.voices.Count > 0 && this.voices.FirstOrDefault(v => v.Id == this.config.PollyVoice) == null)
+                if (this.voices.Count > 0 && !this.voices.Any(v => v.Id == this.config.PollyVoice))
                 {
                     ImGuiVoiceNotSupported();
                 }
