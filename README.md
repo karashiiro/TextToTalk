@@ -1,5 +1,5 @@
 # TextToTalk
-Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, and WebSocket support for external interfacing.
+Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, Amazon Polly, and external interfacing over WebSocket.
 
 ## Commands
 * `/tttconfig`: Opens the configuration window.
@@ -15,7 +15,8 @@ TTS prompt:
 ```
 {
 	"Type": "Say",
-	"Payload": "Someone someone says something"
+	"Payload": "Someone someone says something",
+	"SpeakerGender": 1
 }
 ```
 
@@ -23,13 +24,17 @@ TTS cancel:
 ```
 {
 	"Type": "Cancel",
-	"Payload": ""
+	"Payload": "",
+	"SpeakerGender": -1
 }
 ```
 
-The WebSocket address is shown under the configuration checkbox.
+The WebSocket address is shown under the configuration checkbox. Gender codes can be found in [`Gender.cs`](https://github.com/karashiiro/TextToTalk/blob/master/TextToTalk/GameEnums/Gender.cs).
 
 ## Screenshots
 ![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/0.png)
 ![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/1.png)
 ![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/2.png)
+![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/3.png)
+![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/4.png)
+![Screenshot](https://raw.githubusercontent.com/karashiiro/TextToTalk/master/Assets/5.png)
