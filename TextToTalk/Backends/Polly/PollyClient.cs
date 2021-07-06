@@ -29,9 +29,16 @@ namespace TextToTalk.Backends.Polly
                 Engine = engine,
             };
 
-            var voicesRes = this.client.DescribeVoices(voicesReq);
+            var voices = new List<Voice>();
+            string nextToken;
+            do
+            {
+                var voicesRes = this.client.DescribeVoices(voicesReq);
+                voices.AddRange(voicesRes.Voices);
+                nextToken = voicesRes.NextToken;
+            } while (!string.IsNullOrEmpty(nextToken));
 
-            return voicesRes.Voices;
+            return voices;
         }
 
         public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, string text)
