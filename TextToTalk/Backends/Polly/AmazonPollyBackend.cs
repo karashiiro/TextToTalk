@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Numerics;
+using System.Text.RegularExpressions;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly
@@ -74,6 +75,8 @@ namespace TextToTalk.Backends.Polly
             _ = this.polly.Cancel();
         }
 
+
+        private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
         public override void DrawSettings(ImExposedFunctions helpers)
         {
             var region = this.config.PollyRegion;
@@ -89,7 +92,7 @@ namespace TextToTalk.Backends.Polly
 
             if (ImGui.Button("Save and Login##TTTSavePollyAuth"))
             {
-                var credentials = new NetworkCredential(this.accessKey, this.secretKey);
+                var credentials = new NetworkCredential(Whitespace.Replace(this.accessKey, ""), Whitespace.Replace(this.secretKey, ""));
                 CredentialManager.SaveCredentials(CredentialsTarget, credentials);
 
                 var regionEndpoint = RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion);
