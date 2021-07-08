@@ -1,4 +1,5 @@
 ﻿using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -35,38 +36,18 @@ namespace TextToTalk.Backends.Polly
                 using var mp3Reader = new Mp3FileReader(nextItem.Data);
 
                 // Adjust the volume of the MP3 data
-                {
-                    // Write out the stream data to a buffer
-                    var buffer = new byte[mp3Reader.WaveFormat.SampleRate];
-                    int read;
-                    do
-                    {
-                        read = mp3Reader.Read(buffer, 0, buffer.Length);
-                    } while (read > 0);
+                var sampleProvider = mp3Reader.ToSampleProvider();
+                var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
 
-                    // Scale the data
-                    mp3Reader.Seek(0, SeekOrigin.Begin);
-                    for (var n = 0; n < buffer.Length; n++)
-                    {
-                        buffer[n] = (byte)(buffer[n] * nextItem.Volume);
-                    }
-
-                    // Write the data back to the stream
-                    mp3Reader.Write(buffer, 0, buffer.Length);
-                    mp3Reader.Seek(0, SeekOrigin.Begin);
-                }
-
-                using var waveStream = WaveFormatConversionStream.CreatePcmStream(mp3Reader);
-                using var blockAlignmentStream = new BlockAlignReductionStream(waveStream);
-
+                // Wait for the last sound to stop
                 while (this.waveOut != null)
                 {
                     Thread.Sleep(100);
                 }
 
+                // Play the sound
                 this.waveOut = new WaveOut();
-
-                this.waveOut.Init(blockAlignmentStream);
+                this.waveOut.Init(volumeSampleProvider);
                 this.waveOut.Play();
 
                 while (this.waveOut.PlaybackState == PlaybackState.Playing)
@@ -74,6 +55,7 @@ namespace TextToTalk.Backends.Polly
                     Thread.Sleep(100);
                 }
 
+                // Cleanup
                 this.waveOut.Dispose();
                 this.waveOut = null;
 
