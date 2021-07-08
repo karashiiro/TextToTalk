@@ -65,6 +65,7 @@ namespace TextToTalk.Backends.Polly
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
 
+            text = text.Replace(" - ", "<break strength=\"medium\"/>");
             text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
 
             _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, text);
