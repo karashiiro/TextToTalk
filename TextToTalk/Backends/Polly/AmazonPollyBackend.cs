@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using Dalamud.Plugin;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly
@@ -65,7 +64,7 @@ namespace TextToTalk.Backends.Polly
             var voiceId = this.voices
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
-            
+
             text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
 
             _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, text);

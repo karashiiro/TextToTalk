@@ -115,9 +115,6 @@ namespace TextToTalk
 
         private unsafe void PollTalkAddon(Framework framework)
         {
-            if (!this.config.Enabled) return;
-            if (!this.config.ReadFromQuestTalkAddon) return;
-
             if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
             {
                 this.talkAddonInterface = this.pluginInterface.Framework.Gui.GetAddonByName("Talk", 1);
@@ -141,6 +138,11 @@ namespace TextToTalk
                     SetLastSpeaker(talkAddonText.Speaker);
                 }
             }
+
+            // This check is performed after setting the last text and speaker so that enabling
+            // TTS doesn't suddenly say text for a recently-closed dialogue box.
+            if (!this.config.Enabled) return;
+            if (!this.config.ReadFromQuestTalkAddon) return;
 
             var speaker = this.pluginInterface.ClientState.Actors
                 .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
