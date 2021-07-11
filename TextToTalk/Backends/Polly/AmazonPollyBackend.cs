@@ -65,11 +65,7 @@ namespace TextToTalk.Backends.Polly
             var voiceId = this.voices
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
-
-            PluginLog.Log(text);
-            text = text
-                .Replace("─", " - ") // I don't think these are the same character, but they're both used
-                .Replace("—", " - ");
+            
             text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
 
             _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, text);

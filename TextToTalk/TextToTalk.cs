@@ -206,7 +206,10 @@ namespace TextToTalk
 
         private void Say(Actor speaker, string textValue)
         {
-            var cleanText = TalkUtils.StripSSMLTokens(textValue);
+            var cleanText = Pipe(
+                textValue,
+                TalkUtils.StripSSMLTokens,
+                TalkUtils.NormalizePunctuation);
             var gender = this.config.UseGenderedVoicePresets ? GetActorGender(speaker) : Gender.None;
             this.backendManager.Say(gender, cleanText);
         }
@@ -262,6 +265,11 @@ namespace TextToTalk
         private bool ShouldSaySender(XivChatType type)
         {
             return this.config.EnableNameWithSay && (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
+        }
+
+        private static T Pipe<T>(T input, params Func<T, T>[] transforms)
+        {
+            return transforms.Aggregate(input, (agg, next) => next(agg));
         }
 
         #region IDisposable Support
