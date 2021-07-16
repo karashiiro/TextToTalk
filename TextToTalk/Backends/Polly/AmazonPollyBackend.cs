@@ -59,6 +59,7 @@ namespace TextToTalk.Backends.Polly
                 this.cloudLexicons = new List<LexiconDescription>();
             }
 
+            // Poll the lexicon list for updates since it is eventually-consistent
             this.lexiconUpdateAction = new RepeatingAction(() =>
             {
                 lock (this.cloudLexicons)
@@ -91,8 +92,8 @@ namespace TextToTalk.Backends.Polly
             _ = this.polly.Cancel();
         }
 
-        private Exception lexiconUploadException;
-        private bool lexiconUploadSucceeded;
+        private Exception lexiconUploadException; // Shown to the user on failure
+        private bool lexiconUploadSucceeded; // Controls whether the success icon is shown
         private void CheckLexiconFileSelected()
         {
             if (this.pollyLexiconFileDialog == null) return;
@@ -211,7 +212,7 @@ namespace TextToTalk.Backends.Polly
             if (ImGui.Button("Upload lexicon##TTTPollyAddLexicon"))
             {
                 this.pollyLexiconFileDialog = new FileDialog();
-                this.pollyLexiconFileDialog.StartFileSelect();
+                this.pollyLexiconFileDialog.StartFileSelect(); // Launches the file selection asynchronously
             }
 
             if (this.lexiconUploadSucceeded)
