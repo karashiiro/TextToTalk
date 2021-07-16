@@ -24,9 +24,11 @@ namespace TextToTalk.Backends.Polly
         private static readonly string[] Engines = { Engine.Neural, Engine.Standard };
 
         private readonly PluginConfiguration config;
+        private readonly RepeatingAction lexiconUpdateAction;
 
         private PollyClient polly;
         private IList<Voice> voices;
+        private IList<LexiconDescription> cloudLexicons;
 
         private string accessKey = string.Empty;
         private string secretKey = string.Empty;
@@ -45,11 +47,21 @@ namespace TextToTalk.Backends.Polly
                 this.secretKey = credentials.Password;
                 this.polly = new PollyClient(credentials.UserName, credentials.Password, RegionEndpoint.EUWest1);
                 this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
+                this.cloudLexicons = this.polly.GetLexicons();
             }
             else
             {
                 this.voices = new List<Voice>();
+                this.cloudLexicons = new List<LexiconDescription>();
             }
+
+            this.lexiconUpdateAction = new RepeatingAction(() =>
+            {
+                lock (this.cloudLexicons)
+                {
+                    this.cloudLexicons = this.polly.GetLexicons();
+                }
+            }, new TimeSpan(0, 0, 5));
         }
 
         public override void Say(Gender gender, string text)
@@ -67,7 +79,7 @@ namespace TextToTalk.Backends.Polly
 
             text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
 
-            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, text);
+            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, this.config.PollyLexicons, text);
         }
 
         public override void CancelSay()
@@ -104,6 +116,12 @@ namespace TextToTalk.Backends.Polly
                 {
                     this.polly?.Dispose();
                     this.polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint);
+
+                    this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
+                    lock (this.cloudLexicons)
+                    {
+                        this.cloudLexicons = this.polly.GetLexicons();
+                    }
                 }
             }
 
@@ -144,6 +162,27 @@ namespace TextToTalk.Backends.Polly
                 this.config.PollyVolume = (float)Math.Round((double)volume / 100, 2);
                 this.config.Save();
             }
+
+            ImGui.Text("Lexicons");
+            lock (this.cloudLexicons)
+            {
+                var lexicons = this.cloudLexicons.Select(l => l.Name).ToArray();
+                for (var i = 0; i < this.config.PollyLexicons.Count; i++)
+                {
+                    var lexiconIndex = Array.IndexOf(lexicons, lexicons[i]);
+                    if (ImGui.Combo($"##TTTPollyLexicon{i}", ref lexiconIndex, lexicons, lexicons.Length))
+                    {
+                        this.config.PollyLexicons[i] = lexicons[lexiconIndex];
+                        this.config.Save();
+                    }
+                }
+            }
+
+            if (ImGui.Button("Upload lexicon##TTTPollyAddLexicon"))
+            {
+                // do nothing
+            }
+            ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available.");
 
             var voiceArray = this.voices.Select(v => v.Name).ToArray();
             var voiceIdArray = this.voices.Select(v => v.Id).ToArray();
@@ -224,6 +263,7 @@ namespace TextToTalk.Backends.Polly
             if (disposing)
             {
                 this.polly?.Dispose();
+                this.lexiconUpdateAction.Dispose();
             }
         }
     }

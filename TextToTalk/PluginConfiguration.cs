@@ -105,6 +105,8 @@ namespace TextToTalk
 
         public int PollyPlaybackRate { get; set; } = 100;
 
+        public List<string> PollyLexicons { get; set; }
+
         [JsonIgnore]
         public bool InitializedEver
         {
@@ -133,6 +135,15 @@ namespace TextToTalk
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
             VoicePresets ??= new List<VoicePreset>();
+
+            PollyLexicons ??= new List<string>();
+            if (PollyLexicons.Count < 5)
+            {
+                for (var i = 0; i < 5 - PollyLexicons.Count; i++)
+                {
+                    PollyLexicons.Add("");
+                }
+            }
 
             if (!InitializedEver)
             {

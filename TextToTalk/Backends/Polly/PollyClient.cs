@@ -6,6 +6,7 @@ using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace TextToTalk.Backends.Polly
@@ -20,6 +21,22 @@ namespace TextToTalk.Backends.Polly
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
             this.soundQueue = new SoundQueue();
+        }
+
+        public IList<LexiconDescription> GetLexicons()
+        {
+            var lexiconsReq = new ListLexiconsRequest();
+
+            var lexicons = new List<LexiconDescription>();
+            string nextToken;
+            do
+            {
+                var lexiconsRes = this.client.ListLexicons(lexiconsReq);
+                lexicons.AddRange(lexiconsRes.Lexicons);
+                nextToken = lexiconsRes.NextToken;
+            } while (!string.IsNullOrEmpty(nextToken));
+
+            return lexicons;
         }
 
         public IList<Voice> GetVoicesForEngine(Engine engine)
@@ -41,7 +58,7 @@ namespace TextToTalk.Backends.Polly
             return voices;
         }
 
-        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, string text)
+        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, IEnumerable<string> lexicons, string text)
         {
             var req = new SynthesizeSpeechRequest
             {
@@ -50,6 +67,7 @@ namespace TextToTalk.Backends.Polly
                 Engine = engine,
                 OutputFormat = OutputFormat.Mp3,
                 SampleRate = sampleRate.ToString(),
+                LexiconNames = lexicons.Where(l => !string.IsNullOrEmpty(l)).ToList(),
                 TextType = TextType.Ssml,
             };
 
