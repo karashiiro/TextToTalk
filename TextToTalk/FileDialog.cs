@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Dalamud.Plugin;
 
@@ -17,38 +18,41 @@ namespace TextToTalk
 
         public void StartFileSelect()
         {
-            if (this.dialogActive)
-                return;
-            this.dialogActive = true;
-
-            using var saveFileDialogue = new SaveFileDialog
+            Task.Run(() =>
             {
-                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
-                AddExtension = true,
-                AutoUpgradeEnabled = true,
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                RestoreDirectory = true,
-                ShowHelp = true,
-            };
+                if (this.dialogActive)
+                    return;
+                this.dialogActive = true;
 
-            try
-            {
-                if (saveFileDialogue.ShowDialog(null) != DialogResult.OK)
+                using var saveFileDialogue = new OpenFileDialog
                 {
+                    Filter = "PLS files (*.pls)|*.pls|XML files (*.xml)|*.xml|All files (*.*)|*.*",
+                    AddExtension = true,
+                    AutoUpgradeEnabled = true,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    RestoreDirectory = true,
+                    ShowHelp = true,
+                };
+
+                try
+                {
+                    if (saveFileDialogue.ShowDialog(null) != DialogResult.OK)
+                    {
+                        this.dialogActive = false;
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, e.Message);
                     this.dialogActive = false;
                     return;
                 }
-            }
-            catch (Exception e)
-            {
-                PluginLog.LogError(e, e.Message);
+
+                SelectedFile = saveFileDialogue.FileName;
+
                 this.dialogActive = false;
-                return;
-            }
-
-            SelectedFile = saveFileDialogue.FileName;
-
-            this.dialogActive = false;
+            });
         }
     }
 }

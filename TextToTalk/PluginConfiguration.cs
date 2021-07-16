@@ -139,7 +139,7 @@ namespace TextToTalk
             PollyLexicons ??= new List<string>();
             if (PollyLexicons.Count < 5)
             {
-                for (var i = 0; i < 5 - PollyLexicons.Count; i++)
+                for (var i = 0; i <= 5 - PollyLexicons.Count; i++)
                 {
                     PollyLexicons.Add("");
                 }

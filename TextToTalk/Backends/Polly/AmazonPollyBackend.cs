@@ -195,13 +195,14 @@ namespace TextToTalk.Backends.Polly
             ImGui.Text("Lexicons");
             lock (this.cloudLexicons)
             {
-                var lexicons = this.cloudLexicons.Select(l => l.Name).ToArray();
+                var setLexicons = this.config.PollyLexicons.ToArray();
+                var cloudLexiconNames = this.cloudLexicons.Select(l => l.Name).ToArray();
                 for (var i = 0; i < this.config.PollyLexicons.Count; i++)
                 {
-                    var lexiconIndex = Array.IndexOf(lexicons, lexicons[i]);
-                    if (ImGui.Combo($"##TTTPollyLexicon{i}", ref lexiconIndex, lexicons, lexicons.Length))
+                    var lexiconIndex = Array.IndexOf(cloudLexiconNames, setLexicons[i]);
+                    if (ImGui.Combo($"##TTTPollyLexicon{i}", ref lexiconIndex, cloudLexiconNames, cloudLexiconNames.Length))
                     {
-                        this.config.PollyLexicons[i] = lexicons[lexiconIndex];
+                        this.config.PollyLexicons[i] = cloudLexiconNames[lexiconIndex];
                         this.config.Save();
                     }
                 }
@@ -224,7 +225,9 @@ namespace TextToTalk.Backends.Polly
 
             if (this.lexiconUploadException != null)
             {
-                ImGui.TextColored(Red, this.lexiconUploadException.Message);
+                ImGui.PushStyleColor(ImGuiCol.Text, Red);
+                ImGui.TextWrapped(this.lexiconUploadException.Message);
+                ImGui.PopStyleColor();
             }
             ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available.");
 
