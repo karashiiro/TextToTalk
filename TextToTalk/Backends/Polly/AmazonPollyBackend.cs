@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text.RegularExpressions;
+using Dalamud.Interface;
 using Dalamud.Plugin;
 using Gender = TextToTalk.GameEnums.Gender;
 
@@ -19,6 +20,7 @@ namespace TextToTalk.Backends.Polly
         private const string CredentialsTarget = "TextToTalk_AccessKeys_AmazonPolly";
 
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
+        private static readonly Vector4 Green = new(1, 0, 1, 0);
         private static readonly Vector4 Red = new(1, 0, 0, 1);
 
         private static readonly string[] Regions = RegionEndpoint.EnumerableAllRegions.Select(r => r.SystemName).ToArray();
@@ -90,6 +92,7 @@ namespace TextToTalk.Backends.Polly
         }
 
         private Exception lexiconUploadException;
+        private bool lexiconUploadSucceeded;
         private void CheckLexiconFileSelected()
         {
             if (this.pollyLexiconFileDialog == null) return;
@@ -102,11 +105,13 @@ namespace TextToTalk.Backends.Polly
             {
                 this.polly.UploadLexicon(filePath);
                 this.lexiconUploadException = null;
+                this.lexiconUploadSucceeded = true;
             }
             catch (Exception e)
             {
                 PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
                 this.lexiconUploadException = e;
+                this.lexiconUploadSucceeded = false;
             }
         }
 
@@ -206,6 +211,15 @@ namespace TextToTalk.Backends.Polly
             {
                 this.pollyLexiconFileDialog = new FileDialog();
                 this.pollyLexiconFileDialog.StartFileSelect();
+            }
+
+            if (this.lexiconUploadSucceeded)
+            {
+                ImGui.SameLine();
+                
+                ImGui.PushFont(UiBuilder.IconFont);
+                ImGui.TextColored(Green, FontAwesomeIcon.CheckCircle.ToIconString());
+                ImGui.PopFont();
             }
 
             if (this.lexiconUploadException != null)
