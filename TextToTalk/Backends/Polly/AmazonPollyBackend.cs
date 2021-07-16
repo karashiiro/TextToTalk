@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text.RegularExpressions;
+using Dalamud.Plugin;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly
@@ -27,6 +28,7 @@ namespace TextToTalk.Backends.Polly
         private readonly RepeatingAction lexiconUpdateAction;
 
         private PollyClient polly;
+        private FileDialog pollyLexiconFileDialog;
         private IList<Voice> voices;
         private IList<LexiconDescription> cloudLexicons;
 
@@ -87,10 +89,32 @@ namespace TextToTalk.Backends.Polly
             _ = this.polly.Cancel();
         }
 
+        private Exception lexiconUploadException;
+        private void CheckLexiconFileSelected()
+        {
+            if (this.pollyLexiconFileDialog == null) return;
+            if (string.IsNullOrEmpty(this.pollyLexiconFileDialog.SelectedFile)) return;
+
+            var filePath = this.pollyLexiconFileDialog.SelectedFile;
+            this.pollyLexiconFileDialog.ClearSelectedFile();
+
+            try
+            {
+                this.polly.UploadLexicon(filePath);
+                this.lexiconUploadException = null;
+            }
+            catch (Exception e)
+            {
+                PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                this.lexiconUploadException = e;
+            }
+        }
 
         private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
         public override void DrawSettings(ImExposedFunctions helpers)
         {
+            CheckLexiconFileSelected();
+
             var region = this.config.PollyRegion;
             var regionIndex = Array.IndexOf(Regions, region);
             if (ImGui.Combo("Region##TTTPollyRegion", ref regionIndex, Regions, Regions.Length))
@@ -180,7 +204,13 @@ namespace TextToTalk.Backends.Polly
 
             if (ImGui.Button("Upload lexicon##TTTPollyAddLexicon"))
             {
-                // do nothing
+                this.pollyLexiconFileDialog = new FileDialog();
+                this.pollyLexiconFileDialog.StartFileSelect();
+            }
+
+            if (this.lexiconUploadException != null)
+            {
+                ImGui.TextColored(Red, this.lexiconUploadException.Message);
             }
             ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available.");
 

@@ -39,6 +39,18 @@ namespace TextToTalk.Backends.Polly
             return lexicons;
         }
 
+        public void UploadLexicon(string lexiconFilePath)
+        {
+            var content = File.ReadAllText(lexiconFilePath);
+            var name = Path.GetFileNameWithoutExtension(lexiconFilePath);
+
+            this.client.PutLexicon(new PutLexiconRequest
+            {
+                Content = content,
+                Name = name,
+            });
+        }
+
         public IList<Voice> GetVoicesForEngine(Engine engine)
         {
             var voicesReq = new DescribeVoicesRequest

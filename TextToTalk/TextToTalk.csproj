@@ -58,6 +58,7 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="System.Speech" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
