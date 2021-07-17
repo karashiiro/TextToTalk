@@ -7,9 +7,11 @@ using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Numerics;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Gender = TextToTalk.GameEnums.Gender;
@@ -30,7 +32,6 @@ namespace TextToTalk.Backends.Polly
         private readonly RepeatingAction lexiconUpdateAction;
 
         private PollyClient polly;
-        private OpenFile pollyLexiconFileDialog;
         private IList<Voice> voices;
         private IList<LexiconDescription> cloudLexicons;
 
@@ -93,45 +94,9 @@ namespace TextToTalk.Backends.Polly
             _ = this.polly.Cancel();
         }
 
-        private Exception lexiconUploadException; // Shown to the user on failure
-        private bool lexiconUploadSucceeded; // Controls whether the success icon is shown
-        private void CheckLexiconFileSelected()
-        {
-            if (this.pollyLexiconFileDialog == null) return;
-            if (string.IsNullOrEmpty(this.pollyLexiconFileDialog.SelectedFile)) return;
-
-            var filePath = this.pollyLexiconFileDialog.SelectedFile;
-            this.pollyLexiconFileDialog.ClearSelectedFile();
-
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    this.polly.UploadLexicon(filePath);
-                    this.lexiconUploadException = null;
-                    this.lexiconUploadSucceeded = true;
-                }
-                catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                    this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
-                                                                         "This may take several minutes to take effect.", e);
-                    this.lexiconUploadSucceeded = false;
-                }
-                catch (Exception e)
-                {
-                    PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                    this.lexiconUploadException = e;
-                    this.lexiconUploadSucceeded = false;
-                }
-            });
-        }
-
         private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
         public override void DrawSettings(ImExposedFunctions helpers)
         {
-            CheckLexiconFileSelected();
-
             var region = this.config.PollyRegion;
             var regionIndex = Array.IndexOf(Regions, region);
             if (ImGui.Combo("Region##TTTPollyRegion", ref regionIndex, Regions, Regions.Length))
@@ -231,11 +196,14 @@ namespace TextToTalk.Backends.Polly
                     {
                         this.config.PollyLexicons[i] = "";
                     }
+                    ImGui.PopFont();
 
                     if (!string.IsNullOrEmpty(this.config.PollyLexicons[i]))
                     {
                         ImGui.SameLine();
                         LexiconDeleteButton(i);
+                        ImGui.SameLine();
+                        LexiconDownloadButton(i);
                     }
 
                     if (this.lexiconDeleteExceptions[i] != null)
@@ -243,18 +211,14 @@ namespace TextToTalk.Backends.Polly
                         ImGui.TextColored(Red, this.lexiconDeleteExceptions[i].Message);
                     }
 
-                    ImGui.PopFont();
+                    if (this.lexiconDownloadExceptions[i] != null)
+                    {
+                        ImGui.TextColored(Red, this.lexiconDownloadExceptions[i].Message);
+                    }
                 }
             }
 
-            if (ImGui.Button("Upload lexicon##TTTPollyAddLexicon"))
-            {
-                this.lexiconUploadException = null;
-                this.lexiconUploadSucceeded = false;
-
-                this.pollyLexiconFileDialog = new OpenFile();
-                this.pollyLexiconFileDialog.StartFileSelect(); // Launches the file selection asynchronously
-            }
+            LexiconUploadButton();
 
             if (this.lexiconUploadSucceeded)
             {
@@ -343,9 +307,50 @@ namespace TextToTalk.Backends.Polly
             }
         }
 
+        private Exception lexiconUploadException; // Shown to the user on failure
+        private bool lexiconUploadSucceeded; // Controls whether the success icon is shown
+        private void LexiconUploadButton()
+        {
+            if (ImGui.Button("Upload lexicon##TTTPollyAddLexicon"))
+            {
+                this.lexiconUploadException = null;
+                this.lexiconUploadSucceeded = false;
+
+                _ = Task.Run(() =>
+                {
+                    var filePath = OpenFile.FileSelect();
+                    if (string.IsNullOrEmpty(filePath)) return;
+
+                    _ = Task.Run(() =>
+                    {
+                        try
+                        {
+                            this.polly.UploadLexicon(filePath);
+                            this.lexiconUploadException = null;
+                            this.lexiconUploadSucceeded = true;
+                        }
+                        catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
+                        {
+                            PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                            this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
+                                "This may take several minutes to take effect.", e);
+                            this.lexiconUploadSucceeded = false;
+                        }
+                        catch (Exception e)
+                        {
+                            PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                            this.lexiconUploadException = e;
+                            this.lexiconUploadSucceeded = false;
+                        }
+                    });
+                });
+            }
+        }
+
         private readonly IList<Exception> lexiconDeleteExceptions = new List<Exception> { null, null, null, null, null };
         private void LexiconDeleteButton(int i)
         {
+            ImGui.PushFont(UiBuilder.IconFont);
             if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTPollyLexiconDelete{i}"))
             {
                 _ = Task.Run(() =>
@@ -369,6 +374,35 @@ namespace TextToTalk.Backends.Polly
                     }
                 });
             }
+            ImGui.PopFont();
+        }
+
+        private readonly IList<Exception> lexiconDownloadExceptions = new List<Exception> { null, null, null, null, null };
+        private void LexiconDownloadButton(int i)
+        {
+            ImGui.PushFont(UiBuilder.IconFont);
+            if (ImGui.Button($"{FontAwesomeIcon.Download.ToIconString()}##TTTPollyLexiconDownload{i}"))
+            {
+                _ = Task.Run(() =>
+                {
+                    var filePath = SaveFile.FileSelect();
+                    if (string.IsNullOrEmpty(filePath)) return;
+
+                    try
+                    {
+                        this.lexiconDownloadExceptions[i] = null;
+                        var lexicon = this.polly.GetLexicon(this.config.PollyLexicons[i]);
+                        File.WriteAllText(filePath, lexicon.Content);
+                    }
+                    catch (LexiconNotFoundException) { }
+                    catch (Exception e)
+                    {
+                        this.lexiconDownloadExceptions[i] = e;
+                        PluginLog.LogError(e, "Exception thrown while downloading lexicon.");
+                    }
+                });
+            }
+            ImGui.PopFont();
         }
 
         private static void ImGuiVoiceNotSupported()

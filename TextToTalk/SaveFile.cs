@@ -4,11 +4,11 @@ using System.Windows.Forms;
 
 namespace TextToTalk
 {
-    public static class OpenFile
+    public static class SaveFile
     {
         public static string FileSelect()
         {
-            using var openFileDialog = new OpenFileDialog
+            using var saveFileDialog = new SaveFileDialog
             {
                 Filter = "PLS files (*.pls)|*.pls|XML files (*.xml)|*.xml|All files (*.*)|*.*",
                 AddExtension = true,
@@ -20,7 +20,7 @@ namespace TextToTalk
 
             try
             {
-                if (openFileDialog.ShowDialog(null) != DialogResult.OK)
+                if (saveFileDialog.ShowDialog(null) != DialogResult.OK)
                 {
                     return null;
                 }
@@ -31,7 +31,7 @@ namespace TextToTalk
                 return null;
             }
 
-            return openFileDialog.FileName;
+            return saveFileDialog.FileName;
         }
     }
 }
