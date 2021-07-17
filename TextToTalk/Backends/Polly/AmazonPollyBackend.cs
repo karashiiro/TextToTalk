@@ -30,7 +30,7 @@ namespace TextToTalk.Backends.Polly
         private readonly RepeatingAction lexiconUpdateAction;
 
         private PollyClient polly;
-        private FileDialog pollyLexiconFileDialog;
+        private OpenFile pollyLexiconFileDialog;
         private IList<Voice> voices;
         private IList<LexiconDescription> cloudLexicons;
 
@@ -252,7 +252,7 @@ namespace TextToTalk.Backends.Polly
                 this.lexiconUploadException = null;
                 this.lexiconUploadSucceeded = false;
 
-                this.pollyLexiconFileDialog = new FileDialog();
+                this.pollyLexiconFileDialog = new OpenFile();
                 this.pollyLexiconFileDialog.StartFileSelect(); // Launches the file selection asynchronously
             }
 

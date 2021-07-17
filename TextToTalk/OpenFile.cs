@@ -5,7 +5,7 @@ using Dalamud.Plugin;
 
 namespace TextToTalk
 {
-    public class FileDialog
+    public class OpenFile
     {
         public string SelectedFile { get; private set; }
 
