@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly
@@ -66,7 +67,7 @@ namespace TextToTalk.Backends.Polly
                 {
                     this.cloudLexicons = newLexiconList;
                 }
-            }, new TimeSpan(0, 0, 5));
+            }, new TimeSpan(0, 0, 4));
         }
 
         public override void Say(Gender gender, string text)
@@ -102,25 +103,28 @@ namespace TextToTalk.Backends.Polly
             var filePath = this.pollyLexiconFileDialog.SelectedFile;
             this.pollyLexiconFileDialog.ClearSelectedFile();
 
-            try
+            _ = Task.Run(() =>
             {
-                this.polly.UploadLexicon(filePath);
-                this.lexiconUploadException = null;
-                this.lexiconUploadSucceeded = true;
-            }
-            catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
-            {
-                PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
-                                                                     "This may take several minutes to take effect.", e);
-                this.lexiconUploadSucceeded = false;
-            }
-            catch (Exception e)
-            {
-                PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                this.lexiconUploadException = e;
-                this.lexiconUploadSucceeded = false;
-            }
+                try
+                {
+                    this.polly.UploadLexicon(filePath);
+                    this.lexiconUploadException = null;
+                    this.lexiconUploadSucceeded = true;
+                }
+                catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                    this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
+                                                                         "This may take several minutes to take effect.", e);
+                    this.lexiconUploadSucceeded = false;
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                    this.lexiconUploadException = e;
+                    this.lexiconUploadSucceeded = false;
+                }
+            });
         }
 
         private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
@@ -344,22 +348,26 @@ namespace TextToTalk.Backends.Polly
         {
             if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTPollyLexiconDelete{i}"))
             {
-                try
+                _ = Task.Run(() =>
                 {
-                    this.lexiconDeleteExceptions[i] = null;
-                    this.polly.DeleteLexicon(this.config.PollyLexicons[i]);
-                }
-                catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    this.lexiconDeleteExceptions[i] = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
-                                                                             "This may take several minutes to take effect.", e);
-                    PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
-                }
-                catch (Exception e)
-                {
-                    this.lexiconDeleteExceptions[i] = e;
-                    PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
-                }
+                    try
+                    {
+                        this.lexiconDeleteExceptions[i] = null;
+                        this.polly.DeleteLexicon(this.config.PollyLexicons[i]);
+                    }
+                    catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        this.lexiconDeleteExceptions[i] = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
+                            "This may take several minutes to take effect.", e);
+                        PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
+                    }
+                    catch (LexiconNotFoundException) { }
+                    catch (Exception e)
+                    {
+                        this.lexiconDeleteExceptions[i] = e;
+                        PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
+                    }
+                });
             }
         }
 
