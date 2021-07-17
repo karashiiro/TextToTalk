@@ -61,9 +61,10 @@ namespace TextToTalk.Backends.Polly
             // Poll the lexicon list for updates since it is eventually-consistent
             this.lexiconUpdateAction = new RepeatingAction(() =>
             {
+                var newLexiconList = this.polly.GetLexicons();
                 lock (this.cloudLexicons)
                 {
-                    this.cloudLexicons = this.polly.GetLexicons();
+                    this.cloudLexicons = newLexiconList;
                 }
             }, new TimeSpan(0, 0, 5));
         }
