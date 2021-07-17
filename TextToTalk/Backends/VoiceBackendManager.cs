@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Threading.Tasks;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
@@ -13,6 +14,8 @@ namespace TextToTalk.Backends
         private readonly SharedState sharedState;
 
         private VoiceBackend backend;
+
+        public bool BackendLoading { get; private set; }
 
         public VoiceBackendManager(PluginConfiguration config, SharedState sharedState)
         {
@@ -38,8 +41,14 @@ namespace TextToTalk.Backends
 
         public void SetBackend(TTSBackend backendKind)
         {
-            this.backend?.Dispose();
-            this.backend = CreateBackendFor(backendKind);
+            _ = Task.Run(() =>
+            {
+                BackendLoading = true;
+                var newBackend = CreateBackendFor(this.config.Backend);
+                this.backend?.Dispose();
+                this.backend = newBackend;
+                BackendLoading = false;
+            });
         }
 
         public Vector4 GetBackendTitleBarColor()

@@ -115,8 +115,11 @@ namespace TextToTalk.UI
                     }
                 }
 
-                // Draw the settings for the specific backend we're using.
-                BackendManager.DrawSettings(this.helpers);
+                if (!BackendManager.BackendLoading)
+                {
+                    // Draw the settings for the specific backend we're using.
+                    BackendManager.DrawSettings(this.helpers);
+                }
             }
 
             if (ImGui.CollapsingHeader("Dialogue"))
