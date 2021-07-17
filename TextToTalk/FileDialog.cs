@@ -24,7 +24,7 @@ namespace TextToTalk
                     return;
                 this.dialogActive = true;
 
-                using var saveFileDialogue = new OpenFileDialog
+                using var openFileDialog = new OpenFileDialog
                 {
                     Filter = "PLS files (*.pls)|*.pls|XML files (*.xml)|*.xml|All files (*.*)|*.*",
                     AddExtension = true,
@@ -36,7 +36,7 @@ namespace TextToTalk
 
                 try
                 {
-                    if (saveFileDialogue.ShowDialog(null) != DialogResult.OK)
+                    if (openFileDialog.ShowDialog(null) != DialogResult.OK)
                     {
                         this.dialogActive = false;
                         return;
@@ -49,7 +49,7 @@ namespace TextToTalk
                     return;
                 }
 
-                SelectedFile = saveFileDialogue.FileName;
+                SelectedFile = openFileDialog.FileName;
 
                 this.dialogActive = false;
             });
