@@ -2,6 +2,8 @@
 using Amazon;
 using Amazon.Polly;
 using Amazon.Polly.Model;
+using Dalamud.Interface;
+using Dalamud.Plugin;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -9,8 +11,6 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using Dalamud.Interface;
-using Dalamud.Plugin;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly
@@ -20,7 +20,6 @@ namespace TextToTalk.Backends.Polly
         private const string CredentialsTarget = "TextToTalk_AccessKeys_AmazonPolly";
 
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-        private static readonly Vector4 Green = new(1, 0, 1, 0);
         private static readonly Vector4 Red = new(1, 0, 0, 1);
 
         private static readonly string[] Regions = RegionEndpoint.EnumerableAllRegions.Select(r => r.SystemName).ToArray();
@@ -107,6 +106,13 @@ namespace TextToTalk.Backends.Polly
                 this.polly.UploadLexicon(filePath);
                 this.lexiconUploadException = null;
                 this.lexiconUploadSucceeded = true;
+            }
+            catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
+            {
+                PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
+                                                                     "This may take several minutes to take effect.", e);
+                this.lexiconUploadSucceeded = false;
             }
             catch (Exception e)
             {
@@ -200,12 +206,28 @@ namespace TextToTalk.Backends.Polly
                 var cloudLexiconNames = this.cloudLexicons.Select(l => l.Name).ToArray();
                 for (var i = 0; i < this.config.PollyLexicons.Count; i++)
                 {
+                    // Remove if no longer existent
+                    if (Array.IndexOf(cloudLexiconNames, this.config.PollyLexicons[i]) == -1)
+                    {
+                        this.config.PollyLexicons[i] = "";
+                    }
+
+                    // Editing options
                     var lexiconIndex = Array.IndexOf(cloudLexiconNames, setLexicons[i]);
                     if (ImGui.Combo($"##TTTPollyLexicon{i}", ref lexiconIndex, cloudLexiconNames, cloudLexiconNames.Length))
                     {
                         this.config.PollyLexicons[i] = cloudLexiconNames[lexiconIndex];
                         this.config.Save();
                     }
+
+                    ImGui.SameLine();
+
+                    ImGui.PushFont(UiBuilder.IconFont);
+                    if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##TTTPollyLexiconRemove{i}"))
+                    {
+                        this.config.PollyLexicons[i] = "";
+                    }
+                    ImGui.PopFont();
                 }
             }
 
@@ -218,9 +240,9 @@ namespace TextToTalk.Backends.Polly
             if (this.lexiconUploadSucceeded)
             {
                 ImGui.SameLine();
-                
+
                 ImGui.PushFont(UiBuilder.IconFont);
-                ImGui.TextColored(Green, FontAwesomeIcon.CheckCircle.ToIconString());
+                ImGui.Text(FontAwesomeIcon.CheckCircle.ToIconString());
                 ImGui.PopFont();
             }
 
@@ -231,6 +253,7 @@ namespace TextToTalk.Backends.Polly
                 ImGui.PopStyleColor();
             }
             ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available.");
+            ImGui.Spacing();
 
             var voiceArray = this.voices.Select(v => v.Name).ToArray();
             var voiceIdArray = this.voices.Select(v => v.Id).ToArray();
