@@ -221,12 +221,23 @@ namespace TextToTalk.Backends.Polly
                     }
 
                     ImGui.SameLine();
-
                     ImGui.PushFont(UiBuilder.IconFont);
                     if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##TTTPollyLexiconRemove{i}"))
                     {
                         this.config.PollyLexicons[i] = "";
                     }
+
+                    if (!string.IsNullOrEmpty(this.config.PollyLexicons[i]))
+                    {
+                        ImGui.SameLine();
+                        LexiconDeleteButton(i);
+                    }
+
+                    if (this.lexiconDeleteExceptions[i] != null)
+                    {
+                        ImGui.TextColored(Red, this.lexiconDeleteExceptions[i].Message);
+                    }
+
                     ImGui.PopFont();
                 }
             }
@@ -255,7 +266,7 @@ namespace TextToTalk.Backends.Polly
                 ImGui.TextWrapped(this.lexiconUploadException.Message);
                 ImGui.PopStyleColor();
             }
-            ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available.");
+            ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available or be deleted.");
             ImGui.Spacing();
 
             var voiceArray = this.voices.Select(v => v.Name).ToArray();
@@ -323,6 +334,30 @@ namespace TextToTalk.Backends.Polly
                 if (this.voices.Count > 0 && !this.voices.Any(v => v.Id == this.config.PollyVoice))
                 {
                     ImGuiVoiceNotSupported();
+                }
+            }
+        }
+
+        private readonly IList<Exception> lexiconDeleteExceptions = new List<Exception> { null, null, null, null, null };
+        private void LexiconDeleteButton(int i)
+        {
+            if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTPollyLexiconDelete{i}"))
+            {
+                try
+                {
+                    this.lexiconDeleteExceptions[i] = null;
+                    this.polly.DeleteLexicon(this.config.PollyLexicons[i]);
+                }
+                catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    this.lexiconDeleteExceptions[i] = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
+                                                                             "This may take several minutes to take effect.", e);
+                    PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
+                }
+                catch (Exception e)
+                {
+                    this.lexiconDeleteExceptions[i] = e;
+                    PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
                 }
             }
         }

@@ -51,6 +51,14 @@ namespace TextToTalk.Backends.Polly
             });
         }
 
+        public void DeleteLexicon(string lexiconName)
+        {
+            this.client.DeleteLexicon(new DeleteLexiconRequest
+            {
+                Name = lexiconName,
+            });
+        }
+
         public IList<Voice> GetVoicesForEngine(Engine engine)
         {
             var voicesReq = new DescribeVoicesRequest
