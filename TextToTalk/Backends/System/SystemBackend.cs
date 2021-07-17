@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Dalamud.Plugin;
+﻿using Dalamud.Plugin;
 using ImGuiNET;
 using System.Linq;
 using System.Speech.Synthesis;
