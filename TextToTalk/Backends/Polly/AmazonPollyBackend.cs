@@ -233,6 +233,9 @@ namespace TextToTalk.Backends.Polly
 
             if (ImGui.Button("Upload lexicon##TTTPollyAddLexicon"))
             {
+                this.lexiconUploadException = null;
+                this.lexiconUploadSucceeded = false;
+
                 this.pollyLexiconFileDialog = new FileDialog();
                 this.pollyLexiconFileDialog.StartFileSelect(); // Launches the file selection asynchronously
             }
