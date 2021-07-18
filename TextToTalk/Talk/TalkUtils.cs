@@ -36,6 +36,11 @@ namespace TextToTalk.Talk
             return seString.TextValue;
         }
 
+        public static unsafe bool IsVisible(AddonTalk* talkAddon)
+        {
+            return talkAddon->AtkUnitBase.IsVisible;
+        }
+
         public static string StripSSMLTokens(string text)
         {
             return text
