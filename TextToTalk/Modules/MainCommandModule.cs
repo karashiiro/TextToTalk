@@ -36,8 +36,7 @@ namespace TextToTalk.Modules
         public void DisableTts(string command = "", string args = "")
         {
             Config.Enabled = false;
-            State.LastSpeaker = "";
-            State.LastQuestText = "";
+            BackendManager.CancelSay();
             var chat = PluginInterface.Framework.Gui.Chat;
             chat.Print("TTS disabled.");
             PluginLog.Log("TTS disabled.");
