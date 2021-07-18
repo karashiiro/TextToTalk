@@ -39,6 +39,8 @@ namespace TextToTalk
 
         private PluginServiceCollection serviceCollection;
 
+        private TextSource lastTextSource;
+
         public string Name => "TextToTalk";
 
         public void Initialize(DalamudPluginInterface pi)
@@ -130,6 +132,12 @@ namespace TextToTalk
             // Clear the last text if the window isn't visible.
             if (!TalkUtils.IsVisible(talkAddon))
             {
+                // Cancel TTS when the dialogue window is closed, if configured
+                if (this.config.CancelSpeechOnTextAdvance && this.lastTextSource == TextSource.TalkAddon)
+                {
+                    this.backendManager.CancelSay();
+                }
+
                 SetLastQuestText("");
                 return;
             }
@@ -151,8 +159,8 @@ namespace TextToTalk
 
             var speaker = this.pluginInterface.ClientState.Actors
                 .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
-
-            Say(speaker, text);
+            
+            Say(speaker, text, TextSource.TalkAddon);
         }
 
         private bool notifiedFailedToBindPort;
@@ -208,11 +216,19 @@ namespace TextToTalk
             var speaker = this.pluginInterface.ClientState.Actors
                 .FirstOrDefault(a => a.Name == senderText);
 
-            Say(speaker, textValue);
+            Say(speaker, textValue, TextSource.Chat);
         }
 
-        private void Say(Actor speaker, string textValue)
+        private void Say(Actor speaker, string textValue, TextSource source)
         {
+            this.lastTextSource = source;
+
+            // Cancel the current speech task if the respective setting is enabled
+            if (this.config.CancelSpeechOnTextAdvance)
+            {
+                this.backendManager.CancelSay();
+            }
+
             var cleanText = Pipe(
                 textValue,
                 TalkUtils.StripSSMLTokens,
