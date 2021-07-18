@@ -131,7 +131,6 @@ namespace TextToTalk
             if (!TalkUtils.IsVisible(talkAddon))
             {
                 SetLastQuestText("");
-                SetLastSpeaker("");
                 return;
             }
 
