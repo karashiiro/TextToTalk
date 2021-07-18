@@ -34,8 +34,8 @@ namespace TextToTalk.UI
                 ? titleBarColor
                 : ImGui.ColorConvertU32ToFloat4(ImGui.GetColorU32(ImGuiCol.TitleBgActive)));
 
-            ImGui.SetNextWindowSize(new Vector2(520, 480));
-            ImGui.Begin("TextToTalk Configuration", ref visible, ImGuiWindowFlags.NoResize);
+            ImGui.SetNextWindowSize(new Vector2(520, 480), ImGuiCond.FirstUseEver);
+            ImGui.Begin("TextToTalk Configuration", ref visible);
             {
                 if (ImGui.BeginTabBar("TextToTalk##tabbar"))
                 {
