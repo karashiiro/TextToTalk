@@ -1,13 +1,22 @@
-﻿using Dalamud.Plugin;
+﻿using Dalamud.Interface;
+using Dalamud.Plugin;
 using ImGuiNET;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Speech.Synthesis;
+using System.Text;
+using System.Threading.Tasks;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.System
 {
     public class SystemBackend : VoiceBackend
     {
+        private static readonly Vector4 Red = new(1, 0, 0, 1);
+
         private static readonly SpeechSynthesizer DummySynthesizer = new();
 
         private readonly PluginConfiguration config;
@@ -17,6 +26,23 @@ namespace TextToTalk.Backends.System
         {
             this.config = config;
             this.soundQueue = new SoundQueue();
+            
+            for (var i = 0; i < this.config.Lexicons.Count; i++)
+            {
+                var lexicon = this.config.Lexicons[i];
+
+                try
+                {
+                    this.soundQueue.AddLexicon(lexicon);
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Failed to add lexicon.");
+                    this.config.Lexicons.RemoveAt(i);
+                    this.config.Save();
+                    i--;
+                }
+            }
         }
 
         public override void Say(Gender gender, string text)
@@ -101,6 +127,50 @@ namespace TextToTalk.Backends.System
                 helpers.OpenVoiceUnlockerWindow?.Invoke();
             }
 
+            ImGui.Text("Lexicons");
+            for (var i = 0; i < this.config.Lexicons.Count; i++)
+            {
+                // Remove if no longer existent
+                if (!File.Exists(this.config.Lexicons[i]))
+                {
+                    this.config.Lexicons[i] = "";
+                }
+
+                // Editing options
+                var lexiconPath = this.config.Lexicons[i];
+                var lexiconPathBuf = Encoding.UTF8.GetBytes(lexiconPath);
+                ImGui.InputText($"##TTTSystemLexiconText{i}", lexiconPathBuf, (uint)lexiconPathBuf.Length, ImGuiInputTextFlags.ReadOnly);
+                
+                if (!string.IsNullOrEmpty(this.config.Lexicons[i]))
+                {
+                    ImGui.SameLine();
+                    var deferred = LexiconRemoveButton(i, lexiconPath);
+
+                    if (this.lexiconRemoveExceptions[i] != null)
+                    {
+                        ImGui.TextColored(Red, this.lexiconRemoveExceptions[i].Message);
+                    }
+
+                    deferred?.Invoke();
+                }
+            }
+
+            LexiconAddButton();
+
+            if (this.lexiconAddSucceeded)
+            {
+                ImGui.SameLine();
+
+                ImGui.PushFont(UiBuilder.IconFont);
+                ImGui.Text(FontAwesomeIcon.CheckCircle.ToIconString());
+                ImGui.PopFont();
+            }
+
+            if (this.lexiconAddException != null)
+            {
+                ImGui.TextColored(Red, this.lexiconAddException.Message);
+            }
+
             ImGui.Spacing();
 
             var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
@@ -138,6 +208,81 @@ namespace TextToTalk.Backends.System
                     this.config.FemaleVoicePresetId = presets[femalePresetIndex].Id;
                     this.config.Save();
                 }
+            }
+        }
+
+        private readonly IList<Exception> lexiconRemoveExceptions = new List<Exception>();
+
+        /// <summary>
+        /// Draws the remove lexicon button. Returns an action that should be called after all other operations
+        /// on the provided index are done.
+        /// </summary>
+        private Action LexiconRemoveButton(int i, string lexiconPath)
+        {
+            if (this.lexiconRemoveExceptions.Count < this.config.Lexicons.Count)
+            {
+                this.lexiconRemoveExceptions.Add(null);
+            }
+
+            Action deferred = null;
+
+            ImGui.PushFont(UiBuilder.IconFont);
+            if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##TTTSystemLexiconRemove{i}"))
+            {
+                try
+                {
+                    this.lexiconRemoveExceptions[i] = null;
+                    this.soundQueue.RemoveLexicon(lexiconPath);
+
+                    // This is ugly but it works
+                    deferred = () =>
+                    {
+                        this.config.Lexicons.RemoveAt(i);
+                        this.lexiconRemoveExceptions.RemoveAt(i);
+
+                        this.config.Save();
+                    };
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Failed to remove lexicon.");
+                    this.lexiconRemoveExceptions[i] = e;
+                }
+
+                this.config.Lexicons[i] = "";
+            }
+            ImGui.PopFont();
+
+            return deferred;
+        }
+
+        private Exception lexiconAddException;
+        private bool lexiconAddSucceeded;
+        private void LexiconAddButton()
+        {
+            if (ImGui.Button("Open Lexicon##TTTSystemLexiconAdd"))
+            {
+                this.lexiconAddException = null;
+                this.lexiconAddSucceeded = false;
+
+                _ = Task.Run(() =>
+                {
+                    var filePath = OpenFile.FileSelect();
+                    if (string.IsNullOrEmpty(filePath)) return;
+
+                    try
+                    {
+                        this.soundQueue.AddLexicon(filePath);
+                        this.config.Lexicons.Add(filePath);
+                        this.config.Save();
+                        this.lexiconAddSucceeded = true;
+                    }
+                    catch (Exception e)
+                    {
+                        PluginLog.LogError(e, "Failed to load lexicon.");
+                        this.lexiconAddException = e;
+                    }
+                });
             }
         }
 

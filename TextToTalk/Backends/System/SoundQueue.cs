@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Speech.Synthesis;
 using System.Threading;
 
@@ -21,6 +22,18 @@ namespace TextToTalk.Backends.System
             this.soundThread.Start();
 
             this.speechSynthesizer = new SpeechSynthesizer();
+        }
+
+        public void AddLexicon(string filePath)
+        {
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException("Lexicon file does not exist.", Path.GetFileName(filePath));
+            this.speechSynthesizer.AddLexicon(new Uri(filePath), "application/pls+xml");
+        }
+
+        public void RemoveLexicon(string filePath)
+        {
+            this.speechSynthesizer.RemoveLexicon(new Uri(filePath));
         }
 
         private void PlaySoundLoop()

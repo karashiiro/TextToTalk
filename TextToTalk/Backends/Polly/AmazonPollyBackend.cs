@@ -11,7 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Numerics;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Gender = TextToTalk.GameEnums.Gender;
@@ -321,28 +320,25 @@ namespace TextToTalk.Backends.Polly
                     var filePath = OpenFile.FileSelect();
                     if (string.IsNullOrEmpty(filePath)) return;
 
-                    _ = Task.Run(() =>
+                    try
                     {
-                        try
-                        {
-                            this.polly.UploadLexicon(filePath);
-                            this.lexiconUploadException = null;
-                            this.lexiconUploadSucceeded = true;
-                        }
-                        catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
-                        {
-                            PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                            this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
-                                "This may take several minutes to take effect.", e);
-                            this.lexiconUploadSucceeded = false;
-                        }
-                        catch (Exception e)
-                        {
-                            PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                            this.lexiconUploadException = e;
-                            this.lexiconUploadSucceeded = false;
-                        }
-                    });
+                        this.polly.UploadLexicon(filePath);
+                        this.lexiconUploadException = null;
+                        this.lexiconUploadSucceeded = true;
+                    }
+                    catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                        this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
+                                                                             "This may take several minutes to take effect.", e);
+                        this.lexiconUploadSucceeded = false;
+                    }
+                    catch (Exception e)
+                    {
+                        PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                        this.lexiconUploadException = e;
+                        this.lexiconUploadSucceeded = false;
+                    }
                 });
             }
         }
