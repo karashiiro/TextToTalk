@@ -93,6 +93,54 @@ namespace TextToTalk.UI
                 ImGui.PopItemWidth();
             }
 
+            if (ImGui.CollapsingHeader("General"))
+            {
+                var readFromQuestTalkAddon = Configuration.ReadFromQuestTalkAddon;
+                if (ImGui.Checkbox("Read NPC dialogue from the dialogue window", ref readFromQuestTalkAddon))
+                {
+                    Configuration.ReadFromQuestTalkAddon = readFromQuestTalkAddon;
+                    Configuration.Save();
+                }
+
+                ImGui.Spacing();
+                var enableNameWithSay = Configuration.EnableNameWithSay;
+                if (ImGui.Checkbox("Enable \"X says:\" when people speak", ref enableNameWithSay))
+                {
+                    Configuration.EnableNameWithSay = enableNameWithSay;
+                    Configuration.Save();
+                }
+
+                if (enableNameWithSay)
+                {
+                    ImGui.Spacing();
+                    ImGui.Indent();
+
+                    var nameNpcWithSay = Configuration.NameNpcWithSay;
+                    if (ImGui.Checkbox("Also say \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
+                    {
+                        Configuration.NameNpcWithSay = nameNpcWithSay;
+                        Configuration.Save();
+                    }
+
+                    var disallowMultipleSay = Configuration.DisallowMultipleSay;
+                    if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
+                    {
+                        Configuration.DisallowMultipleSay = disallowMultipleSay;
+                        Configuration.Save();
+                    }
+
+                    ImGui.Unindent();
+                }
+
+                ImGui.Spacing();
+                var cancelSpeechOnTextAdvance = Configuration.CancelSpeechOnTextAdvance;
+                if (ImGui.Checkbox("Cancel the current speech when new text is available or text is advanced", ref cancelSpeechOnTextAdvance))
+                {
+                    Configuration.CancelSpeechOnTextAdvance = cancelSpeechOnTextAdvance;
+                    Configuration.Save();
+                }
+            }
+
             if (ImGui.CollapsingHeader("Voices##TTTVoicePre1", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 var backends = Enum.GetNames(typeof(TTSBackend));
@@ -119,43 +167,6 @@ namespace TextToTalk.UI
                 {
                     // Draw the settings for the specific backend we're using.
                     BackendManager.DrawSettings(this.helpers);
-                }
-            }
-
-            if (ImGui.CollapsingHeader("Dialogue"))
-            {
-                var readFromQuestTalkAddon = Configuration.ReadFromQuestTalkAddon;
-                if (ImGui.Checkbox("Read NPC dialogue from the dialogue window", ref readFromQuestTalkAddon))
-                {
-                    Configuration.ReadFromQuestTalkAddon = readFromQuestTalkAddon;
-                    Configuration.Save();
-                }
-
-                ImGui.Spacing();
-                var enableNameWithSay = Configuration.EnableNameWithSay;
-                if (ImGui.Checkbox("Enable \"X says:\" when people speak", ref enableNameWithSay))
-                {
-                    Configuration.EnableNameWithSay = enableNameWithSay;
-                    Configuration.Save();
-                }
-
-                if (enableNameWithSay)
-                {
-                    ImGui.Spacing();
-                    ImGui.Indent();
-                    var nameNpcWithSay = Configuration.NameNpcWithSay;
-                    if (ImGui.Checkbox("Also say \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
-                    {
-                        Configuration.NameNpcWithSay = nameNpcWithSay;
-                        Configuration.Save();
-                    }
-
-                    var disallowMultipleSay = Configuration.DisallowMultipleSay;
-                    if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
-                    {
-                        Configuration.DisallowMultipleSay = disallowMultipleSay;
-                        Configuration.Save();
-                    }
                 }
             }
         }
