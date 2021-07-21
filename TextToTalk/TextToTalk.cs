@@ -139,6 +139,7 @@ namespace TextToTalk
                 }
 
                 SetLastQuestText("");
+                SetLastSpeaker("");
                 return;
             }
 
