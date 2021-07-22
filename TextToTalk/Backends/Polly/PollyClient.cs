@@ -88,7 +88,7 @@ namespace TextToTalk.Backends.Polly
             return voices;
         }
 
-        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, IEnumerable<string> lexicons, string text)
+        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, IEnumerable<string> lexicons, TextSource source, string text)
         {
             var req = new SynthesizeSpeechRequest
             {
@@ -116,12 +116,18 @@ namespace TextToTalk.Backends.Polly
             await res.AudioStream.CopyToAsync(responseStream);
             responseStream.Seek(0, SeekOrigin.Begin);
 
-            this.soundQueue.EnqueueSound(responseStream, volume);
+            this.soundQueue.EnqueueSound(responseStream, source, volume);
         }
 
-        public Task Cancel()
+        public Task CancelAllSounds()
         {
             this.soundQueue.CancelAllSounds();
+            return Task.CompletedTask;
+        }
+
+        public Task CancelFromSource(TextSource source)
+        {
+            this.soundQueue.CancelFromSource(source);
             return Task.CompletedTask;
         }
 

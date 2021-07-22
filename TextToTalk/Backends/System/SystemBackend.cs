@@ -45,7 +45,7 @@ namespace TextToTalk.Backends.System
             }
         }
 
-        public override void Say(Gender gender, string text)
+        public override void Say(TextSource source, Gender gender, string text)
         {
             var voicePreset = gender switch
             {
@@ -54,13 +54,19 @@ namespace TextToTalk.Backends.System
                 _ => this.config.GetCurrentUngenderedVoicePreset(),
             };
 
-            this.soundQueue.EnqueueSound(voicePreset, text);
+            this.soundQueue.EnqueueSound(voicePreset, source, text);
         }
 
-        public override void CancelSay()
+        public override void CancelAllSpeech()
         {
             this.soundQueue.CancelAllSounds();
             PluginLog.Log("Canceled SpeechSynthesizer TTS.");
+        }
+
+        public override void CancelSay(TextSource source)
+        {
+            this.soundQueue.CancelFromSource(source);
+            PluginLog.Log("Canceled SpeechSynthesizer TTS from source {Source}.", source);
         }
 
         public override void DrawSettings(ImExposedFunctions helpers)

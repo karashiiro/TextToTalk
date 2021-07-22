@@ -32,11 +32,11 @@ namespace TextToTalk.Backends.Websocket
             this.wsServer.Start();
         }
 
-        public override void Say(Gender gender, string text)
+        public override void Say(TextSource source, Gender gender, string text)
         {
             try
             {
-                this.wsServer.Broadcast(gender, text);
+                this.wsServer.Broadcast(source, gender, text);
 #if DEBUG
                 PluginLog.Log("Sent message {0} on WebSocket server.", text);
 #endif
@@ -47,9 +47,15 @@ namespace TextToTalk.Backends.Websocket
             }
         }
 
-        public override void CancelSay()
+        public override void CancelAllSpeech()
         {
-            this.wsServer.Cancel();
+            this.wsServer.CancelAll();
+            PluginLog.Log("Canceled all TTS over WebSocket server.");
+        }
+
+        public override void CancelSay(TextSource source)
+        {
+            this.wsServer.Cancel(source);
             PluginLog.Log("Canceled TTS over WebSocket server.");
         }
 

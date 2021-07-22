@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Speech.Synthesis;
 using System.Threading;
 
@@ -8,7 +9,10 @@ namespace TextToTalk.Backends.System
 {
     public class SoundQueue : IDisposable
     {
-        private readonly ConcurrentQueue<SoundQueueItem> queuedSounds;
+        // This used to be a ConcurrentQueue<T>, but was changed so that items could be
+        // queried and removed from the middle.
+        private IList<SoundQueueItem> queuedSounds;
+
         private readonly SpeechSynthesizer speechSynthesizer;
         private readonly Thread soundThread;
 
@@ -16,7 +20,7 @@ namespace TextToTalk.Backends.System
 
         public SoundQueue()
         {
-            this.queuedSounds = new ConcurrentQueue<SoundQueueItem>();
+            this.queuedSounds = new List<SoundQueueItem>();
             this.active = true;
             this.soundThread = new Thread(PlaySoundLoop);
             this.soundThread.Start();
@@ -40,7 +44,8 @@ namespace TextToTalk.Backends.System
         {
             while (active)
             {
-                if (!this.queuedSounds.TryDequeue(out var nextItem))
+                var nextItem = TryDequeue();
+                if (nextItem == null)
                 {
                     Thread.Sleep(100);
                     continue;
@@ -51,23 +56,53 @@ namespace TextToTalk.Backends.System
             }
         }
 
-        public void EnqueueSound(VoicePreset preset, string text)
+        public void EnqueueSound(VoicePreset preset, TextSource source, string text)
         {
-            this.queuedSounds.Enqueue(new SoundQueueItem
+            lock (this.queuedSounds)
             {
-                Preset = preset,
-                Text = text,
-            });
+                this.queuedSounds.Add(new SoundQueueItem
+                {
+                    Preset = preset,
+                    Text = text,
+                    Source = source,
+                });
+            }
         }
 
         public void CancelAllSounds()
         {
-            while (this.queuedSounds.Count > 0)
+            lock (this.queuedSounds)
             {
-                this.queuedSounds.TryDequeue(out _);
+                while (this.queuedSounds.Count > 0)
+                {
+                    this.queuedSounds.RemoveAt(0);
+                }
             }
 
             this.speechSynthesizer.SpeakAsyncCancelAll();
+        }
+
+        public void CancelFromSource(TextSource source)
+        {
+            lock (this.queuedSounds)
+            {
+                this.queuedSounds = this.queuedSounds.Where(s => s.Source == source).ToList();
+            }
+        }
+
+        private SoundQueueItem TryDequeue()
+        {
+            SoundQueueItem nextItem;
+            lock (this.queuedSounds)
+            {
+                nextItem = this.queuedSounds.FirstOrDefault();
+                if (nextItem != null)
+                {
+                    this.queuedSounds.RemoveAt(0);
+                }
+            }
+
+            return nextItem;
         }
 
         public void Dispose()
@@ -84,6 +119,8 @@ namespace TextToTalk.Backends.System
             public VoicePreset Preset { get; set; }
 
             public string Text { get; set; }
+
+            public TextSource Source { get; set; }
         }
     }
 }

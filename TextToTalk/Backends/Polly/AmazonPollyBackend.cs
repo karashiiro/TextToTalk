@@ -70,7 +70,7 @@ namespace TextToTalk.Backends.Polly
             }, new TimeSpan(0, 0, 4));
         }
 
-        public override void Say(Gender gender, string text)
+        public override void Say(TextSource source, Gender gender, string text)
         {
             var voiceIdStr = gender switch
             {
@@ -85,12 +85,17 @@ namespace TextToTalk.Backends.Polly
 
             text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
 
-            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, this.config.PollyLexicons, text);
+            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, this.config.PollyLexicons, source, text);
         }
 
-        public override void CancelSay()
+        public override void CancelAllSpeech()
         {
-            _ = this.polly.Cancel();
+            _ = this.polly.CancelAllSounds();
+        }
+
+        public override void CancelSay(TextSource source)
+        {
+            _ = this.polly.CancelFromSource(source);
         }
 
         private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);

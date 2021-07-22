@@ -8,9 +8,11 @@ namespace TextToTalk.Backends
     {
         public Vector4 TitleBarColor { get; protected set; }
 
-        public abstract void Say(Gender gender, string text);
+        public abstract void Say(TextSource source, Gender gender, string text);
 
-        public abstract void CancelSay();
+        public abstract void CancelAllSpeech();
+
+        public abstract void CancelSay(TextSource source);
 
         public abstract void DrawSettings(ImExposedFunctions helpers);
 

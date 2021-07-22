@@ -102,6 +102,21 @@ namespace TextToTalk.UI
                     Configuration.Save();
                 }
 
+                if (readFromQuestTalkAddon)
+                {
+                    ImGui.Spacing();
+                    ImGui.Indent();
+
+                    var cancelSpeechOnTextAdvance = Configuration.CancelSpeechOnTextAdvance;
+                    if (ImGui.Checkbox("Cancel the current NPC speech when new text is available or text is advanced", ref cancelSpeechOnTextAdvance))
+                    {
+                        Configuration.CancelSpeechOnTextAdvance = cancelSpeechOnTextAdvance;
+                        Configuration.Save();
+                    }
+
+                    ImGui.Unindent();
+                }
+
                 ImGui.Spacing();
                 var enableNameWithSay = Configuration.EnableNameWithSay;
                 if (ImGui.Checkbox("Enable \"X says:\" when people speak", ref enableNameWithSay))
@@ -130,14 +145,6 @@ namespace TextToTalk.UI
                     }
 
                     ImGui.Unindent();
-                }
-
-                ImGui.Spacing();
-                var cancelSpeechOnTextAdvance = Configuration.CancelSpeechOnTextAdvance;
-                if (ImGui.Checkbox("Cancel the current speech when new text is available or text is advanced", ref cancelSpeechOnTextAdvance))
-                {
-                    Configuration.CancelSpeechOnTextAdvance = cancelSpeechOnTextAdvance;
-                    Configuration.Save();
                 }
             }
 

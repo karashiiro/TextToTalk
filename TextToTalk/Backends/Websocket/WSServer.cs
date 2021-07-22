@@ -41,19 +41,27 @@ namespace TextToTalk.Backends.Websocket
             this.server.AddWebSocketService("/Messages", () => this.behavior);
         }
 
-        public void Broadcast(Gender speakerGender, string message)
+        public void Broadcast(TextSource source, Gender speakerGender, string message)
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(IpcMessageType.Say, message, speakerGender);
+            var ipcMessage = new IpcMessage(IpcMessageType.Say, message, speakerGender, source);
             this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
-        public void Cancel()
+        public void CancelAll()
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, Gender.None);
+            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, Gender.None, TextSource.None);
+            this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
+        }
+
+        public void Cancel(TextSource source)
+        {
+            if (!Active) throw new InvalidOperationException("Server is not active!");
+
+            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, Gender.None, source);
             this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -110,15 +118,32 @@ namespace TextToTalk.Backends.Websocket
         [Serializable]
         private class IpcMessage
         {
+            /// <summary>
+            /// The message type; refer tp <see cref="IpcMessageType"/> for options.
+            /// </summary>
             public string Type { get; set; }
+            
+            /// <summary>
+            /// The message parameter - the spoken text for speech requests, and nothing for cancellations.
+            /// </summary>
             public string Payload { get; set; }
+
+            /// <summary>
+            /// Speaker gender; refer to <see cref="Gender"/> for options.
+            /// </summary>
             public sbyte SpeakerGender { get; set; }
 
-            public IpcMessage(IpcMessageType type, string payload, Gender speakerGender)
+            /// <summary>
+            /// Text source; refer to <see cref="TextSource"/> for options.
+            /// </summary>
+            public string Source { get; set; }
+
+            public IpcMessage(IpcMessageType type, string payload, Gender speakerGender, TextSource source)
             {
                 Type = type.ToString();
                 Payload = payload;
                 SpeakerGender = (sbyte)speakerGender;
+                Source = source.ToString();
             }
         }
 

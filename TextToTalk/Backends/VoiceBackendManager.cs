@@ -24,14 +24,19 @@ namespace TextToTalk.Backends
             this.backend = CreateBackendFor(this.config.Backend);
         }
 
-        public override void Say(Gender gender, string text)
+        public override void Say(TextSource source, Gender gender, string text)
         {
-            this.backend.Say(gender, text);
+            this.backend?.Say(source, gender, text);
         }
 
-        public override void CancelSay()
+        public override void CancelAllSpeech()
         {
-            this.backend.CancelSay();
+            this.backend?.CancelAllSpeech();
+        }
+
+        public override void CancelSay(TextSource source)
+        {
+            this.backend?.CancelSay(source);
         }
 
         public override void DrawSettings(ImExposedFunctions helpers)

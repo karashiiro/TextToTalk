@@ -135,7 +135,7 @@ namespace TextToTalk
                 // Cancel TTS when the dialogue window is closed, if configured
                 if (this.config.CancelSpeechOnTextAdvance && this.lastTextSource == TextSource.TalkAddon)
                 {
-                    this.backendManager.CancelSay();
+                    this.backendManager.CancelSay(TextSource.TalkAddon);
                 }
 
                 SetLastQuestText("");
@@ -227,7 +227,7 @@ namespace TextToTalk
             // Cancel the current speech task if the respective setting is enabled
             if (this.config.CancelSpeechOnTextAdvance)
             {
-                this.backendManager.CancelSay();
+                this.backendManager.CancelSay(source);
             }
 
             var cleanText = Pipe(
@@ -235,7 +235,7 @@ namespace TextToTalk
                 TalkUtils.StripSSMLTokens,
                 TalkUtils.NormalizePunctuation);
             var gender = this.config.UseGenderedVoicePresets ? GetActorGender(speaker) : Gender.None;
-            this.backendManager.Say(gender, cleanText);
+            this.backendManager.Say(source, gender, cleanText);
         }
 
         private static Gender GetActorGender(Actor actor)

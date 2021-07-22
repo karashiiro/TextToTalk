@@ -3,6 +3,7 @@ using Dalamud.CrystalTower.UI;
 using Dalamud.Plugin;
 using TextToTalk.Backends;
 using TextToTalk.UI;
+// ReSharper disable UnusedMember.Global
 
 namespace TextToTalk.Modules
 {
@@ -16,9 +17,9 @@ namespace TextToTalk.Modules
 
         [Command("/canceltts")]
         [HelpMessage("Cancel all queued TTS messages.")]
-        public void CancelTts(string command, string args)
+        public void CancelTts(string command = "", string args = "")
         {
-            BackendManager.CancelSay();
+            BackendManager.CancelAllSpeech();
         }
 
         [Command("/toggletts")]
@@ -36,7 +37,7 @@ namespace TextToTalk.Modules
         public void DisableTts(string command = "", string args = "")
         {
             Config.Enabled = false;
-            BackendManager.CancelSay();
+            CancelTts();
             var chat = PluginInterface.Framework.Gui.Chat;
             chat.Print("TTS disabled.");
             PluginLog.Log("TTS disabled.");
