@@ -15,8 +15,9 @@ TTS prompt:
 ```
 {
 	"Type": "Say",
-	"Payload": "Someone someone says something",
-	"SpeakerGender": 1
+	"Payload": "Firstname Lastname says something",
+	"SpeakerGender": 1,
+	"Source": "Chat"
 }
 ```
 
@@ -25,7 +26,8 @@ TTS cancel:
 {
 	"Type": "Cancel",
 	"Payload": "",
-	"SpeakerGender": -1
+	"SpeakerGender": -1,
+	"Source": "None"
 }
 ```
 
