@@ -102,12 +102,12 @@ namespace TextToTalk.Backends.Polly
         {
             lock (this.queuedSounds)
             {
-                foreach (var item in this.queuedSounds.Where(s => s.Source != source).ToList())
+                foreach (var item in this.queuedSounds.Where(s => s.Source == source).ToList())
                 {
                     item.Data.Dispose();
                 }
 
-                this.queuedSounds = this.queuedSounds.Where(s => s.Source == source).ToList();
+                this.queuedSounds = this.queuedSounds.Where(s => s.Source != source).ToList();
             }
 
             if (this.currentItem?.Source == source)

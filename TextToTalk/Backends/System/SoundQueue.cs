@@ -94,7 +94,7 @@ namespace TextToTalk.Backends.System
         {
             lock (this.queuedSounds)
             {
-                this.queuedSounds = this.queuedSounds.Where(s => s.Source == source).ToList();
+                this.queuedSounds = this.queuedSounds.Where(s => s.Source != source).ToList();
             }
 
             if (this.currentItem?.Source == source)
