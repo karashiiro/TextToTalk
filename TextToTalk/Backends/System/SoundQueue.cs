@@ -16,6 +16,7 @@ namespace TextToTalk.Backends.System
         private readonly SpeechSynthesizer speechSynthesizer;
         private readonly Thread soundThread;
 
+        private SoundQueueItem currentItem;
         private bool active;
 
         public SoundQueue()
@@ -44,15 +45,22 @@ namespace TextToTalk.Backends.System
         {
             while (active)
             {
-                var nextItem = TryDequeue();
-                if (nextItem == null)
+                this.currentItem = TryDequeue();
+                if (this.currentItem == null)
                 {
                     Thread.Sleep(100);
                     continue;
                 }
 
-                this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
-                this.speechSynthesizer.SpeakAsync(nextItem.Text);
+                this.speechSynthesizer.UseVoicePreset(this.currentItem.Preset);
+                this.speechSynthesizer.SpeakAsync(this.currentItem.Text);
+
+                while (this.speechSynthesizer.GetCurrentlySpokenPrompt() != null)
+                {
+                    Thread.Sleep(100);
+                }
+
+                this.currentItem = null;
             }
         }
 
@@ -79,7 +87,7 @@ namespace TextToTalk.Backends.System
                 }
             }
 
-            this.speechSynthesizer.SpeakAsyncCancelAll();
+            this.speechSynthesizer.SpeakAsyncCancel(this.speechSynthesizer.GetCurrentlySpokenPrompt());
         }
 
         public void CancelFromSource(TextSource source)
@@ -88,6 +96,16 @@ namespace TextToTalk.Backends.System
             {
                 this.queuedSounds = this.queuedSounds.Where(s => s.Source == source).ToList();
             }
+
+            if (this.currentItem?.Source == source)
+            {
+                this.speechSynthesizer.SpeakAsyncCancelAll();
+            }
+        }
+
+        public TextSource GetCurrentlySpokenTextSource()
+        {
+            return this.currentItem?.Source ?? TextSource.None;
         }
 
         private SoundQueueItem TryDequeue()
@@ -108,8 +126,8 @@ namespace TextToTalk.Backends.System
         public void Dispose()
         {
             this.active = false;
-            this.soundThread.Join();
             CancelAllSounds();
+            this.soundThread.Join();
 
             this.speechSynthesizer.Dispose();
         }

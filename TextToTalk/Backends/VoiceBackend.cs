@@ -16,6 +16,8 @@ namespace TextToTalk.Backends
 
         public abstract void DrawSettings(ImExposedFunctions helpers);
 
+        public abstract TextSource GetCurrentlySpokenTextSource();
+
         protected abstract void Dispose(bool disposing);
 
         public void Dispose()

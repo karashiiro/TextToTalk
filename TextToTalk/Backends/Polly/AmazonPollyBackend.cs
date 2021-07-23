@@ -311,6 +311,11 @@ namespace TextToTalk.Backends.Polly
             }
         }
 
+        public override TextSource GetCurrentlySpokenTextSource()
+        {
+            return this.polly.GetCurrentlySpokenTextSource();
+        }
+
         private Exception lexiconUploadException; // Shown to the user on failure
         private bool lexiconUploadSucceeded; // Controls whether the success icon is shown
         private void LexiconUploadButton()

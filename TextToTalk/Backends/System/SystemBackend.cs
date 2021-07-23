@@ -60,13 +60,11 @@ namespace TextToTalk.Backends.System
         public override void CancelAllSpeech()
         {
             this.soundQueue.CancelAllSounds();
-            PluginLog.Log("Canceled SpeechSynthesizer TTS.");
         }
 
         public override void CancelSay(TextSource source)
         {
             this.soundQueue.CancelFromSource(source);
-            PluginLog.Log("Canceled SpeechSynthesizer TTS from source {Source}.", source);
         }
 
         public override void DrawSettings(ImExposedFunctions helpers)
@@ -215,6 +213,11 @@ namespace TextToTalk.Backends.System
                     this.config.Save();
                 }
             }
+        }
+
+        public override TextSource GetCurrentlySpokenTextSource()
+        {
+            return this.soundQueue.GetCurrentlySpokenTextSource();
         }
 
         private readonly IList<Exception> lexiconRemoveExceptions = new List<Exception>();

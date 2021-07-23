@@ -16,6 +16,7 @@ namespace TextToTalk.Backends.Polly
 
         private readonly Thread soundThread;
 
+        private SoundQueueItem currentItem;
         private WaveOut waveOut;
         private bool active;
 
@@ -31,18 +32,18 @@ namespace TextToTalk.Backends.Polly
         {
             while (active)
             {
-                var nextItem = TryDequeue();
-                if (nextItem == null)
+                this.currentItem = TryDequeue();
+                if (this.currentItem == null)
                 {
                     Thread.Sleep(100);
                     continue;
                 }
 
-                using var mp3Reader = new Mp3FileReader(nextItem.Data);
+                using var mp3Reader = new Mp3FileReader(this.currentItem.Data);
 
                 // Adjust the volume of the MP3 data
                 var sampleProvider = mp3Reader.ToSampleProvider();
-                var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
+                var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = this.currentItem.Volume };
 
                 // Wait for the last sound to stop
                 while (this.waveOut != null)
@@ -64,7 +65,8 @@ namespace TextToTalk.Backends.Polly
                 this.waveOut.Dispose();
                 this.waveOut = null;
 
-                nextItem.Data.Dispose();
+                this.currentItem.Data.Dispose();
+                this.currentItem = null;
             }
         }
 
@@ -87,7 +89,8 @@ namespace TextToTalk.Backends.Polly
             {
                 while (this.queuedSounds.Count > 0)
                 {
-                    var nextItem = TryDequeue();
+                    var nextItem = this.queuedSounds[0];
+                    this.queuedSounds.RemoveAt(0);
                     nextItem.Data.Dispose();
                 }
             }
@@ -99,8 +102,23 @@ namespace TextToTalk.Backends.Polly
         {
             lock (this.queuedSounds)
             {
+                foreach (var item in this.queuedSounds.Where(s => s.Source != source).ToList())
+                {
+                    item.Data.Dispose();
+                }
+
                 this.queuedSounds = this.queuedSounds.Where(s => s.Source == source).ToList();
             }
+
+            if (this.currentItem?.Source == source)
+            {
+                StopWaveOut();
+            }
+        }
+
+        public TextSource GetCurrentlySpokenTextSource()
+        {
+            return this.currentItem?.Source ?? TextSource.None;
         }
 
         private void StopWaveOut()
@@ -130,8 +148,8 @@ namespace TextToTalk.Backends.Polly
         public void Dispose()
         {
             this.active = false;
-            this.soundThread.Join();
             CancelAllSounds();
+            this.soundThread.Join();
             this.waveOut?.Dispose();
         }
 

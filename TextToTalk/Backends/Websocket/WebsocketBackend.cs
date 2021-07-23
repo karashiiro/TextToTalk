@@ -100,6 +100,12 @@ namespace TextToTalk.Backends.Websocket
             }
         }
 
+        public override TextSource GetCurrentlySpokenTextSource()
+        {
+            // It's not possible to implement this correctly here.
+            return TextSource.None;
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

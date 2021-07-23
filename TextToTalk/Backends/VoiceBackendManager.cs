@@ -41,7 +41,12 @@ namespace TextToTalk.Backends
 
         public override void DrawSettings(ImExposedFunctions helpers)
         {
-            this.backend.DrawSettings(helpers);
+            this.backend?.DrawSettings(helpers);
+        }
+
+        public override TextSource GetCurrentlySpokenTextSource()
+        {
+            return this.backend?.GetCurrentlySpokenTextSource() ?? TextSource.None;
         }
 
         public void SetBackend(TTSBackend backendKind)
@@ -49,16 +54,17 @@ namespace TextToTalk.Backends
             _ = Task.Run(() =>
             {
                 BackendLoading = true;
-                var newBackend = CreateBackendFor(this.config.Backend);
-                this.backend?.Dispose();
+                var newBackend = CreateBackendFor(backendKind);
+                var oldBackend = this.backend;
                 this.backend = newBackend;
                 BackendLoading = false;
+                oldBackend?.Dispose();
             });
         }
 
         public Vector4 GetBackendTitleBarColor()
         {
-            return this.backend.TitleBarColor;
+            return this.backend?.TitleBarColor ?? TitleBarColor;
         }
 
         private VoiceBackend CreateBackendFor(TTSBackend backendKind)

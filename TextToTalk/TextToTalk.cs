@@ -34,12 +34,9 @@ namespace TextToTalk
         private VoiceBackendManager backendManager;
 
         private Addon talkAddonInterface;
-
         private SharedState sharedState;
 
         private PluginServiceCollection serviceCollection;
-
-        private TextSource lastTextSource;
 
         public string Name => "TextToTalk";
 
@@ -133,7 +130,7 @@ namespace TextToTalk
             if (!TalkUtils.IsVisible(talkAddon))
             {
                 // Cancel TTS when the dialogue window is closed, if configured
-                if (this.config.CancelSpeechOnTextAdvance && this.lastTextSource == TextSource.TalkAddon)
+                if (this.config.CancelSpeechOnTextAdvance)
                 {
                     this.backendManager.CancelSay(TextSource.TalkAddon);
                 }
@@ -160,6 +157,12 @@ namespace TextToTalk
 
             var speaker = this.pluginInterface.ClientState.Actors
                 .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
+
+            // Cancel TTS if it's currently talk addon text, if configured
+            if (this.config.CancelSpeechOnTextAdvance && this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
+            {
+                this.backendManager.CancelSay(TextSource.TalkAddon);
+            }
             
             Say(speaker, text, TextSource.TalkAddon);
         }
@@ -222,14 +225,6 @@ namespace TextToTalk
 
         private void Say(Actor speaker, string textValue, TextSource source)
         {
-            this.lastTextSource = source;
-
-            // Cancel the current speech task if the respective setting is enabled
-            if (this.config.CancelSpeechOnTextAdvance)
-            {
-                this.backendManager.CancelSay(source);
-            }
-
             var cleanText = Pipe(
                 textValue,
                 TalkUtils.StripSSMLTokens,

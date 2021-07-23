@@ -88,6 +88,12 @@ namespace TextToTalk.Backends.Polly
             return voices;
         }
 
+        public TextSource GetCurrentlySpokenTextSource()
+        {
+            // This should probably be designed differently.
+            return this.soundQueue.GetCurrentlySpokenTextSource();
+        }
+
         public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, IEnumerable<string> lexicons, TextSource source, string text)
         {
             var req = new SynthesizeSpeechRequest
