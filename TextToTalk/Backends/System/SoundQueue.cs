@@ -87,7 +87,11 @@ namespace TextToTalk.Backends.System
                 }
             }
 
-            this.speechSynthesizer.SpeakAsyncCancel(this.speechSynthesizer.GetCurrentlySpokenPrompt());
+            var currentPrompt = this.speechSynthesizer.GetCurrentlySpokenPrompt();
+            if (currentPrompt != null)
+            {
+                this.speechSynthesizer.SpeakAsyncCancel(currentPrompt);
+            }
         }
 
         public void CancelFromSource(TextSource source)
