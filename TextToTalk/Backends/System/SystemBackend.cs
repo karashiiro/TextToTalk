@@ -20,12 +20,12 @@ namespace TextToTalk.Backends.System
         private static readonly SpeechSynthesizer DummySynthesizer = new();
 
         private readonly PluginConfiguration config;
-        private readonly SoundQueue soundQueue;
+        private readonly SystemSoundQueue soundQueue;
 
         public SystemBackend(PluginConfiguration config)
         {
             this.config = config;
-            this.soundQueue = new SoundQueue();
+            this.soundQueue = new SystemSoundQueue();
             
             for (var i = 0; i < this.config.Lexicons.Count; i++)
             {

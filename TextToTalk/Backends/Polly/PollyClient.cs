@@ -14,13 +14,13 @@ namespace TextToTalk.Backends.Polly
     public class PollyClient : IDisposable
     {
         private readonly AmazonPollyClient client;
-        private readonly SoundQueue soundQueue;
+        private readonly PollySoundQueue soundQueue;
 
         public PollyClient(string accessKey, string secretKey, RegionEndpoint region)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
-            this.soundQueue = new SoundQueue();
+            this.soundQueue = new PollySoundQueue();
         }
 
         public IList<LexiconDescription> GetLexicons()
