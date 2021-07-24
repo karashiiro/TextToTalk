@@ -11,10 +11,11 @@ namespace TextToTalk.Backends.System
     {
         // This used to be a ConcurrentQueue<T>, but was changed so that items could be
         // queried and removed from the middle.
-        private IList<SoundQueueItem> queuedSounds;
+        private readonly IList<SoundQueueItem> queuedSounds;
 
         private readonly SpeechSynthesizer speechSynthesizer;
         private readonly Thread soundThread;
+        private readonly AutoResetEvent speechCompleted;
 
         private SoundQueueItem currentItem;
         private bool active;
@@ -22,11 +23,19 @@ namespace TextToTalk.Backends.System
         public SoundQueue()
         {
             this.queuedSounds = new List<SoundQueueItem>();
+
+            this.speechCompleted = new AutoResetEvent(false);
+            this.speechSynthesizer = new SpeechSynthesizer();
+
+            this.speechSynthesizer.SpeakCompleted += (_, _) =>
+            {
+                // Allows PlaySoundLoop to continue.
+                this.speechCompleted.Set();
+            };
+
             this.active = true;
             this.soundThread = new Thread(PlaySoundLoop);
             this.soundThread.Start();
-
-            this.speechSynthesizer = new SpeechSynthesizer();
         }
 
         public void AddLexicon(string filePath)
@@ -55,10 +64,8 @@ namespace TextToTalk.Backends.System
                 this.speechSynthesizer.UseVoicePreset(this.currentItem.Preset);
                 this.speechSynthesizer.SpeakAsync(this.currentItem.Text);
 
-                while (this.speechSynthesizer.GetCurrentlySpokenPrompt() != null)
-                {
-                    Thread.Sleep(100);
-                }
+                // Waits for the AutoResetEvent lock in the callback to fire.
+                this.speechCompleted.WaitOne();
 
                 this.currentItem = null;
             }

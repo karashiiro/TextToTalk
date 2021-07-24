@@ -12,9 +12,10 @@ namespace TextToTalk.Backends.Polly
     {
         // This used to be a ConcurrentQueue<T>, but was changed so that items could be
         // queried and removed from the middle.
-        private IList<SoundQueueItem> queuedSounds;
+        private readonly IList<SoundQueueItem> queuedSounds;
 
         private readonly Thread soundThread;
+        private readonly AutoResetEvent speechCompleted;
 
         private SoundQueueItem currentItem;
         private WaveOut waveOut;
@@ -23,6 +24,8 @@ namespace TextToTalk.Backends.Polly
         public SoundQueue()
         {
             this.queuedSounds = new List<SoundQueueItem>();
+            this.speechCompleted = new AutoResetEvent(false);
+
             this.active = true;
             this.soundThread = new Thread(PlaySoundLoop);
             this.soundThread.Start();
@@ -45,21 +48,15 @@ namespace TextToTalk.Backends.Polly
                 var sampleProvider = mp3Reader.ToSampleProvider();
                 var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = this.currentItem.Volume };
 
-                // Wait for the last sound to stop
-                while (this.waveOut != null)
-                {
-                    Thread.Sleep(100);
-                }
-
                 // Play the sound
                 this.waveOut = new WaveOut();
+                this.waveOut.PlaybackStopped += (_, _) =>
+                {
+                    this.speechCompleted.Set();
+                };
                 this.waveOut.Init(volumeSampleProvider);
                 this.waveOut.Play();
-
-                while (this.waveOut.PlaybackState == PlaybackState.Playing)
-                {
-                    Thread.Sleep(100);
-                }
+                this.speechCompleted.WaitOne();
 
                 // Cleanup
                 this.waveOut.Dispose();
