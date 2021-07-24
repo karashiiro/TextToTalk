@@ -55,7 +55,11 @@ namespace TextToTalk.Backends.System
 
         protected override void OnSoundCancelled()
         {
-            this.speechSynthesizer.SpeakAsyncCancelAll();
+            try
+            {
+                this.speechSynthesizer.SpeakAsyncCancelAll();
+            }
+            catch (ObjectDisposedException) { }
         }
 
         protected override void Dispose(bool disposing)
