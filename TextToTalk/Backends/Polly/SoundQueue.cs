@@ -89,9 +89,7 @@ namespace TextToTalk.Backends.Polly
             {
                 while (this.queuedSounds.Count > 0)
                 {
-                    var nextItem = this.queuedSounds[0];
-                    this.queuedSounds.RemoveAt(0);
-                    nextItem.Data.Dispose();
+                    SafeRemoveAt(0);
                 }
             }
 
@@ -102,12 +100,13 @@ namespace TextToTalk.Backends.Polly
         {
             lock (this.queuedSounds)
             {
-                foreach (var item in this.queuedSounds.Where(s => s.Source == source).ToList())
+                for (var i = this.queuedSounds.Count - 1; i >= 0; i--)
                 {
-                    item.Data.Dispose();
+                    if (this.queuedSounds[i].Source == source)
+                    {
+                        SafeRemoveAt(i);
+                    }
                 }
-
-                this.queuedSounds = this.queuedSounds.Where(s => s.Source != source).ToList();
             }
 
             if (this.currentItem?.Source == source)
@@ -128,6 +127,23 @@ namespace TextToTalk.Backends.Polly
                 this.waveOut?.Stop();
             }
             catch (ObjectDisposedException) { }
+        }
+
+        /// <summary>
+        /// Safely remove the item at the specified index from the sound queue. Always
+        /// call this method in a synchronized block.
+        /// </summary>
+        /// <param name="index">The index of the item to remove.</param>
+        private void SafeRemoveAt(int index)
+        {
+            // We dispose after removing to avoid edge cases in which the item is disposed
+            // and then pulled from the sound thread, before we remove it.
+
+            // ReSharper disable InconsistentlySynchronizedField
+            var nextItem = this.queuedSounds[index];
+            this.queuedSounds.RemoveAt(index);
+            nextItem.Data.Dispose();
+            // ReSharper restore InconsistentlySynchronizedField
         }
 
         private SoundQueueItem TryDequeue()

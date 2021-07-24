@@ -87,18 +87,20 @@ namespace TextToTalk.Backends.System
                 }
             }
 
-            var currentPrompt = this.speechSynthesizer.GetCurrentlySpokenPrompt();
-            if (currentPrompt != null)
-            {
-                this.speechSynthesizer.SpeakAsyncCancel(currentPrompt);
-            }
+            this.speechSynthesizer.SpeakAsyncCancelAll();
         }
 
         public void CancelFromSource(TextSource source)
         {
             lock (this.queuedSounds)
             {
-                this.queuedSounds = this.queuedSounds.Where(s => s.Source != source).ToList();
+                for (var i = this.queuedSounds.Count - 1; i >= 0; i--)
+                {
+                    if (this.queuedSounds[i].Source == source)
+                    {
+                        this.queuedSounds.RemoveAt(i);
+                    }
+                }
             }
 
             if (this.currentItem?.Source == source)
