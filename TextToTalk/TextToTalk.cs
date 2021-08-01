@@ -116,6 +116,7 @@ namespace TextToTalk
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
+            if (!this.pluginInterface.ClientState.IsLoggedIn) return;
 
             if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
             {
