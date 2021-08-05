@@ -28,7 +28,6 @@ namespace TextToTalk.Backends.Polly
         private static readonly string[] Engines = { Engine.Neural, Engine.Standard };
 
         private readonly PluginConfiguration config;
-        private readonly RepeatingAction lexiconUpdateAction;
 
         private PollyClient polly;
         private IList<Voice> voices;
@@ -58,16 +57,6 @@ namespace TextToTalk.Backends.Polly
                 this.voices = new List<Voice>();
                 this.cloudLexicons = new List<LexiconDescription>();
             }
-
-            // Poll the lexicon list for updates since it is eventually-consistent
-            this.lexiconUpdateAction = new RepeatingAction(() =>
-            {
-                var newLexiconList = this.polly.GetLexicons();
-                lock (this.cloudLexicons)
-                {
-                    this.cloudLexicons = newLexiconList;
-                }
-            }, new TimeSpan(0, 0, 4));
         }
 
         public override void Say(TextSource source, Gender gender, string text)
@@ -233,6 +222,20 @@ namespace TextToTalk.Backends.Polly
                 ImGui.PopFont();
             }
 
+            ImGui.SameLine();
+            ImGui.PushFont(UiBuilder.IconFont);
+            if (ImGui.Button(FontAwesomeIcon.Retweet.ToIconString()))
+            {
+                lock (this.cloudLexicons)
+                {
+                    this.cloudLexicons = this.polly.GetLexicons();
+                }
+            }
+            ImGui.PopFont();
+
+            ImGui.SameLine();
+            ImGui.Text("Refresh lexicons");
+
             if (this.lexiconUploadException != null)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Red);
@@ -240,6 +243,7 @@ namespace TextToTalk.Backends.Polly
                 ImGui.PopStyleColor();
             }
             ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available or be deleted.");
+
             ImGui.Spacing();
 
             var voiceArray = this.voices.Select(v => v.Name).ToArray();
@@ -421,7 +425,6 @@ namespace TextToTalk.Backends.Polly
             if (disposing)
             {
                 this.polly?.Dispose();
-                this.lexiconUpdateAction.Dispose();
             }
         }
     }
