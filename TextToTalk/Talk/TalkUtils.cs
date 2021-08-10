@@ -10,7 +10,7 @@ namespace TextToTalk.Talk
 {
     public static class TalkUtils
     {
-        private static readonly Regex Speakable = new(@"[⺀-⺙⺛-⻳⼀-⿕々〇〡-〩〸-〺〻㐀-䶵一-鿃豈-鶴侮-頻並-龎]+|[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[a-zA-Z0-9]+|[ａ-ｚＡ-Ｚ０-９]+[々〆〤]", RegexOptions.Compiled);
+        private static readonly Regex Speakable = new(@"\p{L}+|\p{M}+|\p{N}+", RegexOptions.Compiled);
 
         public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
         {
