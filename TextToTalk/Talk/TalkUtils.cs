@@ -57,9 +57,7 @@ namespace TextToTalk.Talk
             return text
                 // TextToTalk#29 emdashes
                 .Replace("─", " - ") // I don't think these are the same character, but they're both used
-                .Replace("—", " - ")
-                // TextToTalk #41 periods
-                .Replace("...", " - ");
+                .Replace("—", " - ");
         }
 
         public static bool IsSpeakable(string text)
