@@ -178,7 +178,7 @@ namespace TextToTalk
             this.notifiedFailedToBindPort = true;
         }
 
-        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+        private unsafe void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
             if (!this.config.Enabled) return;
 
@@ -189,14 +189,24 @@ namespace TextToTalk
             PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
 #endif
 
+            // This section controls speaker-related functions.
             if (sender != null && sender.TextValue != string.Empty)
             {
                 if (ShouldSaySender(type))
                 {
+                    // If we allow the speaker's name to be repeated each time the speak,
+                    // or the speaker has actually changed.
                     if (!this.config.DisallowMultipleSay || !IsSameSpeaker(sender.TextValue))
                     {
                         if ((int)type == (int)AdditionalChatType.NPCDialogue)
                         {
+                            // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
+                            var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
+                            if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
+                            {
+                                return;
+                            }
+
                             SetLastQuestText(textValue);
                         }
 
