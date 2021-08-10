@@ -238,7 +238,8 @@ namespace TextToTalk
             var cleanText = Pipe(
                 textValue,
                 TalkUtils.StripSSMLTokens,
-                TalkUtils.NormalizePunctuation);
+                TalkUtils.NormalizePunctuation)
+                .Trim();
             if (!TalkUtils.IsSpeakable(cleanText))
                 return;
             var gender = this.config.UseGenderedVoicePresets ? GetActorGender(speaker) : Gender.None;
