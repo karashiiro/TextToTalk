@@ -239,6 +239,8 @@ namespace TextToTalk
                 textValue,
                 TalkUtils.StripSSMLTokens,
                 TalkUtils.NormalizePunctuation);
+            if (!TalkUtils.IsSpeakable(cleanText))
+                return;
             var gender = this.config.UseGenderedVoicePresets ? GetActorGender(speaker) : Gender.None;
             this.backendManager.Say(source, gender, cleanText);
         }

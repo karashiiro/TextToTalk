@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using Dalamud.Data;
 using Dalamud.Game.Text.SeStringHandling;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -9,6 +10,8 @@ namespace TextToTalk.Talk
 {
     public static class TalkUtils
     {
+        private static readonly Regex Speakable = new(@"(([⺀-⺙⺛-⻳⼀-⿕々〇〡-〩〸-〺〻㐀-䶵一-鿃豈-鶴侮-頻並-龎]+|[一-龠]+|[ぁ-ゔ]+|[ァ-ヴー]+|[a-zA-Z0-9]+|[ａ-ｚＡ-Ｚ０-９]+[々〆〤])|\s)+", RegexOptions.Compiled);
+
         public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
         {
             return new()
@@ -55,8 +58,13 @@ namespace TextToTalk.Talk
                 // TextToTalk#29 emdashes
                 .Replace("─", " - ") // I don't think these are the same character, but they're both used
                 .Replace("—", " - ")
-                // TextToTalk #41 ellipses
-                .Replace("…", "...");
-        }       
+                // TextToTalk #41 periods
+                .Replace("...", " - ");
+        }
+
+        public static bool IsSpeakable(string text)
+        {
+            return Speakable.Match(text).Success;
+        }
     }
 }
