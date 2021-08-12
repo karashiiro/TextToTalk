@@ -238,7 +238,8 @@ namespace TextToTalk
             var cleanText = Pipe(
                 textValue,
                 TalkUtils.StripSSMLTokens,
-                TalkUtils.NormalizePunctuation)
+                TalkUtils.NormalizePunctuation,
+                TalkUtils.RemoveStutters)
                 .Trim();
             if (!TalkUtils.IsSpeakable(cleanText))
                 return;

@@ -11,6 +11,7 @@ namespace TextToTalk.Talk
     public static class TalkUtils
     {
         private static readonly Regex Speakable = new(@"\p{L}+|\p{M}+|\p{N}+", RegexOptions.Compiled);
+        private static readonly Regex Stutter = new(@"(?<=\s|^)\p{L}-", RegexOptions.Compiled);
 
         public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
         {
@@ -51,13 +52,27 @@ namespace TextToTalk.Talk
                 .Replace("<", "")
                 .Replace(">", "");
         }
-
+        
         public static string NormalizePunctuation(string text)
         {
             return text
                 // TextToTalk#29 emdashes
                 .Replace("─", " - ") // I don't think these are the same character, but they're both used
                 .Replace("—", " - ");
+        }
+
+        /// <summary>
+        /// Removes single letters with a hyphen following them, since they aren't read as expected.
+        /// </summary>
+        /// <param name="text">The input text.</param>
+        /// <returns>The cleaned text.</returns>
+        public static string RemoveStutters(string text)
+        {
+            while (true)
+            {
+                if (!Stutter.IsMatch(text)) return text;
+                text = Stutter.Replace(text, "");
+            }
         }
 
         public static bool IsSpeakable(string text)
