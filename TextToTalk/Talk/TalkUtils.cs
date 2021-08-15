@@ -11,7 +11,7 @@ namespace TextToTalk.Talk
     public static class TalkUtils
     {
         private static readonly Regex Speakable = new(@"\p{L}+|\p{M}+|\p{N}+", RegexOptions.Compiled);
-        private static readonly Regex Stutter = new(@"(?<=\s|^)\p{L}-", RegexOptions.Compiled);
+        private static readonly Regex Stutter = new(@"(?<=\s|^)\p{L}{1,2}-", RegexOptions.Compiled);
         private static readonly Regex Bracketed = new(@"<[^<]*>", RegexOptions.Compiled);
 
         public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
