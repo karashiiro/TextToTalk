@@ -48,7 +48,8 @@ namespace TextToTalk.Backends.System
                 // There are some weird incompatibilities in the SSML reader that this helps to fix.
                 var phoneme = lexeme.Phoneme?
                     .Replace(":", "ː")
-                    .Replace(" ", "");
+                    .Replace(" ", "")
+                    .Replace("-", "");
                 if (phoneme == null) continue;
 
                 var graphemes = lexeme.Graphemes.ToList();
