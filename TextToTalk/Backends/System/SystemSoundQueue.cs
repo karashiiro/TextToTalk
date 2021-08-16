@@ -38,7 +38,7 @@ namespace TextToTalk.Backends.System
         {
             this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
 
-            var ssml = this.lexiconManager.MakeSsml(nextItem.Text);
+            var ssml = this.lexiconManager.MakeSsml(nextItem.Text, this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
             this.speechSynthesizer.SpeakSsmlAsync(ssml);
 
             // Waits for the AutoResetEvent lock in the callback to fire.

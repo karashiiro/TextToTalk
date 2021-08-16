@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Dalamud.Plugin;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Security.Policy;
-using System.Xml;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace TextToTalk.Backends.System
 {
@@ -21,27 +22,43 @@ namespace TextToTalk.Backends.System
 
         public void AddLexicon(string lexiconUrl)
         {
-            var doc = new XmlDocument();
-            doc.Load(lexiconUrl);
-
-            var root = doc.DocumentElement ?? throw new NullReferenceException("Document has no root element.");
-            var lexemes = root.SelectNodes("/lexeme");
+            var xml = XDocument.Load(lexiconUrl);
+            if (xml.Root == null)
+            {
+                throw new NullReferenceException("XML document has no root element.");
+            }
 
             var replacements = new ConcurrentDictionary<string, string>();
-            this.lexicons.Add(lexiconUrl, replacements);
-            if (lexemes == null) return;
 
-            foreach (XmlNode node in lexemes)
+            if (this.lexicons.ContainsKey(lexiconUrl))
             {
-                var phoneme = node.SelectSingleNode("/phoneme");
+                this.lexicons.Remove(lexiconUrl);
+            }
+
+            this.lexicons.Add(lexiconUrl, replacements);
+
+            var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
+            foreach (var lexeme in xml.Root.Descendants($"{{{ns}}}lexeme").Select(el => new
+            {
+                Graphemes = el.Elements($"{{{ns}}}grapheme").Select(g => g.Value),
+                Phoneme = el.Element($"{{{ns}}}phoneme")?.Value,
+            }))
+            {
+                var phoneme = lexeme.Phoneme;
                 if (phoneme == null) continue;
 
-                var graphemes = node.SelectNodes("/grapheme");
-                if (graphemes == null) continue;
+                var graphemes = lexeme.Graphemes.ToList();
+                if (!graphemes.Any()) continue;
 
-                foreach (XmlNode grapheme in graphemes)
+                foreach (var grapheme in graphemes)
                 {
-                    this.lexicons[lexiconUrl].Add(grapheme.InnerText, phoneme.InnerText);
+                    if (this.lexicons[lexiconUrl].ContainsKey(grapheme))
+                    {
+                        // Allow later graphemes to override previous ones
+                        this.lexicons[lexiconUrl].Remove(grapheme);
+                    }
+                    
+                    this.lexicons[lexiconUrl].Add(grapheme, phoneme);
                 }
             }
         }
@@ -51,7 +68,7 @@ namespace TextToTalk.Backends.System
             this.lexicons.Remove(lexiconUrl);
         }
 
-        public string MakeSsml(string text)
+        public string MakeSsml(string text, string langCode)
         {
             foreach (var lexicon in this.lexicons.Values)
             {
@@ -63,8 +80,8 @@ namespace TextToTalk.Backends.System
                     text = text.Replace(grapheme, $"<phoneme ph=\"{phoneme}\">{grapheme}</phoneme>");
                 }
             }
-
-            return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\">{text}</speak>";
+            
+            return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
         }
     }
 }
