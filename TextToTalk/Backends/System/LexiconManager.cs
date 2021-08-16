@@ -44,7 +44,11 @@ namespace TextToTalk.Backends.System
                 Phoneme = el.Element($"{{{ns}}}phoneme")?.Value,
             }))
             {
-                var phoneme = lexeme.Phoneme;
+                // https://github.com/karashiiro/TextToTalk/issues/37#issuecomment-899733701
+                // There are some weird incompatibilities in the SSML reader that this helps to fix.
+                var phoneme = lexeme.Phoneme?
+                    .Replace(":", "ː")
+                    .Replace(" ", "");
                 if (phoneme == null) continue;
 
                 var graphemes = lexeme.Graphemes.ToList();
