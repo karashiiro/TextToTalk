@@ -52,6 +52,11 @@ namespace TextToTalk.Talk
             return Bracketed.Replace(text, "");
         }
 
+        public static string ReplaceAmpersand(string text)
+        {
+            return text.Replace("&", "and");
+        }
+
         public static string NormalizePunctuation(string text)
         {
             return text
