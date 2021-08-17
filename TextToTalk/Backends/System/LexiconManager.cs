@@ -128,7 +128,9 @@ namespace TextToTalk.Backends.System
         
         private static bool StartsWithEndPhonemeTag(string text)
         {
-            return text.IndexOf("</phoneme", StringComparison.InvariantCultureIgnoreCase) < text.IndexOf("<phoneme", StringComparison.InvariantCultureIgnoreCase);
+            var endTagIndex = text.IndexOf("</phoneme", StringComparison.InvariantCultureIgnoreCase);
+            var startTagIndex = text.IndexOf("<phoneme", StringComparison.InvariantCultureIgnoreCase);
+            return endTagIndex < startTagIndex;
         }
 
         private class LexiconInfo
