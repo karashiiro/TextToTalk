@@ -1,5 +1,4 @@
-﻿using Dalamud.Plugin;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +12,11 @@ namespace TextToTalk.Backends.System
         // this SO question https://stackoverflow.com/questions/11529164/how-do-i-use-a-lexicon-with-speechsynthesizer.
         // Because of this, we just manage lexicons ourselves here.
 
-        private readonly IDictionary<string, IDictionary<string, string>> lexicons;
+        private readonly IList<LexiconInfo> lexicons;
 
         public LexiconManager()
         {
-            this.lexicons = new ConcurrentDictionary<string, IDictionary<string, string>>();
+            this.lexicons = new List<LexiconInfo>();
         }
 
         public void AddLexicon(string lexiconUrl)
@@ -28,14 +27,20 @@ namespace TextToTalk.Backends.System
                 throw new NullReferenceException("XML document has no root element.");
             }
 
-            var replacements = new ConcurrentDictionary<string, string>();
-
-            if (this.lexicons.ContainsKey(lexiconUrl))
+            // Remove existing lexicon if it's already registered
+            var existingLexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
+            if (existingLexicon != null)
             {
-                this.lexicons.Remove(lexiconUrl);
+                this.lexicons.Remove(existingLexicon);
             }
 
-            this.lexicons.Add(lexiconUrl, replacements);
+            // Create the lexicon
+            var lexicon = new LexiconInfo { Url = lexiconUrl };
+            this.lexicons.Add(lexicon);
+
+            // Set the lexicon language
+            var alphabet = xml.Root.Attribute("alphabet")?.Value ?? lexicon.Alphabet;
+            lexicon.Alphabet = alphabet;
 
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
             foreach (var lexeme in xml.Root.Descendants($"{{{ns}}}lexeme").Select(el => new
@@ -57,40 +62,53 @@ namespace TextToTalk.Backends.System
 
                 foreach (var grapheme in graphemes)
                 {
-                    if (this.lexicons[lexiconUrl].ContainsKey(grapheme))
+                    if (lexicon.GraphemesPhonemes.ContainsKey(grapheme))
                     {
                         // Allow later graphemes to override previous ones
-                        this.lexicons[lexiconUrl].Remove(grapheme);
+                        lexicon.GraphemesPhonemes.Remove(grapheme);
                     }
-                    
-                    this.lexicons[lexiconUrl].Add(grapheme, phoneme);
+
+                    lexicon.GraphemesPhonemes.Add(grapheme, phoneme);
                 }
             }
         }
 
         public void RemoveLexicon(string lexiconUrl)
         {
-            this.lexicons.Remove(lexiconUrl);
+            var lexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
+            if (lexicon != null)
+            {
+                this.lexicons.Remove(lexicon);
+            }
         }
 
         public string MakeSsml(string text, string langCode)
         {
-            foreach (var lexicon in this.lexicons.Values)
+            foreach (var lexicon in this.lexicons)
             {
-                foreach (var entry in lexicon)
+                foreach (var entry in lexicon.GraphemesPhonemes)
                 {
                     var grapheme = entry.Key;
                     var phoneme = entry.Value;
 
                     var phonemeNode = phoneme.Contains("\"")
-                        ? $"<phoneme ph='{phoneme}'>{grapheme}</phoneme>"
-                        : $"<phoneme ph=\"{phoneme}\">{grapheme}</phoneme>";
+                        ? $"<phoneme alphabet={lexicon.Alphabet} ph='{phoneme}'>{grapheme}</phoneme>"
+                        : $"<phoneme alphabet={lexicon.Alphabet} ph=\"{phoneme}\">{grapheme}</phoneme>";
 
                     text = text.Replace(grapheme, phonemeNode);
                 }
             }
-            
+
             return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
+        }
+
+        private class LexiconInfo
+        {
+            public string Url { get; set; }
+
+            public string Alphabet { get; set; } = "ipa";
+
+            public IDictionary<string, string> GraphemesPhonemes { get; } = new ConcurrentDictionary<string, string>();
         }
     }
 }
