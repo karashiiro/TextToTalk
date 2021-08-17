@@ -82,7 +82,11 @@ namespace TextToTalk.Backends.System
                     var grapheme = entry.Key;
                     var phoneme = entry.Value;
 
-                    text = text.Replace(grapheme, $"<phoneme ph=\"{phoneme}\">{grapheme}</phoneme>");
+                    var phonemeNode = phoneme.Contains("\"")
+                        ? $"<phoneme ph='{phoneme}'>{grapheme}</phoneme>"
+                        : $"<phoneme ph=\"{phoneme}\">{grapheme}</phoneme>";
+
+                    text = text.Replace(grapheme, phonemeNode);
                 }
             }
             
