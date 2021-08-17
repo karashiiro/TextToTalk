@@ -112,9 +112,8 @@ namespace TextToTalk.Backends.System
 
                     // Avoid doing replacements inside of replacements
                     var replacementIndex = text.IndexOf(grapheme, StringComparison.InvariantCulture);
-                    var textLeft = text[..replacementIndex];
                     var textRight = text[(replacementIndex + grapheme.Length)..];
-                    if (EndsWithStartPhonemeTag(textLeft) || StartsWithEndPhonemeTag(textRight)) continue;
+                    if (StartsWithEndPhonemeTag(textRight)) continue;
 
                     var phonemeNode = phoneme.Contains("\"")
                         ? $"<phoneme ph='{phoneme}'>{grapheme}</phoneme>"
@@ -126,12 +125,7 @@ namespace TextToTalk.Backends.System
 
             return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
         }
-
-        private static bool EndsWithStartPhonemeTag(string text)
-        {
-            return text.IndexOf("<phoneme", StringComparison.InvariantCultureIgnoreCase) < text.IndexOf("</phoneme", StringComparison.InvariantCultureIgnoreCase);
-        }
-
+        
         private static bool StartsWithEndPhonemeTag(string text)
         {
             return text.IndexOf("</phoneme", StringComparison.InvariantCultureIgnoreCase) < text.IndexOf("<phoneme", StringComparison.InvariantCultureIgnoreCase);
