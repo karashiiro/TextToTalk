@@ -82,7 +82,7 @@ namespace TextToTalk.Backends.System
                             lexicon.GraphemeAliases.Remove(grapheme);
                         }
 
-                        lexicon.GraphemeAliases.Add(grapheme, phoneme);
+                        lexicon.GraphemeAliases.Add(grapheme, lexeme.Alias);
                     }
                 }
             }
