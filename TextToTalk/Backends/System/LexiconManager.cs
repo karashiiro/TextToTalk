@@ -43,10 +43,12 @@ namespace TextToTalk.Backends.System
             lexicon.Alphabet = alphabet;
 
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
-            foreach (var lexeme in xml.Root.Descendants($"{{{ns}}}lexeme").Select(el => new
+            var nsPrefix = !string.IsNullOrEmpty(ns) ? $"{{{ns}}}" : "";
+            foreach (var lexeme in xml.Root.Descendants($"{nsPrefix}lexeme").Select(el => new
             {
-                Graphemes = el.Elements($"{{{ns}}}grapheme").Select(g => g.Value),
-                Phoneme = el.Element($"{{{ns}}}phoneme")?.Value,
+                Graphemes = el.Elements($"{nsPrefix}grapheme").Select(g => g.Value),
+                Phoneme = el.Element($"{nsPrefix}phoneme")?.Value,
+                Alias = el.Element($"{nsPrefix}alias")?.Value,
             }))
             {
                 // https://github.com/karashiiro/TextToTalk/issues/37#issuecomment-899733701
@@ -55,20 +57,33 @@ namespace TextToTalk.Backends.System
                     .Replace(":", "ː")
                     .Replace(" ", "")
                     .Replace("-", "");
-                if (phoneme == null) continue;
 
                 var graphemes = lexeme.Graphemes.ToList();
                 if (!graphemes.Any()) continue;
 
                 foreach (var grapheme in graphemes)
                 {
-                    if (lexicon.GraphemesPhonemes.ContainsKey(grapheme))
+                    if (phoneme != null)
                     {
-                        // Allow later graphemes to override previous ones
-                        lexicon.GraphemesPhonemes.Remove(grapheme);
+                        if (lexicon.GraphemePhonemes.ContainsKey(grapheme))
+                        {
+                            // Allow later graphemes to override previous ones
+                            lexicon.GraphemePhonemes.Remove(grapheme);
+                        }
+
+                        lexicon.GraphemePhonemes.Add(grapheme, phoneme);
                     }
 
-                    lexicon.GraphemesPhonemes.Add(grapheme, phoneme);
+                    if (lexeme.Alias != null)
+                    {
+                        if (lexicon.GraphemeAliases.ContainsKey(grapheme))
+                        {
+                            // Allow later graphemes to override previous ones
+                            lexicon.GraphemeAliases.Remove(grapheme);
+                        }
+
+                        lexicon.GraphemeAliases.Add(grapheme, phoneme);
+                    }
                 }
             }
         }
@@ -86,7 +101,15 @@ namespace TextToTalk.Backends.System
         {
             foreach (var lexicon in this.lexicons)
             {
-                foreach (var entry in lexicon.GraphemesPhonemes)
+                foreach (var entry in lexicon.GraphemeAliases)
+                {
+                    var grapheme = entry.Key;
+                    var alias = entry.Value;
+                    
+                    text = text.Replace(grapheme, alias);
+                }
+
+                foreach (var entry in lexicon.GraphemePhonemes)
                 {
                     var grapheme = entry.Key;
                     var phoneme = entry.Value;
@@ -108,7 +131,9 @@ namespace TextToTalk.Backends.System
 
             public string Alphabet { get; set; } = "ipa";
 
-            public IDictionary<string, string> GraphemesPhonemes { get; } = new ConcurrentDictionary<string, string>();
+            public IDictionary<string, string> GraphemeAliases { get; } = new ConcurrentDictionary<string, string>();
+
+            public IDictionary<string, string> GraphemePhonemes { get; } = new ConcurrentDictionary<string, string>();
         }
     }
 }
