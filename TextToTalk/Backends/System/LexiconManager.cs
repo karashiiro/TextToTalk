@@ -37,11 +37,7 @@ namespace TextToTalk.Backends.System
             // Create the lexicon
             var lexicon = new LexiconInfo { Url = lexiconUrl };
             this.lexicons.Add(lexicon);
-
-            // Set the lexicon language
-            var alphabet = xml.Root.Attribute("alphabet")?.Value ?? lexicon.Alphabet;
-            lexicon.Alphabet = alphabet;
-
+            
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
             var nsPrefix = !string.IsNullOrEmpty(ns) ? $"{{{ns}}}" : "";
             foreach (var lexeme in xml.Root.Descendants($"{nsPrefix}lexeme").Select(el => new
@@ -115,8 +111,8 @@ namespace TextToTalk.Backends.System
                     var phoneme = entry.Value;
 
                     var phonemeNode = phoneme.Contains("\"")
-                        ? $"<phoneme alphabet={lexicon.Alphabet} ph='{phoneme}'>{grapheme}</phoneme>"
-                        : $"<phoneme alphabet={lexicon.Alphabet} ph=\"{phoneme}\">{grapheme}</phoneme>";
+                        ? $"<phoneme ph='{phoneme}'>{grapheme}</phoneme>"
+                        : $"<phoneme ph=\"{phoneme}\">{grapheme}</phoneme>";
 
                     text = text.Replace(grapheme, phonemeNode);
                 }
@@ -128,8 +124,6 @@ namespace TextToTalk.Backends.System
         private class LexiconInfo
         {
             public string Url { get; set; }
-
-            public string Alphabet { get; set; } = "ipa";
 
             public IDictionary<string, string> GraphemeAliases { get; } = new ConcurrentDictionary<string, string>();
 
