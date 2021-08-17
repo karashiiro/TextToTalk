@@ -46,15 +46,18 @@ namespace TextToTalk.Talk
             return talkAddon->AtkUnitBase.IsVisible;
         }
 
-        public static string StripSSMLTokens(string text)
+        public static string StripAngleBracketedText(string text)
         {
             // TextToTalk#17 "<sigh>"
             return Bracketed.Replace(text, "");
         }
 
-        public static string ReplaceAmpersand(string text)
+        public static string ReplaceSsmlTokens(string text)
         {
-            return text.Replace("&", "and");
+            return text
+                .Replace("&", "&amp;")
+                .Replace("\"", "&quot;")
+                .Replace("'", "&apos;");
         }
 
         public static string NormalizePunctuation(string text)
