@@ -108,6 +108,13 @@ namespace TextToTalk.Backends.System
                 foreach (var entry in lexicon.GraphemePhonemes)
                 {
                     var grapheme = entry.Key;
+
+                    // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work,
+                    // which is the correct way to handle this in SSML.
+                    var graphemeReadable = grapheme
+                        .Replace("'", "")
+                        .Replace("\"", "");
+
                     var phoneme = entry.Value;
 
                     // Avoid doing replacements inside of replacements
@@ -116,8 +123,8 @@ namespace TextToTalk.Backends.System
                     if (StartsWithEndPhonemeTag(textRight)) continue;
 
                     var phonemeNode = phoneme.Contains("\"")
-                        ? $"<phoneme ph='{phoneme}'>{grapheme}</phoneme>"
-                        : $"<phoneme ph=\"{phoneme}\">{grapheme}</phoneme>";
+                        ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
+                        : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
 
                     text = text.Replace(grapheme, phonemeNode);
                 }
