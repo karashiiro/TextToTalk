@@ -116,12 +116,7 @@ namespace TextToTalk.Backends.System
                         .Replace("\"", "");
 
                     var phoneme = entry.Value;
-
-                    // Avoid doing replacements inside of replacements
-                    var replacementIndex = text.IndexOf(grapheme, StringComparison.InvariantCulture);
-                    var textRight = text[(replacementIndex + grapheme.Length)..];
-                    if (StartsWithEndPhonemeTag(textRight)) continue;
-
+                    
                     var phonemeNode = phoneme.Contains("\"")
                         ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
                         : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
@@ -131,13 +126,6 @@ namespace TextToTalk.Backends.System
             }
 
             return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
-        }
-        
-        private static bool StartsWithEndPhonemeTag(string text)
-        {
-            var endTagIndex = text.IndexOf("</phoneme", StringComparison.InvariantCultureIgnoreCase);
-            var startTagIndex = text.IndexOf("<phoneme", StringComparison.InvariantCultureIgnoreCase);
-            return endTagIndex < startTagIndex;
         }
 
         private class LexiconInfo
