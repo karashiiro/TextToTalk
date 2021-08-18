@@ -54,10 +54,7 @@ namespace TextToTalk.Talk
 
         public static string ReplaceSsmlTokens(string text)
         {
-            return text
-                .Replace("&", "&amp;")
-                .Replace("\"", "&quot;")
-                .Replace("'", "&apos;");
+            return text.Replace("&", "and");
         }
 
         public static string NormalizePunctuation(string text)
