@@ -21,11 +21,13 @@ namespace TextToTalk.Backends.System
 
         private readonly PluginConfiguration config;
         private readonly SystemSoundQueue soundQueue;
+        private readonly LexiconManager lexiconManager;
 
         public SystemBackend(PluginConfiguration config)
         {
             this.config = config;
-            this.soundQueue = new SystemSoundQueue();
+            this.lexiconManager = new LexiconManager();
+            this.soundQueue = new SystemSoundQueue(this.lexiconManager);
             
             for (var i = 0; i < this.config.Lexicons.Count; i++)
             {
@@ -33,7 +35,7 @@ namespace TextToTalk.Backends.System
 
                 try
                 {
-                    this.soundQueue.AddLexicon(lexicon);
+                    this.lexiconManager.AddLexicon(lexicon);
                 }
                 catch (Exception e)
                 {
@@ -241,7 +243,7 @@ namespace TextToTalk.Backends.System
                 try
                 {
                     this.lexiconRemoveExceptions[i] = null;
-                    this.soundQueue.RemoveLexicon(lexiconPath);
+                    this.lexiconManager.RemoveLexicon(lexiconPath);
 
                     // This is ugly but it works
                     deferred = () =>
@@ -281,7 +283,7 @@ namespace TextToTalk.Backends.System
 
                     try
                     {
-                        this.soundQueue.AddLexicon(filePath);
+                        this.lexiconManager.AddLexicon(filePath);
                         this.config.Lexicons.Add(filePath);
                         this.config.Save();
                         this.lexiconAddSucceeded = true;

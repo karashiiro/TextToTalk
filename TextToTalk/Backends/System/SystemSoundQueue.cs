@@ -8,11 +8,13 @@ namespace TextToTalk.Backends.System
     public class SystemSoundQueue : SoundQueue<SystemSoundQueueItem>
     {
         private readonly SpeechSynthesizer speechSynthesizer;
+        private readonly LexiconManager lexiconManager;
         private readonly AutoResetEvent speechCompleted;
 
-        public SystemSoundQueue()
+        public SystemSoundQueue(LexiconManager lexiconManager)
         {
             this.speechCompleted = new AutoResetEvent(false);
+            this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
 
             this.speechSynthesizer.SpeakCompleted += (_, _) =>
@@ -20,18 +22,6 @@ namespace TextToTalk.Backends.System
                 // Allows PlaySoundLoop to continue.
                 this.speechCompleted.Set();
             };
-        }
-
-        public void AddLexicon(string filePath)
-        {
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException("Lexicon file does not exist.", Path.GetFileName(filePath));
-            this.speechSynthesizer.AddLexicon(new Uri(filePath), "application/pls+xml");
-        }
-
-        public void RemoveLexicon(string filePath)
-        {
-            this.speechSynthesizer.RemoveLexicon(new Uri(filePath));
         }
 
         public void EnqueueSound(VoicePreset preset, TextSource source, string text)
@@ -47,7 +37,9 @@ namespace TextToTalk.Backends.System
         protected override void OnSoundLoop(SystemSoundQueueItem nextItem)
         {
             this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
-            this.speechSynthesizer.SpeakAsync(nextItem.Text);
+
+            var ssml = this.lexiconManager.MakeSsml(nextItem.Text, this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
+            this.speechSynthesizer.SpeakSsmlAsync(ssml);
 
             // Waits for the AutoResetEvent lock in the callback to fire.
             this.speechCompleted.WaitOne();

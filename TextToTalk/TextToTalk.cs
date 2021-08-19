@@ -237,7 +237,8 @@ namespace TextToTalk
         {
             var cleanText = Pipe(
                 textValue,
-                TalkUtils.StripSSMLTokens,
+                TalkUtils.StripAngleBracketedText,
+                TalkUtils.ReplaceSsmlTokens,
                 TalkUtils.NormalizePunctuation,
                 TalkUtils.RemoveStutters)
                 .Trim();

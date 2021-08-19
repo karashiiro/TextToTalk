@@ -1,17 +1,18 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using Dalamud.Data;
+﻿using Dalamud.Data;
 using Dalamud.Game.Text.SeStringHandling;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using System;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace TextToTalk.Talk
 {
     public static class TalkUtils
     {
         private static readonly Regex Speakable = new(@"\p{L}+|\p{M}+|\p{N}+", RegexOptions.Compiled);
-        private static readonly Regex Stutter = new(@"(?<=\s|^)\p{L}-", RegexOptions.Compiled);
+        private static readonly Regex Stutter = new(@"(?<=\s|^)\p{L}{1,2}-", RegexOptions.Compiled);
+        private static readonly Regex Bracketed = new(@"<[^<]*>", RegexOptions.Compiled);
 
         public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
         {
@@ -29,7 +30,7 @@ namespace TextToTalk.Talk
             if (textNode == null) return "";
 
             StringManager ??= new SeStringManager(data);
-            
+
             var textPtr = textNode->NodeText.StringPtr;
             var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
             if (textLength is <= 0 or > int.MaxValue) return "";
@@ -45,14 +46,17 @@ namespace TextToTalk.Talk
             return talkAddon->AtkUnitBase.IsVisible;
         }
 
-        public static string StripSSMLTokens(string text)
+        public static string StripAngleBracketedText(string text)
         {
-            return text
-                // TextToTalk#17 "<sigh>"
-                .Replace("<", "")
-                .Replace(">", "");
+            // TextToTalk#17 "<sigh>"
+            return Bracketed.Replace(text, "");
         }
-        
+
+        public static string ReplaceSsmlTokens(string text)
+        {
+            return text.Replace("&", "and");
+        }
+
         public static string NormalizePunctuation(string text)
         {
             return text
