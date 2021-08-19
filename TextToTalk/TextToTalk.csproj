@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="AdysTech.CredentialManager" Version="2.3.0" />
-    <PackageReference Include="AWSSDK.Core" Version="3.7.1.3" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.2.4" />
     <PackageReference Include="AWSSDK.Polly" Version="3.7.1.18" />
     <PackageReference Include="Dalamud.CrystalTower" Version="1.2.0" />
     <PackageReference Include="DalamudPackager" Version="1.2.2" />
