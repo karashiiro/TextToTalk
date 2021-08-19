@@ -32,7 +32,7 @@ namespace TextToTalk.Talk
             
             var textPtr = textNode->NodeText.StringPtr;
             var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
-            if (textLength <= 0) return "";
+            if (textLength is <= 0 or > int.MaxValue) return "";
 
             var textBytes = new byte[textLength];
             Marshal.Copy((IntPtr)textPtr, textBytes, 0, (int)textLength);
