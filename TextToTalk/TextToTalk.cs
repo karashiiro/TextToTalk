@@ -140,8 +140,18 @@ namespace TextToTalk
                 return;
             }
 
-            var talkAddonText = TalkUtils.ReadTalkAddon(this.pluginInterface.Data, talkAddon);
-            var text = talkAddonText.Text;
+            TalkAddonText talkAddonText;
+            string text;
+            try
+            {
+                talkAddonText = TalkUtils.ReadTalkAddon(this.pluginInterface.Data, talkAddon);
+                text = talkAddonText.Text;
+            }
+            catch (NullReferenceException)
+            {
+                // Just swallow the NRE, I have no clue what causes this but it only happens when relogging in rare cases
+                return;
+            }
 
             if (talkAddonText.Text == "" || IsDuplicateQuestText(talkAddonText.Text)) return;
             SetLastQuestText(text);
