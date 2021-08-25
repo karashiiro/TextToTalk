@@ -120,6 +120,7 @@ namespace TextToTalk.Backends.System
             if (ImGui.Combo("Voice##TTTVoice8",
                 ref voiceIndex,
                 voices
+                    .Where(iv => iv.Enabled)
                     .Select(iv => $"{iv?.VoiceInfo?.Name} ({iv?.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
                     .ToArray(),
                 voices.Count))
