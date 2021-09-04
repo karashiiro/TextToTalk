@@ -168,7 +168,7 @@ namespace TextToTalk
             var speaker = this.pluginInterface.ClientState.Actors
                 .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
 
-            // Cancel TTS if it's currently talk addon text, if configured
+            // Cancel TTS if it's currently Talk addon text, if configured
             if (this.config.CancelSpeechOnTextAdvance && this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
             {
                 this.backendManager.CancelSay(TextSource.TalkAddon);
