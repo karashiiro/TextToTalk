@@ -55,10 +55,10 @@ namespace TextToTalk
             this.serviceCollection.AddService(this.config);
             this.serviceCollection.AddService(this.backendManager);
             this.serviceCollection.AddService(this.sharedState);
-            this.serviceCollection.AddService(this.pluginInterface, shouldDispose: false);
+            this.serviceCollection.AddService(this.pluginInterface);
 
             this.ui = new WindowManager(this.serviceCollection);
-            this.serviceCollection.AddService(this.ui, shouldDispose: false);
+            this.serviceCollection.AddService(this.ui);
 
             this.ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
             this.ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
@@ -334,16 +334,12 @@ namespace TextToTalk
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= CheckFailedToBindPort;
             this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
 
-            this.pluginInterface.SavePluginConfig(this.config);
-
             this.pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
             this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.Draw;
 
-            this.ui.Dispose();
+            this.pluginInterface.SavePluginConfig(this.config);
 
             this.serviceCollection.Dispose();
-
-            this.pluginInterface.Dispose();
         }
 
         public void Dispose()
