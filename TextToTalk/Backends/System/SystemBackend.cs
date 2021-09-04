@@ -121,7 +121,7 @@ namespace TextToTalk.Backends.System
                 ref voiceIndex,
                 voices
                     .Where(iv => iv?.Enabled ?? false)
-                    .Select(iv => $"{iv.VoiceInfo?.Name} ({iv.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language"})")
+                    .Select(FormatVoiceInfo)
                     .ToArray(),
                 voices.Count))
             {
@@ -216,6 +216,21 @@ namespace TextToTalk.Backends.System
                     this.config.Save();
                 }
             }
+        }
+
+        private string FormatVoiceInfo(InstalledVoice iv)
+        {
+            var line = new StringBuilder(iv.VoiceInfo?.Name ?? "");
+            line.Append(" (")
+                .Append(iv.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language")
+                .Append(")");
+
+            if (iv.VoiceInfo?.Name.Contains("Zira") ?? false)
+            {
+                line.Append(" [UNSTABLE]");
+            }
+
+            return line.ToString();
         }
 
         public override TextSource GetCurrentlySpokenTextSource()
