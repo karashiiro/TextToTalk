@@ -343,8 +343,17 @@ namespace TextToTalk.Backends.Polly
                     catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
                     {
                         PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                        this.lexiconUploadException = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
-                                                                             "This may take several minutes to take effect.", e);
+                        this.lexiconUploadException = new AggregateException(
+                            "Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
+                            "This may take several minutes to take effect.", e);
+                        this.lexiconUploadSucceeded = false;
+                    }
+                    catch (LexiconSizeExceededException e)
+                    {
+                        PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
+                        this.lexiconUploadException = new AggregateException(
+                            "Maximum lexicon size has been exceeded. " +
+                            "Each lexicon can be up to 4,000 characters in size.", e);
                         this.lexiconUploadSucceeded = false;
                     }
                     catch (Exception e)
