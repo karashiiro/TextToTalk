@@ -3,3 +3,4 @@ author: karashiiro
 description: Chat TTS. Use /tttconfig to configure the enabled channels and triggers/exceptions.
 repo_url: https://github.com/karashiiro/TextToTalk
 tags: [ "tts", "trigger", "triggers", "voice", "voices", "speech", "karashiiro" ]
+dalamud_api_level: 3
