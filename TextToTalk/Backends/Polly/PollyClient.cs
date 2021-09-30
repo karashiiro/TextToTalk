@@ -2,7 +2,7 @@
 using Amazon.Polly;
 using Amazon.Polly.Model;
 using Amazon.Runtime;
-using Dalamud.Plugin;
+using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,7 +31,7 @@ namespace TextToTalk.Backends.Polly
             string nextToken;
             do
             {
-                var lexiconsRes = this.client.ListLexicons(lexiconsReq);
+                var lexiconsRes = this.client.ListLexiconsAsync(lexiconsReq).GetAwaiter().GetResult();
                 lexicons.AddRange(lexiconsRes.Lexicons);
                 nextToken = lexiconsRes.NextToken;
             } while (!string.IsNullOrEmpty(nextToken));
@@ -41,10 +41,10 @@ namespace TextToTalk.Backends.Polly
 
         public Lexicon GetLexicon(string lexiconName)
         {
-            var lexicon = this.client.GetLexicon(new GetLexiconRequest
+            var lexicon = this.client.GetLexiconAsync(new GetLexiconRequest
             {
                 Name = lexiconName,
-            });
+            }).GetAwaiter().GetResult();
 
             return lexicon.Lexicon;
         }
@@ -54,16 +54,16 @@ namespace TextToTalk.Backends.Polly
             var content = File.ReadAllText(lexiconFilePath);
             var name = Path.GetFileNameWithoutExtension(lexiconFilePath);
 
-            this.client.PutLexicon(new PutLexiconRequest
+            this.client.PutLexiconAsync(new PutLexiconRequest
             {
                 Content = content,
                 Name = name,
-            });
+            }).GetAwaiter().GetResult();
         }
 
         public void DeleteLexicon(string lexiconName)
         {
-            this.client.DeleteLexicon(new DeleteLexiconRequest
+            this.client.DeleteLexiconAsync(new DeleteLexiconRequest
             {
                 Name = lexiconName,
             });
@@ -80,7 +80,7 @@ namespace TextToTalk.Backends.Polly
             string nextToken;
             do
             {
-                var voicesRes = this.client.DescribeVoices(voicesReq);
+                var voicesRes = this.client.DescribeVoicesAsync(voicesReq).GetAwaiter().GetResult();
                 voices.AddRange(voicesRes.Voices);
                 nextToken = voicesRes.NextToken;
             } while (!string.IsNullOrEmpty(nextToken));

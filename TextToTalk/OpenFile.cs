@@ -1,4 +1,4 @@
-﻿using Dalamud.Plugin;
+﻿using Dalamud.Logging;
 using System;
 using System.Windows.Forms;
 

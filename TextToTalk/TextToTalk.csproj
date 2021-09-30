@@ -1,68 +1,68 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
-    <LangVersion>9.0</LangVersion>
-    <Version>1.8.10.0</Version>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<LangVersion>latest</LangVersion>
+		<Version>1.9.0.0</Version>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-    <PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+		<PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AdysTech.CredentialManager" Version="2.3.0" />
-    <PackageReference Include="AWSSDK.Core" Version="3.7.2.4" />
-    <PackageReference Include="AWSSDK.Polly" Version="3.7.1.23" />
-    <PackageReference Include="Dalamud.CrystalTower" Version="1.2.0" />
-    <PackageReference Include="DalamudPackager" Version="1.2.2" />
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
-    <PackageReference Include="log4net" Version="2.0.12" />
-    <PackageReference Include="NAudio" Version="2.0.1" />
-    <PackageReference Include="WebSocketSharpFork" Version="1.0.4" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AdysTech.CredentialManager" Version="2.3.0" />
+		<PackageReference Include="AWSSDK.Core" Version="3.7.2.4" />
+		<PackageReference Include="AWSSDK.Polly" Version="3.7.1.23" />
+		<PackageReference Include="Dalamud.CrystalTower" Version="2.0.0" />
+		<PackageReference Include="DalamudPackager" Version="2.1.2" />
+		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
+		<PackageReference Include="log4net" Version="2.0.12" />
+		<PackageReference Include="NAudio" Version="2.0.1" />
+		<PackageReference Include="System.Speech" Version="5.0.0" />
+		<PackageReference Include="WebSocketSharpFork" Version="1.0.4" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Dalamud">
-      <HintPath Condition="Exists('$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0')">$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0\Dalamud.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ImGui.NET">
-      <HintPath Condition="Exists('$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0')">$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0\ImGui.NET.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ImGuiScene">
-      <HintPath Condition="Exists('$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0')">$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0\ImGuiScene.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath Condition="Exists('$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0')">$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0\Newtonsoft.Json.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="FFXIVClientStructs">
-      <HintPath Condition="Exists('$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0')">$(AppData)\XIVLauncher\addon\Hooks\5.2.7.0\FFXIVClientStructs.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="System.Speech" />
-    <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="Dalamud">
+			<HintPath Condition="Exists('..\..\Dalamud\bin\Debug')">..\..\Dalamud\bin\Debug\Dalamud.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="ImGui.NET">
+			<HintPath Condition="Exists('..\..\Dalamud\bin\Debug')">..\..\Dalamud\bin\Debug\ImGui.NET.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="ImGuiScene">
+			<HintPath Condition="Exists('..\..\Dalamud\bin\Debug')">..\..\Dalamud\bin\Debug\ImGuiScene.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="Newtonsoft.Json">
+			<HintPath Condition="Exists('..\..\Dalamud\bin\Debug')">..\..\Dalamud\bin\Debug\Newtonsoft.Json.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="FFXIVClientStructs">
+			<HintPath Condition="Exists('..\..\Dalamud\bin\Debug')">'..\..\Dalamud\bin\Debug\FFXIVClientStructs.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
-    <Exec Command="echo Running Debug Post Build (Please have Dalamud closed)&#xD;&#xA;  echo Copying to DevPlugins&#xD;&#xA;  xcopy &quot;$(TargetPath)\..&quot; &quot;%25appdata%25\XIVLauncher\devPlugins&quot; /Y /E&#xD;&#xA;  exit /b 0&#xD;&#xA;)" />
-  </Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
+		<Exec Command="echo Running Debug Post Build (Please have Dalamud closed)&#xD;&#xA;  echo Copying to DevPlugins&#xD;&#xA;  xcopy &quot;$(TargetPath)\..&quot; &quot;%25appdata%25\XIVLauncher\devPlugins&quot; /Y /E&#xD;&#xA;  exit /b 0&#xD;&#xA;)" />
+	</Target>
 
 </Project>

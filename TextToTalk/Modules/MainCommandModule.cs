@@ -1,6 +1,7 @@
 ﻿using Dalamud.CrystalTower.Commands.Attributes;
 using Dalamud.CrystalTower.UI;
-using Dalamud.Plugin;
+using Dalamud.Game.Gui;
+using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.UI;
 // ReSharper disable UnusedMember.Global
@@ -9,7 +10,7 @@ namespace TextToTalk.Modules
 {
     public class MainCommandModule
     {
-        public DalamudPluginInterface PluginInterface { get; set; }
+        public ChatGui Chat { get; set; }
         public PluginConfiguration Config { get; set; }
         public SharedState State { get; set; }
         public WindowManager Windows { get; set; }
@@ -38,8 +39,7 @@ namespace TextToTalk.Modules
         {
             Config.Enabled = false;
             CancelTts();
-            var chat = PluginInterface.Framework.Gui.Chat;
-            chat.Print("TTS disabled.");
+            Chat.Print("TTS disabled.");
             PluginLog.Log("TTS disabled.");
         }
 
@@ -48,8 +48,7 @@ namespace TextToTalk.Modules
         public void EnableTts(string command = "", string args = "")
         {
             Config.Enabled = true;
-            var chat = PluginInterface.Framework.Gui.Chat;
-            chat.Print("TTS enabled.");
+            Chat.Print("TTS enabled.");
             PluginLog.Log("TTS enabled.");
         }
 

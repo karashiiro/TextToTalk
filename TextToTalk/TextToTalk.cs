@@ -11,6 +11,13 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using System.Reflection;
+using Dalamud.Data;
+using Dalamud.Game;
+using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.Gui;
+using Dalamud.IoC;
+using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Modules;
@@ -26,8 +33,38 @@ namespace TextToTalk
 #else
         private const bool InitiallyVisible = false;
 #endif
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private DalamudPluginInterface PluginInterface { get; init; }
 
-        private DalamudPluginInterface pluginInterface;
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private Dalamud.Game.Command.CommandManager Commands { get; init; }
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private ClientState ClientState { get; init; }
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private Framework Framework { get; init; }
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private DataManager Data { get; init; }
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private ChatGui Chat { get; init; }
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private GameGui Gui { get; init; }
+
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private KeyState Keys { get; init; }
+
         private PluginConfiguration config;
         private WindowManager ui;
         private CommandManager commandManager;
@@ -40,12 +77,10 @@ namespace TextToTalk
 
         public string Name => "TextToTalk";
 
-        public void Initialize(DalamudPluginInterface pi)
+        public TextToTalk()
         {
-            this.pluginInterface = pi;
-
-            this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
-            this.config.Initialize(this.pluginInterface);
+            this.config = (PluginConfiguration)PluginInterface.GetPluginConfig() ?? new PluginConfiguration();
+            this.config.Initialize(PluginInterface);
 
             this.sharedState = new SharedState();
 
@@ -55,7 +90,8 @@ namespace TextToTalk
             this.serviceCollection.AddService(this.config);
             this.serviceCollection.AddService(this.backendManager);
             this.serviceCollection.AddService(this.sharedState);
-            this.serviceCollection.AddService(this.pluginInterface);
+            this.serviceCollection.AddService(Chat, shouldDispose: false);
+            this.serviceCollection.AddService(PluginInterface, shouldDispose: false);
 
             this.ui = new WindowManager(this.serviceCollection);
             this.serviceCollection.AddService(this.ui);
@@ -65,17 +101,17 @@ namespace TextToTalk
             this.ui.AddWindow<PresetModificationWindow>(initiallyVisible: false);
             this.ui.AddWindow<ConfigurationWindow>(InitiallyVisible);
 
-            this.pluginInterface.UiBuilder.OnBuildUi += this.ui.Draw;
-            this.pluginInterface.UiBuilder.OnOpenConfigUi += OpenConfigUi;
+            PluginInterface.UiBuilder.Draw += this.ui.Draw;
+            PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 
-            this.pluginInterface.Framework.Gui.Chat.OnChatMessage += OnChatMessage;
-            this.pluginInterface.Framework.Gui.Chat.OnChatMessage += CheckFailedToBindPort;
+            Chat.ChatMessage += OnChatMessage;
+            Chat.ChatMessage += CheckFailedToBindPort;
 
-            this.pluginInterface.Framework.OnUpdateEvent += PollTalkAddon;
-            this.pluginInterface.Framework.OnUpdateEvent += CheckKeybindPressed;
-            this.pluginInterface.Framework.OnUpdateEvent += CheckPresetKeybindPressed;
+            Framework.Update += PollTalkAddon;
+            Framework.Update += CheckKeybindPressed;
+            Framework.Update += CheckPresetKeybindPressed;
 
-            this.commandManager = new CommandManager(pi, this.serviceCollection);
+            this.commandManager = new CommandManager(Commands, this.serviceCollection);
             this.commandManager.AddCommandModule<MainCommandModule>();
         }
 
@@ -84,8 +120,8 @@ namespace TextToTalk
         {
             if (!this.config.UseKeybind) return;
 
-            if (this.pluginInterface.ClientState.KeyState[(byte)this.config.ModifierKey] &&
-                this.pluginInterface.ClientState.KeyState[(byte)this.config.MajorKey])
+            if (Keys[(byte)this.config.ModifierKey] &&
+                Keys[(byte)this.config.MajorKey])
             {
                 if (this.keysDown) return;
 
@@ -104,8 +140,8 @@ namespace TextToTalk
         {
             foreach (var preset in this.config.EnabledChatTypesPresets.Where(p => p.UseKeybind))
             {
-                if (this.pluginInterface.ClientState.KeyState[(byte)preset.ModifierKey] &&
-                    this.pluginInterface.ClientState.KeyState[(byte)preset.MajorKey])
+                if (Keys[(byte)preset.ModifierKey] &&
+                    Keys[(byte)preset.MajorKey])
                 {
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
                 }
@@ -116,7 +152,7 @@ namespace TextToTalk
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            if (!this.pluginInterface.ClientState.IsLoggedIn)
+            if (!ClientState.IsLoggedIn)
             {
                 this.talkAddonInterface = null;
                 return;
@@ -124,7 +160,7 @@ namespace TextToTalk
 
             if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
             {
-                this.talkAddonInterface = this.pluginInterface.Framework.Gui.GetAddonByName("Talk", 1);
+                this.talkAddonInterface = Gui.GetAddonByName("Talk", 1);
                 return;
             }
 
@@ -148,7 +184,7 @@ namespace TextToTalk
             string text;
             try
             {
-                talkAddonText = TalkUtils.ReadTalkAddon(this.pluginInterface.Data, talkAddon);
+                talkAddonText = TalkUtils.ReadTalkAddon(Data, talkAddon);
                 text = talkAddonText.Text;
             }
             catch (NullReferenceException)
@@ -169,7 +205,7 @@ namespace TextToTalk
                 }
             }
 
-            var speaker = this.pluginInterface.ClientState.Actors
+            var speaker = ClientState.Actors
                 .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
 
             // Cancel TTS if it's currently Talk addon text, if configured
@@ -184,9 +220,8 @@ namespace TextToTalk
         private bool notifiedFailedToBindPort;
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
-            if (!this.pluginInterface.ClientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
-            var chat = this.pluginInterface.Framework.Gui.Chat;
-            chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
+            if (!ClientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
+            Chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
                        "Please close the owner of that port and reload the Websocket server, " +
                        "or select a different port.");
             this.notifiedFailedToBindPort = true;
@@ -241,7 +276,7 @@ namespace TextToTalk
             if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
             var senderText = sender?.TextValue; // Can't access in lambda
-            var speaker = this.pluginInterface.ClientState.Actors
+            var speaker = ClientState.Actors
                 .FirstOrDefault(a => a.Name == senderText);
 
             Say(speaker, textValue, TextSource.Chat);
@@ -280,7 +315,7 @@ namespace TextToTalk
             return actorGender;
         }
 
-        private void OpenConfigUi(object sender, EventArgs args)
+        private void OpenConfigUi()
         {
             this.ui.ShowWindow<ConfigurationWindow>();
         }
@@ -327,17 +362,17 @@ namespace TextToTalk
 
             this.commandManager.Dispose();
 
-            this.pluginInterface.Framework.OnUpdateEvent -= PollTalkAddon;
-            this.pluginInterface.Framework.OnUpdateEvent -= CheckKeybindPressed;
-            this.pluginInterface.Framework.OnUpdateEvent -= CheckPresetKeybindPressed;
+            Framework.Update -= PollTalkAddon;
+            Framework.Update -= CheckKeybindPressed;
+            Framework.Update -= CheckPresetKeybindPressed;
 
-            this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= CheckFailedToBindPort;
-            this.pluginInterface.Framework.Gui.Chat.OnChatMessage -= OnChatMessage;
+            Chat.ChatMessage -= CheckFailedToBindPort;
+            Chat.ChatMessage -= OnChatMessage;
 
-            this.pluginInterface.UiBuilder.OnOpenConfigUi -= OpenConfigUi;
-            this.pluginInterface.UiBuilder.OnBuildUi -= this.ui.Draw;
+            PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+            PluginInterface.UiBuilder.Draw -= this.ui.Draw;
 
-            this.pluginInterface.SavePluginConfig(this.config);
+            PluginInterface.SavePluginConfig(this.config);
 
             this.serviceCollection.Dispose();
         }

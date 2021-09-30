@@ -1,4 +1,4 @@
-﻿using Dalamud.Plugin;
+﻿using Dalamud.Logging;
 using ImGuiNET;
 using System;
 using System.Net.Sockets;

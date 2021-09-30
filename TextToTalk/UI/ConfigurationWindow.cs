@@ -1,6 +1,6 @@
 ﻿using Dalamud.CrystalTower.UI;
 using Dalamud.Game.Text;
-using Dalamud.Plugin;
+using Dalamud.Logging;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;

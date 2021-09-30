@@ -1,5 +1,5 @@
 ﻿using Dalamud.Interface;
-using Dalamud.Plugin;
+using Dalamud.Logging;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace TextToTalk.Backends.System
             this.config = config;
             this.lexiconManager = new LexiconManager();
             this.soundQueue = new SystemSoundQueue(this.lexiconManager);
-            
+
             for (var i = 0; i < this.config.Lexicons.Count; i++)
             {
                 var lexicon = this.config.Lexicons[i];
@@ -147,7 +147,7 @@ namespace TextToTalk.Backends.System
                 var lexiconPath = this.config.Lexicons[i];
                 var lexiconPathBuf = Encoding.UTF8.GetBytes(lexiconPath);
                 ImGui.InputText($"##TTTSystemLexiconText{i}", lexiconPathBuf, (uint)lexiconPathBuf.Length, ImGuiInputTextFlags.ReadOnly);
-                
+
                 if (!string.IsNullOrEmpty(this.config.Lexicons[i]))
                 {
                     ImGui.SameLine();
