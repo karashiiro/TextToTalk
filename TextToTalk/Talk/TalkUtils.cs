@@ -23,13 +23,9 @@ namespace TextToTalk.Talk
             };
         }
 
-        private static SeStringManager StringManager { get; set; }
-
         private static unsafe string ReadTextNode(DataManager data, AtkTextNode* textNode)
         {
             if (textNode == null) return "";
-
-            StringManager ??= new SeStringManager(data);
 
             var textPtr = textNode->NodeText.StringPtr;
             var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
@@ -37,7 +33,7 @@ namespace TextToTalk.Talk
 
             var textBytes = new byte[textLength];
             Marshal.Copy((IntPtr)textPtr, textBytes, 0, (int)textLength);
-            var seString = StringManager.Parse(textBytes);
+            var seString = SeString.Parse(textBytes);
             return seString.TextValue;
         }
 

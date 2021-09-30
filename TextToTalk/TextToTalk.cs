@@ -1,28 +1,30 @@
 ﻿using Dalamud.CrystalTower.Commands;
 using Dalamud.CrystalTower.DependencyInjection;
 using Dalamud.CrystalTower.UI;
-using Dalamud.Game.ClientState.Actors.Types;
-using Dalamud.Game.Internal;
-using Dalamud.Game.Internal.Gui.Addon;
-using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using System;
-using System.Linq;
-using System.Reflection;
 using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.Gui;
+using Dalamud.Game.Text;
+using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
 using Dalamud.Logging;
+using Dalamud.Plugin;
+using System;
+using System.Linq;
+using System.Reflection;
+using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Types;
+using FFXIVClientStructs.Attributes;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI;
+using DalamudCommandManager = Dalamud.Game.Command.CommandManager;
+using RawCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace TextToTalk
 {
@@ -39,7 +41,7 @@ namespace TextToTalk
 
         [PluginService]
         [RequiredVersion("1.0")]
-        private Dalamud.Game.Command.CommandManager Commands { get; init; }
+        private DalamudCommandManager Commands { get; init; }
 
         [PluginService]
         [RequiredVersion("1.0")]
@@ -65,15 +67,19 @@ namespace TextToTalk
         [RequiredVersion("1.0")]
         private KeyState Keys { get; init; }
 
-        private PluginConfiguration config;
-        private WindowManager ui;
-        private CommandManager commandManager;
-        private VoiceBackendManager backendManager;
+        [PluginService]
+        [RequiredVersion("1.0")]
+        private ObjectTable Objects { get; init; }
 
-        private Addon talkAddonInterface;
-        private SharedState sharedState;
+        private readonly PluginConfiguration config;
+        private readonly WindowManager ui;
+        private readonly CommandManager commandManager;
+        private readonly VoiceBackendManager backendManager;
 
-        private PluginServiceCollection serviceCollection;
+        private IntPtr talkAddonPtr;
+        private readonly SharedState sharedState;
+
+        private readonly PluginServiceCollection serviceCollection;
 
         public string Name => "TextToTalk";
 
@@ -154,17 +160,17 @@ namespace TextToTalk
             if (!this.config.ReadFromQuestTalkAddon) return;
             if (!ClientState.IsLoggedIn)
             {
-                this.talkAddonInterface = null;
+                this.talkAddonPtr = IntPtr.Zero;
                 return;
             }
 
-            if (this.talkAddonInterface == null || this.talkAddonInterface.Address == IntPtr.Zero)
+            if (this.talkAddonPtr == IntPtr.Zero)
             {
-                this.talkAddonInterface = Gui.GetAddonByName("Talk", 1);
+                this.talkAddonPtr = Gui.GetAddonByName("Talk", 1);
                 return;
             }
 
-            var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
+            var talkAddon = (AddonTalk*)this.talkAddonPtr.ToPointer();
             if (talkAddon == null) return;
 
             // Clear the last text if the window isn't visible.
@@ -205,15 +211,14 @@ namespace TextToTalk
                 }
             }
 
-            var speaker = ClientState.Actors
-                .FirstOrDefault(actor => actor.Name == talkAddonText.Speaker);
+            var speaker = Objects.FirstOrDefault(gObj => gObj.Name.TextValue == talkAddonText.Speaker);
 
             // Cancel TTS if it's currently Talk addon text, if configured
             if (this.config.CancelSpeechOnTextAdvance && this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
             {
                 this.backendManager.CancelSay(TextSource.TalkAddon);
             }
-            
+
             Say(speaker, text, TextSource.TalkAddon);
         }
 
@@ -250,7 +255,7 @@ namespace TextToTalk
                         if ((int)type == (int)AdditionalChatType.NPCDialogue)
                         {
                             // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
-                            var talkAddon = (AddonTalk*)this.talkAddonInterface.Address.ToPointer();
+                            var talkAddon = (AddonTalk*)this.talkAddonPtr.ToPointer();
                             if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
                             {
                                 return;
@@ -276,13 +281,12 @@ namespace TextToTalk
             if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
             var senderText = sender?.TextValue; // Can't access in lambda
-            var speaker = ClientState.Actors
-                .FirstOrDefault(a => a.Name == senderText);
+            var speaker = Objects.FirstOrDefault(a => a.Name.TextValue == senderText);
 
             Say(speaker, textValue, TextSource.Chat);
         }
 
-        private void Say(Actor speaker, string textValue, TextSource source)
+        private void Say(GameObject speaker, string textValue, TextSource source)
         {
             var cleanText = Pipe(
                 textValue,
@@ -293,24 +297,25 @@ namespace TextToTalk
                 .Trim();
             if (!TalkUtils.IsSpeakable(cleanText))
                 return;
-            var gender = this.config.UseGenderedVoicePresets ? GetActorGender(speaker) : Gender.None;
+            var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
             this.backendManager.Say(source, gender, cleanText);
         }
 
-        private static Gender GetActorGender(Actor actor)
+        private static unsafe Gender GetCharacterGender(GameObject gObj)
         {
-            if (actor == null) return Gender.None;
+            if (gObj == null) return Gender.None;
 
-            var actorStructProp = typeof(Actor)
-                .GetProperty("ActorStruct", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (actorStructProp == null)
+            var charaStructProp = typeof(Character)
+                .GetProperty("Struct", BindingFlags.NonPublic | BindingFlags.Instance);
+            var charaStruct = charaStructProp?.GetValue(gObj);
+            if (charaStruct == null)
             {
                 PluginLog.Warning("Failed to retrieve actor struct accessor.");
                 return Gender.None;
             }
 
-            var actorStruct = (Dalamud.Game.ClientState.Structs.Actor)actorStructProp.GetValue(actor);
-            var actorGender = (Gender)actorStruct.Customize[1];
+            var rawChara = (RawCharacter)charaStruct;
+            var actorGender = (Gender)rawChara.CustomizeData[1];
 
             return actorGender;
         }

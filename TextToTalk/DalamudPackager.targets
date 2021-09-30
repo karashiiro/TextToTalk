@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Target Name="PackagePlugin" AfterTargets="ILRepacker">
-    <DalamudPackager
-      ProjectDir="$(ProjectDir)"
-      OutputPath="$(OutputPath)"
-      AssemblyName="$(AssemblyName)"
-      MakeZip="true"
-      ManifestType="yaml"
-      Include="TextToTalk.json;TextToTalk.dll;TextToTalk.pdb;VoiceUnlocker.exe;VoiceUnlocker.exe.config;VoiceUnlocker.pdb;log4net.dll"/>
-  </Target>
+	<Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">
+		<DalamudPackager ProjectDir="$(ProjectDir)"
+		                 OutputPath="$(OutputPath)"
+		                 AssemblyName="$(AssemblyName)"
+		                 MakeZip="true"
+		                 ManifestType="yaml"/>
+	</Target>
 </Project>
