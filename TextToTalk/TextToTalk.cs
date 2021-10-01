@@ -305,7 +305,7 @@ namespace TextToTalk
             if (gObj == null) return Gender.None;
 
             var charaStructProp = typeof(Character)
-                .GetProperty("Struct", BindingFlags.NonPublic | BindingFlags.Instance);
+                .GetProperty("Struct", BindingFlags.NonPublic | BindingFlags.Instance, null, typeof(RawCharacter*), new[] { typeof(Character) }, null);
             var charaStruct = charaStructProp?.GetValue(gObj);
             if (charaStruct == null)
             {
