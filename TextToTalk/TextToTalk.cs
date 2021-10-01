@@ -304,18 +304,15 @@ namespace TextToTalk
         {
             if (gObj == null) return Gender.None;
 
-            var charaStructProp = typeof(Character)
-                .GetProperty("Struct", BindingFlags.NonPublic | BindingFlags.Instance, null, typeof(RawCharacter*), new[] { typeof(Character) }, null);
-            var charaStruct = charaStructProp?.GetValue(gObj);
+            var charaStruct = (RawCharacter*)gObj.Address;
             if (charaStruct == null)
             {
-                PluginLog.Warning("Failed to retrieve actor struct accessor.");
+                PluginLog.Warning("Failed to retrieve character struct.");
                 return Gender.None;
             }
-
-            var rawChara = (RawCharacter)charaStruct;
-            var actorGender = (Gender)rawChara.CustomizeData[1];
-
+            
+            var actorGender = (Gender)charaStruct->CustomizeData[1];
+            PluginLog.Log(actorGender.ToString());
             return actorGender;
         }
 
