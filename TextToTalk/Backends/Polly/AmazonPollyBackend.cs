@@ -48,9 +48,16 @@ namespace TextToTalk.Backends.Polly
             {
                 this.accessKey = credentials.UserName;
                 this.secretKey = credentials.Password;
-                this.polly = new PollyClient(credentials.UserName, credentials.Password, RegionEndpoint.EUWest1);
-                this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
-                this.cloudLexicons = this.polly.GetLexicons();
+                try
+                {
+                    this.polly = new PollyClient(credentials.UserName, credentials.Password, RegionEndpoint.EUWest1);
+                    this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
+                    this.cloudLexicons = this.polly.GetLexicons();
+                }
+                catch (Exception)
+                {
+                    CredentialManager.RemoveCredentials(CredentialsTarget);
+                }
             }
             else
             {
@@ -114,12 +121,18 @@ namespace TextToTalk.Backends.Polly
                 else
                 {
                     this.polly?.Dispose();
-                    this.polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint);
-
-                    this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
-                    lock (this.cloudLexicons)
+                    try
                     {
-                        this.cloudLexicons = this.polly.GetLexicons();
+                        this.polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint);
+                        this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
+                        lock (this.cloudLexicons)
+                        {
+                            this.cloudLexicons = this.polly.GetLexicons();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        CredentialManager.RemoveCredentials(CredentialsTarget);
                     }
                 }
             }
