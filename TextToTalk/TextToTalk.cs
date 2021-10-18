@@ -312,7 +312,6 @@ namespace TextToTalk
             }
             
             var actorGender = (Gender)charaStruct->CustomizeData[1];
-            PluginLog.Log(actorGender.ToString());
             return actorGender;
         }
 
