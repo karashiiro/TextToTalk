@@ -121,11 +121,69 @@ namespace TextToTalk.Backends.System
                         ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
                         : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
 
-                    text = text.Replace(grapheme, phonemeNode);
+                    text = ReplacePhoneme(text, grapheme, phonemeNode);
                 }
             }
 
             return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
+        }
+
+        private static string ReplacePhoneme(string text, string oldValue, string newValue)
+        {
+            // Ensure we're not surrounding something that was already surrounded.
+            // We build an array in which open tags (<phoneme>) are represented by 1,
+            // and and close tags (</phoneme>) are represented by 2.
+            var curMarker = (byte)1;
+            var tags = new byte[text.Length];
+            var inTag = false;
+            var lastCharWasLeftBracket = false;
+            for (var i = 0; i < text.Length; i++)
+            {
+                if (lastCharWasLeftBracket)
+                {
+                    lastCharWasLeftBracket = false;
+                    curMarker = text[i] == '/' ? (byte)2 : (byte)1;
+                    tags[i - 1] = curMarker;
+                }
+
+                if (inTag)
+                {
+                    tags[i] = curMarker;
+                }
+
+                if (!inTag && text[i] == '<')
+                {
+                    inTag = true;
+                    lastCharWasLeftBracket = true;
+                    tags[i] = curMarker;
+                }
+
+                if (text[i] == '>')
+                {
+                    inTag = false;
+                    tags[i] = curMarker;
+                }
+            }
+
+            // Starting from the index of the text we want to replace, we move right
+            // and ensure that we do not encounter a 2 before we encounter a 1.
+            var xIdx = text.IndexOf(oldValue, StringComparison.InvariantCulture);
+            for (var i = xIdx; i < text.Length; i++)
+            {
+                if (tags[i] == 1)
+                {
+                    // A-OK
+                    break;
+                }
+
+                if (tags[i] == 2)
+                {
+                    // Not A-OK, return early
+                    return text;
+                }
+            }
+
+            return text.Replace(oldValue, newValue);
         }
 
         private class LexiconInfo
