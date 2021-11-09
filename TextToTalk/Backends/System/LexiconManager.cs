@@ -130,6 +130,12 @@ namespace TextToTalk.Backends.System
 
         private static string ReplacePhoneme(string text, string oldValue, string newValue)
         {
+            var xIdx = text.IndexOf(oldValue, StringComparison.InvariantCulture);
+            if (xIdx == -1)
+            {
+                return text;
+            }
+
             // Ensure we're not surrounding something that was already surrounded.
             // We build an array in which open tags (<phoneme>) are represented by 1,
             // and and close tags (</phoneme>) are represented by 2.
@@ -167,7 +173,6 @@ namespace TextToTalk.Backends.System
 
             // Starting from the index of the text we want to replace, we move right
             // and ensure that we do not encounter a 2 before we encounter a 1.
-            var xIdx = text.IndexOf(oldValue, StringComparison.InvariantCulture);
             for (var i = xIdx; i < text.Length; i++)
             {
                 if (tags[i] == 1)
