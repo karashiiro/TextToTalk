@@ -36,7 +36,6 @@ namespace TextToTalk.Backends.System
 
             // Create the lexicon
             var lexicon = new LexiconInfo { Url = lexiconUrl };
-            this.lexicons.Add(lexicon);
             
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
             var nsPrefix = !string.IsNullOrEmpty(ns) ? $"{{{ns}}}" : "";
@@ -82,46 +81,57 @@ namespace TextToTalk.Backends.System
                     }
                 }
             }
+
+            lock (this.lexicons)
+            {
+                this.lexicons.Add(lexicon);
+            }
         }
 
         public void RemoveLexicon(string lexiconUrl)
         {
-            var lexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
-            if (lexicon != null)
+            lock (this.lexicons)
             {
-                this.lexicons.Remove(lexicon);
+                var lexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
+                if (lexicon != null)
+                {
+                    this.lexicons.Remove(lexicon);
+                }
             }
         }
 
         public string MakeSsml(string text, string langCode)
         {
-            foreach (var lexicon in this.lexicons)
+            lock (this.lexicons)
             {
-                foreach (var entry in lexicon.GraphemeAliases)
+                foreach (var lexicon in this.lexicons)
                 {
-                    var grapheme = entry.Key;
-                    var alias = entry.Value;
-                    
-                    text = text.Replace(grapheme, alias);
-                }
+                    foreach (var entry in lexicon.GraphemeAliases)
+                    {
+                        var grapheme = entry.Key;
+                        var alias = entry.Value;
 
-                foreach (var entry in lexicon.GraphemePhonemes)
-                {
-                    var grapheme = entry.Key;
+                        text = text.Replace(grapheme, alias);
+                    }
 
-                    // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work,
-                    // which is the correct way to handle this in SSML.
-                    var graphemeReadable = grapheme
-                        .Replace("'", "")
-                        .Replace("\"", "");
+                    foreach (var entry in lexicon.GraphemePhonemes)
+                    {
+                        var grapheme = entry.Key;
 
-                    var phoneme = entry.Value;
-                    
-                    var phonemeNode = phoneme.Contains("\"")
-                        ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
-                        : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
+                        // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work,
+                        // which is the correct way to handle this in SSML.
+                        var graphemeReadable = grapheme
+                            .Replace("'", "")
+                            .Replace("\"", "");
 
-                    text = ReplacePhoneme(text, grapheme, phonemeNode);
+                        var phoneme = entry.Value;
+
+                        var phonemeNode = phoneme.Contains("\"")
+                            ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
+                            : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
+
+                        text = ReplacePhoneme(text, grapheme, phonemeNode);
+                    }
                 }
             }
 
@@ -197,7 +207,15 @@ namespace TextToTalk.Backends.System
 
             public IDictionary<string, string> GraphemeAliases { get; } = new ConcurrentDictionary<string, string>();
 
-            public IDictionary<string, string> GraphemePhonemes { get; } = new ConcurrentDictionary<string, string>();
+            public IDictionary<string, string> GraphemePhonemes { get; } = new SortedDictionary<string, string>(new GraphemeComparer());
+        }
+
+        private class GraphemeComparer : IComparer<string>
+        {
+            public int Compare(string a, string b)
+            {
+                return (b?.Length ?? 0) - (a?.Length ?? 0);
+            }
         }
     }
 }
