@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Dalamud.Logging;
 
 namespace TextToTalk.Backends.System
 {
@@ -127,6 +128,8 @@ namespace TextToTalk.Backends.System
                     }
                 }
             }
+
+            PluginLog.Information(text);
 
             return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
         }
