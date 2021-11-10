@@ -106,25 +106,18 @@ namespace TextToTalk.Backends.System
             {
                 foreach (var lexicon in this.lexicons)
                 {
-                    foreach (var entry in lexicon.GraphemeAliases)
+                    foreach (var (grapheme, alias) in lexicon.GraphemeAliases)
                     {
-                        var grapheme = entry.Key;
-                        var alias = entry.Value;
-
                         text = text.Replace(grapheme, alias);
                     }
 
-                    foreach (var entry in lexicon.GraphemePhonemes)
+                    foreach (var (grapheme, phoneme) in lexicon.GraphemePhonemes)
                     {
-                        var grapheme = entry.Key;
-
                         // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work,
                         // which is the correct way to handle this in SSML.
                         var graphemeReadable = grapheme
                             .Replace("'", "")
                             .Replace("\"", "");
-
-                        var phoneme = entry.Value;
 
                         var phonemeNode = phoneme.Contains("\"")
                             ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
