@@ -41,7 +41,10 @@ namespace TextToTalk.UI
 
                 if (ImGui.Button($"{ManualTutorialText}##VoiceUnlockerButton1"))
                 {
-                    Process.Start("https://www.reddit.com/r/Windows10/comments/96dx8z/how_unlock_all_windows_10_hidden_tts_voices_for/");
+                    Process.Start(new ProcessStartInfo("https://www.reddit.com/r/Windows10/comments/96dx8z/how_unlock_all_windows_10_hidden_tts_voices_for/")
+                    {
+                        UseShellExecute = true,
+                    });
                 }
 
                 ImGui.Spacing();
