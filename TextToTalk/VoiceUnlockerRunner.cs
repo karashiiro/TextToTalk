@@ -14,7 +14,11 @@ namespace TextToTalk
             {
                 var assemblyPath = Path.Combine(Assembly.GetExecutingAssembly().Location, "..");
                 var applicationPath = Path.Combine(assemblyPath, "VoiceUnlocker.exe");
-                using var application = Process.Start(applicationPath);
+                using var application = Process.Start(new ProcessStartInfo(applicationPath)
+                {
+                    UseShellExecute = true,
+                    Verb = "runas",
+                });
 
                 if (application == null)
                 {
