@@ -83,49 +83,40 @@ namespace TextToTalk.Backends.System
                 }
             }
 
-            lock (this.lexicons)
-            {
-                this.lexicons.Add(lexicon);
-            }
+            this.lexicons.Add(lexicon);
         }
 
         public void RemoveLexicon(string lexiconUrl)
         {
-            lock (this.lexicons)
+            var lexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
+            if (lexicon != null)
             {
-                var lexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
-                if (lexicon != null)
-                {
-                    this.lexicons.Remove(lexicon);
-                }
+                this.lexicons.Remove(lexicon);
             }
         }
 
         public string MakeSsml(string text, string langCode)
         {
-            lock (this.lexicons)
+            foreach (var lexicon in this.lexicons)
             {
-                foreach (var lexicon in this.lexicons)
+                foreach (var (grapheme, alias) in lexicon.GraphemeAliases)
                 {
-                    foreach (var (grapheme, alias) in lexicon.GraphemeAliases)
-                    {
-                        text = text.Replace(grapheme, alias);
-                    }
+                    text = text.Replace(grapheme, alias);
+                }
 
-                    foreach (var (grapheme, phoneme) in lexicon.GraphemePhonemes)
-                    {
-                        // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work,
-                        // which is the correct way to handle this in SSML.
-                        var graphemeReadable = grapheme
-                            .Replace("'", "")
-                            .Replace("\"", "");
+                foreach (var (grapheme, phoneme) in lexicon.GraphemePhonemes)
+                {
+                    // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work,
+                    // which is the correct way to handle this in SSML.
+                    var graphemeReadable = grapheme
+                        .Replace("'", "")
+                        .Replace("\"", "");
 
-                        var phonemeNode = phoneme.Contains("\"")
-                            ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
-                            : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
+                    var phonemeNode = phoneme.Contains("\"")
+                        ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
+                        : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
 
-                        text = ReplacePhoneme(text, grapheme, phonemeNode);
-                    }
+                    text = ReplacePhoneme(text, grapheme, phonemeNode);
                 }
             }
 
@@ -199,19 +190,11 @@ namespace TextToTalk.Backends.System
 
         private class LexiconInfo
         {
-            public string Url { get; set; }
+            public string Url { get; init; }
 
             public IDictionary<string, string> GraphemeAliases { get; } = new ConcurrentDictionary<string, string>();
 
-            public IDictionary<string, string> GraphemePhonemes { get; } = new SortedDictionary<string, string>(new GraphemeComparer());
-        }
-
-        private class GraphemeComparer : IComparer<string>
-        {
-            public int Compare(string a, string b)
-            {
-                return (b?.Length ?? 0) - (a?.Length ?? 0);
-            }
+            public IDictionary<string, string> GraphemePhonemes { get; } = new ConcurrentDictionary<string, string>();
         }
     }
 }
