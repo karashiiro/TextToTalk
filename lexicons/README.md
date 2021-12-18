@@ -11,7 +11,8 @@ mindful of this. Please do not commit zipped lexicons.
 Each set of lexicon files in a folder composes a single "lexicon". In order to keep track of these files, each lexicon should have a YAML metadata file
 associated with it that looks like this:
 ```yaml
-name: Your username
+name: Your lexicon name
+author: Your name
 description: Some description of what your lexicon is for.
 files:
   - file0.pls
