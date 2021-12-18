@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace TextToTalk.LexiconUpdater
 {
@@ -24,9 +26,9 @@ namespace TextToTalk.LexiconUpdater
             _cached = GetCachedPackage();
         }
 
-        public async Task<Stream> GetPackageFile(string fileName)
+        public async Task<Stream> GetPackageFile(string filename)
         {
-            var url = new Uri(RepoBase + _packageName + fileName);
+            var url = new Uri(RepoBase + _packageName + filename);
             
             // Check the file etag
             var res = await _http.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
@@ -42,17 +44,17 @@ namespace TextToTalk.LexiconUpdater
             }
 
             // Check if the remote etag matches our local etag
-            if (_cached.FileETags.TryGetValue(fileName, out var cachedETag) && etag == cachedETag)
+            if (_cached.FileETags.TryGetValue(filename, out var cachedETag) && etag == cachedETag)
             {
-                return GetLocalPackageStream();
+                return GetLocalPackageStream(filename);
             }
 
             // Download the updated lexicon file and cache the updated data
             var fileData = await _http.GetStreamAsync(url);
-            SaveLocalPackageStream(fileData);
+            SaveLocalPackageStream(filename, fileData);
             fileData.Seek(0, SeekOrigin.Begin);
 
-            _cached.FileETags[fileName] = etag;
+            _cached.FileETags[filename] = etag;
             SaveCachedPackage();
 
             return fileData;
@@ -60,21 +62,40 @@ namespace TextToTalk.LexiconUpdater
 
         private CachedLexiconPackage GetCachedPackage()
         {
-            return new CachedLexiconPackage();
+            var path = Path.Join(_cachePath, _packageName, "package.yml");
+            var raw = File.ReadAllText(path);
+            return new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build()
+                .Deserialize<CachedLexiconPackage>(raw);
         }
 
         private void SaveCachedPackage()
         {
+            var path = Path.Join(_cachePath, _packageName, "package.yml");
+            var raw = new SerializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build()
+                .Serialize(_cached);
+            File.WriteAllText(path, raw);
         }
 
-        private Stream GetLocalPackageStream()
+        private Stream GetLocalPackageStream(string filename)
         {
-            return null;
+            var data = new MemoryStream();
+            var path = Path.Join(_cachePath, _packageName, filename);
+            var localData = File.OpenRead(path);
+            localData.CopyTo(data);
+            data.Seek(0, SeekOrigin.Begin);
+            return data;
         }
 
-        private void SaveLocalPackageStream(Stream data)
+        private void SaveLocalPackageStream(string filename, Stream data)
         {
-            // Save stream to cached file location
+            var path = Path.Join(_cachePath, _packageName, filename);
+            File.Delete(path);
+            using var file = File.OpenWrite(path);
+            data.CopyTo(file);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace TextToTalk.LexiconUpdater
+﻿using YamlDotNet.Serialization;
+
+namespace TextToTalk.LexiconUpdater
 {
     public class LexiconPackageInfo
     {
@@ -11,6 +13,12 @@
         /// The lexicon author's username.
         /// </summary>
         public string Author { get; set; }
+
+        /// <summary>
+        /// Whether or not the package should not be shown in the lexicon listings.
+        /// </summary>
+        [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitDefaults)]
+        public bool Disabled { get; set; }
 
         /// <summary>
         /// The lexicon package's description.

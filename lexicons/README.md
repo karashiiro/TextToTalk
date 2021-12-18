@@ -13,9 +13,12 @@ associated with it that looks like this:
 ```yaml
 name: Your lexicon name
 author: Your name
+disabled: true
 description: Some description of what your lexicon is for.
 files:
   - file0.pls
   - file1.pls
   - filen.pls
 ```
+
+`disabled` is an optional field that may be set to true in order to temporarily hide the package from users (e.g. because it is broken).
