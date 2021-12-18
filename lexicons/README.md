@@ -9,7 +9,7 @@ Lexicons may be split into multiple files to work around this restriction. Also 
 mindful of this. Please do not commit zipped lexicons.
 
 Each set of lexicon files in a folder composes a single "lexicon". In order to keep track of these files, each lexicon should have a YAML metadata file
-associated with it that looks like this:
+associated with it called `package.yml` that looks like this:
 ```yaml
 name: Your lexicon name
 author: Your name
