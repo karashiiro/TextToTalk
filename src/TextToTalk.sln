@@ -7,12 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextToTalk", "TextToTalk\Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{49A4953A-AD55-4B70-98A0-B22938AEA9A2}"
 	ProjectSection(SolutionItems) = preProject
-		.gitattributes = .gitattributes
-		.gitignore = .gitignore
-		README.md = README.md
+		..\.gitattributes = ..\.gitattributes
+		..\.gitignore = ..\.gitignore
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceUnlocker", "VoiceUnlocker\VoiceUnlocker.csproj", "{E023B363-6FC3-4B1E-A5EF-1B28DEDF47AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoiceUnlocker", "VoiceUnlocker\VoiceUnlocker.csproj", "{E023B363-6FC3-4B1E-A5EF-1B28DEDF47AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
