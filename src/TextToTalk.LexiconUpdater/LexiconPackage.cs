@@ -46,6 +46,7 @@ namespace TextToTalk.LexiconUpdater
             }
 
             var fileData = await _http.GetStreamAsync(url);
+            SaveCachedPackage(fileData);
             _cached.FileETags[fileName] = etag;
             return fileData;
         }
@@ -55,9 +56,10 @@ namespace TextToTalk.LexiconUpdater
             return new CachedLexiconPackage();
         }
 
-        private void SaveCachedPackage()
+        private void SaveCachedPackage(Stream data)
         {
-            //
+            // Save stream to cached file location
+            data.Seek(0, SeekOrigin.Begin);
         }
     }
 }
