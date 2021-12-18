@@ -27,6 +27,8 @@ namespace TextToTalk.LexiconUpdater
         public async Task<Stream> GetPackageFile(string fileName)
         {
             var url = new Uri(RepoBase + _packageName + fileName);
+            
+            // Check the file etag
             var res = await _http.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
             if (!res.Headers.TryGetValues("etag", out var values))
             {
@@ -39,15 +41,20 @@ namespace TextToTalk.LexiconUpdater
                 throw new InvalidOperationException("Response has no etag value.");
             }
 
+            // Check if the remote etag matches our local etag
             if (_cached.FileETags.TryGetValue(fileName, out var cachedETag) && etag == cachedETag)
             {
-                // Return already-downloaded file stream
-                return null;
+                return GetLocalPackageStream();
             }
 
+            // Download the updated lexicon file and cache the updated data
             var fileData = await _http.GetStreamAsync(url);
-            SaveCachedPackage(fileData);
+            SaveLocalPackageStream(fileData);
+            fileData.Seek(0, SeekOrigin.Begin);
+
             _cached.FileETags[fileName] = etag;
+            SaveCachedPackage();
+
             return fileData;
         }
 
@@ -56,10 +63,18 @@ namespace TextToTalk.LexiconUpdater
             return new CachedLexiconPackage();
         }
 
-        private void SaveCachedPackage(Stream data)
+        private void SaveCachedPackage()
+        {
+        }
+
+        private Stream GetLocalPackageStream()
+        {
+            return null;
+        }
+
+        private void SaveLocalPackageStream(Stream data)
         {
             // Save stream to cached file location
-            data.Seek(0, SeekOrigin.Begin);
         }
     }
 }
