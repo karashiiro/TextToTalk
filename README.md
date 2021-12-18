@@ -8,6 +8,11 @@ Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support 
 * `/disabletts`: Turns TTS off.
 * `/enabletts`: Turns TTS on.
 
+## Lexicons
+TextToTalk supports custom lexicons to modify how words are pronounced. For more information, please join our [community lexicons discussion](https://github.com/karashiiro/TextToTalk/discussions/62).
+
+Direct links to information will be added here eventually.
+
 ## WebSocket Interfacing
 TextToTalk can optionally open a WebSocket server to serve messages over. There are currently two JSON-format messages that can be sent:
 
