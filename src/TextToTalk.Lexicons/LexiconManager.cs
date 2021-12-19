@@ -22,6 +22,11 @@ namespace TextToTalk.Lexicons
         public void AddLexicon(string lexiconUrl)
         {
             var xml = XDocument.Load(lexiconUrl);
+            AddLexicon(xml, lexiconUrl);
+        }
+
+        public void AddLexicon(XDocument xml, string lexiconUrl)
+        {
             if (xml.Root == null)
             {
                 throw new NullReferenceException("XML document has no root element.");
@@ -36,7 +41,7 @@ namespace TextToTalk.Lexicons
 
             // Create the lexicon
             var lexicon = new LexiconInfo { Url = lexiconUrl };
-            
+
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
             var nsPrefix = !string.IsNullOrEmpty(ns) ? $"{{{ns}}}" : "";
             foreach (var lexeme in xml.Root.Descendants($"{nsPrefix}lexeme").Select(el => new
