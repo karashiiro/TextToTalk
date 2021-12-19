@@ -110,8 +110,8 @@ namespace TextToTalk.Lexicons
 
                 foreach (var (grapheme, phoneme) in lexicon.GraphemePhonemes)
                 {
-                    // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work,
-                    // which is the correct way to handle this in SSML.
+                    // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work
+                    // with System.Speech, which would be correct way to handle this.
                     var graphemeReadable = grapheme
                         .Replace("'", "")
                         .Replace("\"", "");
@@ -120,14 +120,14 @@ namespace TextToTalk.Lexicons
                         ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
                         : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
 
-                    text = ReplacePhoneme(text, grapheme, phonemeNode);
+                    text = ReplaceGrapheme(text, grapheme, phonemeNode);
                 }
             }
 
             return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
         }
 
-        private static string ReplacePhoneme(string text, string oldValue, string newValue)
+        private static string ReplaceGrapheme(string text, string oldValue, string newValue)
         {
             var xIdx = text.IndexOf(oldValue, StringComparison.InvariantCulture);
             if (xIdx == -1)
