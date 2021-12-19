@@ -44,7 +44,7 @@ namespace TextToTalk.Lexicons
 
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
             var nsPrefix = !string.IsNullOrEmpty(ns) ? $"{{{ns}}}" : "";
-            foreach (var lexeme in xml.Root.Descendants($"{nsPrefix}lexeme").Select(el => new
+            foreach (var lexeme in xml.Root.Descendants($"{nsPrefix}lexeme").Select(el => new Lexeme
             {
                 Graphemes = el.Elements($"{nsPrefix}grapheme").Select(g => g.Value),
                 Phoneme = el.Element($"{nsPrefix}phoneme")?.Value,
