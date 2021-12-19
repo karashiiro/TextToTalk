@@ -1,7 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Speech.Synthesis;
 using System.Threading;
+using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.System
 {

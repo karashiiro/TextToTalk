@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = none
+
+[*.{cs,vb}]
+dotnet_style_qualification_for_field=true:none

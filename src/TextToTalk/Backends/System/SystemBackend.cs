@@ -10,6 +10,7 @@ using System.Speech.Synthesis;
 using System.Text;
 using System.Threading.Tasks;
 using TextToTalk.GameEnums;
+using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.System
 {

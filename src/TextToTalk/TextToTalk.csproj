@@ -31,6 +31,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
 		<ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" />
 	</ItemGroup>
 
