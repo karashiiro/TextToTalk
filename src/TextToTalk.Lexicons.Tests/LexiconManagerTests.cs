@@ -28,8 +28,8 @@ namespace TextToTalk.Lexicons.Tests
         {
             var lm = new LexiconManager();
             var lexicon = new LexiconBuilder()
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzea" }, Phoneme = "eɪɔrːzɪːə" })
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzean" }, Phoneme = "eɪɔrːzɪːə" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzea" }, Phoneme = "eɪ ɔrːzɪː ə" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzean" }, Phoneme = "eɪ ɔrːzɪːæn" })
                 .Build();
             var xml = XDocument.Parse(lexicon);
             lm.AddLexicon(xml, "test");
@@ -46,8 +46,8 @@ namespace TextToTalk.Lexicons.Tests
         {
             var lm = new LexiconManager();
             var lexicon = new LexiconBuilder()
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzean" }, Phoneme = "eɪɔrːzɪːə" })
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzea" }, Phoneme = "eɪɔrːzɪːə" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzean" }, Phoneme = "eɪ ɔrːzɪːæn" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzea" }, Phoneme = "eɪ ɔrːzɪː ə" })
                 .Build();
             var xml = XDocument.Parse(lexicon);
             lm.AddLexicon(xml, "test");
@@ -65,7 +65,7 @@ namespace TextToTalk.Lexicons.Tests
         {
             var lm = new LexiconManager();
             var lexicon = new LexiconBuilder()
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzea", "Eorzean" }, Phoneme = "eɪɔrːzɪːə" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzea", "Eorzean" }, Phoneme = "eɪ ɔrːzɪː ə" })
                 .Build();
             var xml = XDocument.Parse(lexicon);
             lm.AddLexicon(xml, "test");
@@ -83,7 +83,7 @@ namespace TextToTalk.Lexicons.Tests
         {
             var lm = new LexiconManager();
             var lexicon = new LexiconBuilder()
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzean", "Eorzea" }, Phoneme = "eɪɔrːzɪːə" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Eorzean", "Eorzea" }, Phoneme = "eɪ ɔrːzɪː ə" })
                 .Build();
             var xml = XDocument.Parse(lexicon);
             lm.AddLexicon(xml, "test");
