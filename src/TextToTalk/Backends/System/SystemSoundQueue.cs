@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Speech.Synthesis;
 using System.Threading;
+using Dalamud.Logging;
 using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.System
@@ -39,6 +40,8 @@ namespace TextToTalk.Backends.System
             this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
 
             var ssml = this.lexiconManager.MakeSsml(nextItem.Text, this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
+            PluginLog.Log(ssml);
+
             this.speechSynthesizer.SpeakSsmlAsync(ssml);
 
             // Waits for the AutoResetEvent lock in the callback to fire.
