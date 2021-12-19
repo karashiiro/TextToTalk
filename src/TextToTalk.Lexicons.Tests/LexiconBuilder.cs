@@ -28,18 +28,21 @@ namespace TextToTalk.Lexicons.Tests
         http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd""
       alphabet=""ipa"" 
       xml:lang=""en"">
-    {this.lexemes.Aggregate("", (agg, next) => {
-        agg += next.Graphemes.Aggregate("", (aggGrapheme, nextGrapheme) => aggGrapheme + $"<grapheme>{nextGrapheme}</grapheme>\n");
+{this.lexemes.Aggregate("", (agg, next) => {
+    agg += "<lexeme>\n";
 
-        agg += $"<phoneme>{next.Phoneme}</phoneme>\n";
+    agg += next.Graphemes.Aggregate("", (aggGrapheme, nextGrapheme) => aggGrapheme + $"<grapheme>{nextGrapheme}</grapheme>\n");
 
-        if (!string.IsNullOrEmpty(next.Alias)) {
-            agg += $"<alias>{next.Alias}</alias>\n";
-        }
+    agg += $"<phoneme>{next.Phoneme}</phoneme>\n";
 
-        return agg;
-    })}
-</lexicon>";
+    if (!string.IsNullOrEmpty(next.Alias)) {
+        agg += $"<alias>{next.Alias}</alias>\n";
+    }
+
+    agg += "</lexeme>\n";
+
+    return agg;
+})}</lexicon>";
         }
     }
 }
