@@ -19,4 +19,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
+  </ItemGroup>
+
 </Project>
