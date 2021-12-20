@@ -91,5 +91,23 @@ namespace TextToTalk.Lexicons.Tests
             var ssml = lm.MakeSsml("Eorzean", "en-US");
             Assert.True(ssml.Contains("Eorzean"));
         }
+
+        /// <summary>
+        /// Tests that longer graphemes are replaced first with respect to an actual input string.
+        /// </summary>
+        [Fact]
+        public void LongerGraphemes_AreReplacedFirst_Test5()
+        {
+            var lm = new LexiconManager();
+            var lexicon = new LexiconBuilder()
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Vanu" }, Phoneme = "vɑːnu" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Vanus" }, Phoneme = "vɑːnuz" })
+                .Build();
+            var xml = XDocument.Parse(lexicon);
+            lm.AddLexicon(xml, "test");
+
+            var ssml = lm.MakeSsml("Vanu Vanus", "en-US");
+            Assert.True(!ssml.Contains("Vanu Vanus") && ssml.Contains("Vanu") && ssml.Contains("Vanus"));
+        }
     }
 }
