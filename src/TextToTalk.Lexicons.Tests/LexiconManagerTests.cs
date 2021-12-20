@@ -109,5 +109,13 @@ namespace TextToTalk.Lexicons.Tests
             var ssml = lm.MakeSsml("Vanu Vanus", "en-US");
             Assert.True(!ssml.Contains("Vanu Vanus") && ssml.Contains("Vanu") && ssml.Contains("Vanus"));
         }
+
+        [Fact]
+        public void ReplaceGrapheme_DoesNotDeepReplace()
+        {
+            var s = LexiconManager.ReplaceGrapheme("Vanu Vanus", "Vanus", "<phoneme>Vanus</phoneme>");
+            var t = LexiconManager.ReplaceGrapheme(s, "Vanu", "<phoneme>Vanu</phoneme>");
+            Assert.Equal("<phoneme>Vanu</phoneme> <phoneme>Vanus</phoneme>", t);
+        }
     }
 }

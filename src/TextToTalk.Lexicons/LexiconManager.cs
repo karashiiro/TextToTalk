@@ -127,7 +127,7 @@ namespace TextToTalk.Lexicons
             return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
         }
 
-        private static string ReplaceGrapheme(string text, string oldValue, string newValue)
+        internal static string ReplaceGrapheme(string text, string oldValue, string newValue)
         {
             var xIdx = text.IndexOf(oldValue, StringComparison.InvariantCulture);
             if (xIdx == -1)
@@ -187,16 +187,18 @@ namespace TextToTalk.Lexicons
                 }
             }
 
-            return text.Replace(oldValue, newValue);
+            return text[..xIdx] + newValue + ReplaceGrapheme(text[(xIdx + oldValue.Length)..], oldValue, newValue);
         }
 
         private class LexiconInfo
         {
             public string Url { get; init; }
 
-            public IDictionary<string, string> GraphemeAliases { get; } = new ConcurrentDictionary<string, string>();
-            
-            public IDictionary<string, string> GraphemePhonemes { get; } = new ConcurrentDictionary<string, string>();
+            public IDictionary<string, string> GraphemeAliases { get; } = new Dictionary<string, string>();
+
+            // This uses a sorted dictionary to order graphemes from largest to smallest for replacement.
+            public IDictionary<string, string> GraphemePhonemes { get; } = new SortedDictionary<string, string>(
+                Comparer<string>.Create((a, b) => b.Length - a.Length));
         }
     }
 }
