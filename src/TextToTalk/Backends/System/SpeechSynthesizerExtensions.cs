@@ -1,4 +1,6 @@
-﻿using System.Speech.Synthesis;
+﻿using Dalamud.Logging;
+using System;
+using System.Speech.Synthesis;
 
 namespace TextToTalk.Backends.System
 {
@@ -11,7 +13,14 @@ namespace TextToTalk.Backends.System
 
             if (synthesizer.Voice.Name != preset.VoiceName)
             {
-                synthesizer.SelectVoice(preset.VoiceName);
+                try
+                {
+                    synthesizer.SelectVoice(preset.VoiceName);
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Failed to select voice {0}", preset.VoiceName);
+                }
             }
         }
     }

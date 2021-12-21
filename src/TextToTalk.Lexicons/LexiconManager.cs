@@ -194,11 +194,9 @@ namespace TextToTalk.Lexicons
         {
             public string Url { get; init; }
 
-            public IDictionary<string, string> GraphemeAliases { get; } = new Dictionary<string, string>();
-
-            // This uses a sorted dictionary to order graphemes from largest to smallest for replacement.
-            public IDictionary<string, string> GraphemePhonemes { get; } = new SortedDictionary<string, string>(
-                Comparer<string>.Create((a, b) => b.Length - a.Length));
+            public IDictionary<string, string> GraphemeAliases { get; } = new ConcurrentDictionary<string, string>();
+            
+            public IDictionary<string, string> GraphemePhonemes { get; } = new ConcurrentDictionary<string, string>();
         }
     }
 }
