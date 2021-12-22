@@ -111,6 +111,21 @@ namespace TextToTalk.Lexicons.Tests
         }
 
         [Fact]
+        public void LongerGraphemes_AreReplacedFirst_Test6()
+        {
+            var lm = new LexiconManager();
+            var lexicon = new LexiconBuilder()
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Y'shtola" }, Phoneme = "jiʃtoʊˈlɑ" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "'s" }, Phoneme = "z" })
+                .Build();
+            var xml = XDocument.Parse(lexicon);
+            lm.AddLexicon(xml, "test");
+
+            var ssml = lm.MakeSsml("Y'shtola's", "en-US");
+            Assert.True(ssml.Contains("Yshtola") && ssml.Contains("<phoneme ph=\"z\">s</phoneme>"));
+        }
+
+        [Fact]
         public void ReplaceGrapheme_DoesNotDeepReplace()
         {
             var s = LexiconManager.ReplaceGrapheme("Vanu Vanus", "Vanus", "<phoneme>Vanus</phoneme>");
