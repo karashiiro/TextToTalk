@@ -1,4 +1,6 @@
-﻿using System.Xml.Linq;
+﻿using System.IO;
+using System.Reflection;
+using System.Xml.Linq;
 using Xunit;
 
 namespace TextToTalk.Lexicons.Tests
@@ -26,7 +28,7 @@ namespace TextToTalk.Lexicons.Tests
             const string text = "This is some 'text'.";
             var lm = new LexiconManager();
             var ssml = lm.MakeSsml(text, "en-US");
-            Assert.True(ssml.Contains(text) && !ssml.Contains("<phoneme>"));
+            Assert.True(ssml.Contains(text) && !ssml.Contains("<phoneme"));
         }
 
         [Fact]
@@ -41,7 +43,7 @@ namespace TextToTalk.Lexicons.Tests
             var xml = XDocument.Parse(lexicon);
             lm.AddLexicon(xml, "test");
             var ssml = lm.MakeSsml(text, "en-US");
-            Assert.True(ssml.Contains(text) && !ssml.Contains("<phoneme>"));
+            Assert.True(ssml.Contains(text) && !ssml.Contains("<phoneme"));
         }
 
         /// <summary>
@@ -176,7 +178,30 @@ namespace TextToTalk.Lexicons.Tests
             lm.AddLexicon(xml, "test");
 
             var ssml = lm.MakeSsml("Eorzean", "en-US");
-            Assert.True(ssml.Contains("Eorzean"));
+            Assert.True(ssml.Contains("Eorzean") && ssml.Contains("<phoneme"));
+        }
+
+        [Fact]
+        public void FullLexicon_VariousReplacementTests()
+        {
+            using var data = Assembly.GetExecutingAssembly().GetManifestResourceStream("TextToTalk.Lexicons.Tests.test.pls");
+            if (data == null) Assert.True(false);
+
+            using var sr = new StreamReader(data);
+            var lexicon = sr.ReadToEnd();
+
+            var lm = new LexiconManager();
+            var xml = XDocument.Parse(lexicon);
+            lm.AddLexicon(xml, "test");
+
+            var ssml = lm.MakeSsml("Alphinaud", "en-GB");
+            Assert.True(ssml.Contains("Alphinaud") && ssml.Contains("<phoneme"));
+
+            ssml = lm.MakeSsml("G'raha", "en-GB");
+            Assert.True(ssml.Contains("Graha") && ssml.Contains("<phoneme"));
+
+            ssml = lm.MakeSsml("Amalj'aa", "en-GB");
+            Assert.True(ssml.Contains("Amaljaa") && ssml.Contains("<phoneme"));
         }
 
         [Fact]

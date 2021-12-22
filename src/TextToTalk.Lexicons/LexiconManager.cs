@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -39,53 +38,32 @@ namespace TextToTalk.Lexicons
                 this.lexicons.Remove(existingLexicon);
             }
 
-            // Create the lexicon
-            var lexicon = new LexiconInfo { Url = lexiconUrl };
-
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
             var nsPrefix = !string.IsNullOrEmpty(ns) ? $"{{{ns}}}" : "";
-            foreach (var lexeme in xml.Root.Descendants($"{nsPrefix}lexeme").Select(el => new Lexeme
+
+            // Create the lexicon
+            var lexicon = new LexiconInfo
             {
-                Graphemes = el.Elements($"{nsPrefix}grapheme").Select(g => g.Value),
-                Phoneme = el.Element($"{nsPrefix}phoneme")?.Value,
-                Alias = el.Element($"{nsPrefix}alias")?.Value,
-            }))
-            {
-                // https://github.com/karashiiro/TextToTalk/issues/37#issuecomment-899733701
-                // There are some weird incompatibilities in the SSML reader that this helps to fix.
-                var phoneme = lexeme.Phoneme?
-                    .Replace(":", "ː")
-                    .Replace(" ", "")
-                    .Replace("-", "");
-
-                var graphemes = lexeme.Graphemes.ToList();
-                if (!graphemes.Any()) continue;
-
-                foreach (var grapheme in graphemes)
-                {
-                    if (phoneme != null)
-                    {
-                        if (lexicon.GraphemePhonemes.ContainsKey(grapheme))
+                Url = lexiconUrl,
+                Lexemes = xml.Root.Descendants($"{nsPrefix}lexeme")
+                    .SelectMany(el => el.Elements($"{nsPrefix}grapheme")
+                        .Select(grapheme => new MicroLexeme
                         {
-                            // Allow later graphemes to override previous ones
-                            lexicon.GraphemePhonemes.Remove(grapheme);
-                        }
+                            Grapheme = grapheme.Value,
+                            // https://github.com/karashiiro/TextToTalk/issues/37#issuecomment-899733701
+                            // There are some weird incompatibilities in the SSML reader that this helps to fix.
+                            Phoneme = el.Element($"{nsPrefix}phoneme")?.Value
+                                .Replace(":", "ː")
+                                .Replace(" ", "")
+                                .Replace("-", ""),
+                            Alias = el.Element($"{nsPrefix}alias")?.Value,
+                        })
+                    )
+                    .Where(lexeme => !string.IsNullOrEmpty(lexeme.Phoneme))
+                    .ToList(),
+            };
 
-                        lexicon.GraphemePhonemes.Add(grapheme, phoneme);
-                    }
-
-                    if (lexeme.Alias != null)
-                    {
-                        if (lexicon.GraphemeAliases.ContainsKey(grapheme))
-                        {
-                            // Allow later graphemes to override previous ones
-                            lexicon.GraphemeAliases.Remove(grapheme);
-                        }
-
-                        lexicon.GraphemeAliases.Add(grapheme, lexeme.Alias);
-                    }
-                }
-            }
+            lexicon.Lexemes.Sort((a, b) => b.Grapheme.Length - a.Grapheme.Length);
 
             this.lexicons.Add(lexicon);
         }
@@ -103,24 +81,24 @@ namespace TextToTalk.Lexicons
         {
             foreach (var lexicon in this.lexicons)
             {
-                foreach (var (grapheme, alias) in lexicon.GraphemeAliases)
+                foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme)))
                 {
-                    text = text.Replace(grapheme, alias);
-                }
+                    if (!string.IsNullOrEmpty(lexeme.Alias))
+                    {
+                        text = text.Replace(lexeme.Grapheme, lexeme.Alias);
+                    }
 
-                foreach (var (grapheme, phoneme) in lexicon.GraphemePhonemes)
-                {
                     // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work
                     // with System.Speech, which would be correct way to handle this.
-                    var graphemeReadable = grapheme
+                    var graphemeReadable = lexeme.Grapheme
                         .Replace("'", "")
                         .Replace("\"", "");
 
-                    var phonemeNode = phoneme.Contains("\"")
-                        ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
-                        : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
+                    var phonemeNode = lexeme.Phoneme.Contains("\"")
+                        ? $"<phoneme ph='{lexeme.Phoneme}'>{graphemeReadable}</phoneme>"
+                        : $"<phoneme ph=\"{lexeme.Phoneme}\">{graphemeReadable}</phoneme>";
 
-                    text = ReplaceGrapheme(text, grapheme, phonemeNode);
+                    text = ReplaceGrapheme(text, lexeme.Grapheme, phonemeNode);
                 }
             }
 
@@ -190,15 +168,20 @@ namespace TextToTalk.Lexicons
             return text[..xIdx] + newValue + ReplaceGrapheme(text[(xIdx + oldValue.Length)..], oldValue, newValue);
         }
 
+        private class MicroLexeme
+        {
+            public string Grapheme { get; init; }
+
+            public string Phoneme { get; init; }
+
+            public string Alias { get; init; }
+        }
+
         private class LexiconInfo
         {
             public string Url { get; init; }
 
-            public IDictionary<string, string> GraphemeAliases { get; } = new Dictionary<string, string>();
-
-            // This uses a sorted dictionary to order graphemes from largest to smallest for replacement.
-            public IDictionary<string, string> GraphemePhonemes { get; } = new SortedDictionary<string, string>(
-                Comparer<string>.Create((a, b) => b.Length - a.Length));
+            public List<MicroLexeme> Lexemes { get; init; }
         }
     }
 }
