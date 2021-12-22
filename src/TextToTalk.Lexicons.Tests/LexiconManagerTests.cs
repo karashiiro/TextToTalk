@@ -20,6 +20,30 @@ namespace TextToTalk.Lexicons.Tests
             lm.AddLexicon(xml, "test");
         }
 
+        [Fact]
+        public void MakeSsml_Works_WithNoLexicons()
+        {
+            const string text = "This is some 'text'.";
+            var lm = new LexiconManager();
+            var ssml = lm.MakeSsml(text, "en-US");
+            Assert.True(ssml.Contains(text) && !ssml.Contains("<phoneme>"));
+        }
+
+        [Fact]
+        public void MakeSsml_Works_WithNoReplacements()
+        {
+            const string text = "This is some 'text'.";
+            var lm = new LexiconManager();
+            var lexicon = new LexiconBuilder()
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Bahamut" }, Phoneme = "bɑhɑmɪt", Alias = "Bahamoot" })
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Baldesion" }, Phoneme = "bɔldˈɛˈsiɑn" })
+                .Build();
+            var xml = XDocument.Parse(lexicon);
+            lm.AddLexicon(xml, "test");
+            var ssml = lm.MakeSsml(text, "en-US");
+            Assert.True(ssml.Contains(text) && !ssml.Contains("<phoneme>"));
+        }
+
         /// <summary>
         /// Tests that longer graphemes are replaced first when the shorter grapheme comes first in the lexicon.
         /// </summary>
