@@ -1,6 +1,6 @@
-name: Characters Locations
-author: johnysandels
+name: Miscellaneous
+author: ryankhart
 disabled: false
-description: Corrections for various characters' and locations' names
+description: Corrections for various words and abbreviations not covered by johnysandels' lexicon
 files:
-  - lexicon.pls
+  - miscellaneous.pls
