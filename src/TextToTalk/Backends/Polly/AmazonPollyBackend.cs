@@ -44,6 +44,9 @@ namespace TextToTalk.Backends.Polly
 
             var credentials = CredentialManager.GetCredentials(CredentialsTarget);
 
+            this.voices = new List<Voice>();
+            this.cloudLexicons = new List<LexiconDescription>();
+
             if (credentials != null)
             {
                 this.accessKey = credentials.UserName;
@@ -54,15 +57,11 @@ namespace TextToTalk.Backends.Polly
                     this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
                     this.cloudLexicons = this.polly.GetLexicons();
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    PluginLog.LogError(e, "Failed to initialize AWS client.");
                     CredentialManager.RemoveCredentials(CredentialsTarget);
                 }
-            }
-            else
-            {
-                this.voices = new List<Voice>();
-                this.cloudLexicons = new List<LexiconDescription>();
             }
         }
 
@@ -130,8 +129,9 @@ namespace TextToTalk.Backends.Polly
                             this.cloudLexicons = this.polly.GetLexicons();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        PluginLog.LogError(e, "Failed to initialize AWS client.");
                         CredentialManager.RemoveCredentials(CredentialsTarget);
                     }
                 }
