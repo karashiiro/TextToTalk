@@ -1,0 +1,6 @@
+name: Characters Locations
+author: johnysandels
+disabled: false
+description: Corrections for various characters' and locations' names
+files:
+  - lexicon.pls
