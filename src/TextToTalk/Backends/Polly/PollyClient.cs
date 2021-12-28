@@ -28,13 +28,12 @@ namespace TextToTalk.Backends.Polly
             var lexiconsReq = new ListLexiconsRequest();
 
             var lexicons = new List<LexiconDescription>();
-            string nextToken;
             do
             {
                 var lexiconsRes = this.client.ListLexiconsAsync(lexiconsReq).GetAwaiter().GetResult();
                 lexicons.AddRange(lexiconsRes.Lexicons);
-                nextToken = lexiconsRes.NextToken;
-            } while (!string.IsNullOrEmpty(nextToken));
+                lexiconsReq.NextToken = lexiconsRes.NextToken;
+            } while (!string.IsNullOrEmpty(lexiconsReq.NextToken));
 
             return lexicons;
         }
