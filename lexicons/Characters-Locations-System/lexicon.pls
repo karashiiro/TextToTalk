@@ -76,7 +76,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Ixali</grapheme>
-<phoneme>ɪksəˈlaɪ</phoneme>
+<phoneme>ɪksælaɪ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ixals</grapheme>
@@ -164,7 +164,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Y'shtola</grapheme>
-<phoneme>jiʃtoʊˈlɑ</phoneme>
+<phoneme>jiʃtəʊlə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>'s</grapheme>

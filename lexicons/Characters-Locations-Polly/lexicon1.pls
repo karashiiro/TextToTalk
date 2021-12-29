@@ -164,7 +164,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Y'shtola</grapheme>
-<phoneme>jiʃtoʊˈlɑ</phoneme>
+<phoneme>jiʃtəʊlə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>'s</grapheme>
