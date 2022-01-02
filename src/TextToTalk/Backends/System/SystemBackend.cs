@@ -77,26 +77,47 @@ namespace TextToTalk.Backends.System
             var presets = this.config.VoicePresets.ToList();
             presets.Sort((a, b) => a.Id - b.Id);
 
-            var presetIndex = presets.IndexOf(currentVoicePreset);
-            if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+            if (presets.Any())
             {
-                this.config.CurrentVoicePresetId = presets[presetIndex].Id;
-                this.config.Save();
+                var presetIndex = presets.IndexOf(currentVoicePreset);
+                if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+                        presets.Count))
+                {
+                    this.config.CurrentVoicePresetId = presets[presetIndex].Id;
+                    this.config.Save();
+                }
+            }
+            else
+            {
+                ImGui.TextColored(Red, "You have no voices installed. Please install more voices or use a different backend.");
             }
 
-            if (ImGui.Button("New preset##TTTVoice4"))
+            if (ImGui.Button("New preset##TTTVoice4") && this.config.TryCreateVoicePreset(out var newPreset))
             {
-                var newPreset = this.config.NewVoicePreset();
                 this.config.SetCurrentVoicePreset(newPreset.Id);
             }
 
-            if (this.config.EnabledChatTypesPresets.Count > 1)
+            if (this.config.VoicePresets.Count > 1)
             {
                 ImGui.SameLine();
-                if (ImGui.Button("Delete##TTTVoice5"))
+                if (ImGui.Button("Delete preset##TTTVoice5"))
                 {
                     var otherPreset = this.config.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
                     this.config.SetCurrentVoicePreset(otherPreset.Id);
+
+                    if (this.config.UngenderedVoicePresetId == currentVoicePreset.Id)
+                    {
+                        this.config.UngenderedVoicePresetId = 0;
+                    }
+                    else if (this.config.MaleVoicePresetId == currentVoicePreset.Id)
+                    {
+                        this.config.MaleVoicePresetId = 0;
+                    }
+                    else if (this.config.FemaleVoicePresetId == currentVoicePreset.Id)
+                    {
+                        this.config.FemaleVoicePresetId = 0;
+                    }
+
                     this.config.VoicePresets.Remove(currentVoicePreset);
                 }
             }
@@ -181,45 +202,52 @@ namespace TextToTalk.Backends.System
 
             ImGui.Spacing();
 
-            var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
-            if (ImGui.Checkbox("Use gendered voice presets##TTTVoice9", ref useGenderedVoicePresets))
+            if (presets.Any())
             {
-                this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
-                this.config.Save();
+                var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
+                if (ImGui.Checkbox("Use gendered voice presets##TTTVoice9", ref useGenderedVoicePresets))
+                {
+                    this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
+                    this.config.Save();
+                }
+
+                if (useGenderedVoicePresets)
+                {
+                    var currentUngenderedVoicePreset = this.config.GetCurrentUngenderedVoicePreset();
+                    var currentMaleVoicePreset = this.config.GetCurrentMaleVoicePreset();
+                    var currentFemaleVoicePreset = this.config.GetCurrentFemaleVoicePreset();
+
+                    var presetArray = presets.Select(p => p.Name).ToArray();
+
+                    var ungenderedPresetIndex = presets.IndexOf(currentUngenderedVoicePreset);
+                    if (ImGui.Combo("Ungendered preset##TTTVoice12", ref ungenderedPresetIndex, presetArray, presets.Count))
+                    {
+                        this.config.UngenderedVoicePresetId = presets[ungenderedPresetIndex].Id;
+                        this.config.Save();
+                    }
+
+                    var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
+                    if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presetArray, presets.Count))
+                    {
+                        this.config.MaleVoicePresetId = presets[malePresetIndex].Id;
+                        this.config.Save();
+                    }
+
+                    var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
+                    if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presetArray, presets.Count))
+                    {
+                        this.config.FemaleVoicePresetId = presets[femalePresetIndex].Id;
+                        this.config.Save();
+                    }
+                }
             }
-
-            if (useGenderedVoicePresets)
+            else
             {
-                var currentUngenderedVoicePreset = this.config.GetCurrentUngenderedVoicePreset();
-                var currentMaleVoicePreset = this.config.GetCurrentMaleVoicePreset();
-                var currentFemaleVoicePreset = this.config.GetCurrentFemaleVoicePreset();
-
-                var presetArray = presets.Select(p => p.Name).ToArray();
-
-                var ungenderedPresetIndex = presets.IndexOf(currentUngenderedVoicePreset);
-                if (ImGui.Combo("Ungendered preset##TTTVoice12", ref ungenderedPresetIndex, presetArray, presets.Count))
-                {
-                    this.config.UngenderedVoicePresetId = presets[ungenderedPresetIndex].Id;
-                    this.config.Save();
-                }
-
-                var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
-                if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presetArray, presets.Count))
-                {
-                    this.config.MaleVoicePresetId = presets[malePresetIndex].Id;
-                    this.config.Save();
-                }
-
-                var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
-                if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presetArray, presets.Count))
-                {
-                    this.config.FemaleVoicePresetId = presets[femalePresetIndex].Id;
-                    this.config.Save();
-                }
+                ImGui.TextColored(Red, "You have no voices installed. Please install more voices or use a different backend.");
             }
         }
 
-        private string FormatVoiceInfo(InstalledVoice iv)
+        private static string FormatVoiceInfo(InstalledVoice iv)
         {
             var line = new StringBuilder(iv.VoiceInfo?.Name ?? "");
             line.Append(" (")

@@ -172,14 +172,18 @@ namespace TextToTalk
                 });
 
                 using var ss = new SpeechSynthesizer();
-                VoicePresets.Add(new VoicePreset
+                var defaultVoiceInfo = ss.GetInstalledVoices().FirstOrDefault();
+                if (defaultVoiceInfo != null)
                 {
-                    Id = 0,
-                    Rate = ss.Rate,
-                    Volume = ss.Volume,
-                    VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name,
-                    Name = DefaultPreset,
-                });
+                    VoicePresets.Add(new VoicePreset
+                    {
+                        Id = 0,
+                        Rate = ss.Rate,
+                        Volume = ss.Volume,
+                        VoiceName = defaultVoiceInfo.VoiceInfo.Name,
+                        Name = DefaultPreset,
+                    });
+                }
 
                 InitializedEver = true;
                 MigratedTo1_5 = true;
@@ -254,23 +258,33 @@ namespace TextToTalk
             return VoicePresets.FirstOrDefault(p => p.Id == FemaleVoicePresetId);
         }
 
-        public VoicePreset NewVoicePreset()
+        public bool TryCreateVoicePreset(out VoicePreset preset)
         {
+            preset = null;
+
             using var ss = new SpeechSynthesizer();
 
             var highestId = VoicePresets.Select(p => p.Id).Max();
-            var preset = new VoicePreset
+            var defaultVoiceInfo = ss.GetInstalledVoices().FirstOrDefault();
+            if (defaultVoiceInfo != null)
             {
-                Id = highestId + 1,
-                Rate = ss.Rate,
-                Volume = ss.Volume,
-                VoiceName = ss.GetInstalledVoices().First().VoiceInfo.Name,
-                Name = "New preset",
-            };
+                preset = new VoicePreset
+                {
+                    Id = highestId + 1,
+                    Rate = ss.Rate,
+                    Volume = ss.Volume,
+                    VoiceName = defaultVoiceInfo.VoiceInfo.Name,
+                    Name = "New preset",
+                };
 
-            VoicePresets.Add(preset);
+                VoicePresets.Add(preset);
+            }
+            else
+            {
+                return false;
+            }
 
-            return preset;
+            return true;
         }
 
         public void SetCurrentVoicePreset(int presetId)
