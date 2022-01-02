@@ -111,6 +111,12 @@ namespace TextToTalk.Backends.Polly
             {
                 res = await this.client.SynthesizeSpeechAsync(req);
             }
+            catch (LexiconNotFoundException e)
+            {
+                PluginLog.LogError(e, "A lexicon could not be found, retrying without any lexicons...");
+                await Say(engine, voice, sampleRate, volume, Array.Empty<string>(), source, text);
+                return;
+            }
             catch (Exception e)
             {
                 PluginLog.LogError(e, "Synthesis request failed in {0}.", nameof(PollyClient));
