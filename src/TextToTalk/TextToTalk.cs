@@ -16,7 +16,6 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
-using System.Reflection;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Modules;
@@ -310,7 +309,7 @@ namespace TextToTalk
                 PluginLog.Warning("Failed to retrieve character struct.");
                 return Gender.None;
             }
-            
+
             var actorGender = (Gender)charaStruct->CustomizeData[1];
             return actorGender;
         }
