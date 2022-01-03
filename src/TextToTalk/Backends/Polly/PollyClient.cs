@@ -93,7 +93,7 @@ namespace TextToTalk.Backends.Polly
             return this.soundQueue.GetCurrentlySpokenTextSource();
         }
 
-        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, IEnumerable<string> lexicons, TextSource source, string text)
+        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, IList<string> lexicons, TextSource source, string text)
         {
             var req = new SynthesizeSpeechRequest
             {
@@ -113,8 +113,16 @@ namespace TextToTalk.Backends.Polly
             }
             catch (LexiconNotFoundException e)
             {
-                PluginLog.LogError(e, "A lexicon could not be found, retrying without any lexicons...");
-                await Say(engine, voice, sampleRate, volume, Array.Empty<string>(), source, text);
+                if (lexicons.Any())
+                {
+                    PluginLog.LogError(e, "A lexicon could not be found, retrying without any lexicons...");
+                    await Say(engine, voice, sampleRate, volume, Array.Empty<string>(), source, text);
+                }
+                else
+                {
+                    PluginLog.LogError(e, "A lexicon could not be found... but we aren't using any lexicons?");
+                }
+
                 return;
             }
             catch (Exception e)
