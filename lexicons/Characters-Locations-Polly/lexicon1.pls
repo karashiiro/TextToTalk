@@ -40,7 +40,13 @@
 </lexeme>
 <lexeme>
 <grapheme>Chocobo</grapheme>
-<phoneme>ʧoʊˈkoboʊ</phoneme>
+<grapheme>chocobo</grapheme>
+<phoneme>ˈʧəʊkəbəʊ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Chocobos</grapheme>
+<grapheme>chocobos</grapheme>
+<phoneme>ˈʧəʊkəbəʊz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Cid</grapheme>
