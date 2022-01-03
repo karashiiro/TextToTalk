@@ -40,17 +40,11 @@
 </lexeme>
 <lexeme>
 <grapheme>Chocobo</grapheme>
-<phoneme>ˈʧəʊkəbəʊ</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>chocobo</grapheme>
 <phoneme>ˈʧəʊkəbəʊ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Chocobos</grapheme>
-<phoneme>ˈʧəʊkəbəʊz</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>chocobos</grapheme>
 <phoneme>ˈʧəʊkəbəʊz</phoneme>
 </lexeme>
