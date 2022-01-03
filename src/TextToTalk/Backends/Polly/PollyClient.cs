@@ -115,12 +115,12 @@ namespace TextToTalk.Backends.Polly
             {
                 if (lexicons.Any())
                 {
-                    PluginLog.LogError(e, "A lexicon could not be found, retrying without any lexicons...");
+                    PluginLog.LogError(e, "A lexicon could not be found, retrying without any lexicons... Additional data: {@Data}", e.Data);
                     await Say(engine, voice, sampleRate, volume, Array.Empty<string>(), source, text);
                 }
                 else
                 {
-                    PluginLog.LogError(e, "A lexicon could not be found... but we aren't using any lexicons?");
+                    PluginLog.LogError(e, "A lexicon could not be found... but we aren't using any lexicons? Additional data: {@Data}", e.Data);
                 }
 
                 return;
