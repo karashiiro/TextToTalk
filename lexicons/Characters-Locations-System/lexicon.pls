@@ -178,17 +178,11 @@
 </lexeme>
 <lexeme>
 <grapheme>Aetheryte</grapheme>
-<phoneme>eɪθˈər.aɪt</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>aetheryte</grapheme>
 <phoneme>eɪθˈə.raɪt</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Aetherytes</grapheme>
-<phoneme>eɪθˈər.aɪtz</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>aetherytes</grapheme>
 <phoneme>eɪθˈə.raɪtz</phoneme>
 </lexeme>
