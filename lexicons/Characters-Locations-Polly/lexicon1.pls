@@ -43,6 +43,10 @@
 <phoneme>ˈʧəʊkəbəʊ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>chocobo</grapheme>
+<phoneme>ˈʧəʊkəbəʊ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Cid</grapheme>
 <phoneme>sɪd</phoneme>
 </lexeme>
