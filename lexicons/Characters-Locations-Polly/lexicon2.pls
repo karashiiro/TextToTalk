@@ -108,4 +108,8 @@
 <grapheme>Ul'dah</grapheme>
 <phoneme>ulˈdɑ</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>Viera</grapheme>
+<phoneme>ˈviːˈɛrə</phoneme>
+</lexeme>
 </lexicon>

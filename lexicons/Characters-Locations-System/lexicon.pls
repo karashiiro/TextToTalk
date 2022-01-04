@@ -65,6 +65,10 @@
 <phoneme>gaɪəs</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Guildivain</grapheme>
+<phoneme>gɪldɪveɪn</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Hien</grapheme>
 <phoneme>ˈhiɛn</phoneme>
 </lexeme>
@@ -277,5 +281,9 @@
 <lexeme>
 <grapheme>Ul'dah</grapheme>
 <phoneme>ulˈdɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Viera</grapheme>
+<phoneme>ˈviːˈɛrə</phoneme>
 </lexeme>
 </lexicon>
