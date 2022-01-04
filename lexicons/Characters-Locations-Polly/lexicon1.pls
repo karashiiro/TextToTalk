@@ -82,7 +82,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Ixali</grapheme>
-<phoneme>ɪksəˈlaɪ</phoneme>
+<phoneme>ɪksælaɪ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ixals</grapheme>
