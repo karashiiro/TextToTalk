@@ -7,11 +7,17 @@
       alphabet="ipa" 
       xml:lang="en">
 <lexeme>
+<grapheme>eld</grapheme>
+<grapheme>Eld</grapheme>
+<alias>ɛld</alias>
+</lexeme>
+<lexeme>
 <grapheme>NIN</grapheme>
 <alias>ninja</alias>
 </lexeme>
 <lexeme>
 <grapheme>magitek</grapheme>
+<grapheme>Magitek</grapheme>
 <phoneme>ˈmæʝɪtek</phoneme>
 </lexeme>
 <lexeme>
