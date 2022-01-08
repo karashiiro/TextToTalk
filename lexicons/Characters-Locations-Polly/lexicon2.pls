@@ -21,6 +21,10 @@
 <phoneme>æmˈəˌræŋ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Azys Lla</grapheme>
+<phoneme>ˈɑzɪz lɔ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Eorzea</grapheme>
 <phoneme>eɪ ɔrːzɪː ə</phoneme>
 </lexeme>
