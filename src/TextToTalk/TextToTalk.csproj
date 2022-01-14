@@ -32,6 +32,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
+		<ProjectReference Include="..\TextToTalk.UngenderedOverrides\TextToTalk.UngenderedOverrides.csproj" />
 		<ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" />
 	</ItemGroup>
 

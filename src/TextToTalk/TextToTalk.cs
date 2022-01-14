@@ -6,7 +6,6 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -16,13 +15,17 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Microsoft.VisualBasic.Logging;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI;
+using TextToTalk.UngenderedOverrides;
 using DalamudCommandManager = Dalamud.Game.Command.CommandManager;
-using RawCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace TextToTalk
 {
@@ -73,6 +76,7 @@ namespace TextToTalk
         private readonly WindowManager ui;
         private readonly CommandManager commandManager;
         private readonly VoiceBackendManager backendManager;
+        private readonly UngenderedOverrideManager ungenderedOverrides;
 
         private IntPtr talkAddonPtr;
         private readonly SharedState sharedState;
@@ -87,8 +91,8 @@ namespace TextToTalk
             this.config.Initialize(PluginInterface);
 
             this.sharedState = new SharedState();
-
             this.backendManager = new VoiceBackendManager(this.config, this.sharedState);
+            this.ungenderedOverrides = new UngenderedOverrideManager();
 
             this.serviceCollection = new PluginServiceCollection();
             this.serviceCollection.AddService(this.config);
@@ -185,11 +189,9 @@ namespace TextToTalk
             }
 
             TalkAddonText talkAddonText;
-            string text;
             try
             {
                 talkAddonText = TalkUtils.ReadTalkAddon(Data, talkAddon);
-                text = talkAddonText.Text;
             }
             catch (NullReferenceException)
             {
@@ -197,7 +199,9 @@ namespace TextToTalk
                 return;
             }
 
-            if (talkAddonText.Text == "" || IsDuplicateQuestText(talkAddonText.Text)) return;
+            var text = talkAddonText.Text;
+
+            if (text == "" || IsDuplicateQuestText(text)) return;
             SetLastQuestText(text);
 
             if (talkAddonText.Speaker != "" && ShouldSaySender())
@@ -299,18 +303,52 @@ namespace TextToTalk
             this.backendManager.Say(source, gender, cleanText);
         }
 
-        private static unsafe Gender GetCharacterGender(GameObject gObj)
+        private unsafe Gender GetCharacterGender(GameObject gObj)
         {
-            if (gObj == null) return Gender.None;
+            if (gObj == null)
+            {
+                PluginLog.Log("GameObject is null; cannot check gender.");
+                return Gender.None;
+            }
 
-            var charaStruct = (RawCharacter*)gObj.Address;
+            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)gObj.Address;
             if (charaStruct == null)
             {
                 PluginLog.Warning("Failed to retrieve character struct.");
                 return Gender.None;
             }
 
+            // Get actor gender as defined by its struct.
             var actorGender = (Gender)charaStruct->CustomizeData[1];
+            
+            // Player gender overrides will be handled by a different system.
+            if (gObj.ObjectKind is ObjectKind.Player)
+            {
+                return actorGender;
+            }
+
+            // Get the actor's model ID to see if we have an ungendered override for it.
+            // Actors only have 0/1 genders regardless of their canonical genders, so this
+            // needs to be specified by us. If an actor is canonically ungendered, their
+            // gender seems to always be left at 0 (male).
+            var modelId = Marshal.ReadInt32((IntPtr)charaStruct, 0x1BC);
+            if (modelId == -1)
+            {
+                // https://github.com/aers/FFXIVClientStructs/blob/5e6b8ca2959f396b4d8c88253e4bc82fa6af54b7/FFXIVClientStructs/FFXIV/Client/Game/Character/Character.cs#L23
+                modelId = Marshal.ReadInt32((IntPtr)charaStruct, 0x1B4);
+            }
+
+            // Get the override state and log the model ID so that we can add it to our overrides file if needed.
+            if (this.ungenderedOverrides.IsUngendered(modelId))
+            {
+                actorGender = Gender.None;
+                PluginLog.Log($"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender overriden to: {actorGender})");
+            }
+            else
+            {
+                PluginLog.Log($"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender read as: {actorGender})");
+            }
+
             return actorGender;
         }
 
