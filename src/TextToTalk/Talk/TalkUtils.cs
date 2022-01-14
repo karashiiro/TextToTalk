@@ -16,7 +16,7 @@ namespace TextToTalk.Talk
 
         public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
         {
-            return new()
+            return new TalkAddonText
             {
                 Speaker = ReadTextNode(data, talkAddon->AtkTextNode220),
                 Text = ReadTextNode(data, talkAddon->AtkTextNode228),
@@ -34,7 +34,10 @@ namespace TextToTalk.Talk
             var textBytes = new byte[textLength];
             Marshal.Copy((IntPtr)textPtr, textBytes, 0, (int)textLength);
             var seString = SeString.Parse(textBytes);
-            return seString.TextValue;
+            return seString.TextValue
+                .Trim()
+                .Replace("\n", "")
+                .Replace("\r", "");
         }
 
         public static unsafe bool IsVisible(AddonTalk* talkAddon)
