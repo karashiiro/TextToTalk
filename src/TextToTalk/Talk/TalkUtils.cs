@@ -18,12 +18,12 @@ namespace TextToTalk.Talk
         {
             return new TalkAddonText
             {
-                Speaker = ReadTextNode(data, talkAddon->AtkTextNode220),
-                Text = ReadTextNode(data, talkAddon->AtkTextNode228),
+                Speaker = ReadTextNode(talkAddon->AtkTextNode220),
+                Text = ReadTextNode(talkAddon->AtkTextNode228),
             };
         }
 
-        private static unsafe string ReadTextNode(DataManager data, AtkTextNode* textNode)
+        private static unsafe string ReadTextNode(AtkTextNode* textNode)
         {
             if (textNode == null) return "";
 
