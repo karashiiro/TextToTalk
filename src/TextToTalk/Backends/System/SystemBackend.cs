@@ -122,6 +122,13 @@ namespace TextToTalk.Backends.System
                 }
             }
 
+            var presetName = currentVoicePreset.Name;
+            if (ImGui.InputText("Preset name", ref presetName, 64))
+            {
+                currentVoicePreset.Name = presetName;
+                this.config.Save();
+            }
+
             var rate = currentVoicePreset.Rate;
             if (ImGui.SliderInt("Rate##TTTVoice6", ref rate, -10, 10))
             {
