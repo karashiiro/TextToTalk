@@ -1,11 +1,10 @@
 ﻿using Dalamud.CrystalTower.UI;
 using ImGuiNET;
 using System.Linq;
-using System.Numerics;
 
 namespace TextToTalk.UI
 {
-    public class PresetModificationWindow : ImmediateModeWindow
+    public class ChannelPresetModificationWindow : ImmediateModeWindow
     {
         public PluginConfiguration Configuration { get; set; }
 

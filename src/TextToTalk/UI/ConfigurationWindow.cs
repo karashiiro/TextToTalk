@@ -195,14 +195,14 @@ namespace TextToTalk.UI
             {
                 var newPreset = Configuration.NewChatTypesPreset();
                 Configuration.SetCurrentEnabledChatTypesPreset(newPreset.Id);
-                OpenWindow<PresetModificationWindow>();
+                OpenWindow<ChannelPresetModificationWindow>();
             }
 
             ImGui.SameLine();
 
             if (ImGui.Button("Edit##TTT3"))
             {
-                OpenWindow<PresetModificationWindow>();
+                OpenWindow<ChannelPresetModificationWindow>();
             }
 
             if (Configuration.EnabledChatTypesPresets.Count > 1)
