@@ -16,6 +16,7 @@ namespace TextToTalk.Backends.System
 {
     public class SystemBackend : VoiceBackend
     {
+        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
         private static readonly Vector4 Red = new(1, 0, 0, 1);
 
         private static readonly SpeechSynthesizer DummySynthesizer = new();
@@ -164,6 +165,15 @@ namespace TextToTalk.Backends.System
             }
 
             ImGui.Text("Lexicons");
+            
+            ImGui.TextColored(HintColor, "Looking for more lexicons? Have a look at our community lexicons list!");
+            if (ImGui.Button("Wiki"))
+            {
+                WebBrowser.Open("https://github.com/karashiiro/TextToTalk/wiki/Community-lexicons");
+            }
+
+            ImGui.Spacing();
+
             for (var i = 0; i < this.config.Lexicons.Count; i++)
             {
                 // Remove if no longer existent

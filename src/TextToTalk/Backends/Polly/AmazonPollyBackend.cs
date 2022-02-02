@@ -176,6 +176,15 @@ namespace TextToTalk.Backends.Polly
             }
 
             ImGui.Text("Lexicons");
+
+            ImGui.TextColored(HintColor, "Looking for more lexicons? Have a look at our community lexicons list!");
+            if (ImGui.Button("Wiki"))
+            {
+                WebBrowser.Open("https://github.com/karashiiro/TextToTalk/wiki/Community-lexicons");
+            }
+
+            ImGui.Spacing();
+
             lock (this.cloudLexicons)
             {
                 var setLexicons = this.config.PollyLexicons.ToArray();
