@@ -78,6 +78,8 @@ namespace TextToTalk.Backends.Polly
                 };
             }
 
+            // Find the configured voice in the voice list, and fall back to Matthew
+            // if it wasn't found in order to avoid a plugin crash.
             var voiceId = this.voices
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
