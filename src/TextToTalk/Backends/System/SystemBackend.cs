@@ -51,12 +51,16 @@ namespace TextToTalk.Backends.System
 
         public override void Say(TextSource source, Gender gender, string text)
         {
-            var voicePreset = gender switch
+            var voicePreset = this.config.GetCurrentVoicePreset();
+            if (this.config.UseGenderedVoicePresets)
             {
-                Gender.Male => this.config.GetCurrentMaleVoicePreset(),
-                Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
-                _ => this.config.GetCurrentUngenderedVoicePreset(),
-            };
+                voicePreset = gender switch
+                {
+                    Gender.Male => this.config.GetCurrentMaleVoicePreset(),
+                    Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
+                    _ => this.config.GetCurrentUngenderedVoicePreset(),
+                };
+            }
 
             this.soundQueue.EnqueueSound(voicePreset, source, text);
         }

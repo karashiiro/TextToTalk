@@ -67,12 +67,16 @@ namespace TextToTalk.Backends.Polly
 
         public override void Say(TextSource source, Gender gender, string text)
         {
-            var voiceIdStr = gender switch
+            var voiceIdStr = this.config.PollyVoice;
+            if (this.config.UseGenderedVoicePresets)
             {
-                Gender.Male => this.config.PollyVoiceMale,
-                Gender.Female => this.config.PollyVoiceFemale,
-                _ => this.config.PollyVoice,
-            };
+                voiceIdStr = gender switch
+                {
+                    Gender.Male => this.config.PollyVoiceMale,
+                    Gender.Female => this.config.PollyVoiceFemale,
+                    _ => this.config.PollyVoiceUngendered,
+                };
+            }
 
             var voiceId = this.voices
                 .Select(v => v.Id)
