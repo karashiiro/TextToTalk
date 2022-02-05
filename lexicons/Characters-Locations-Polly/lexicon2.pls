@@ -6,7 +6,6 @@
         http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
       alphabet="ipa" 
       xml:lang="en">
-<lexeme>
 <grapheme>Aetheryte</grapheme>
 <grapheme>aetheryte</grapheme>
 <phoneme>eɪθˈə.raɪt</phoneme>
@@ -18,7 +17,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Ahm Araeng</grapheme>
-<phoneme>æmˈəˌræŋ</phoneme>
+<phoneme>ˈɑːmɐrɛng</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Azys Lla</grapheme>
@@ -96,6 +95,7 @@
 <grapheme>Rak'tika</grapheme>
 <phoneme>rækˈtikˈæ</phoneme>
 </lexeme>
+
 <lexeme>
 <grapheme>Sharlayan</grapheme>
 <phoneme>ˈʃɑrliiən</phoneme>

@@ -7,6 +7,14 @@
       alphabet="ipa" 
       xml:lang="en">
 <lexeme>
+<grapheme>Ascian</grapheme>
+<phoneme>ˈæsiːən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ascians</grapheme>
+<phoneme>ˈæsiːənz</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Allagan</grapheme>
 <phoneme>ælɛgɛn</phoneme>
 </lexeme>
@@ -125,6 +133,11 @@
 <phoneme>ˈraʊˈbɑn</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Ryne</grapheme>
+<phoneme>ri:n</phoneme>
+</lexeme>
+
+<lexeme>
 <grapheme>Sahagin</grapheme>
 <phoneme>səˈhɑgɪn</phoneme>
 </lexeme>
@@ -177,6 +190,10 @@
 <phoneme>jiʃtəʊlə</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Zodiark</grapheme>
+<phoneme>ˈzoʊdɪɑrk</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>'s</grapheme>
 <phoneme>z</phoneme>
 </lexeme>
@@ -192,7 +209,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Ahm Araeng</grapheme>
-<phoneme>æmˈəˌræŋ</phoneme>
+<phoneme>ˈɑːmɐrɛng</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Azys Lla</grapheme>
@@ -270,6 +287,7 @@
 <grapheme>Rak'tika</grapheme>
 <phoneme>rækˈtikˈæ</phoneme>
 </lexeme>
+
 <lexeme>
 <grapheme>Sharlayan</grapheme>
 <phoneme>ˈʃɑrliiən</phoneme>
