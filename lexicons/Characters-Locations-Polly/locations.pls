@@ -28,6 +28,10 @@
 <phoneme>ˈɑzɪz lɔ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Baldesion</grapheme>
+<phoneme>bɔldˈɛˈs ˈiən</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Eorzea</grapheme>
 <phoneme>eɪ ɔrːzɪː ə</phoneme>
 </lexeme>
