@@ -107,7 +107,6 @@
 <grapheme>Rak'tika</grapheme>
 <phoneme>rækˈtikˈæ</phoneme>
 </lexeme>
-
 <lexeme>
 <grapheme>Sharlayan</grapheme>
 <phoneme>ˈʃɑrliiən</phoneme>
