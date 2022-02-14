@@ -43,10 +43,6 @@
 <phoneme>bɑhɑmɪt</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Baldesion</grapheme>
-<phoneme>bɔldˈɛˈsiɑn</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>Chocobo</grapheme>
 <grapheme>chocobo</grapheme>
 <phoneme>ˈʧəʊkəbəʊ</phoneme>
