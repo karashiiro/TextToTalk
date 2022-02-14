@@ -43,10 +43,6 @@
 <phoneme>bɑhɑmɪt</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Baldesion</grapheme>
-<phoneme>bɔldˈɛˈsiɑn</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>Chocobo</grapheme>
 <grapheme>chocobo</grapheme>
 <phoneme>ˈʧəʊkəbəʊ</phoneme>
@@ -218,6 +214,10 @@
 <lexeme>
 <grapheme>Azys Lla</grapheme>
 <phoneme>ˈɑzɪz lɔ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Baldesion</grapheme>
+<phoneme>bɔldˈɛˈs ˈiən</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eorzea</grapheme>
