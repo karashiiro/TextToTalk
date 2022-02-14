@@ -212,6 +212,10 @@
 <phoneme>ˈɑːmɐrɛng</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Archeion</grapheme>
+<phoneme>ɑrkiən</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Azys Lla</grapheme>
 <phoneme>ˈɑzɪz lɔ</phoneme>
 </lexeme>
@@ -242,6 +246,10 @@
 <lexeme>
 <grapheme>Gridania</grapheme>
 <phoneme>grɪdɔniə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Gyr</grapheme>
+<phoneme>gɪr</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Idyllshire</grapheme>
