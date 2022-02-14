@@ -3,5 +3,5 @@ author: johnysandels
 disabled: false
 description: Corrections for various characters' and locations' names
 files:
-  - lexicon1.pls
-  - lexicon2.pls
+  - characters.pls
+  - locations.pls
