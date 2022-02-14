@@ -12,6 +12,12 @@
 <alias>ɛld</alias>
 </lexeme>
 <lexeme>
+<grapheme>Hm</grapheme>
+<grapheme> hm?</grapheme>
+<grapheme> hm.</grapheme>
+<phoneme>hɚːmːː</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>NIN</grapheme>
 <alias>ninja</alias>
 </lexeme>
