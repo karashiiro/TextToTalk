@@ -21,7 +21,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Archeion</grapheme>
-<phoneme>ɑrkiən</phoneme>
+<phoneme>ɑr.kiː ən</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Azys Lla</grapheme>
