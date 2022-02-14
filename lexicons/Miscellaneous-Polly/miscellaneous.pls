@@ -24,4 +24,9 @@
 <grapheme>Regen</grapheme>
 <phoneme>riˈʝen</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>'tis</grapheme>
+<grapheme>'Tis</grapheme>
+<phoneme>ˈtɪz</phoneme>
+</lexeme>
 </lexicon>
