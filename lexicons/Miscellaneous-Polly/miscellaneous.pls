@@ -13,6 +13,8 @@
 </lexeme>
 <lexeme>
 <grapheme>Hm</grapheme>
+<grapheme>Hmm</grapheme>
+<grapheme> hmm</grapheme>
 <grapheme> hm?</grapheme>
 <grapheme> hm.</grapheme>
 <phoneme>hɚːmːː</phoneme>
