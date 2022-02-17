@@ -35,6 +35,10 @@
 <phoneme>a.mɔld͡ʒæz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Arenvald</grapheme>
+<phoneme>ɛrɪnvɔld</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Aymeric</grapheme>
 <phoneme>æmɛrɪk</phoneme>
 </lexeme>
@@ -57,8 +61,16 @@
 <phoneme>sɪd</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Erenville</grapheme>
+<phoneme>ɛrɪnvɪl</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Estinien</grapheme>
 <phoneme>ɛstɪŋi:ɪn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Fourchenault</grapheme>
+<phoneme>fɔrʃɛˈnoʊ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>G'raha</grapheme>
@@ -170,6 +182,10 @@
 <phoneme>vɑːnuz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Vrtra</grapheme>
+<phoneme>vitrʌ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>XIIth</grapheme>
 <alias>12th</alias>
 </lexeme>
@@ -183,7 +199,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Y'shtola</grapheme>
-<phoneme>jiʃtəʊlə</phoneme>
+<phoneme>ji ʃtəʊlə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Zodiark</grapheme>
@@ -295,7 +311,6 @@
 <grapheme>Rak'tika</grapheme>
 <phoneme>rækˈtikˈæ</phoneme>
 </lexeme>
-
 <lexeme>
 <grapheme>Sharlayan</grapheme>
 <phoneme>ˈʃɑrliiən</phoneme>
