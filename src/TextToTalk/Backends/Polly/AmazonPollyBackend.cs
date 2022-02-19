@@ -154,7 +154,7 @@ namespace TextToTalk.Backends.Polly
                 this.config.PollyEngine = Engines[engineIndex];
                 this.config.Save();
 
-                this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
+                this.voices = this.polly?.GetVoicesForEngine(this.config.PollyEngine) ?? new List<Voice>();
             }
 
             var validSampleRates = new[] { "8000", "16000", "22050", "24000" };
