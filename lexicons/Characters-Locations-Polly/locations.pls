@@ -20,8 +20,16 @@
 <phoneme>ˈɑːmɐrɛng</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Archeion</grapheme>
+<phoneme>ɑr.kiː ən</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Azys Lla</grapheme>
 <phoneme>ˈɑzɪz lɔ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Baldesion</grapheme>
+<phoneme>bɔldˈɛˈs ˈiən</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eorzea</grapheme>
@@ -50,6 +58,10 @@
 <lexeme>
 <grapheme>Gridania</grapheme>
 <phoneme>grɪdɔniə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Gyr</grapheme>
+<phoneme>gɪr</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Idyllshire</grapheme>
@@ -95,7 +107,6 @@
 <grapheme>Rak'tika</grapheme>
 <phoneme>rækˈtikˈæ</phoneme>
 </lexeme>
-
 <lexeme>
 <grapheme>Sharlayan</grapheme>
 <phoneme>ˈʃɑrliiən</phoneme>

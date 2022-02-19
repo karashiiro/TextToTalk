@@ -12,6 +12,14 @@
 <alias>ɛld</alias>
 </lexeme>
 <lexeme>
+<grapheme>Hm</grapheme>
+<grapheme>Hmm</grapheme>
+<grapheme> hmm</grapheme>
+<grapheme> hm?</grapheme>
+<grapheme> hm.</grapheme>
+<phoneme>hɚːmːː</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>NIN</grapheme>
 <alias>ninja</alias>
 </lexeme>
@@ -23,5 +31,10 @@
 <lexeme>
 <grapheme>Regen</grapheme>
 <phoneme>riˈʝen</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>'tis</grapheme>
+<grapheme>'Tis</grapheme>
+<phoneme>ˈtɪz</phoneme>
 </lexeme>
 </lexicon>

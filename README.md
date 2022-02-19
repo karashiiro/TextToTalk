@@ -1,3 +1,5 @@
+[![Download count](https://img.shields.io/endpoint?url=https://vz32sgcoal.execute-api.us-east-1.amazonaws.com/TextToTalk)](https://github.com/karashiiro/TextToTalk)
+
 # TextToTalk
 Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, Amazon Polly, and external interfacing over WebSocket.
 
