@@ -144,7 +144,6 @@
 <grapheme>Ryne</grapheme>
 <phoneme>ri:n</phoneme>
 </lexeme>
-
 <lexeme>
 <grapheme>Sahagin</grapheme>
 <phoneme>səˈhɑgɪn</phoneme>
