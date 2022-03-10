@@ -6,6 +6,7 @@
         http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
       alphabet="ipa" 
       xml:lang="en">
+<lexeme>
 <grapheme>Aetheryte</grapheme>
 <grapheme>aetheryte</grapheme>
 <phoneme>eɪθˈə.raɪt</phoneme>
