@@ -327,7 +327,7 @@ namespace TextToTalk
         {
             return (ObjectKind)speaker.SubKind == ObjectKind.Player &&
                    this.config.UsePlayerRateLimiter &&
-                   !this.rateLimiter.Check(speaker.Name.TextValue);
+                   this.rateLimiter.TryRateLimit(speaker.Name.TextValue);
         }
 
         private unsafe Gender GetCharacterGender(GameObject gObj)

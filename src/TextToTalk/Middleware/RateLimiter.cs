@@ -14,10 +14,16 @@ namespace TextToTalk.Middleware
         public RateLimiter(Func<long> getLimitMs)
         {
             this.getLimitMs = getLimitMs;
-            Cleanup(this.tokenSource.Token).Start();
+            _ = Cleanup(this.tokenSource.Token);
         }
 
-        public bool Check(string speaker)
+        /// <summary>
+        /// Checks if we should rate-limit the current speaker. Returns true if we should
+        /// rate-limit this speaker, or false if we shouldn't.
+        /// </summary>
+        /// <param name="speaker"></param>
+        /// <returns></returns>
+        public bool TryRateLimit(string speaker)
         {
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var limit = this.getLimitMs.Invoke();
@@ -29,13 +35,13 @@ namespace TextToTalk.Middleware
                     // No timestamp; create it and leave
                     t = now;
                     this.times.Add(speaker, t);
-                    return true;
+                    return false;
                 }
 
                 // Update timestamp and check if we should skip this or not
                 var shouldLimit = now - t <= limit;
                 this.times[speaker] = now;
-                return !shouldLimit;
+                return shouldLimit;
             }
         }
 
