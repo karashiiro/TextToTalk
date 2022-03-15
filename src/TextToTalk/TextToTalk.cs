@@ -100,8 +100,8 @@ namespace TextToTalk
                 {
                     return long.MaxValue;
                 }
-
-                return (long)(1f / this.config.MessagesPerSecond);
+                
+                return (long)(1000f / this.config.MessagesPerSecond);
             });
 
             this.serviceCollection = new PluginServiceCollection();
@@ -325,8 +325,8 @@ namespace TextToTalk
 
         private bool ShouldRateLimit(GameObject speaker)
         {
-            return (ObjectKind)speaker.SubKind == ObjectKind.Player &&
-                   this.config.UsePlayerRateLimiter &&
+            return this.config.UsePlayerRateLimiter &&
+                   speaker.ObjectKind is ObjectKind.Player &&
                    this.rateLimiter.TryRateLimit(speaker.Name.TextValue);
         }
 
