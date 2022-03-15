@@ -157,10 +157,14 @@ namespace TextToTalk.UI.Dalamud
                 var messagesPerSecond = Configuration.MessagesPerSecond;
                 if (useRateLimiter)
                 {
-                    if (ImGui.DragFloat("", ref messagesPerSecond, 1, 1, 30, "%f messages/s"))
+                    ImGui.Indent();
+
+                    if (ImGui.DragFloat("", ref messagesPerSecond, 1, 1, 30, "%.3f message(s)/s"))
                     {
                         Configuration.MessagesPerSecond = messagesPerSecond;
                     }
+
+                    ImGui.Unindent();
                 }
             }
 
