@@ -151,14 +151,9 @@ namespace TextToTalk.Backends.System
 
             var voiceName = currentVoicePreset.VoiceName;
             var voices = DummySynthesizer.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
-            var voiceIndex = voices.FindIndex(iv => iv?.VoiceInfo?.Name == voiceName);
-            if (ImGui.Combo("Voice##TTTVoice8",
-                ref voiceIndex,
-                voices
-                    .Where(iv => iv?.Enabled ?? false)
-                    .Select(FormatVoiceInfo)
-                    .ToArray(),
-                voices.Count))
+            var voicesUi = voices.Select(FormatVoiceInfo).ToArray();
+            var voiceIndex = voices.FindIndex(iv => iv.VoiceInfo?.Name == voiceName);
+            if (ImGui.Combo("Voice##TTTVoice8", ref voiceIndex, voicesUi, voices.Count))
             {
                 currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
                 this.config.Save();
