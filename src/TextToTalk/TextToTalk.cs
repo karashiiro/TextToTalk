@@ -301,7 +301,7 @@ namespace TextToTalk
 
         private void Say(GameObject speaker, string textValue, TextSource source)
         {
-            if ((ObjectKind)speaker.SubKind == ObjectKind.Player && this.config.UsePlayerRateLimiter && !this.rateLimiter.Check(speaker.Name.TextValue))
+            if (ShouldRateLimit(speaker))
             {
                 return;
             }
@@ -311,8 +311,8 @@ namespace TextToTalk
                 TalkUtils.StripAngleBracketedText,
                 TalkUtils.ReplaceSsmlTokens,
                 TalkUtils.NormalizePunctuation,
-                TalkUtils.RemoveStutters)
-                .Trim();
+                TalkUtils.RemoveStutters,
+                x => x.Trim());
 
             if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))
             {
@@ -321,6 +321,13 @@ namespace TextToTalk
 
             var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
             this.backendManager.Say(source, gender, cleanText);
+        }
+
+        private bool ShouldRateLimit(GameObject speaker)
+        {
+            return (ObjectKind)speaker.SubKind == ObjectKind.Player &&
+                   this.config.UsePlayerRateLimiter &&
+                   !this.rateLimiter.Check(speaker.Name.TextValue);
         }
 
         private unsafe Gender GetCharacterGender(GameObject gObj)
