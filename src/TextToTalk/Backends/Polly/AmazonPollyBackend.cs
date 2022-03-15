@@ -13,6 +13,7 @@ using System.Net;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TextToTalk.UI.Native;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly

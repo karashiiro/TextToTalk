@@ -1,8 +1,8 @@
-﻿using Dalamud.Logging;
-using System;
+﻿using System;
 using System.Windows.Forms;
+using Dalamud.Logging;
 
-namespace TextToTalk
+namespace TextToTalk.UI.Native
 {
     public static class SaveFile
     {

@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TextToTalk.GameEnums;
 using TextToTalk.Lexicons;
+using TextToTalk.UI.Native;
 
 namespace TextToTalk.Backends.System
 {

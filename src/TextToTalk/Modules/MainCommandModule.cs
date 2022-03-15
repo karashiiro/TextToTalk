@@ -4,6 +4,8 @@ using Dalamud.Game.Gui;
 using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.UI;
+using TextToTalk.UI.Dalamud;
+
 // ReSharper disable UnusedMember.Global
 
 namespace TextToTalk.Modules

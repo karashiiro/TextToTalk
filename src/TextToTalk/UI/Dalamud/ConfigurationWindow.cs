@@ -1,16 +1,16 @@
-﻿using Dalamud.CrystalTower.UI;
-using Dalamud.Game.Text;
-using Dalamud.Logging;
-using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using Dalamud.CrystalTower.UI;
+using Dalamud.Game.Text;
+using Dalamud.Logging;
+using ImGuiNET;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 
-namespace TextToTalk.UI
+namespace TextToTalk.UI.Dalamud
 {
     public class ConfigurationWindow : ImmediateModeWindow
     {

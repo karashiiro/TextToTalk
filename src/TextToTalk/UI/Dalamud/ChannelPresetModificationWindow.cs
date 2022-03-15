@@ -1,8 +1,8 @@
-﻿using Dalamud.CrystalTower.UI;
+﻿using System.Linq;
+using Dalamud.CrystalTower.UI;
 using ImGuiNET;
-using System.Linq;
 
-namespace TextToTalk.UI
+namespace TextToTalk.UI.Dalamud
 {
     public class ChannelPresetModificationWindow : ImmediateModeWindow
     {

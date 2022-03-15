@@ -6,6 +6,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -16,13 +17,11 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Dalamud.Game.ClientState.Objects.Enums;
-using Microsoft.VisualBasic.Logging;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
-using TextToTalk.UI;
+using TextToTalk.UI.Dalamud;
 using TextToTalk.UngenderedOverrides;
 using DalamudCommandManager = Dalamud.Game.Command.CommandManager;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
@@ -320,7 +319,7 @@ namespace TextToTalk
 
             // Get actor gender as defined by its struct.
             var actorGender = (Gender)charaStruct->CustomizeData[1];
-            
+
             // Player gender overrides will be handled by a different system.
             if (gObj.ObjectKind is ObjectKind.Player)
             {

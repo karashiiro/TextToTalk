@@ -1,9 +1,8 @@
-﻿using Dalamud.CrystalTower.UI;
+﻿using System.Numerics;
+using Dalamud.CrystalTower.UI;
 using ImGuiNET;
-using System.Diagnostics;
-using System.Numerics;
 
-namespace TextToTalk.UI
+namespace TextToTalk.UI.Dalamud
 {
     public class VoiceUnlockerWindow : ImmediateModeWindow
     {
