@@ -301,7 +301,7 @@ namespace TextToTalk
 
         private void Say(GameObject speaker, string textValue, TextSource source)
         {
-            if (this.config.UsePlayerRateLimiter && !this.rateLimiter.Check(speaker.Name.TextValue))
+            if ((ObjectKind)speaker.SubKind == ObjectKind.Player && this.config.UsePlayerRateLimiter && !this.rateLimiter.Check(speaker.Name.TextValue))
             {
                 return;
             }
@@ -318,7 +318,7 @@ namespace TextToTalk
             {
                 return;
             }
-            
+
             var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
             this.backendManager.Say(source, gender, cleanText);
         }
