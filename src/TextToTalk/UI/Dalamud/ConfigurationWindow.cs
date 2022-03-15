@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Dalamud.CrystalTower.UI;
+using Dalamud.Game.Text;
+using Dalamud.Logging;
+using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using Dalamud.CrystalTower.UI;
-using Dalamud.Game.Text;
-using Dalamud.Logging;
-using ImGuiNET;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 
@@ -145,6 +145,22 @@ namespace TextToTalk.UI.Dalamud
                     }
 
                     ImGui.Unindent();
+                }
+
+                var useRateLimiter = Configuration.UsePlayerRateLimiter;
+                if (ImGui.Checkbox("Limit player TTS frequency", ref useRateLimiter))
+                {
+                    Configuration.UsePlayerRateLimiter = useRateLimiter;
+                    Configuration.Save();
+                }
+
+                var messagesPerSecond = Configuration.MessagesPerSecond;
+                if (useRateLimiter)
+                {
+                    if (ImGui.DragFloat("", ref messagesPerSecond, 1, 1, 30, "%f messages/s"))
+                    {
+                        Configuration.MessagesPerSecond = messagesPerSecond;
+                    }
                 }
             }
 

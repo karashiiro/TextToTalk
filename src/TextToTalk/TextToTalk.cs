@@ -19,6 +19,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
+using TextToTalk.Middleware;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI.Dalamud;
@@ -76,6 +77,7 @@ namespace TextToTalk
         private readonly CommandManager commandManager;
         private readonly VoiceBackendManager backendManager;
         private readonly UngenderedOverrideManager ungenderedOverrides;
+        private readonly RateLimiter rateLimiter;
 
         private IntPtr talkAddonPtr;
         private readonly SharedState sharedState;
@@ -92,10 +94,20 @@ namespace TextToTalk
             this.sharedState = new SharedState();
             this.backendManager = new VoiceBackendManager(this.config, this.sharedState);
             this.ungenderedOverrides = new UngenderedOverrideManager();
+            this.rateLimiter = new RateLimiter(() =>
+            {
+                if (this.config.MessagesPerSecond == 0)
+                {
+                    return long.MaxValue;
+                }
+
+                return (long)(1f / this.config.MessagesPerSecond);
+            });
 
             this.serviceCollection = new PluginServiceCollection();
             this.serviceCollection.AddService(this.config);
             this.serviceCollection.AddService(this.backendManager);
+            this.serviceCollection.AddService(this.rateLimiter);
             this.serviceCollection.AddService(this.sharedState);
             this.serviceCollection.AddService(Chat, shouldDispose: false);
             this.serviceCollection.AddService(PluginInterface, shouldDispose: false);
@@ -289,6 +301,11 @@ namespace TextToTalk
 
         private void Say(GameObject speaker, string textValue, TextSource source)
         {
+            if (this.config.UsePlayerRateLimiter && !this.rateLimiter.Check(speaker.Name.TextValue))
+            {
+                return;
+            }
+
             var cleanText = Pipe(
                 textValue,
                 TalkUtils.StripAngleBracketedText,
@@ -296,8 +313,12 @@ namespace TextToTalk
                 TalkUtils.NormalizePunctuation,
                 TalkUtils.RemoveStutters)
                 .Trim();
-            if (!TalkUtils.IsSpeakable(cleanText))
+
+            if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))
+            {
                 return;
+            }
+            
             var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
             this.backendManager.Say(source, gender, cleanText);
         }

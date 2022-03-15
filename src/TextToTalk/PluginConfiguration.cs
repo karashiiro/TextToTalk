@@ -55,7 +55,6 @@ namespace TextToTalk
         public VirtualKey.Enum MajorKey { get; set; }
 
         public bool MigratedTo1_5 { get; set; }
-
         public bool MigratedTo1_6 { get; set; }
 
         public IList<Trigger> Bad { get; set; }
@@ -63,7 +62,6 @@ namespace TextToTalk
 
         public int CurrentPresetId { get; set; }
         public IList<EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
-
         public int CurrentVoicePresetId { get; set; }
         public IList<VoicePreset> VoicePresets { get; set; }
 
@@ -72,44 +70,32 @@ namespace TextToTalk
         public int WebsocketPort { get; set; }
 
         public bool NameNpcWithSay { get; set; } = true;
-
         public bool EnableNameWithSay { get; set; } = true;
-
         public bool DisallowMultipleSay { get; set; }
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;
-
         public bool CancelSpeechOnTextAdvance { get; set; }
 
         public bool UseGenderedVoicePresets { get; set; }
-
         public int UngenderedVoicePresetId { get; set; }
-
         public int MaleVoicePresetId { get; set; }
-
         public int FemaleVoicePresetId { get; set; }
 
         public IList<string> Lexicons { get; set; }
 
         public string PollyVoice { get; set; }
-
         public string PollyVoiceUngendered { get; set; }
-
         public string PollyVoiceMale { get; set; }
-
         public string PollyVoiceFemale { get; set; }
-
         public string PollyEngine { get; set; } = Engine.Neural;
-
         public string PollyRegion { get; set; }
-
         public int PollySampleRate { get; set; } = 22050;
-
         public float PollyVolume { get; set; } = 1.0f;
-
         public int PollyPlaybackRate { get; set; } = 100;
-
         public List<string> PollyLexicons { get; set; }
+
+        public bool UsePlayerRateLimiter { get; set; }
+        public float MessagesPerSecond { get; set; } = 5;
 
         [JsonIgnore]
         public bool InitializedEver
