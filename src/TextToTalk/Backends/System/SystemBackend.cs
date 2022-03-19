@@ -1,53 +1,33 @@
-﻿using Dalamud.Interface;
-using Dalamud.Logging;
-using ImGuiNET;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using ImGuiNET;
 using System.Linq;
 using System.Numerics;
 using System.Speech.Synthesis;
 using System.Text;
-using System.Threading.Tasks;
 using TextToTalk.GameEnums;
 using TextToTalk.Lexicons;
-using TextToTalk.UI.Native;
+using TextToTalk.UI.Dalamud;
 
 namespace TextToTalk.Backends.System
 {
     public class SystemBackend : VoiceBackend
     {
-        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
         private static readonly Vector4 Red = new(1, 0, 0, 1);
 
         private static readonly SpeechSynthesizer DummySynthesizer = new();
 
         private readonly PluginConfiguration config;
         private readonly SystemSoundQueue soundQueue;
-        private readonly LexiconManager lexiconManager;
+
+        private readonly LexiconComponent lexiconComponent;
 
         public SystemBackend(PluginConfiguration config)
         {
+            var lexiconManager = new LexiconManager();
+            LexiconUtils.LoadFromConfigSystem(lexiconManager, config);
+
             this.config = config;
-            this.lexiconManager = new LexiconManager();
-            this.soundQueue = new SystemSoundQueue(this.lexiconManager);
-
-            for (var i = 0; i < this.config.Lexicons.Count; i++)
-            {
-                var lexicon = this.config.Lexicons[i];
-
-                try
-                {
-                    this.lexiconManager.AddLexicon(lexicon);
-                }
-                catch (Exception e)
-                {
-                    PluginLog.LogError(e, "Failed to add lexicon.");
-                    this.config.Lexicons.RemoveAt(i);
-                    this.config.Save();
-                    i--;
-                }
-            }
+            this.soundQueue = new SystemSoundQueue(lexiconManager);
+            this.lexiconComponent = new LexiconComponent(lexiconManager, config);
         }
 
         public override void Say(TextSource source, Gender gender, string text)
@@ -164,58 +144,7 @@ namespace TextToTalk.Backends.System
                 helpers.OpenVoiceUnlockerWindow?.Invoke();
             }
 
-            ImGui.Text("Lexicons");
-            
-            ImGui.TextColored(HintColor, "Looking for more lexicons? Have a look at our community lexicons list!");
-            if (ImGui.Button("Wiki"))
-            {
-                WebBrowser.Open("https://github.com/karashiiro/TextToTalk/wiki/Community-lexicons");
-            }
-
-            ImGui.Spacing();
-
-            for (var i = 0; i < this.config.Lexicons.Count; i++)
-            {
-                // Remove if no longer existent
-                if (!File.Exists(this.config.Lexicons[i]))
-                {
-                    this.config.Lexicons[i] = "";
-                }
-
-                // Editing options
-                var lexiconPath = this.config.Lexicons[i];
-                var lexiconPathBuf = Encoding.UTF8.GetBytes(lexiconPath);
-                ImGui.InputText($"##TTTSystemLexiconText{i}", lexiconPathBuf, (uint)lexiconPathBuf.Length, ImGuiInputTextFlags.ReadOnly);
-
-                if (!string.IsNullOrEmpty(this.config.Lexicons[i]))
-                {
-                    ImGui.SameLine();
-                    var deferred = LexiconRemoveButton(i, lexiconPath);
-
-                    if (this.lexiconRemoveExceptions[i] != null)
-                    {
-                        ImGui.TextColored(Red, this.lexiconRemoveExceptions[i].Message);
-                    }
-
-                    deferred?.Invoke();
-                }
-            }
-
-            LexiconAddButton();
-
-            if (this.lexiconAddSucceeded)
-            {
-                ImGui.SameLine();
-
-                ImGui.PushFont(UiBuilder.IconFont);
-                ImGui.Text(FontAwesomeIcon.CheckCircle.ToIconString());
-                ImGui.PopFont();
-            }
-
-            if (this.lexiconAddException != null)
-            {
-                ImGui.TextColored(Red, this.lexiconAddException.Message);
-            }
+            this.lexiconComponent.Draw();
 
             ImGui.Spacing();
 
@@ -282,81 +211,6 @@ namespace TextToTalk.Backends.System
         public override TextSource GetCurrentlySpokenTextSource()
         {
             return this.soundQueue.GetCurrentlySpokenTextSource();
-        }
-
-        private readonly IList<Exception> lexiconRemoveExceptions = new List<Exception>();
-
-        /// <summary>
-        /// Draws the remove lexicon button. Returns an action that should be called after all other operations
-        /// on the provided index are done.
-        /// </summary>
-        private Action LexiconRemoveButton(int i, string lexiconPath)
-        {
-            if (this.lexiconRemoveExceptions.Count < this.config.Lexicons.Count)
-            {
-                this.lexiconRemoveExceptions.Add(null);
-            }
-
-            Action deferred = null;
-
-            ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##TTTSystemLexiconRemove{i}"))
-            {
-                try
-                {
-                    this.lexiconRemoveExceptions[i] = null;
-                    this.lexiconManager.RemoveLexicon(lexiconPath);
-
-                    // This is ugly but it works
-                    deferred = () =>
-                    {
-                        this.config.Lexicons.RemoveAt(i);
-                        this.lexiconRemoveExceptions.RemoveAt(i);
-
-                        this.config.Save();
-                    };
-                }
-                catch (Exception e)
-                {
-                    PluginLog.LogError(e, "Failed to remove lexicon.");
-                    this.lexiconRemoveExceptions[i] = e;
-                }
-
-                this.config.Lexicons[i] = "";
-            }
-            ImGui.PopFont();
-
-            return deferred;
-        }
-
-        private Exception lexiconAddException;
-        private bool lexiconAddSucceeded;
-        private void LexiconAddButton()
-        {
-            if (ImGui.Button("Open Lexicon##TTTSystemLexiconAdd"))
-            {
-                this.lexiconAddException = null;
-                this.lexiconAddSucceeded = false;
-
-                _ = Task.Run(() =>
-                {
-                    var filePath = OpenFile.FileSelect();
-                    if (string.IsNullOrEmpty(filePath)) return;
-
-                    try
-                    {
-                        this.lexiconManager.AddLexicon(filePath);
-                        this.config.Lexicons.Add(filePath);
-                        this.config.Save();
-                        this.lexiconAddSucceeded = true;
-                    }
-                    catch (Exception e)
-                    {
-                        PluginLog.LogError(e, "Failed to load lexicon.");
-                        this.lexiconAddException = e;
-                    }
-                });
-            }
         }
 
         protected override void Dispose(bool disposing)

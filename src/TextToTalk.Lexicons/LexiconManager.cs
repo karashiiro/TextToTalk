@@ -84,7 +84,7 @@ namespace TextToTalk.Lexicons
             }
         }
 
-        public string MakeSsml(string text, string langCode)
+        public string MakeSsml(string text, string langCode = null)
         {
             foreach (var lexicon in this.lexicons)
             {
@@ -95,8 +95,7 @@ namespace TextToTalk.Lexicons
                         text = text.Replace(lexeme.Grapheme, lexeme.Alias);
                     }
 
-                    // This is awful and should be done in the earliest preprocessing steps but escaped punctuation doesn't work
-                    // with System.Speech, which would be correct way to handle this.
+                    // Escaped punctuation doesn't work with System.Speech.
                     var graphemeReadable = lexeme.Grapheme
                         .Replace("'", "")
                         .Replace("\"", "");
@@ -109,7 +108,13 @@ namespace TextToTalk.Lexicons
                 }
             }
 
-            return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
+            // ReSharper disable once ConvertIfStatementToReturnStatement
+            if (langCode != null)
+            {
+                return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
+            }
+
+            return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\">{text}</speak>";
         }
 
         internal static string ReplaceGrapheme(string text, string oldValue, string newValue)

@@ -39,6 +39,9 @@ namespace TextToTalk
         [Obsolete("Use Backend.")]
         public bool UseWebsocket { get; set; }
 
+        [Obsolete("Use PollyLexiconFiles.")]
+        public List<string> PollyLexicons { get; set; }
+
         /// <summary>
         /// <c>true</c> if it is not the first time, <c>false</c> if the first time handler has not run before. This was named horribly.
         /// </summary>
@@ -92,7 +95,7 @@ namespace TextToTalk
         public int PollySampleRate { get; set; } = 22050;
         public float PollyVolume { get; set; } = 1.0f;
         public int PollyPlaybackRate { get; set; } = 100;
-        public List<string> PollyLexicons { get; set; }
+        public IList<string> PollyLexiconFiles { get; set; }
 
         public bool UsePlayerRateLimiter { get; set; }
         public float MessagesPerSecond { get; set; } = 5;
@@ -126,15 +129,7 @@ namespace TextToTalk
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
             VoicePresets ??= new List<VoicePreset>();
 
-            PollyLexicons ??= new List<string>();
-            if (PollyLexicons.Count < 5)
-            {
-                for (var i = 0; i <= 5 - PollyLexicons.Count; i++)
-                {
-                    PollyLexicons.Add("");
-                }
-            }
-
+            PollyLexiconFiles ??= new List<string>();
             Lexicons ??= new List<string>();
 
             if (!InitializedEver)

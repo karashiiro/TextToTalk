@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.Polly
 {
@@ -15,57 +16,14 @@ namespace TextToTalk.Backends.Polly
     {
         private readonly AmazonPollyClient client;
         private readonly PollySoundQueue soundQueue;
+        private readonly LexiconManager lexiconManager;
 
-        public PollyClient(string accessKey, string secretKey, RegionEndpoint region)
+        public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
             this.soundQueue = new PollySoundQueue();
-        }
-
-        public IList<LexiconDescription> GetLexicons()
-        {
-            var lexiconsReq = new ListLexiconsRequest();
-
-            var lexicons = new List<LexiconDescription>();
-            do
-            {
-                var lexiconsRes = this.client.ListLexiconsAsync(lexiconsReq).GetAwaiter().GetResult();
-                lexicons.AddRange(lexiconsRes.Lexicons);
-                lexiconsReq.NextToken = lexiconsRes.NextToken;
-            } while (!string.IsNullOrEmpty(lexiconsReq.NextToken));
-
-            return lexicons;
-        }
-
-        public Lexicon GetLexicon(string lexiconName)
-        {
-            var lexicon = this.client.GetLexiconAsync(new GetLexiconRequest
-            {
-                Name = lexiconName,
-            }).GetAwaiter().GetResult();
-
-            return lexicon.Lexicon;
-        }
-
-        public void UploadLexicon(string lexiconFilePath)
-        {
-            var content = File.ReadAllText(lexiconFilePath);
-            var name = Path.GetFileNameWithoutExtension(lexiconFilePath);
-
-            this.client.PutLexiconAsync(new PutLexiconRequest
-            {
-                Content = content,
-                Name = name,
-            }).GetAwaiter().GetResult();
-        }
-
-        public void DeleteLexicon(string lexiconName)
-        {
-            this.client.DeleteLexiconAsync(new DeleteLexiconRequest
-            {
-                Name = lexiconName,
-            });
+            this.lexiconManager = lexiconManager;
         }
 
         public IList<Voice> GetVoicesForEngine(Engine engine)
@@ -93,8 +51,11 @@ namespace TextToTalk.Backends.Polly
             return this.soundQueue.GetCurrentlySpokenTextSource();
         }
 
-        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, IList<string> lexicons, TextSource source, string text)
+        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, TextSource source, string text)
         {
+            var ssml = this.lexiconManager.MakeSsml(text);
+            PluginLog.Log(ssml);
+
             var req = new SynthesizeSpeechRequest
             {
                 Text = text,
@@ -102,7 +63,6 @@ namespace TextToTalk.Backends.Polly
                 Engine = engine,
                 OutputFormat = OutputFormat.Mp3,
                 SampleRate = sampleRate.ToString(),
-                LexiconNames = lexicons.Where(l => !string.IsNullOrEmpty(l)).ToList(),
                 TextType = TextType.Ssml,
             };
 
@@ -110,20 +70,6 @@ namespace TextToTalk.Backends.Polly
             try
             {
                 res = await this.client.SynthesizeSpeechAsync(req);
-            }
-            catch (LexiconNotFoundException e)
-            {
-                if (lexicons.Any())
-                {
-                    PluginLog.LogError(e, "A lexicon could not be found, retrying without any lexicons... Additional data: {@Data}", e.Data);
-                    await Say(engine, voice, sampleRate, volume, Array.Empty<string>(), source, text);
-                }
-                else
-                {
-                    PluginLog.LogError(e, "A lexicon could not be found... but we aren't using any lexicons? Additional data: {@Data}", e.Data);
-                }
-
-                return;
             }
             catch (Exception e)
             {

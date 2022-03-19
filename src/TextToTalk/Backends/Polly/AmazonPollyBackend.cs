@@ -2,18 +2,16 @@
 using Amazon;
 using Amazon.Polly;
 using Amazon.Polly.Model;
-using Dalamud.Interface;
 using Dalamud.Logging;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using TextToTalk.UI.Native;
+using TextToTalk.Lexicons;
+using TextToTalk.UI.Dalamud;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly
@@ -32,31 +30,33 @@ namespace TextToTalk.Backends.Polly
 
         private PollyClient polly;
         private IList<Voice> voices;
-        private IList<LexiconDescription> cloudLexicons;
+
+        private readonly LexiconManager lexiconManager;
+        private readonly LexiconComponent lexiconComponent;
 
         private string accessKey = string.Empty;
         private string secretKey = string.Empty;
 
         public AmazonPollyBackend(PluginConfiguration config)
         {
-            this.config = config;
-
             TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
-            var credentials = CredentialManager.GetCredentials(CredentialsTarget);
+            this.lexiconManager = new LexiconManager();
+            LexiconUtils.LoadFromConfigPolly(this.lexiconManager, config);
 
+            this.config = config;
             this.voices = new List<Voice>();
-            this.cloudLexicons = new List<LexiconDescription>();
+            this.lexiconComponent = new LexiconComponent(this.lexiconManager, config);
 
+            var credentials = CredentialManager.GetCredentials(CredentialsTarget);
             if (credentials != null)
             {
                 this.accessKey = credentials.UserName;
                 this.secretKey = credentials.Password;
                 try
                 {
-                    this.polly = new PollyClient(credentials.UserName, credentials.Password, RegionEndpoint.EUWest1);
+                    this.polly = new PollyClient(credentials.UserName, credentials.Password, RegionEndpoint.EUWest1, this.lexiconManager);
                     this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
-                    this.cloudLexicons = this.polly.GetLexicons();
                 }
                 catch (Exception e)
                 {
@@ -87,7 +87,7 @@ namespace TextToTalk.Backends.Polly
 
             text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
 
-            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, this.config.PollyLexicons, source, text);
+            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, source, text);
         }
 
         public override void CancelAllSpeech()
@@ -129,12 +129,8 @@ namespace TextToTalk.Backends.Polly
                     this.polly?.Dispose();
                     try
                     {
-                        this.polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint);
+                        this.polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint, this.lexiconManager);
                         this.voices = this.polly.GetVoicesForEngine(this.config.PollyEngine);
-                        lock (this.cloudLexicons)
-                        {
-                            this.cloudLexicons = this.polly.GetLexicons();
-                        }
                     }
                     catch (Exception e)
                     {
@@ -182,97 +178,7 @@ namespace TextToTalk.Backends.Polly
                 this.config.Save();
             }
 
-            ImGui.Text("Lexicons");
-
-            ImGui.TextColored(HintColor, "Looking for more lexicons? Have a look at our community lexicons list!");
-            if (ImGui.Button("Wiki"))
-            {
-                WebBrowser.Open("https://github.com/karashiiro/TextToTalk/wiki/Community-lexicons");
-            }
-
-            ImGui.Spacing();
-
-            lock (this.cloudLexicons)
-            {
-                var setLexicons = this.config.PollyLexicons.ToArray();
-                var cloudLexiconNames = this.cloudLexicons.Select(l => l.Name).ToArray();
-                for (var i = 0; i < this.config.PollyLexicons.Count; i++)
-                {
-                    // Remove if no longer existent
-                    if (Array.IndexOf(cloudLexiconNames, this.config.PollyLexicons[i]) == -1)
-                    {
-                        this.config.PollyLexicons[i] = "";
-                    }
-
-                    // Editing options
-                    var lexiconIndex = Array.IndexOf(cloudLexiconNames, setLexicons[i]);
-                    if (ImGui.Combo($"##TTTPollyLexicon{i}", ref lexiconIndex, cloudLexiconNames, cloudLexiconNames.Length))
-                    {
-                        this.config.PollyLexicons[i] = cloudLexiconNames[lexiconIndex];
-                        this.config.Save();
-                    }
-
-                    ImGui.SameLine();
-                    ImGui.PushFont(UiBuilder.IconFont);
-                    if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##TTTPollyLexiconRemove{i}"))
-                    {
-                        this.config.PollyLexicons[i] = "";
-                    }
-                    ImGui.PopFont();
-
-                    if (!string.IsNullOrEmpty(this.config.PollyLexicons[i]))
-                    {
-                        ImGui.SameLine();
-                        LexiconDeleteButton(i);
-                        ImGui.SameLine();
-                        LexiconDownloadButton(i);
-                    }
-
-                    if (this.lexiconDeleteExceptions[i] != null)
-                    {
-                        ImGui.TextColored(Red, this.lexiconDeleteExceptions[i].Message);
-                    }
-
-                    if (this.lexiconDownloadExceptions[i] != null)
-                    {
-                        ImGui.TextColored(Red, this.lexiconDownloadExceptions[i].Message);
-                    }
-                }
-            }
-
-            LexiconUploadButton();
-
-            if (this.lexiconUploadSucceeded)
-            {
-                ImGui.SameLine();
-
-                ImGui.PushFont(UiBuilder.IconFont);
-                ImGui.Text(FontAwesomeIcon.CheckCircle.ToIconString());
-                ImGui.PopFont();
-            }
-
-            ImGui.SameLine();
-            ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button(FontAwesomeIcon.Retweet.ToIconString()))
-            {
-                lock (this.cloudLexicons)
-                {
-                    this.cloudLexicons = this.polly.GetLexicons();
-                }
-            }
-            ImGui.PopFont();
-
-            ImGui.SameLine();
-            ImGui.Text("Refresh lexicons");
-
-            if (this.lexiconUploadException != null)
-            {
-                ImGui.PushStyleColor(ImGuiCol.Text, Red);
-                ImGui.TextWrapped(this.lexiconUploadException.Message);
-                ImGui.PopStyleColor();
-            }
-            ImGui.TextColored(HintColor, "Lexicons may take several minutes to become available or be deleted.");
-
+            this.lexiconComponent.Draw();
             ImGui.Spacing();
 
             var voiceArray = this.voices.Select(v => v.Name).ToArray();
@@ -347,110 +253,6 @@ namespace TextToTalk.Backends.Polly
         public override TextSource GetCurrentlySpokenTextSource()
         {
             return this.polly.GetCurrentlySpokenTextSource();
-        }
-
-        private Exception lexiconUploadException; // Shown to the user on failure
-        private bool lexiconUploadSucceeded; // Controls whether the success icon is shown
-        private void LexiconUploadButton()
-        {
-            if (ImGui.Button("Upload lexicon##TTTPollyAddLexicon"))
-            {
-                this.lexiconUploadException = null;
-                this.lexiconUploadSucceeded = false;
-
-                _ = Task.Run(() =>
-                {
-                    var filePath = OpenFile.FileSelect();
-                    if (string.IsNullOrEmpty(filePath)) return;
-
-                    try
-                    {
-                        this.polly.UploadLexicon(filePath);
-                        this.lexiconUploadException = null;
-                        this.lexiconUploadSucceeded = true;
-                    }
-                    catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
-                    {
-                        PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                        this.lexiconUploadException = new AggregateException(
-                            "Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
-                            "This may take several minutes to take effect.", e);
-                        this.lexiconUploadSucceeded = false;
-                    }
-                    catch (LexiconSizeExceededException e)
-                    {
-                        PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                        this.lexiconUploadException = new AggregateException(
-                            "Maximum lexicon size has been exceeded. " +
-                            "Each lexicon can be up to 4,000 characters in size.", e);
-                        this.lexiconUploadSucceeded = false;
-                    }
-                    catch (Exception e)
-                    {
-                        PluginLog.LogError(e, "Exception thrown when uploading a lexicon.");
-                        this.lexiconUploadException = e;
-                        this.lexiconUploadSucceeded = false;
-                    }
-                });
-            }
-        }
-
-        private readonly IList<Exception> lexiconDeleteExceptions = new List<Exception> { null, null, null, null, null };
-        private void LexiconDeleteButton(int i)
-        {
-            ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTPollyLexiconDelete{i}"))
-            {
-                _ = Task.Run(() =>
-                {
-                    try
-                    {
-                        this.lexiconDeleteExceptions[i] = null;
-                        this.polly.DeleteLexicon(this.config.PollyLexicons[i]);
-                    }
-                    catch (AmazonPollyException e) when (e.StatusCode == HttpStatusCode.Forbidden)
-                    {
-                        this.lexiconDeleteExceptions[i] = new AggregateException("Access denied. Please ensure your IAM user has the policy \"AmazonPollyFullAccess\" attached. " +
-                            "This may take several minutes to take effect.", e);
-                        PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
-                    }
-                    catch (LexiconNotFoundException) { }
-                    catch (Exception e)
-                    {
-                        this.lexiconDeleteExceptions[i] = e;
-                        PluginLog.LogError(e, "Exception thrown while deleting lexicon.");
-                    }
-                });
-            }
-            ImGui.PopFont();
-        }
-
-        private readonly IList<Exception> lexiconDownloadExceptions = new List<Exception> { null, null, null, null, null };
-        private void LexiconDownloadButton(int i)
-        {
-            ImGui.PushFont(UiBuilder.IconFont);
-            if (ImGui.Button($"{FontAwesomeIcon.Download.ToIconString()}##TTTPollyLexiconDownload{i}"))
-            {
-                _ = Task.Run(() =>
-                {
-                    var filePath = SaveFile.FileSelect();
-                    if (string.IsNullOrEmpty(filePath)) return;
-
-                    try
-                    {
-                        this.lexiconDownloadExceptions[i] = null;
-                        var lexicon = this.polly.GetLexicon(this.config.PollyLexicons[i]);
-                        File.WriteAllText(filePath, lexicon.Content);
-                    }
-                    catch (LexiconNotFoundException) { }
-                    catch (Exception e)
-                    {
-                        this.lexiconDownloadExceptions[i] = e;
-                        PluginLog.LogError(e, "Exception thrown while downloading lexicon.");
-                    }
-                });
-            }
-            ImGui.PopFont();
         }
 
         private static void ImGuiVoiceNotSupported()
