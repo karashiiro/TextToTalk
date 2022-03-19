@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using TextToTalk.LexiconUpdater;
+using TextToTalk.Lexicons.Updater;
 
 namespace LexiconRepoCheck
 {

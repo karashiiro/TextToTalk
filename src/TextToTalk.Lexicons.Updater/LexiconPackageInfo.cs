@@ -1,6 +1,6 @@
 ﻿using YamlDotNet.Serialization;
 
-namespace TextToTalk.LexiconUpdater
+namespace TextToTalk.Lexicons.Updater
 {
     public class LexiconPackageInfo
     {

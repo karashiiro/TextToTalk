@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TextToTalk.LexiconUpdater
+namespace TextToTalk.Lexicons.Updater
 {
     internal class CachedLexicon
     {
