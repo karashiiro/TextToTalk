@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    <ProjectReference Include="..\TextToTalk.LexiconUpdater\TextToTalk.LexiconUpdater.csproj" />
   </ItemGroup>
 
 	<ItemGroup>
+		<!--This needs to be copied even though it's not directly used just so that it can be located by the assembly.-->
 		<Reference Include="Newtonsoft.Json">
 			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Newtonsoft.Json.dll</HintPath>
-			<Private>false</Private>
 		</Reference>
 	</ItemGroup>
 

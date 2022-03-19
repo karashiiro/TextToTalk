@@ -35,9 +35,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextToTalk.UngenderedOverri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextToTalk.UngenderedOverrides.Tests", "TextToTalk.UngenderedOverrides.Tests\TextToTalk.UngenderedOverrides.Tests.csproj", "{043035D1-2721-4BCC-9E05-CFBF85E3298D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToTalk.Tests", "TextToTalk.Tests\TextToTalk.Tests.csproj", "{237C6AFC-13E3-4945-9AF3-146D5116F42D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextToTalk.Tests", "TextToTalk.Tests\TextToTalk.Tests.csproj", "{237C6AFC-13E3-4945-9AF3-146D5116F42D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoiceCheck", "VoiceCheck\VoiceCheck.csproj", "{4AEC8074-5164-4790-8D86-33C86F07B19F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoiceCheck", "VoiceCheck\VoiceCheck.csproj", "{4AEC8074-5164-4790-8D86-33C86F07B19F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{869EA518-EE54-4AC4-9D4C-12B881372867}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LexiconRepoCheck", "LexiconRepoCheck\LexiconRepoCheck.csproj", "{3DD6DE1F-CA9B-47BE-B101-FC185C559CB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,9 +85,17 @@ Global
 		{4AEC8074-5164-4790-8D86-33C86F07B19F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AEC8074-5164-4790-8D86-33C86F07B19F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4AEC8074-5164-4790-8D86-33C86F07B19F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DD6DE1F-CA9B-47BE-B101-FC185C559CB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DD6DE1F-CA9B-47BE-B101-FC185C559CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DD6DE1F-CA9B-47BE-B101-FC185C559CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DD6DE1F-CA9B-47BE-B101-FC185C559CB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4AEC8074-5164-4790-8D86-33C86F07B19F} = {869EA518-EE54-4AC4-9D4C-12B881372867}
+		{3DD6DE1F-CA9B-47BE-B101-FC185C559CB5} = {869EA518-EE54-4AC4-9D4C-12B881372867}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB309474-7EB5-47DB-A23B-98FBA066A084}

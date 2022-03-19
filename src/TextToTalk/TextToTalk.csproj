@@ -38,23 +38,23 @@
 
 	<ItemGroup>
 		<Reference Include="Dalamud">
-			<HintPath Condition="Exists('..\..\..\Dalamud\bin\Debug')">..\..\..\Dalamud\bin\Debug\Dalamud.dll</HintPath>
+			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="ImGui.NET">
-			<HintPath Condition="Exists('..\..\..\Dalamud\bin\Debug')">..\..\..\Dalamud\bin\Debug\ImGui.NET.dll</HintPath>
+			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="ImGuiScene">
-			<HintPath Condition="Exists('..\..\..\Dalamud\bin\Debug')">..\..\..\Dalamud\bin\Debug\ImGuiScene.dll</HintPath>
+			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="Newtonsoft.Json">
-			<HintPath Condition="Exists('..\..\..\Dalamud\bin\Debug')">..\..\..\Dalamud\bin\Debug\Newtonsoft.Json.dll</HintPath>
+			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Newtonsoft.Json.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="FFXIVClientStructs">
-			<HintPath Condition="Exists('..\..\..\Dalamud\bin\Debug')">..\..\..\Dalamud\bin\Debug\FFXIVClientStructs.dll</HintPath>
+			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
 	</ItemGroup>

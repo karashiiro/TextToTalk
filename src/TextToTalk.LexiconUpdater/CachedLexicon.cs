@@ -2,11 +2,11 @@
 
 namespace TextToTalk.LexiconUpdater
 {
-    internal class CachedLexiconPackage
+    internal class CachedLexicon
     {
         public IDictionary<string, string> FileETags { get; }
 
-        public CachedLexiconPackage()
+        public CachedLexicon()
         {
             FileETags = new Dictionary<string, string>();
         }
