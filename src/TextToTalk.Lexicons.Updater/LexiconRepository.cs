@@ -18,22 +18,38 @@ namespace TextToTalk.Lexicons.Updater
             this.http = http;
         }
 
+        /// <summary>
+        /// Gets a lexicon package. This does not actually download any data; data is downloaded on-demand
+        /// using the <see cref="LexiconPackage"/> methods.
+        /// </summary>
+        /// <param name="packageName">The name of the lexicon package's folder in the repo.</param>
+        /// <param name="cachePath">The path to the download cache.</param>
+        public LexiconPackage GetPackage(string packageName, string cachePath)
+        {
+            return new LexiconPackage(this.http, packageName, cachePath);
+        }
+
+        /// <summary>
+        /// Fetches all available packages from the repository.
+        /// </summary>
         public async Task<IList<LexiconDirectoryItem>> FetchPackages()
         {
-            var items = await FetchAll();
+            var items = await FetchAllFiles();
             return items
                 .Where(i => i.Path.StartsWith("lexicons/"))
                 .Where(i => IsPackageMetadataFile(i.Path))
                 .ToList();
         }
 
-        private async Task<LexiconDirectoryItem[]> FetchAll()
+        private async Task<LexiconDirectoryItem[]> FetchAllFiles()
         {
             using var req = new HttpRequestMessage
             {
                 RequestUri = new Uri(IndexUrl),
                 Method = HttpMethod.Get,
             };
+
+            // Set the user agent. The GitHub API will reject our request if we don't change the user agent.
             req.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0");
 
             var res = await this.http.SendAsync(req);

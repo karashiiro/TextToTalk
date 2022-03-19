@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -18,13 +19,19 @@ namespace TextToTalk.Lexicons
             this.lexicons = new List<LexiconInfo>();
         }
 
+        public void AddLexicon(Stream data, string lexiconName)
+        {
+            var xml = XDocument.Load(data);
+            AddLexicon(xml, lexiconName);
+        }
+
         public void AddLexicon(string lexiconUrl)
         {
             var xml = XDocument.Load(lexiconUrl);
             AddLexicon(xml, lexiconUrl);
         }
 
-        public void AddLexicon(XDocument xml, string lexiconUrl)
+        public void AddLexicon(XDocument xml, string lexiconId)
         {
             if (xml.Root == null)
             {
@@ -32,7 +39,7 @@ namespace TextToTalk.Lexicons
             }
 
             // Remove existing lexicon if it's already registered
-            var existingLexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
+            var existingLexicon = this.lexicons.FirstOrDefault(li => li.Id == lexiconId);
             if (existingLexicon != null)
             {
                 this.lexicons.Remove(existingLexicon);
@@ -44,7 +51,7 @@ namespace TextToTalk.Lexicons
             // Create the lexicon
             var lexicon = new LexiconInfo
             {
-                Url = lexiconUrl,
+                Id = lexiconId,
                 Lexemes = xml.Root.Descendants($"{nsPrefix}lexeme")
                     .SelectMany(el => el.Elements($"{nsPrefix}grapheme")
                         .Select(grapheme => new MicroLexeme
@@ -68,9 +75,9 @@ namespace TextToTalk.Lexicons
             this.lexicons.Add(lexicon);
         }
 
-        public void RemoveLexicon(string lexiconUrl)
+        public void RemoveLexicon(string lexiconId)
         {
-            var lexicon = this.lexicons.FirstOrDefault(li => li.Url == lexiconUrl);
+            var lexicon = this.lexicons.FirstOrDefault(li => li.Id == lexiconId);
             if (lexicon != null)
             {
                 this.lexicons.Remove(lexicon);
@@ -179,7 +186,7 @@ namespace TextToTalk.Lexicons
 
         private class LexiconInfo
         {
-            public string Url { get; init; }
+            public string Id { get; init; }
 
             public List<MicroLexeme> Lexemes { get; init; }
         }

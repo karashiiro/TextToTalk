@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TextToTalk.Lexicons.Updater\TextToTalk.Lexicons.Updater.csproj" />
+    <ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
   </ItemGroup>
 
 	<ItemGroup>
