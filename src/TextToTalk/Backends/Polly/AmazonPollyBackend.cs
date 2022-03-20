@@ -46,7 +46,7 @@ namespace TextToTalk.Backends.Polly
 
             this.config = config;
             this.voices = new List<Voice>();
-            this.lexiconComponent = new LexiconComponent(this.lexiconManager, config);
+            this.lexiconComponent = new LexiconComponent(this.lexiconManager, config, () => config.PollyLexiconFiles);
 
             var credentials = CredentialManager.GetCredentials(CredentialsTarget);
             if (credentials != null)

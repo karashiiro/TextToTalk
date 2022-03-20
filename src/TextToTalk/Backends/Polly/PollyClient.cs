@@ -55,7 +55,6 @@ namespace TextToTalk.Backends.Polly
         {
             var ssml = this.lexiconManager.MakeSsml(text, playbackRate: playbackRate, includeSpeakAttributes: false);
             PluginLog.Log(ssml);
-            PluginLog.Log($"{lexiconManager.GraphemeCount}");
 
             var req = new SynthesizeSpeechRequest
             {

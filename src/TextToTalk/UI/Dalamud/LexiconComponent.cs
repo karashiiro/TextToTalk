@@ -24,10 +24,13 @@ public class LexiconComponent
     private readonly PluginConfiguration config;
     private readonly LexiconManager lexiconManager;
 
-    public LexiconComponent(LexiconManager lm, PluginConfiguration config)
+    private readonly Func<IList<string>> getLexiconList;
+
+    public LexiconComponent(LexiconManager lm, PluginConfiguration config, Func<IList<string>> getLexiconList)
     {
         this.lexiconManager = lm;
         this.config = config;
+        this.getLexiconList = getLexiconList;
     }
 
     public void Draw()
@@ -42,20 +45,21 @@ public class LexiconComponent
 
         ImGui.Spacing();
 
-        for (var i = 0; i < this.config.Lexicons.Count; i++)
+        var lexicons = this.getLexiconList.Invoke();
+        for (var i = 0; i < lexicons.Count; i++)
         {
             // Remove if no longer existent
-            if (!File.Exists(this.config.Lexicons[i]))
+            if (!File.Exists(lexicons[i]))
             {
-                this.config.Lexicons[i] = "";
+                lexicons[i] = "";
             }
 
             // Editing options
-            var lexiconPath = this.config.Lexicons[i];
+            var lexiconPath = lexicons[i];
             var lexiconPathBuf = Encoding.UTF8.GetBytes(lexiconPath);
             ImGui.InputText($"##TTTLexiconText{i}", lexiconPathBuf, (uint)lexiconPathBuf.Length, ImGuiInputTextFlags.ReadOnly);
 
-            if (!string.IsNullOrEmpty(this.config.Lexicons[i]))
+            if (!string.IsNullOrEmpty(lexicons[i]))
             {
                 ImGui.SameLine();
                 var deferred = LexiconRemoveButton(i, lexiconPath);
@@ -92,7 +96,9 @@ public class LexiconComponent
     /// </summary>
     private Action LexiconRemoveButton(int i, string lexiconPath)
     {
-        if (this.lexiconRemoveExceptions.Count < this.config.Lexicons.Count)
+        var lexicons = this.getLexiconList.Invoke();
+
+        if (this.lexiconRemoveExceptions.Count < lexicons.Count)
         {
             this.lexiconRemoveExceptions.Add(null);
         }
@@ -110,7 +116,7 @@ public class LexiconComponent
                 // This is ugly but it works
                 deferred = () =>
                 {
-                    this.config.Lexicons.RemoveAt(i);
+                    lexicons.RemoveAt(i);
                     this.lexiconRemoveExceptions.RemoveAt(i);
 
                     this.config.Save();
@@ -122,7 +128,7 @@ public class LexiconComponent
                 this.lexiconRemoveExceptions[i] = e;
             }
 
-            this.config.Lexicons[i] = "";
+            lexicons[i] = "";
         }
         ImGui.PopFont();
 
@@ -136,6 +142,8 @@ public class LexiconComponent
             this.lexiconAddException = null;
             this.lexiconAddSucceeded = false;
 
+            var lexicons = this.getLexiconList.Invoke();
+
             _ = Task.Run(() =>
             {
                 var filePath = OpenFile.FileSelect();
@@ -143,8 +151,9 @@ public class LexiconComponent
 
                 try
                 {
+                    PluginLog.Log($"Adding lexicon \"{filePath}\"");
                     this.lexiconManager.AddLexicon(filePath);
-                    this.config.Lexicons.Add(filePath);
+                    lexicons.Add(filePath);
                     this.config.Save();
                     this.lexiconAddSucceeded = true;
                 }

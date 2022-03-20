@@ -27,7 +27,7 @@ namespace TextToTalk.Backends.System
 
             this.config = config;
             this.soundQueue = new SystemSoundQueue(lexiconManager);
-            this.lexiconComponent = new LexiconComponent(lexiconManager, config);
+            this.lexiconComponent = new LexiconComponent(lexiconManager, config, () => config.Lexicons);
         }
 
         public override void Say(TextSource source, Gender gender, string text)

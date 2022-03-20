@@ -14,6 +14,7 @@ public static class LexiconUtils
 
             try
             {
+                PluginLog.Log($"Adding lexicon \"{lexicon}\"");
                 lexiconManager.AddLexicon(lexicon);
             }
             catch (Exception e)
@@ -34,6 +35,7 @@ public static class LexiconUtils
 
             try
             {
+                PluginLog.Log($"Adding lexicon \"{lexicon}\"");
                 lexiconManager.AddLexicon(lexicon);
             }
             catch (Exception e)
