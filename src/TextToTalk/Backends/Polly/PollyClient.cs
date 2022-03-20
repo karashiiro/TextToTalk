@@ -51,14 +51,15 @@ namespace TextToTalk.Backends.Polly
             return this.soundQueue.GetCurrentlySpokenTextSource();
         }
 
-        public async Task Say(Engine engine, VoiceId voice, int sampleRate, float volume, TextSource source, string text)
+        public async Task Say(Engine engine, VoiceId voice, int sampleRate, int playbackRate, float volume, TextSource source, string text)
         {
-            var ssml = this.lexiconManager.MakeSsml(text);
+            var ssml = this.lexiconManager.MakeSsml(text, playbackRate: playbackRate, includeSpeakAttributes: false);
             PluginLog.Log(ssml);
+            PluginLog.Log($"{lexiconManager.GraphemeCount}");
 
             var req = new SynthesizeSpeechRequest
             {
-                Text = text,
+                Text = ssml,
                 VoiceId = voice,
                 Engine = engine,
                 OutputFormat = OutputFormat.Mp3,

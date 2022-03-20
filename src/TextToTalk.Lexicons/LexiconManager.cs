@@ -14,6 +14,8 @@ namespace TextToTalk.Lexicons
 
         private readonly IList<LexiconInfo> lexicons;
 
+        public int GraphemeCount => this.lexicons.Count;
+
         public LexiconManager()
         {
             this.lexicons = new List<LexiconInfo>();
@@ -84,7 +86,7 @@ namespace TextToTalk.Lexicons
             }
         }
 
-        public string MakeSsml(string text, string langCode = null)
+        public string MakeSsml(string text, string langCode = null, int playbackRate = -1, bool includeSpeakAttributes = true)
         {
             foreach (var lexicon in this.lexicons)
             {
@@ -108,13 +110,26 @@ namespace TextToTalk.Lexicons
                 }
             }
 
-            // ReSharper disable once ConvertIfStatementToReturnStatement
-            if (langCode != null)
+            if (playbackRate >= 0)
             {
-                return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"{langCode}\">{text}</speak>";
+                text = $"<prosody rate=\"{playbackRate}%\">{text}</prosody>";
             }
 
-            return $"<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\">{text}</speak>";
+            // Generate speak tag
+            var speakTag = "<speak";
+            if (includeSpeakAttributes)
+            {
+                speakTag += " version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\"";
+
+                if (langCode != null)
+                {
+                    speakTag += $" xml:lang=\"{langCode}\"";
+                }
+            }
+
+            speakTag += ">";
+
+            return $"{speakTag}{text}</speak>";
         }
 
         internal static string ReplaceGrapheme(string text, string oldValue, string newValue)

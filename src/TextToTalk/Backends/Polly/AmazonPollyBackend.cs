@@ -84,10 +84,8 @@ namespace TextToTalk.Backends.Polly
             var voiceId = this.voices
                 .Select(v => v.Id)
                 .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
-
-            text = $"<speak><prosody rate=\"{this.config.PollyPlaybackRate}%\">{text}</prosody></speak>";
-
-            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyVolume, source, text);
+            
+            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyPlaybackRate, this.config.PollyVolume, source, text);
         }
 
         public override void CancelAllSpeech()
