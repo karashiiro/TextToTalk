@@ -16,6 +16,7 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
@@ -36,101 +37,40 @@ namespace TextToTalk
 #else
         private const bool InitiallyVisible = false;
 #endif
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private DalamudPluginInterface PluginInterface { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private DalamudCommandManager Commands { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private ClientState ClientState { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private Framework Framework { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private DataManager Data { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private ChatGui Chat { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private GameGui Gui { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private KeyState Keys { get; init; }
-
-        [PluginService]
-        [RequiredVersion("1.0")]
-        private ObjectTable Objects { get; init; }
 
         private readonly PluginConfiguration config;
-        private readonly WindowManager ui;
         private readonly CommandManager commandManager;
-        private readonly VoiceBackendManager backendManager;
-        private readonly UngenderedOverrideManager ungenderedOverrides;
-        private readonly RateLimiter rateLimiter;
+        private readonly Services services;
 
         private IntPtr talkAddonPtr;
-        private readonly SharedState sharedState;
-
-        private readonly PluginServiceCollection serviceCollection;
 
         public string Name => "TextToTalk";
 
-        public TextToTalk()
+        public TextToTalk([RequiredVersion("1.0")] DalamudPluginInterface pi)
         {
-            this.config = (PluginConfiguration)PluginInterface.GetPluginConfig() ?? new PluginConfiguration();
-            this.config.Initialize(PluginInterface);
+            this.config = (PluginConfiguration)pi.GetPluginConfig() ?? new PluginConfiguration();
+            this.config.Initialize(pi);
 
-            this.sharedState = new SharedState();
-            this.backendManager = new VoiceBackendManager(this.config, this.sharedState);
-            this.ungenderedOverrides = new UngenderedOverrideManager();
-            this.rateLimiter = new RateLimiter(() =>
-            {
-                if (this.config.MessagesPerSecond == 0)
-                {
-                    return long.MaxValue;
-                }
-                
-                return (long)(1000f / this.config.MessagesPerSecond);
-            });
+            this.services = Services.Create(pi, this.config);
 
-            this.serviceCollection = new PluginServiceCollection();
-            this.serviceCollection.AddService(this.config);
-            this.serviceCollection.AddService(this.backendManager);
-            this.serviceCollection.AddService(this.rateLimiter);
-            this.serviceCollection.AddService(this.sharedState);
-            this.serviceCollection.AddService(Chat, shouldDispose: false);
-            this.serviceCollection.AddService(PluginInterface, shouldDispose: false);
+            var ui = this.services.GetService<WindowManager>();
+            
+            ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
+            ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
+            ui.AddWindow<ChannelPresetModificationWindow>(initiallyVisible: false);
+            ui.AddWindow<ConfigurationWindow>(InitiallyVisible);
 
-            this.ui = new WindowManager(this.serviceCollection);
-            this.serviceCollection.AddService(this.ui);
+            this.services.PluginInterface.UiBuilder.Draw += ui.Draw;
+            this.services.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 
-            this.ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
-            this.ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
-            this.ui.AddWindow<ChannelPresetModificationWindow>(initiallyVisible: false);
-            this.ui.AddWindow<ConfigurationWindow>(InitiallyVisible);
+            this.services.Chat.ChatMessage += OnChatMessage;
+            this.services.Chat.ChatMessage += CheckFailedToBindPort;
 
-            PluginInterface.UiBuilder.Draw += this.ui.Draw;
-            PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+            this.services.Framework.Update += PollTalkAddon;
+            this.services.Framework.Update += CheckKeybindPressed;
+            this.services.Framework.Update += CheckPresetKeybindPressed;
 
-            Chat.ChatMessage += OnChatMessage;
-            Chat.ChatMessage += CheckFailedToBindPort;
-
-            Framework.Update += PollTalkAddon;
-            Framework.Update += CheckKeybindPressed;
-            Framework.Update += CheckPresetKeybindPressed;
-
-            this.commandManager = new CommandManager(Commands, this.serviceCollection);
+            this.commandManager = new CommandManager(this.services.Commands, this.services);
             this.commandManager.AddCommandModule<MainCommandModule>();
         }
 
@@ -139,8 +79,9 @@ namespace TextToTalk
         {
             if (!this.config.UseKeybind) return;
 
-            if (Keys[(byte)this.config.ModifierKey] &&
-                Keys[(byte)this.config.MajorKey])
+            var keys = this.services.Keys;
+            if (keys[(byte)this.config.ModifierKey] &&
+                keys[(byte)this.config.MajorKey])
             {
                 if (this.keysDown) return;
 
@@ -159,8 +100,9 @@ namespace TextToTalk
         {
             foreach (var preset in this.config.EnabledChatTypesPresets.Where(p => p.UseKeybind))
             {
-                if (Keys[(byte)preset.ModifierKey] &&
-                    Keys[(byte)preset.MajorKey])
+                var keys = this.services.Keys;
+                if (keys[(byte)preset.ModifierKey] &&
+                    keys[(byte)preset.MajorKey])
                 {
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
                 }
@@ -171,7 +113,7 @@ namespace TextToTalk
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            if (!ClientState.IsLoggedIn)
+            if (!this.services.ClientState.IsLoggedIn)
             {
                 this.talkAddonPtr = IntPtr.Zero;
                 return;
@@ -179,12 +121,14 @@ namespace TextToTalk
 
             if (this.talkAddonPtr == IntPtr.Zero)
             {
-                this.talkAddonPtr = Gui.GetAddonByName("Talk", 1);
+                this.talkAddonPtr = this.services.Gui.GetAddonByName("Talk", 1);
                 return;
             }
 
             var talkAddon = (AddonTalk*)this.talkAddonPtr.ToPointer();
             if (talkAddon == null) return;
+
+            var backendManager = this.services.GetService<VoiceBackendManager>();
 
             // Clear the last text if the window isn't visible.
             if (!TalkUtils.IsVisible(talkAddon))
@@ -192,7 +136,7 @@ namespace TextToTalk
                 // Cancel TTS when the dialogue window is closed, if configured
                 if (this.config.CancelSpeechOnTextAdvance)
                 {
-                    this.backendManager.CancelSay(TextSource.TalkAddon);
+                    backendManager.CancelSay(TextSource.TalkAddon);
                 }
 
                 SetLastQuestText("");
@@ -202,7 +146,7 @@ namespace TextToTalk
             TalkAddonText talkAddonText;
             try
             {
-                talkAddonText = TalkUtils.ReadTalkAddon(Data, talkAddon);
+                talkAddonText = TalkUtils.ReadTalkAddon(this.services.Data, talkAddon);
             }
             catch (NullReferenceException)
             {
@@ -224,12 +168,12 @@ namespace TextToTalk
                 }
             }
 
-            var speaker = Objects.FirstOrDefault(gObj => gObj.Name.TextValue == talkAddonText.Speaker);
+            var speaker = this.services.Objects.FirstOrDefault(gObj => gObj.Name.TextValue == talkAddonText.Speaker);
 
             // Cancel TTS if it's currently Talk addon text, if configured
-            if (this.config.CancelSpeechOnTextAdvance && this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
+            if (this.config.CancelSpeechOnTextAdvance && backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
             {
-                this.backendManager.CancelSay(TextSource.TalkAddon);
+                backendManager.CancelSay(TextSource.TalkAddon);
             }
 
             Say(speaker, text, TextSource.TalkAddon);
@@ -238,10 +182,12 @@ namespace TextToTalk
         private bool notifiedFailedToBindPort;
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
-            if (!ClientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
-            Chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
-                       "Please close the owner of that port and reload the Websocket server, " +
-                       "or select a different port.");
+            var sharedState = this.services.GetService<SharedState>();
+
+            if (!this.services.ClientState.IsLoggedIn || !sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
+            this.services.Chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
+                                     "Please close the owner of that port and reload the Websocket server, " +
+                                     "or select a different port.");
             this.notifiedFailedToBindPort = true;
         }
 
@@ -294,7 +240,7 @@ namespace TextToTalk
             if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
             var senderText = sender?.TextValue; // Can't access in lambda
-            var speaker = Objects.FirstOrDefault(a => a.Name.TextValue == senderText);
+            var speaker = this.services.Objects.FirstOrDefault(a => a.Name.TextValue == senderText);
 
             Say(speaker, textValue, TextSource.Chat);
         }
@@ -320,14 +266,16 @@ namespace TextToTalk
             }
 
             var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
-            this.backendManager.Say(source, gender, cleanText);
+            var backendManager = this.services.GetService<VoiceBackendManager>();
+            backendManager.Say(source, gender, cleanText);
         }
 
         private bool ShouldRateLimit(GameObject speaker)
         {
+            var rateLimiter = this.services.GetService<RateLimiter>();
             return this.config.UsePlayerRateLimiter &&
                    speaker.ObjectKind is ObjectKind.Player &&
-                   this.rateLimiter.TryRateLimit(speaker.Name.TextValue);
+                   rateLimiter.TryRateLimit(speaker.Name.TextValue);
         }
 
         private unsafe Gender GetCharacterGender(GameObject gObj)
@@ -366,7 +314,8 @@ namespace TextToTalk
             }
 
             // Get the override state and log the model ID so that we can add it to our overrides file if needed.
-            if (this.ungenderedOverrides.IsUngendered(modelId))
+            var ungenderedOverrides = this.services.GetService<UngenderedOverrideManager>();
+            if (ungenderedOverrides.IsUngendered(modelId))
             {
                 actorGender = Gender.None;
                 PluginLog.Log($"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender overriden to: {actorGender})");
@@ -381,27 +330,32 @@ namespace TextToTalk
 
         private void OpenConfigUi()
         {
-            this.ui.ShowWindow<ConfigurationWindow>();
+            var ui = this.services.GetService<WindowManager>();
+            ui.ShowWindow<ConfigurationWindow>();
         }
 
         private bool IsDuplicateQuestText(string text)
         {
-            return this.sharedState.LastQuestText == text;
+            var sharedState = this.services.GetService<SharedState>();
+            return sharedState.LastQuestText == text;
         }
 
         private void SetLastQuestText(string text)
         {
-            this.sharedState.LastQuestText = text;
+            var sharedState = this.services.GetService<SharedState>();
+            sharedState.LastQuestText = text;
         }
 
         private bool IsSameSpeaker(string speaker)
         {
-            return this.sharedState.LastSpeaker == speaker;
+            var sharedState = this.services.GetService<SharedState>();
+            return sharedState.LastSpeaker == speaker;
         }
 
         private void SetLastSpeaker(string speaker)
         {
-            this.sharedState.LastSpeaker = speaker;
+            var sharedState = this.services.GetService<SharedState>();
+            sharedState.LastSpeaker = speaker;
         }
 
         private bool ShouldSaySender()
@@ -426,19 +380,20 @@ namespace TextToTalk
 
             this.commandManager.Dispose();
 
-            Framework.Update -= PollTalkAddon;
-            Framework.Update -= CheckKeybindPressed;
-            Framework.Update -= CheckPresetKeybindPressed;
+            this.services.Framework.Update -= PollTalkAddon;
+            this.services.Framework.Update -= CheckKeybindPressed;
+            this.services.Framework.Update -= CheckPresetKeybindPressed;
 
-            Chat.ChatMessage -= CheckFailedToBindPort;
-            Chat.ChatMessage -= OnChatMessage;
+            this.services.Chat.ChatMessage -= CheckFailedToBindPort;
+            this.services.Chat.ChatMessage -= OnChatMessage;
 
-            PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
-            PluginInterface.UiBuilder.Draw -= this.ui.Draw;
+            var ui = this.services.GetService<WindowManager>();
+            this.services.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+            this.services.PluginInterface.UiBuilder.Draw -= ui.Draw;
 
-            PluginInterface.SavePluginConfig(this.config);
+            this.services.PluginInterface.SavePluginConfig(this.config);
 
-            this.serviceCollection.Dispose();
+            this.services.Dispose();
         }
 
         public void Dispose()

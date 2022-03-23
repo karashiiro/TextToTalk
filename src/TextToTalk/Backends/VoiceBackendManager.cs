@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Numerics;
 using System.Threading.Tasks;
 using TextToTalk.Backends.Polly;
@@ -10,6 +11,7 @@ namespace TextToTalk.Backends
 {
     public class VoiceBackendManager : VoiceBackend
     {
+        private readonly HttpClient http;
         private readonly PluginConfiguration config;
         private readonly SharedState sharedState;
 
@@ -17,9 +19,10 @@ namespace TextToTalk.Backends
 
         public bool BackendLoading { get; private set; }
 
-        public VoiceBackendManager(PluginConfiguration config, SharedState sharedState)
+        public VoiceBackendManager(PluginConfiguration config, HttpClient http, SharedState sharedState)
         {
             this.config = config;
+            this.http = http;
             this.sharedState = sharedState;
             this.backend = CreateBackendFor(this.config.Backend);
         }
@@ -71,9 +74,9 @@ namespace TextToTalk.Backends
         {
             return backendKind switch
             {
-                TTSBackend.System => new SystemBackend(this.config),
+                TTSBackend.System => new SystemBackend(this.config, this.http),
                 TTSBackend.Websocket => new WebsocketBackend(this.config, this.sharedState),
-                TTSBackend.AmazonPolly => new AmazonPollyBackend(this.config),
+                TTSBackend.AmazonPolly => new AmazonPollyBackend(this.config, this.http),
                 _ => throw new NotImplementedException(),
             };
         }

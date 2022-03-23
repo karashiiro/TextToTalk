@@ -1,10 +1,14 @@
-﻿using ImGuiNET;
+﻿using System;
+using System.IO;
+using ImGuiNET;
 using System.Linq;
+using System.Net.Http;
 using System.Numerics;
 using System.Speech.Synthesis;
 using System.Text;
 using TextToTalk.GameEnums;
 using TextToTalk.Lexicons;
+using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI.Dalamud;
 
 namespace TextToTalk.Backends.System
@@ -17,17 +21,22 @@ namespace TextToTalk.Backends.System
 
         private readonly PluginConfiguration config;
         private readonly SystemSoundQueue soundQueue;
-
+        
         private readonly LexiconComponent lexiconComponent;
 
-        public SystemBackend(PluginConfiguration config)
+        public SystemBackend(PluginConfiguration config, HttpClient http)
         {
             var lexiconManager = new LexiconManager();
             LexiconUtils.LoadFromConfigSystem(lexiconManager, config);
 
+            // TODO: Make this configurable
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var downloadPath = Path.Join(appData, "TextToTalk");
+            var lexiconRepository = new LexiconRepository(http, downloadPath);
+
             this.config = config;
             this.soundQueue = new SystemSoundQueue(lexiconManager);
-            this.lexiconComponent = new LexiconComponent(lexiconManager, config, () => config.Lexicons);
+            this.lexiconComponent = new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.Lexicons);
         }
 
         public override void Say(TextSource source, Gender gender, string text)

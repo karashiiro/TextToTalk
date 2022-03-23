@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using TextToTalk.Lexicons;
+using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI.Native;
 
 namespace TextToTalk.UI.Dalamud;
@@ -23,12 +24,14 @@ public class LexiconComponent
 
     private readonly PluginConfiguration config;
     private readonly LexiconManager lexiconManager;
+    private readonly LexiconRepository lexiconRepository;
 
     private readonly Func<IList<string>> getLexiconList;
 
-    public LexiconComponent(LexiconManager lm, PluginConfiguration config, Func<IList<string>> getLexiconList)
+    public LexiconComponent(LexiconManager lm, LexiconRepository lr, PluginConfiguration config, Func<IList<string>> getLexiconList)
     {
         this.lexiconManager = lm;
+        this.lexiconRepository = lr;
         this.config = config;
         this.getLexiconList = getLexiconList;
     }
@@ -164,5 +167,14 @@ public class LexiconComponent
                 }
             });
         }
+    }
+
+    private async Task DownloadRemoteLexicon(string packageName)
+    {
+        // Fetch lexicon file list
+        var package = this.lexiconRepository.GetPackage(packageName);
+        var packageInfo = await package.GetPackageInfo();
+
+        // Download each file
     }
 }

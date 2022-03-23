@@ -6,11 +6,14 @@ using Dalamud.Logging;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using TextToTalk.Lexicons;
+using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI.Dalamud;
 using Gender = TextToTalk.GameEnums.Gender;
 
@@ -30,23 +33,28 @@ namespace TextToTalk.Backends.Polly
 
         private PollyClient polly;
         private IList<Voice> voices;
-
+        
         private readonly LexiconManager lexiconManager;
         private readonly LexiconComponent lexiconComponent;
 
         private string accessKey = string.Empty;
         private string secretKey = string.Empty;
 
-        public AmazonPollyBackend(PluginConfiguration config)
+        public AmazonPollyBackend(PluginConfiguration config, HttpClient http)
         {
             TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
             this.lexiconManager = new LexiconManager();
             LexiconUtils.LoadFromConfigPolly(this.lexiconManager, config);
 
+            // TODO: Make this configurable
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var downloadPath = Path.Join(appData, "TextToTalk");
+            var lexiconRepository = new LexiconRepository(http, downloadPath);
+
             this.config = config;
             this.voices = new List<Voice>();
-            this.lexiconComponent = new LexiconComponent(this.lexiconManager, config, () => config.PollyLexiconFiles);
+            this.lexiconComponent = new LexiconComponent(this.lexiconManager, lexiconRepository, config, () => config.PollyLexiconFiles);
 
             var credentials = CredentialManager.GetCredentials(CredentialsTarget);
             if (credentials != null)
