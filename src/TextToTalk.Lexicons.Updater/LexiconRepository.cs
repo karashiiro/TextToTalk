@@ -12,12 +12,13 @@ namespace TextToTalk.Lexicons.Updater
         private const string IndexUrl = "https://api.github.com/repos/karashiiro/TextToTalk/git/trees/main?recursive=1";
 
         private readonly HttpClient http;
-        private readonly string cachePath;
+
+        public string CachePath { get; }
 
         public LexiconRepository(HttpClient http, string cachePath)
         {
             this.http = http;
-            this.cachePath = cachePath;
+            CachePath = cachePath;
         }
 
         /// <summary>
@@ -27,7 +28,7 @@ namespace TextToTalk.Lexicons.Updater
         /// <param name="packageName">The name of the lexicon package's folder in the repo.</param>
         public LexiconPackage GetPackage(string packageName)
         {
-            return new LexiconPackage(this.http, packageName, this.cachePath);
+            return new LexiconPackage(this.http, packageName, CachePath);
         }
 
         /// <summary>
@@ -52,7 +53,7 @@ namespace TextToTalk.Lexicons.Updater
                 .ToList();
         }
 
-        private async Task<LexiconDirectoryItem[]> FetchAllFiles()
+        private async Task<IList<LexiconDirectoryItem>> FetchAllFiles()
         {
             using var req = new HttpRequestMessage
             {

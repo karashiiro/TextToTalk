@@ -44,7 +44,23 @@ namespace TextToTalk.Lexicons.Updater
                 .Deserialize<LexiconPackageInfo>(info);
         }
 
-        public async Task<bool> CheckPackageFileUpdates(string filename)
+        public async Task<bool> IsInstalled()
+        {
+            // A package is considered installed if at least one of its lexicon files has been downloaded.
+            var info = await GetPackageInfo();
+            foreach (var file in info.Files)
+            {
+                var localPath = GetCacheFilePath(file);
+                if (File.Exists(localPath))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<bool> HasUpdate(string filename)
         {
             // Get the package metadata
             this.cache ??= GetCacheInfo();
@@ -81,7 +97,7 @@ namespace TextToTalk.Lexicons.Updater
         public async Task<Stream> GetPackageFile(string filename)
         {
             // Check if the remote file matches our local file
-            if (!await CheckPackageFileUpdates(filename))
+            if (!await HasUpdate(filename))
             {
                 if (TryGetLocalPackageStream(filename, out var localData))
                 {
