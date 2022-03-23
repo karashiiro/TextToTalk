@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net.Http;
-using Dalamud.CrystalTower.DependencyInjection;
+﻿using Dalamud.CrystalTower.DependencyInjection;
 using Dalamud.CrystalTower.UI;
 using Dalamud.Data;
 using Dalamud.Game;
@@ -11,6 +9,8 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using System;
+using System.Net.Http;
 using TextToTalk.Backends;
 using TextToTalk.Exceptions;
 using TextToTalk.Middleware;

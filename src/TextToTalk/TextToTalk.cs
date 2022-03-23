@@ -1,13 +1,7 @@
 ﻿using Dalamud.CrystalTower.Commands;
-using Dalamud.CrystalTower.DependencyInjection;
 using Dalamud.CrystalTower.UI;
-using Dalamud.Data;
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Keys;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
@@ -16,7 +10,6 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
@@ -25,7 +18,6 @@ using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI.Dalamud;
 using TextToTalk.UngenderedOverrides;
-using DalamudCommandManager = Dalamud.Game.Command.CommandManager;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace TextToTalk
@@ -54,7 +46,7 @@ namespace TextToTalk
             this.services = Services.Create(pi, this.config);
 
             var ui = this.services.GetService<WindowManager>();
-            
+
             ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
             ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
             ui.AddWindow<ChannelPresetModificationWindow>(initiallyVisible: false);
