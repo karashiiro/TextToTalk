@@ -44,7 +44,7 @@ namespace TextToTalk.Lexicons.Updater
                 .Deserialize<LexiconPackageInfo>(info);
         }
 
-        public async Task<Stream> GetPackageFile(string filename)
+        public async Task<bool> CheckPackageFileUpdates(string filename)
         {
             // Get the package metadata
             this.cache ??= GetCacheInfo();
@@ -68,6 +68,21 @@ namespace TextToTalk.Lexicons.Updater
             // Check if the remote etag matches our local etag
             if (this.cache.FileETags.TryGetValue(filename, out var cachedETag) && etag == cachedETag)
             {
+                return false;
+            }
+
+            // Update our cache info
+            this.cache.FileETags[filename] = etag;
+            SaveCacheInfo();
+
+            return true;
+        }
+
+        public async Task<Stream> GetPackageFile(string filename)
+        {
+            // Check if the remote file matches our local file
+            if (!await CheckPackageFileUpdates(filename))
+            {
                 if (TryGetLocalPackageStream(filename, out var localData))
                 {
                     return localData;
@@ -75,6 +90,7 @@ namespace TextToTalk.Lexicons.Updater
             }
 
             // Download the updated lexicon file and cache the updated data
+            var url = new Uri(RepoBase + this.packageName + "/" + filename);
             await using var fileData = await this.http.GetStreamAsync(url);
 
             // We can't seek on an HTTP data stream, so we need to copy the data to a second stream
@@ -85,10 +101,6 @@ namespace TextToTalk.Lexicons.Updater
             // Save the stream data
             SaveLocalPackageStream(filename, fileDataCopy);
             fileDataCopy.Seek(0, SeekOrigin.Begin);
-
-            // Update our cache info
-            this.cache.FileETags[filename] = etag;
-            SaveCacheInfo();
 
             return fileDataCopy;
         }
