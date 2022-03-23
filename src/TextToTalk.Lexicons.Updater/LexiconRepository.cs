@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace TextToTalk.Lexicons.Updater
 {
@@ -12,10 +12,12 @@ namespace TextToTalk.Lexicons.Updater
         private const string IndexUrl = "https://api.github.com/repos/karashiiro/TextToTalk/git/trees/main?recursive=1";
 
         private readonly HttpClient http;
+        private readonly string cachePath;
 
-        public LexiconRepository(HttpClient http)
+        public LexiconRepository(HttpClient http, string cachePath)
         {
             this.http = http;
+            this.cachePath = cachePath;
         }
 
         /// <summary>
@@ -23,10 +25,19 @@ namespace TextToTalk.Lexicons.Updater
         /// using the <see cref="LexiconPackage"/> methods.
         /// </summary>
         /// <param name="packageName">The name of the lexicon package's folder in the repo.</param>
-        /// <param name="cachePath">The path to the download cache.</param>
-        public LexiconPackage GetPackage(string packageName, string cachePath)
+        public LexiconPackage GetPackage(string packageName)
         {
-            return new LexiconPackage(this.http, packageName, cachePath);
+            return new LexiconPackage(this.http, packageName, this.cachePath);
+        }
+
+        /// <summary>
+        /// Deletes all files associated with a lexicon package.
+        /// </summary>
+        /// <param name="packageName">The name of the lexicon package's folder in the repo.</param>
+        public void RemovePackage(string packageName)
+        {
+            var package = GetPackage(packageName);
+            package.Delete();
         }
 
         /// <summary>

@@ -105,6 +105,13 @@ namespace TextToTalk.Lexicons.Updater
             return fileDataCopy;
         }
 
+        public void Delete()
+        {
+            var dir = Path.Join(this.cachePath, this.packageName);
+            if (!Directory.Exists(dir)) return;
+            Directory.Delete(dir, true);
+        }
+
         private bool TryGetLocalPackageStream(string filename, out Stream stream)
         {
             if (!CanCache())
