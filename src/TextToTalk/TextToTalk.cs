@@ -7,7 +7,6 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -34,8 +33,6 @@ namespace TextToTalk
         private readonly CommandManager commandManager;
         private readonly Services services;
 
-        private IntPtr talkAddonPtr;
-
         public string Name => "TextToTalk";
 
         public TextToTalk([RequiredVersion("1.0")] DalamudPluginInterface pi)
@@ -46,11 +43,16 @@ namespace TextToTalk
             this.services = Services.Create(pi, this.config);
 
             var ui = this.services.GetService<WindowManager>();
-
             ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
             ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
             ui.AddWindow<ChannelPresetModificationWindow>(initiallyVisible: false);
             ui.AddWindow<ConfigurationWindow>(InitiallyVisible);
+
+            var talkAddonHandler = this.services.GetService<TalkAddonHandler>();
+            talkAddonHandler.Say += Say;
+
+            var chatMessageHandler = this.services.GetService<ChatMessageHandler>();
+            chatMessageHandler.Say += Say;
 
             this.services.PluginInterface.UiBuilder.Draw += ui.Draw;
             this.services.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
@@ -101,74 +103,12 @@ namespace TextToTalk
             }
         }
 
-        private unsafe void PollTalkAddon(Framework framework)
+        private void PollTalkAddon(Framework framework)
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            if (!this.services.ClientState.IsLoggedIn)
-            {
-                this.talkAddonPtr = IntPtr.Zero;
-                return;
-            }
-
-            if (this.talkAddonPtr == IntPtr.Zero)
-            {
-                this.talkAddonPtr = this.services.Gui.GetAddonByName("Talk", 1);
-                return;
-            }
-
-            var talkAddon = (AddonTalk*)this.talkAddonPtr.ToPointer();
-            if (talkAddon == null) return;
-
-            var backendManager = this.services.GetService<VoiceBackendManager>();
-
-            // Clear the last text if the window isn't visible.
-            if (!TalkUtils.IsVisible(talkAddon))
-            {
-                // Cancel TTS when the dialogue window is closed, if configured
-                if (this.config.CancelSpeechOnTextAdvance)
-                {
-                    backendManager.CancelSay(TextSource.TalkAddon);
-                }
-
-                SetLastQuestText("");
-                return;
-            }
-
-            TalkAddonText talkAddonText;
-            try
-            {
-                talkAddonText = TalkUtils.ReadTalkAddon(this.services.Data, talkAddon);
-            }
-            catch (NullReferenceException)
-            {
-                // Just swallow the NRE, I have no clue what causes this but it only happens when relogging in rare cases
-                return;
-            }
-
-            var text = talkAddonText.Text;
-
-            if (text == "" || IsDuplicateQuestText(text)) return;
-            SetLastQuestText(text);
-
-            if (talkAddonText.Speaker != "" && ShouldSaySender())
-            {
-                if (!this.config.DisallowMultipleSay || !IsSameSpeaker(talkAddonText.Speaker))
-                {
-                    text = $"{talkAddonText.Speaker} says {text}";
-                    SetLastSpeaker(talkAddonText.Speaker);
-                }
-            }
-
-            var speaker = this.services.Objects.FirstOrDefault(gObj => gObj.Name.TextValue == talkAddonText.Speaker);
-
-            // Cancel TTS if it's currently Talk addon text, if configured
-            if (this.config.CancelSpeechOnTextAdvance && backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
-            {
-                backendManager.CancelSay(TextSource.TalkAddon);
-            }
-
-            Say(speaker, text, TextSource.TalkAddon);
+            var talkAddonHandler = this.services.GetService<TalkAddonHandler>();
+            talkAddonHandler.PollAddon(framework);
         }
 
         private bool notifiedFailedToBindPort;
@@ -183,58 +123,11 @@ namespace TextToTalk
             this.notifiedFailedToBindPort = true;
         }
 
-        private unsafe void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
             if (!this.config.Enabled) return;
-
-            var textValue = message.TextValue;
-            if (IsDuplicateQuestText(textValue)) return;
-
-#if DEBUG
-            PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
-#endif
-
-            // This section controls speaker-related functions.
-            if (sender != null && sender.TextValue != string.Empty)
-            {
-                if (ShouldSaySender(type))
-                {
-                    // If we allow the speaker's name to be repeated each time the speak,
-                    // or the speaker has actually changed.
-                    if (!this.config.DisallowMultipleSay || !IsSameSpeaker(sender.TextValue))
-                    {
-                        if ((int)type == (int)AdditionalChatType.NPCDialogue)
-                        {
-                            // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
-                            var talkAddon = (AddonTalk*)this.talkAddonPtr.ToPointer();
-                            if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
-                            {
-                                return;
-                            }
-
-                            SetLastQuestText(textValue);
-                        }
-
-                        textValue = $"{sender.TextValue} says {textValue}";
-                        SetLastSpeaker(sender.TextValue);
-                    }
-                }
-            }
-
-            if (this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
-
-            var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
-
-            var typeAccepted = chatTypes.EnabledChatTypes.Contains((int)type);
-            var goodMatch = this.config.Good
-                .Where(t => t.Text != "")
-                .Any(t => t.Match(textValue));
-            if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
-
-            var senderText = sender?.TextValue; // Can't access in lambda
-            var speaker = this.services.Objects.FirstOrDefault(a => a.Name.TextValue == senderText);
-
-            Say(speaker, textValue, TextSource.Chat);
+            var chatMessageHandler = this.services.GetService<ChatMessageHandler>();
+            chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
         }
 
         private void Say(GameObject speaker, string textValue, TextSource source)
@@ -324,40 +217,6 @@ namespace TextToTalk
         {
             var ui = this.services.GetService<WindowManager>();
             ui.ShowWindow<ConfigurationWindow>();
-        }
-
-        private bool IsDuplicateQuestText(string text)
-        {
-            var sharedState = this.services.GetService<SharedState>();
-            return sharedState.LastQuestText == text;
-        }
-
-        private void SetLastQuestText(string text)
-        {
-            var sharedState = this.services.GetService<SharedState>();
-            sharedState.LastQuestText = text;
-        }
-
-        private bool IsSameSpeaker(string speaker)
-        {
-            var sharedState = this.services.GetService<SharedState>();
-            return sharedState.LastSpeaker == speaker;
-        }
-
-        private void SetLastSpeaker(string speaker)
-        {
-            var sharedState = this.services.GetService<SharedState>();
-            sharedState.LastSpeaker = speaker;
-        }
-
-        private bool ShouldSaySender()
-        {
-            return this.config.EnableNameWithSay && this.config.NameNpcWithSay;
-        }
-
-        private bool ShouldSaySender(XivChatType type)
-        {
-            return this.config.EnableNameWithSay && (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
         }
 
         private static T Pipe<T>(T input, params Func<T, T>[] transforms)

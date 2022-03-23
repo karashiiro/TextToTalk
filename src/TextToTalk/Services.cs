@@ -79,14 +79,26 @@ public class Services : IServiceProvider, IDisposable
         var services = pi.Create<Services>() ?? throw new ServiceException("Failed to initialize plugin services.");
         services.serviceCollection = new PluginServiceCollection();
 
+        services.serviceCollection.AddService(services.PluginInterface, shouldDispose: false);
+        services.serviceCollection.AddService(services.Commands, shouldDispose: false);
+        services.serviceCollection.AddService(services.ClientState, shouldDispose: false);
+        services.serviceCollection.AddService(services.Framework, shouldDispose: false);
+        services.serviceCollection.AddService(services.Data, shouldDispose: false);
+        services.serviceCollection.AddService(services.Chat, shouldDispose: false);
+        services.serviceCollection.AddService(services.Gui, shouldDispose: false);
+        services.serviceCollection.AddService(services.Keys, shouldDispose: false);
+        services.serviceCollection.AddService(services.Objects, shouldDispose: false);
+
         var sharedState = new SharedState();
         var http = new HttpClient();
+        var filters = new MessageHandlerFilters(services, config);
+        var backendManager = new VoiceBackendManager(config, http, sharedState);
 
-        services.serviceCollection = new PluginServiceCollection();
         services.serviceCollection.AddService(config);
+        services.serviceCollection.AddService(sharedState);
+        services.serviceCollection.AddService(http);
         services.serviceCollection.AddService(new UngenderedOverrideManager());
-        services.serviceCollection.AddService(new HttpClient());
-        services.serviceCollection.AddService(new VoiceBackendManager(config, http, sharedState));
+        services.serviceCollection.AddService(backendManager);
         services.serviceCollection.AddService(new RateLimiter(() =>
         {
             if (config.MessagesPerSecond == 0)
@@ -96,9 +108,9 @@ public class Services : IServiceProvider, IDisposable
 
             return (long)(1000f / config.MessagesPerSecond);
         }));
-        services.serviceCollection.AddService(new SharedState());
-        services.serviceCollection.AddService(services.Chat, shouldDispose: false);
-        services.serviceCollection.AddService(services.PluginInterface, shouldDispose: false);
+        services.serviceCollection.AddService(filters);
+        services.serviceCollection.AddService(new TalkAddonHandler(services.ClientState, services.Gui, services.Data, filters, services.Objects, config, sharedState, backendManager));
+        services.serviceCollection.AddService(new ChatMessageHandler(filters, services.Objects, config, sharedState));
         services.serviceCollection.AddService(new WindowManager(services.serviceCollection));
 
         return services;

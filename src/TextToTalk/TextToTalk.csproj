@@ -61,7 +61,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Middleware\" />
 	  <Folder Include="Exceptions\" />
 	</ItemGroup>
 
