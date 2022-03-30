@@ -4,9 +4,11 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="LexiconPackage.cs~RF466ad81.TMP" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+		<PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="YamlDotNet" Version="11.2.1" />

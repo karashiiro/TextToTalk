@@ -4,9 +4,11 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="overridenModelIds.txt" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+		<PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
+		<Deterministic>true</Deterministic>
+	</PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="overridenModelIds.txt" />
