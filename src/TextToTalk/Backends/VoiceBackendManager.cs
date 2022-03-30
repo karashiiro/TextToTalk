@@ -77,7 +77,7 @@ namespace TextToTalk.Backends
             {
                 TTSBackend.System => new SystemBackend(this.config, this.http),
                 TTSBackend.Websocket => new WebsocketBackend(this.config, this.sharedState),
-                TTSBackend.AmazonPolly => new AmazonPollyBackend(this.config, this.http),
+                TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 _ => throw new NotImplementedException(),
             };
         }
