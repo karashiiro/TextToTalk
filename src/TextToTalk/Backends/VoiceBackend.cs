@@ -14,7 +14,7 @@ namespace TextToTalk.Backends
 
         public abstract void CancelSay(TextSource source);
 
-        public abstract void DrawSettings(ImExposedFunctions helpers);
+        public abstract void DrawSettings(IConfigUIDelegates helpers);
 
         public abstract TextSource GetCurrentlySpokenTextSource();
 

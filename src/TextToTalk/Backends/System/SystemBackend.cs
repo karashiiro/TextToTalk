@@ -47,7 +47,7 @@ namespace TextToTalk.Backends.System
             this.soundQueue.CancelFromSource(source);
         }
 
-        public override void DrawSettings(ImExposedFunctions helpers)
+        public override void DrawSettings(IConfigUIDelegates helpers)
         {
             this.ui.DrawSettings(helpers);
         }

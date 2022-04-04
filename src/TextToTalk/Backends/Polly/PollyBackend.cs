@@ -80,7 +80,7 @@ namespace TextToTalk.Backends.Polly
             _ = this.polly.CancelFromSource(source);
         }
 
-        public override void DrawSettings(ImExposedFunctions helpers)
+        public override void DrawSettings(IConfigUIDelegates helpers)
         {
             this.ui.DrawSettings(helpers);
         }

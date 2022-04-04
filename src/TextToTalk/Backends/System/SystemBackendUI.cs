@@ -9,6 +9,7 @@ using System.Text;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI.Dalamud;
+using TextToTalk.UI.Dalamud.Lexicons;
 
 namespace TextToTalk.Backends.System;
 
@@ -32,7 +33,7 @@ public class SystemBackendUI
         this.lexiconComponent = new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.Lexicons);
     }
 
-    public void DrawSettings(ImExposedFunctions helpers)
+    public void DrawSettings(IConfigUIDelegates helpers)
     {
         var currentVoicePreset = this.config.GetCurrentVoicePreset();
 
@@ -117,7 +118,7 @@ public class SystemBackendUI
 
         if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
         {
-            helpers.OpenVoiceUnlockerWindow?.Invoke();
+            helpers.OpenVoiceUnlocker();
         }
 
         this.lexiconComponent.Draw();

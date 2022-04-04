@@ -43,7 +43,7 @@ namespace TextToTalk.Backends
             this.backend?.CancelSay(source);
         }
 
-        public override void DrawSettings(ImExposedFunctions helpers)
+        public override void DrawSettings(IConfigUIDelegates helpers)
         {
             this.backend?.DrawSettings(helpers);
         }

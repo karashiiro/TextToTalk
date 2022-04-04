@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI.Dalamud;
+using TextToTalk.UI.Dalamud.Lexicons;
 
 namespace TextToTalk.Backends.Polly;
 
@@ -61,7 +62,7 @@ public class PollyBackendUI
     }
 
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
-    public void DrawSettings(ImExposedFunctions helpers)
+    public void DrawSettings(IConfigUIDelegates helpers)
     {
         var region = this.config.PollyRegion;
         var regionIndex = Array.IndexOf(Regions, region);

@@ -17,13 +17,13 @@ namespace TextToTalk.UI.Dalamud
         public PluginConfiguration Configuration { get; set; }
         public VoiceBackendManager BackendManager { get; set; }
 
-        private readonly ImExposedFunctions helpers;
+        private readonly IConfigUIDelegates helpers;
 
         public ConfigurationWindow()
         {
-            this.helpers = new ImExposedFunctions
+            this.helpers = new ConfigUIDelegates
             {
-                OpenVoiceUnlockerWindow = OpenWindow<VoiceUnlockerWindow>,
+                OpenVoiceUnlockerAction = OpenWindow<VoiceUnlockerWindow>,
             };
         }
 

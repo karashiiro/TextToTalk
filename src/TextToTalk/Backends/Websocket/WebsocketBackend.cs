@@ -59,7 +59,7 @@ namespace TextToTalk.Backends.Websocket
             PluginLog.Log("Canceled TTS over WebSocket server.");
         }
 
-        public override void DrawSettings(ImExposedFunctions helpers)
+        public override void DrawSettings(IConfigUIDelegates helpers)
         {
             var port = this.config.WebsocketPort;
             var portBytes = Encoding.UTF8.GetBytes(port.ToString());
