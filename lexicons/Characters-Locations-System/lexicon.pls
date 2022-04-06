@@ -330,4 +330,8 @@
 <grapheme>Viera</grapheme>
 <phoneme>ˈviːˈɛrə</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>Miqo'te</grapheme>
+<phoneme>mɪˌqəʊteɪ</phoneme>
+</lexeme>
 </lexicon>
