@@ -42,4 +42,8 @@
 <grapheme>Miqo'te</grapheme>
 <phoneme>mɪˌqəʊteɪ</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>Moenbryda</grapheme>
+<phoneme>ˈmuːnˈbriːda</phoneme>
+</lexeme>
 </lexicon>
