@@ -15,9 +15,10 @@ namespace TextToTalk.Lexicons.Updater
 
         private readonly string cachePath;
         private readonly HttpClient http;
-        private readonly string packageName;
 
         private CachedLexicon cache;
+
+        public string PackageName { get; }
 
         /// <summary>
         /// Create a lexicon package instance. No data will actually be loaded until it is requested.
@@ -29,7 +30,8 @@ namespace TextToTalk.Lexicons.Updater
         {
             this.cachePath = cachePath;
             this.http = http;
-            this.packageName = packageName;
+
+            PackageName = packageName;
         }
 
         public async Task<LexiconPackageInfo> GetPackageInfo()
@@ -37,11 +39,13 @@ namespace TextToTalk.Lexicons.Updater
             // This can be disposed once we've read its data
             await using var data = await GetPackageFile("package.yml");
             using var sr = new StreamReader(data);
-            var info = await sr.ReadToEndAsync();
-            return new DeserializerBuilder()
+            var infoRaw = await sr.ReadToEndAsync();
+            var info = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build()
-                .Deserialize<LexiconPackageInfo>(info);
+                .Deserialize<LexiconPackageInfo>(infoRaw);
+            info.InternalName = PackageName;
+            return info;
         }
 
         public async Task<bool> IsInstalled()
@@ -66,7 +70,7 @@ namespace TextToTalk.Lexicons.Updater
             this.cache ??= GetCacheInfo();
 
             // Get the file etag
-            var url = new Uri(RepoBase + this.packageName + "/" + filename);
+            var url = new Uri(RepoBase + PackageName + "/" + filename);
 
             using var req = new HttpRequestMessage(HttpMethod.Head, url);
             var res = await this.http.SendAsync(req);
@@ -106,7 +110,7 @@ namespace TextToTalk.Lexicons.Updater
             }
 
             // Download the updated lexicon file and cache the updated data
-            var url = new Uri(RepoBase + this.packageName + "/" + filename);
+            var url = new Uri(RepoBase + PackageName + "/" + filename);
             await using var fileData = await this.http.GetStreamAsync(url);
 
             // We can't seek on an HTTP data stream, so we need to copy the data to a second stream
@@ -123,7 +127,7 @@ namespace TextToTalk.Lexicons.Updater
 
         public void Delete()
         {
-            var dir = Path.Join(this.cachePath, this.packageName);
+            var dir = Path.Join(this.cachePath, PackageName);
             if (!Directory.Exists(dir)) return;
             Directory.Delete(dir, true);
         }
@@ -194,7 +198,7 @@ namespace TextToTalk.Lexicons.Updater
 
         private string GetCacheFilePath(string filename)
         {
-            return Path.Join(this.cachePath, this.packageName, filename);
+            return Path.Join(this.cachePath, PackageName, filename);
         }
 
         private bool CanCache()
