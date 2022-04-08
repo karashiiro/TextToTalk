@@ -51,4 +51,17 @@
 <grapheme>eikons</grapheme>
 <phoneme>ˈaɪkɒnz</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>NIN</grapheme>
+<alias>ninja</alias>
+</lexeme>
+<lexeme>
+<grapheme>magitek</grapheme>
+<grapheme>Magitek</grapheme>
+<phoneme>ˈmæʝɪtek</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Regen</grapheme>
+<phoneme>riˈʝen</phoneme>
+</lexeme>
 </lexicon>

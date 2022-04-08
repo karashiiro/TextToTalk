@@ -1,6 +1,0 @@
-name: Miscellaneous
-author: ryankhart
-disabled: false
-description: Corrections for various words and abbreviations not covered by johnysandels' lexicon
-files:
-  - miscellaneous.pls
