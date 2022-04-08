@@ -10,6 +10,12 @@ namespace TextToTalk.Lexicons.Updater
         public string Name { get; set; }
 
         /// <summary>
+        /// The package's internal name.
+        /// </summary>
+        [YamlIgnore]
+        public string InternalName { get; set; }
+
+        /// <summary>
         /// The lexicon author's username.
         /// </summary>
         public string Author { get; set; }

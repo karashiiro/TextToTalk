@@ -1,7 +1,10 @@
 ﻿using Dalamud.CrystalTower.Commands;
 using Dalamud.CrystalTower.UI;
 using Dalamud.Game;
+using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
@@ -32,6 +35,7 @@ namespace TextToTalk
         private readonly PluginConfiguration config;
         private readonly CommandManager commandManager;
         private readonly Services services;
+        private readonly KeyState keys;
 
         public string Name => "TextToTalk";
 
@@ -54,17 +58,23 @@ namespace TextToTalk
             var chatMessageHandler = this.services.GetService<ChatMessageHandler>();
             chatMessageHandler.Say += Say;
 
-            this.services.PluginInterface.UiBuilder.Draw += ui.Draw;
-            this.services.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+            pi.UiBuilder.Draw += ui.Draw;
+            pi.UiBuilder.OpenConfigUi += OpenConfigUi;
 
-            this.services.Chat.ChatMessage += OnChatMessage;
-            this.services.Chat.ChatMessage += CheckFailedToBindPort;
+            var keyState = this.services.GetService<KeyState>();
+            this.keys = keyState;
 
-            this.services.Framework.Update += PollTalkAddon;
-            this.services.Framework.Update += CheckKeybindPressed;
-            this.services.Framework.Update += CheckPresetKeybindPressed;
+            var chat = this.services.GetService<ChatGui>();
+            chat.ChatMessage += OnChatMessage;
+            chat.ChatMessage += CheckFailedToBindPort;
 
-            this.commandManager = new CommandManager(this.services.Commands, this.services);
+            var framework = this.services.GetService<Framework>();
+            framework.Update += PollTalkAddon;
+            framework.Update += CheckKeybindPressed;
+            framework.Update += CheckPresetKeybindPressed;
+
+            var commands = this.services.GetService<Dalamud.Game.Command.CommandManager>();
+            this.commandManager = new CommandManager(commands, this.services);
             this.commandManager.AddCommandModule<MainCommandModule>();
         }
 
@@ -73,9 +83,8 @@ namespace TextToTalk
         {
             if (!this.config.UseKeybind) return;
 
-            var keys = this.services.Keys;
-            if (keys[(byte)this.config.ModifierKey] &&
-                keys[(byte)this.config.MajorKey])
+            if (this.keys[(byte)this.config.ModifierKey] &&
+                this.keys[(byte)this.config.MajorKey])
             {
                 if (this.keysDown) return;
 
@@ -94,9 +103,8 @@ namespace TextToTalk
         {
             foreach (var preset in this.config.EnabledChatTypesPresets.Where(p => p.UseKeybind))
             {
-                var keys = this.services.Keys;
-                if (keys[(byte)preset.ModifierKey] &&
-                    keys[(byte)preset.MajorKey])
+                if (this.keys[(byte)preset.ModifierKey] &&
+                    this.keys[(byte)preset.MajorKey])
                 {
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
                 }
@@ -115,11 +123,13 @@ namespace TextToTalk
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
         {
             var sharedState = this.services.GetService<SharedState>();
+            var clientState = this.services.GetService<ClientState>();
+            var chat = this.services.GetService<ChatGui>();
 
-            if (!this.services.ClientState.IsLoggedIn || !sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
-            this.services.Chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
-                                     "Please close the owner of that port and reload the Websocket server, " +
-                                     "or select a different port.");
+            if (!clientState.IsLoggedIn || !sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
+            chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
+                       "Please close the owner of that port and reload the Websocket server, " +
+                       "or select a different port.");
             this.notifiedFailedToBindPort = true;
         }
 
@@ -231,18 +241,21 @@ namespace TextToTalk
 
             this.commandManager.Dispose();
 
-            this.services.Framework.Update -= PollTalkAddon;
-            this.services.Framework.Update -= CheckKeybindPressed;
-            this.services.Framework.Update -= CheckPresetKeybindPressed;
+            var framework = this.services.GetService<Framework>();
+            framework.Update -= PollTalkAddon;
+            framework.Update -= CheckKeybindPressed;
+            framework.Update -= CheckPresetKeybindPressed;
 
-            this.services.Chat.ChatMessage -= CheckFailedToBindPort;
-            this.services.Chat.ChatMessage -= OnChatMessage;
+            var chat = this.services.GetService<ChatGui>();
+            chat.ChatMessage -= CheckFailedToBindPort;
+            chat.ChatMessage -= OnChatMessage;
 
             var ui = this.services.GetService<WindowManager>();
-            this.services.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
-            this.services.PluginInterface.UiBuilder.Draw -= ui.Draw;
+            var pi = this.services.GetService<DalamudPluginInterface>();
+            pi.UiBuilder.OpenConfigUi -= OpenConfigUi;
+            pi.UiBuilder.Draw -= ui.Draw;
 
-            this.services.PluginInterface.SavePluginConfig(this.config);
+            pi.SavePluginConfig(this.config);
 
             this.services.Dispose();
         }

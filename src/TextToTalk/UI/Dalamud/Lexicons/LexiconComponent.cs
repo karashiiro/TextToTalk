@@ -41,8 +41,11 @@ public class LexiconComponent
 
     public void Draw()
     {
-        // Draw the lexicon repo subwindow, if it's visible
-        this.lexiconRepoSubwindow.Draw(ref this.lexiconRepoSubwindowVisible);
+        // Draw the lexicon repo subwindow
+        if (this.lexiconRepoSubwindowVisible)
+        {
+            this.lexiconRepoSubwindow.Draw(ref this.lexiconRepoSubwindowVisible);
+        }
 
         ImGui.Text("Lexicons");
 
@@ -83,6 +86,11 @@ public class LexiconComponent
         }
 
         LexiconAddButton();
+        ImGui.SameLine();
+        if (ImGui.Button("Open Lexicon Repository"))
+        {
+            this.lexiconRepoSubwindowVisible = true;
+        }
 
         if (this.lexiconAddSucceeded)
         {

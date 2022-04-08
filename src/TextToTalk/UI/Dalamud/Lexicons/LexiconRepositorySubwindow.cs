@@ -16,19 +16,113 @@ public class LexiconRepositorySubwindow
     private readonly LexiconManager lexiconManager;
     private readonly LexiconRepository lexiconRepository;
 
+    private LexiconPackageInfo selectedPackage;
+    private bool selectedPackageIsInstalled;
+
+    private readonly object rpLock;
+    private IList<LexiconPackageInfo> remotePackages;
+    private bool remotePackagesLoading;
+    private bool remotePackagesLoaded;
+
     public LexiconRepositorySubwindow(LexiconManager lm, LexiconRepository lr)
     {
         this.lexiconManager = lm;
         this.lexiconRepository = lr;
+
+        this.rpLock = true;
     }
 
     public void Draw(ref bool visible)
     {
         ImGui.SetNextWindowSize(new Vector2(520, 480), ImGuiCond.FirstUseEver);
-        ImGui.Begin("Lexicon Repository", ref visible);
+        ImGui.Begin("Lexicon Repository##TextToTalkLexiconRepositorySubwindow", ref visible);
         {
+            if (!this.remotePackagesLoaded && !this.remotePackagesLoading)
+            {
+                // Fetch the list of lexicon packages
+                PluginLog.Log("Fetching lexicon package list...");
+                _ = LoadPackageInfo();
+            }
+            else if (ImGui.BeginTable("##LexiconRepoList", 2, ImGuiTableFlags.Borders))
+            {
+                ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 380f);
+                ImGui.TableSetupColumn("Author", ImGuiTableColumnFlags.None, 120f);
+                ImGui.TableHeadersRow();
+
+                if (this.remotePackages != null)
+                {
+                    lock (this.rpLock)
+                    {
+                        foreach (var package in this.remotePackages)
+                        {
+                            ImGui.TableNextRow();
+
+                            ImGui.TableSetColumnIndex(0);
+                            if (ImGui.Selectable($"##LexiconRepoList_{package.InternalName}", this.selectedPackage == package, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
+                            {
+                                this.selectedPackage = package;
+                                this.selectedPackageIsInstalled = this.lexiconRepository
+                                    .GetPackage(this.selectedPackage.InternalName).IsInstalled().GetAwaiter()
+                                    .GetResult();
+                            }
+                            ImGui.SameLine(0f, 0f);
+                            ImGui.Text(package.Name); // TODO: Show something different if it's installed or has an update
+
+                            ImGui.TableSetColumnIndex(1);
+                            ImGui.Text(package.Author);
+                        }
+                    }
+                }
+                
+                ImGui.EndTable();
+            }
+
+            lock (this.rpLock)
+            {
+                if (this.selectedPackage != null)
+                {
+                    ImGui.Text($"{this.selectedPackage.Name} by {this.selectedPackage.Author}");
+                    ImGui.TextWrapped(this.selectedPackage.Description);
+
+                    ImGui.Spacing();
+                    if (!this.selectedPackageIsInstalled)
+                    {
+                        if (ImGui.Button("Install"))
+                        {
+                            // do something
+                            this.selectedPackageIsInstalled = true;
+                        }
+                    }
+                    else if (ImGui.Button("Uninstall"))
+                    {
+                        // do something else
+                        this.selectedPackageIsInstalled = false;
+                    }
+                }
+            }
         }
         ImGui.End();
+    }
+
+    private async Task LoadPackageInfo()
+    {
+        if (this.remotePackagesLoading) return;
+        this.remotePackagesLoading = true;
+        var packages = await Task.WhenAll((await this.lexiconRepository.FetchPackages())
+            .Select(package =>
+            {
+                var packageName = LexiconPackage.GetInternalName(package.Path);
+                return this.lexiconRepository.GetPackage(packageName);
+            })
+            .Select(package => package.GetPackageInfo())
+            .ToList());
+        lock (this.rpLock)
+        {
+            this.remotePackages = packages;
+            this.selectedPackage = null;
+        }
+        this.remotePackagesLoading = false;
+        this.remotePackagesLoaded = true;
     }
 
     private void LoadRemoteLexicons()
