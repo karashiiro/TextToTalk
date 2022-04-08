@@ -134,7 +134,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Papalymo</grapheme>
-<phoneme>ˈpeɪpʊliˌmoʊ</phoneme>
+<phoneme>ˈpapʊliˌmoʊ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Raubahn</grapheme>

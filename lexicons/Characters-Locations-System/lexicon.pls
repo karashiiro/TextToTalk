@@ -134,7 +134,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Papalymo</grapheme>
-<phoneme>ˈpeɪpʊliˌmoʊ</phoneme>
+<phoneme>ˈpapʊliˌmoʊ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Raubahn</grapheme>
@@ -329,5 +329,13 @@
 <lexeme>
 <grapheme>Viera</grapheme>
 <phoneme>ˈviːˈɛrə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Miqo'te</grapheme>
+<phoneme>mɪˌqəʊteɪ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Moenbryda</grapheme>
+<phoneme>ˈmuːnˈbriːda</phoneme>
 </lexeme>
 </lexicon>
