@@ -345,7 +345,7 @@
 </lexeme>
 <lexeme>
 <grapheme>NIN</grapheme>
-<alias>ninja</alias>
+<phoneme>ˈnɪndʒə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>magitek</grapheme>
