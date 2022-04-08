@@ -344,8 +344,4 @@
 <phoneme>ˈaɪkɒnz</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Eikon</grapheme>
-<grapheme>eikon</grapheme>
-<phoneme>ˈaɪkɒn</phoneme>
-</lexeme>
 </lexicon>
