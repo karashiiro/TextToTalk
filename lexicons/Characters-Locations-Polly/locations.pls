@@ -61,6 +61,16 @@
 <phoneme>grɪdɔniə</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Gridanian</grapheme>
+<grapheme>gridanian</grapheme>
+<phoneme>grɪdɔniən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Gridanians</grapheme>
+<grapheme>gridanians</grapheme>
+<phoneme>grɪdɔniənz</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Gyr</grapheme>
 <phoneme>gɪr</phoneme>
 </lexeme>
