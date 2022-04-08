@@ -47,8 +47,8 @@
 <phoneme>ˈmuːnˈbriːda</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Eikon</grapheme>
-<grapheme>eikon</grapheme>
+<grapheme>Eikons</grapheme>
+<grapheme>eikons</grapheme>
 <phoneme>ˈaɪkɒnz</phoneme>
 </lexeme>
 <lexeme>
