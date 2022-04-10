@@ -14,26 +14,26 @@ namespace TextToTalk.Lexicons
 
         private readonly IList<LexiconInfo> lexicons;
 
-        public int GraphemeCount => this.lexicons.Count;
+        public int Entries => this.lexicons.SelectMany(l => l.Lexemes).Count();
 
         public LexiconManager()
         {
             this.lexicons = new List<LexiconInfo>();
         }
 
-        public void AddLexicon(Stream data, string lexiconName)
+        public virtual int AddLexicon(Stream data, string lexiconId)
         {
             var xml = XDocument.Load(data);
-            AddLexicon(xml, lexiconName);
+            return AddLexicon(xml, lexiconId);
         }
 
-        public void AddLexicon(string lexiconUrl)
+        public virtual int AddLexicon(string lexiconUrl)
         {
             var xml = XDocument.Load(lexiconUrl);
-            AddLexicon(xml, lexiconUrl);
+            return AddLexicon(xml, lexiconUrl);
         }
 
-        public void AddLexicon(XDocument xml, string lexiconId)
+        internal int AddLexicon(XDocument xml, string lexiconId)
         {
             if (xml.Root == null)
             {
@@ -75,9 +75,11 @@ namespace TextToTalk.Lexicons
             lexicon.Lexemes.Sort((a, b) => b.Grapheme.Length - a.Grapheme.Length);
 
             this.lexicons.Add(lexicon);
+
+            return lexicon.Lexemes.Count;
         }
 
-        public void RemoveLexicon(string lexiconId)
+        public virtual void RemoveLexicon(string lexiconId)
         {
             var lexicon = this.lexicons.FirstOrDefault(li => li.Id == lexiconId);
             if (lexicon != null)
@@ -86,7 +88,7 @@ namespace TextToTalk.Lexicons
             }
         }
 
-        public string MakeSsml(string text, string langCode = null, int playbackRate = -1, bool includeSpeakAttributes = true)
+        public virtual string MakeSsml(string text, string langCode = null, int playbackRate = -1, bool includeSpeakAttributes = true)
         {
             foreach (var lexicon in this.lexicons)
             {

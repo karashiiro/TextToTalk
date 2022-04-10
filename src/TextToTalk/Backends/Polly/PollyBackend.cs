@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using TextToTalk.Lexicons;
 using Gender = TextToTalk.GameEnums.Gender;
 
 namespace TextToTalk.Backends.Polly
@@ -27,7 +26,7 @@ namespace TextToTalk.Backends.Polly
             this.config = config;
             this.voices = new List<Voice>();
 
-            var lexiconManager = new LexiconManager();
+            var lexiconManager = new DalamudLexiconManager();
             LexiconUtils.LoadFromConfigPolly(lexiconManager, config);
 
             var credentials = PollyCredentialManager.LoadCredentials();

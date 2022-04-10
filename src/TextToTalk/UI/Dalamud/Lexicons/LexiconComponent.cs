@@ -168,7 +168,6 @@ public class LexiconComponent
 
                 try
                 {
-                    PluginLog.Log($"Adding lexicon \"{filePath}\"");
                     this.lexiconManager.AddLexicon(filePath);
                     lexicons.Add(filePath);
                     this.config.Save();

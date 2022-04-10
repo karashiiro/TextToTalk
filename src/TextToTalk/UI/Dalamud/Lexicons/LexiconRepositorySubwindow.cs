@@ -30,6 +30,8 @@ public class LexiconRepositorySubwindow
         this.lexiconRepository = lr;
 
         this.rpLock = true;
+
+        Task.Factory.StartNew(LoadRemoteLexicons);
     }
 
     public void Draw(ref bool visible)
@@ -62,8 +64,7 @@ public class LexiconRepositorySubwindow
                             {
                                 this.selectedPackage = package;
                                 this.selectedPackageIsInstalled = this.lexiconRepository
-                                    .GetPackage(this.selectedPackage.InternalName).IsInstalled().GetAwaiter()
-                                    .GetResult();
+                                    .GetPackage(this.selectedPackage.InternalName).IsInstalled();
                             }
                             ImGui.SameLine(0f, 0f);
                             ImGui.Text(package.Name); // TODO: Show something different if it's installed or has an update
@@ -89,13 +90,13 @@ public class LexiconRepositorySubwindow
                     {
                         if (ImGui.Button("Install"))
                         {
-                            // do something
+                            _ = InstallRemoteLexicon(this.selectedPackage.InternalName);
                             this.selectedPackageIsInstalled = true;
                         }
                     }
                     else if (ImGui.Button("Uninstall"))
                     {
-                        // do something else
+                        UninstallRemoteLexicon(this.selectedPackage.InternalName);
                         this.selectedPackageIsInstalled = false;
                     }
                 }
@@ -127,20 +128,36 @@ public class LexiconRepositorySubwindow
 
     private void LoadRemoteLexicons()
     {
-        var packageFolders = Directory.EnumerateDirectories(this.lexiconRepository.CachePath);
-        foreach (var lexiconDir in packageFolders)
+        IEnumerable<LexiconPackage> packages;
+        try
         {
-            // TODO: Read the local package metadata file instead of doing this
-            var files = Directory.EnumerateFiles(lexiconDir);
-            var packageName = Path.GetDirectoryName(lexiconDir);
-            foreach (var file in files.Where(f => !f.EndsWith(".yml")))
+            packages = Directory.EnumerateDirectories(this.lexiconRepository.CachePath)
+                .Select(dir => new DirectoryInfo(dir).Name)
+                .Where(packageName => this.lexiconRepository.GetPackage(packageName).IsInstalled())
+                .Select(packageName => this.lexiconRepository.GetPackage(packageName));
+        }
+        catch (DirectoryNotFoundException)
+        {
+            // Cache folder has not yet been created
+            return;
+        }
+
+        foreach (var package in packages)
+        {
+            var packageInfo = package.GetPackageInfoLocal();
+            var files = packageInfo.Files;
+            foreach (var file in files)
             {
-                var filename = Path.GetFileName(file);
-                var lexiconId = GetLexiconId(packageName, filename);
-                using var lexiconData = File.OpenRead(file);
+                var lexiconData = package.GetPackageFileLocal(file);
+                if (lexiconData == null)
+                {
+                    PluginLog.Error($"Local data for lexicon file \"{file}\" of lexicon \"{package.PackageName}\" not found! Please reinstall this lexicon.");
+                    continue;
+                }
+
                 try
                 {
-                    PluginLog.Log($"Adding lexicon \"{lexiconId}\"");
+                    var lexiconId = GetLexiconFileId(package.PackageName, file);
                     this.lexiconManager.AddLexicon(lexiconData, lexiconId);
                 }
                 catch (Exception e)
@@ -151,7 +168,7 @@ public class LexiconRepositorySubwindow
         }
     }
 
-    private async Task DownloadRemoteLexicon(string packageName)
+    private async Task InstallRemoteLexicon(string packageName)
     {
         // Fetch lexicon file list
         var package = this.lexiconRepository.GetPackage(packageName);
@@ -160,11 +177,10 @@ public class LexiconRepositorySubwindow
         // Download each file and load it
         foreach (var file in packageInfo.Files)
         {
-            var lexiconId = GetLexiconId(packageName, file);
+            var lexiconId = GetLexiconFileId(packageName, file);
             await using var lexiconData = await package.GetPackageFile(file);
             try
             {
-                PluginLog.Log($"Adding lexicon \"{lexiconId}\"");
                 this.lexiconManager.AddLexicon(lexiconData, lexiconId);
             }
             catch (Exception e)
@@ -184,7 +200,7 @@ public class LexiconRepositorySubwindow
             var package = this.lexiconRepository.GetPackage(packageName);
 
             // Only check updates for installed packages
-            if (!await package.IsInstalled()) continue;
+            if (!package.IsInstalled()) continue;
 
             var info = await package.GetPackageInfo();
             foreach (var file in info.Files)
@@ -210,7 +226,7 @@ public class LexiconRepositorySubwindow
         {
             if (!await package.HasUpdate(file)) continue;
 
-            var lexiconId = GetLexiconId(packageName, file);
+            var lexiconId = GetLexiconFileId(packageName, file);
             await using var lexiconData = await package.GetPackageFile(file);
             this.lexiconManager.RemoveLexicon(lexiconId);
             this.lexiconManager.AddLexicon(lexiconData, lexiconId);
@@ -222,17 +238,17 @@ public class LexiconRepositorySubwindow
         // TODO: Read the local package metadata file instead of doing this
         var lexiconDir = Path.Combine(this.lexiconRepository.CachePath, packageName);
         var files = Directory.EnumerateFiles(lexiconDir);
-        foreach (var file in files.Where(f => !f.EndsWith(".yml")))
+        foreach (var file in files.Where(f => f.EndsWith(".pls")))
         {
             var filename = Path.GetFileName(file);
-            var lexiconId = GetLexiconId(packageName, filename);
+            var lexiconId = GetLexiconFileId(packageName, filename);
             this.lexiconManager.RemoveLexicon(lexiconId);
         }
 
         this.lexiconRepository.RemovePackage(packageName);
     }
 
-    private static string GetLexiconId(string packageName, string filename)
+    private static string GetLexiconFileId(string packageName, string filename)
     {
         return $"{packageName}.{filename}";
     }

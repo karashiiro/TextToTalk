@@ -40,18 +40,37 @@ namespace TextToTalk.Lexicons.Updater
             await using var data = await GetPackageFile("package.yml");
             using var sr = new StreamReader(data);
             var infoRaw = await sr.ReadToEndAsync();
+            return ParsePackageInfo(infoRaw);
+        }
+
+        public LexiconPackageInfo GetPackageInfoLocal()
+        {
+            var filePath = GetCacheFilePath("package.yml");
+            if (!File.Exists(filePath)) return null;
+
+            // This can be disposed once we've read its data
+            using var data = File.OpenRead(filePath);
+            using var sr = new StreamReader(data);
+            var infoRaw = sr.ReadToEnd();
+            return ParsePackageInfo(infoRaw);
+        }
+
+        private LexiconPackageInfo ParsePackageInfo(string data)
+        {
             var info = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build()
-                .Deserialize<LexiconPackageInfo>(infoRaw);
+                .Deserialize<LexiconPackageInfo>(data);
             info.InternalName = PackageName;
             return info;
         }
 
-        public async Task<bool> IsInstalled()
+        public bool IsInstalled()
         {
             // A package is considered installed if at least one of its lexicon files has been downloaded.
-            var info = await GetPackageInfo();
+            var info = GetPackageInfoLocal();
+            if (info == null) return false;
+
             foreach (var file in info.Files)
             {
                 var localPath = GetCacheFilePath(file);
@@ -125,6 +144,11 @@ namespace TextToTalk.Lexicons.Updater
             return fileDataCopy;
         }
 
+        public Stream GetPackageFileLocal(string filename)
+        {
+            return TryGetLocalPackageStream(filename, out var localData) ? localData : null;
+        }
+
         public void Delete()
         {
             var dir = Path.Join(this.cachePath, PackageName);
@@ -175,7 +199,7 @@ namespace TextToTalk.Lexicons.Updater
         {
             if (!CanCache()) return new CachedLexicon();
 
-            var path = GetCacheFilePath("config.json");
+            var path = GetCacheFilePath("update.json");
             if (!File.Exists(path))
             {
                 return new CachedLexicon();
@@ -189,7 +213,7 @@ namespace TextToTalk.Lexicons.Updater
         {
             if (!CanCache()) return;
 
-            var path = GetCacheFilePath("config.json");
+            var path = GetCacheFilePath("update.json");
             var dir = Path.GetDirectoryName(path) ?? throw new InvalidOperationException("Directory is null.");
             Directory.CreateDirectory(dir);
             var data = JsonConvert.SerializeObject(this.cache);

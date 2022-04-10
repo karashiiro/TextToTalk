@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using TextToTalk.GameEnums;
-using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.System
 {
@@ -12,7 +11,7 @@ namespace TextToTalk.Backends.System
 
         public SystemBackend(PluginConfiguration config, HttpClient http)
         {
-            var lexiconManager = new LexiconManager();
+            var lexiconManager = new DalamudLexiconManager();
             LexiconUtils.LoadFromConfigSystem(lexiconManager, config);
 
             this.ui = new SystemBackendUI(config, lexiconManager, http);
