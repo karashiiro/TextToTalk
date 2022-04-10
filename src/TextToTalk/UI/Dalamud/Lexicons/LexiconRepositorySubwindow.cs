@@ -45,7 +45,7 @@ public class LexiconRepositorySubwindow
 
     public void Draw(ref bool visible)
     {
-        ImGui.SetNextWindowSize(new Vector2(520, 480), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(new Vector2(670, 480), ImGuiCond.Appearing);
         ImGui.Begin("Lexicon Repository##TextToTalkLexiconRepositorySubwindow", ref visible);
         {
             if (!this.remotePackagesLoaded && !this.remotePackagesLoading)
@@ -58,7 +58,7 @@ public class LexiconRepositorySubwindow
             {
                 ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 280f);
                 ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 100f);
-                ImGui.TableSetupColumn("Author", ImGuiTableColumnFlags.None, 120f);
+                ImGui.TableSetupColumn("Authors", ImGuiTableColumnFlags.None, 320f);
                 ImGui.TableHeadersRow();
 
                 if (this.remotePackages != null)
