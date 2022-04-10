@@ -58,7 +58,25 @@ public class ChatMessageHandler
                         this.filters.SetLastQuestText(textValue);
                     }
 
-                    textValue = $"{sender.TextValue} says {textValue}";
+                    var speakerNameToSay = sender.TextValue;
+
+                    if (config.SayPartialName)
+                    {
+                        var names = speakerNameToSay.Split(' ');
+
+                        switch (config.OnlySayFirstOrLastName)
+                        {
+                            case FirstOrLastName.First:
+                                speakerNameToSay = names[0];
+                                break;
+
+                            case FirstOrLastName.Last:
+                                speakerNameToSay = names[1];
+                                break;
+                        }
+                    }
+
+                    textValue = $"{speakerNameToSay} says {textValue}";
                     this.filters.SetLastSpeaker(sender.TextValue);
                 }
             }
