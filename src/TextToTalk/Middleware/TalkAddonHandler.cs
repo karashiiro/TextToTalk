@@ -87,7 +87,28 @@ public class TalkAddonHandler
         {
             if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(talkAddonText.Speaker))
             {
-                text = $"{talkAddonText.Speaker} says {text}";
+                var speakerNameToSay = talkAddonText.Speaker;
+
+                if (config.SayPartialName)
+                {
+                    var names = speakerNameToSay.Split(' ');
+
+                    switch (config.OnlySayFirstOrLastName)
+                    {
+                        case FirstOrLastName.First:
+                            speakerNameToSay = names[0];
+                            break;
+
+                        case FirstOrLastName.Last:
+                            if (names.Length == 1)
+                                speakerNameToSay = names[0]; // Some NPCs only have one name.
+                            else
+                                speakerNameToSay = names[1];
+                            break;
+                    }
+                }
+
+                text = $"{speakerNameToSay} says {text}";
                 this.filters.SetLastSpeaker(talkAddonText.Speaker);
             }
         }

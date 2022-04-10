@@ -144,6 +144,35 @@ namespace TextToTalk.UI.Dalamud
                         Configuration.Save();
                     }
 
+                    var SayPartialName = Configuration.SayPartialName;
+                    if (ImGui.Checkbox("Only say forename or surname", ref SayPartialName))
+                    {
+                        Configuration.SayPartialName = SayPartialName;
+                        Configuration.Save();
+                    }
+
+                    if (SayPartialName)
+                    {
+                        ImGui.Spacing();
+                        ImGui.Indent();
+
+                        var OnlySayFirstOrLastName = (int)Configuration.OnlySayFirstOrLastName;
+
+                        if (ImGui.RadioButton("Only say forename", ref OnlySayFirstOrLastName, (int)FirstOrLastName.First))
+                        {
+                            Configuration.OnlySayFirstOrLastName = FirstOrLastName.First;
+                            Configuration.Save();
+                        }
+
+                        if (ImGui.RadioButton("Only say surname", ref OnlySayFirstOrLastName, (int)FirstOrLastName.Last))
+                        {
+                            Configuration.OnlySayFirstOrLastName = FirstOrLastName.Last;
+                            Configuration.Save();
+                        }
+
+                        ImGui.Unindent();
+                    }
+
                     ImGui.Unindent();
                 }
 
