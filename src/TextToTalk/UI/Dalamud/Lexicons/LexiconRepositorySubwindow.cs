@@ -16,11 +16,10 @@ public class LexiconRepositorySubwindow
     private readonly LexiconManager lexiconManager;
     private readonly LexiconRepository lexiconRepository;
 
-    private LexiconPackageInfo selectedPackage;
-    private bool selectedPackageIsInstalled;
+    private (LexiconPackageInfo, LexiconPackageStatus) selectedPackage;
 
     private readonly object rpLock;
-    private IList<(LexiconPackageInfo, LexiconShouldUpdate)> remotePackages;
+    private IList<(LexiconPackageInfo, LexiconPackageStatus)> remotePackages;
     private bool remotePackagesLoading;
     private bool remotePackagesLoaded;
 
@@ -55,22 +54,23 @@ public class LexiconRepositorySubwindow
                 {
                     lock (this.rpLock)
                     {
-                        foreach (var (package, _) in this.remotePackages)
+                        foreach (var remotePackage in this.remotePackages)
                         {
+                            var (selectedPackageData, selectedPackageStatus) = this.selectedPackage;
+                            var (packageData, packageStatus) = remotePackage;
+
                             ImGui.TableNextRow();
 
                             ImGui.TableSetColumnIndex(0);
-                            if (ImGui.Selectable($"##LexiconRepoList_{package.InternalName}", this.selectedPackage == package, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
+                            if (ImGui.Selectable($"##LexiconRepoList_{packageData.InternalName}", selectedPackageData == packageData, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
                             {
-                                this.selectedPackage = package;
-                                this.selectedPackageIsInstalled = this.lexiconRepository
-                                    .GetPackage(this.selectedPackage.InternalName).IsInstalled();
+                                this.selectedPackage = remotePackage;
                             }
                             ImGui.SameLine(0f, 0f);
-                            ImGui.Text(package.Name); // TODO: Show something different if it's installed or has an update
+                            ImGui.Text(packageData.Name); // TODO: Show something different if it's installed or has an update
 
                             ImGui.TableSetColumnIndex(1);
-                            ImGui.Text(package.Author);
+                            ImGui.Text(packageData.Author);
                         }
                     }
                 }
@@ -80,24 +80,25 @@ public class LexiconRepositorySubwindow
 
             lock (this.rpLock)
             {
-                if (this.selectedPackage != null)
+                var (selectedPackageData, selectedPackageStatus) = this.selectedPackage;
+                if (selectedPackageData != null)
                 {
-                    ImGui.Text($"{this.selectedPackage.Name} by {this.selectedPackage.Author}");
-                    ImGui.TextWrapped(this.selectedPackage.Description);
+                    ImGui.Text($"{selectedPackageData.Name} by {selectedPackageData.Author}");
+                    ImGui.TextWrapped(selectedPackageData.Description);
 
                     ImGui.Spacing();
-                    if (!this.selectedPackageIsInstalled)
+                    if (!selectedPackageStatus.Installed)
                     {
                         if (ImGui.Button("Install"))
                         {
-                            _ = InstallLexicon(this.selectedPackage.InternalName);
-                            this.selectedPackageIsInstalled = true;
+                            _ = InstallLexicon(selectedPackageData.InternalName);
+                            selectedPackageStatus.Installed = true;
                         }
                     }
                     else if (ImGui.Button("Uninstall"))
                     {
-                        UninstallLexicon(this.selectedPackage.InternalName);
-                        this.selectedPackageIsInstalled = false;
+                        UninstallLexicon(selectedPackageData.InternalName);
+                        selectedPackageStatus.Installed = false;
                     }
                 }
             }
@@ -123,14 +124,15 @@ public class LexiconRepositorySubwindow
                 var packageInfo = await package.GetPackageInfo();
 
                 // Check the package for updates
-                var shouldUpdate = new LexiconShouldUpdate();
+                var shouldUpdate = new LexiconPackageStatus();
                 if (package.IsInstalled())
                 {
+                    shouldUpdate.Installed = true;
                     foreach (var file in packageInfo.Files)
                     {
                         if (await package.HasUpdate(file))
                         {
-                            shouldUpdate.ShouldUpdate = true;
+                            shouldUpdate.HasUpdate = true;
                             break;
                         }
                     }
@@ -142,7 +144,7 @@ public class LexiconRepositorySubwindow
         lock (this.rpLock)
         {
             this.remotePackages = packages;
-            this.selectedPackage = null;
+            this.selectedPackage = default;
         }
         this.remotePackagesLoading = false;
         this.remotePackagesLoaded = true;
