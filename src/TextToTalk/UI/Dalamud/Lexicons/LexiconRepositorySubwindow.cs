@@ -20,7 +20,7 @@ public class LexiconRepositorySubwindow
     private bool selectedPackageIsInstalled;
 
     private readonly object rpLock;
-    private IList<LexiconPackageInfo> remotePackages;
+    private IList<(LexiconPackageInfo, LexiconShouldUpdate)> remotePackages;
     private bool remotePackagesLoading;
     private bool remotePackagesLoaded;
 
@@ -55,7 +55,7 @@ public class LexiconRepositorySubwindow
                 {
                     lock (this.rpLock)
                     {
-                        foreach (var package in this.remotePackages)
+                        foreach (var (package, _) in this.remotePackages)
                         {
                             ImGui.TableNextRow();
 
@@ -118,7 +118,26 @@ public class LexiconRepositorySubwindow
                 var packageName = LexiconPackage.GetInternalName(package.Path);
                 return this.lexiconRepository.GetPackage(packageName);
             })
-            .Select(package => package.GetPackageInfo())
+            .Select(async package =>
+            {
+                var packageInfo = await package.GetPackageInfo();
+
+                // Check the package for updates
+                var shouldUpdate = new LexiconShouldUpdate();
+                if (package.IsInstalled())
+                {
+                    foreach (var file in packageInfo.Files)
+                    {
+                        if (await package.HasUpdate(file))
+                        {
+                            shouldUpdate.ShouldUpdate = true;
+                            break;
+                        }
+                    }
+                }
+
+                return (packageInfo, shouldUpdate);
+            })
             .ToList());
         lock (this.rpLock)
         {
@@ -197,36 +216,6 @@ public class LexiconRepositorySubwindow
                 PluginLog.LogError(e, "Failed to load lexicon.");
             }
         }
-    }
-
-    /// <summary>
-    /// Checks all lexicons to see if any are in need of an update.
-    /// </summary>
-    /// <returns>The list of lexicons that have available updates.</returns>
-    private async Task<IList<LexiconPackageInfo>> CheckRemoteLexiconUpdates()
-    {
-        var toUpdate = new List<LexiconPackageInfo>();
-        var items = await this.lexiconRepository.FetchPackages();
-        foreach (var item in items)
-        {
-            var packageName = LexiconPackage.GetInternalName(item.Path);
-            var package = this.lexiconRepository.GetPackage(packageName);
-
-            // Only check updates for installed packages
-            if (!package.IsInstalled()) continue;
-
-            var info = await package.GetPackageInfo();
-            foreach (var file in info.Files)
-            {
-                if (await package.HasUpdate(file))
-                {
-                    toUpdate.Add(info);
-                    break;
-                }
-            }
-        }
-
-        return toUpdate;
     }
 
     /// <summary>
