@@ -15,6 +15,9 @@ using TextToTalk.Migrations;
 
 namespace TextToTalk
 {
+    
+    public enum FirstOrLastName { First, Last }
+
     public class PluginConfiguration : IPluginConfiguration
     {
         private const string DefaultPreset = "Default";
@@ -75,6 +78,8 @@ namespace TextToTalk
         public bool NameNpcWithSay { get; set; } = true;
         public bool EnableNameWithSay { get; set; } = true;
         public bool DisallowMultipleSay { get; set; }
+        public bool SayPartialName { get; set; } = false;
+        public FirstOrLastName OnlySayFirstOrLastName { get; set; } = FirstOrLastName.First;
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;
         public bool CancelSpeechOnTextAdvance { get; set; }
