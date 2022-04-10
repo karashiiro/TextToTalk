@@ -151,8 +151,7 @@ public class LexiconRepositorySubwindow
         foreach (var package in packages)
         {
             var packageInfo = package.GetPackageInfoLocal();
-            var files = packageInfo.Files;
-            foreach (var file in files)
+            foreach (var file in packageInfo.Files)
             {
                 var lexiconData = package.GetPackageFileLocal(file);
                 if (lexiconData == null)
@@ -237,6 +236,8 @@ public class LexiconRepositorySubwindow
     private async Task UpdateLexicon(string packageName)
     {
         var package = this.lexiconRepository.GetPackage(packageName);
+        if (!package.IsInstalled()) return;
+
         var packageInfo = await package.GetPackageInfo();
 
         // Download each updated file and (re)load it
@@ -257,17 +258,32 @@ public class LexiconRepositorySubwindow
     /// <param name="packageName">The package name of the lexicon to uninstall.</param>
     private void UninstallLexicon(string packageName)
     {
-        // TODO: Read the local package metadata file instead of doing this
-        var lexiconDir = Path.Combine(this.lexiconRepository.CachePath, packageName);
-        var files = Directory.EnumerateFiles(lexiconDir);
-        foreach (var file in files.Where(f => f.EndsWith(".pls")))
+        var package = this.lexiconRepository.GetPackage(packageName);
+        if (!package.IsInstalled()) return;
+
+        var packageInfo = package.GetPackageInfoLocal();
+        foreach (var file in packageInfo.Files)
         {
-            var filename = Path.GetFileName(file);
-            var lexiconId = GetLexiconFileId(packageName, filename);
-            this.lexiconManager.RemoveLexicon(lexiconId);
+            var lexiconId = GetLexiconFileId(packageName, file);
+
+            try
+            {
+                this.lexiconManager.RemoveLexicon(lexiconId);
+            }
+            catch (Exception e)
+            {
+                PluginLog.LogError(e, "Failed to remove lexicon file.");
+            }
         }
 
-        this.lexiconRepository.RemovePackage(packageName);
+        try
+        {
+            this.lexiconRepository.RemovePackage(packageName);
+        }
+        catch (Exception e)
+        {
+            PluginLog.LogError(e, "Failed to uninstall lexicon.");
+        }
     }
 
     /// <summary>
