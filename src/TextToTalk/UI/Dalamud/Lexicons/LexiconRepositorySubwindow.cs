@@ -31,7 +31,7 @@ public class LexiconRepositorySubwindow
 
         this.rpLock = true;
 
-        Task.Factory.StartNew(LoadRemoteLexicons);
+        Task.Factory.StartNew(LoadInstalledLexicons);
     }
 
     public void Draw(ref bool visible)
@@ -90,13 +90,13 @@ public class LexiconRepositorySubwindow
                     {
                         if (ImGui.Button("Install"))
                         {
-                            _ = InstallRemoteLexicon(this.selectedPackage.InternalName);
+                            _ = InstallLexicon(this.selectedPackage.InternalName);
                             this.selectedPackageIsInstalled = true;
                         }
                     }
                     else if (ImGui.Button("Uninstall"))
                     {
-                        UninstallRemoteLexicon(this.selectedPackage.InternalName);
+                        UninstallLexicon(this.selectedPackage.InternalName);
                         this.selectedPackageIsInstalled = false;
                     }
                 }
@@ -105,6 +105,9 @@ public class LexiconRepositorySubwindow
         ImGui.End();
     }
 
+    /// <summary>
+    /// Retrieves all remote package info files for the UI list.
+    /// </summary>
     private async Task LoadPackageInfo()
     {
         if (this.remotePackagesLoading) return;
@@ -126,7 +129,10 @@ public class LexiconRepositorySubwindow
         this.remotePackagesLoaded = true;
     }
 
-    private void LoadRemoteLexicons()
+    /// <summary>
+    /// Loads all installed lexicons from the lexicon repository.
+    /// </summary>
+    private void LoadInstalledLexicons()
     {
         IEnumerable<LexiconPackage> packages;
         try
@@ -168,7 +174,11 @@ public class LexiconRepositorySubwindow
         }
     }
 
-    private async Task InstallRemoteLexicon(string packageName)
+    /// <summary>
+    /// Installs a lexicon from the lexicon repository.
+    /// </summary>
+    /// <param name="packageName">The lexicon's package name.</param>
+    private async Task InstallLexicon(string packageName)
     {
         // Fetch lexicon file list
         var package = this.lexiconRepository.GetPackage(packageName);
@@ -190,6 +200,10 @@ public class LexiconRepositorySubwindow
         }
     }
 
+    /// <summary>
+    /// Checks all lexicons to see if any are in need of an update.
+    /// </summary>
+    /// <returns>The list of lexicons that have available updates.</returns>
     private async Task<IList<LexiconPackageInfo>> CheckRemoteLexiconUpdates()
     {
         var toUpdate = new List<LexiconPackageInfo>();
@@ -216,7 +230,11 @@ public class LexiconRepositorySubwindow
         return toUpdate;
     }
 
-    private async Task UpdateRemoteLexicon(string packageName)
+    /// <summary>
+    /// Updates an installed lexicon from the lexicon repository.
+    /// </summary>
+    /// <param name="packageName">The package name of the lexicon to update.</param>
+    private async Task UpdateLexicon(string packageName)
     {
         var package = this.lexiconRepository.GetPackage(packageName);
         var packageInfo = await package.GetPackageInfo();
@@ -233,7 +251,11 @@ public class LexiconRepositorySubwindow
         }
     }
 
-    private void UninstallRemoteLexicon(string packageName)
+    /// <summary>
+    /// Uninstalls a lexicon.
+    /// </summary>
+    /// <param name="packageName">The package name of the lexicon to uninstall.</param>
+    private void UninstallLexicon(string packageName)
     {
         // TODO: Read the local package metadata file instead of doing this
         var lexiconDir = Path.Combine(this.lexiconRepository.CachePath, packageName);
@@ -248,6 +270,9 @@ public class LexiconRepositorySubwindow
         this.lexiconRepository.RemovePackage(packageName);
     }
 
+    /// <summary>
+    /// Returns a file ID for a lexicon file, which should be unique.
+    /// </summary>
     private static string GetLexiconFileId(string packageName, string filename)
     {
         return $"{packageName}.{filename}";
