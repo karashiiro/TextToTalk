@@ -199,24 +199,19 @@ namespace TextToTalk.UI.Dalamud
 
             if (ImGui.CollapsingHeader("Voices##TTTVoicePre1", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                var backends = Enum.GetNames(typeof(TTSBackend));
-                var backendsDisplay = backends.Select(SplitWords).ToArray();
+                var backends = Enum.GetValues<TTSBackend>();
+                var backendsDisplay = backends.Select(b => b.GetFormattedName()).ToArray();
                 var backend = Configuration.Backend;
-                var backendIndex = Array.IndexOf(backends, backend.ToString());
+                var backendIndex = Array.IndexOf(backends, backend);
 
                 if (ImGui.Combo("Voice backend##TTTVoicePre2", ref backendIndex, backendsDisplay, backends.Length))
                 {
-                    if (Enum.TryParse(backends[backendIndex], out TTSBackend newBackend))
-                    {
-                        Configuration.Backend = newBackend;
-                        Configuration.Save();
+                    var newBackend = backends[backendIndex];
 
-                        BackendManager.SetBackend(newBackend);
-                    }
-                    else
-                    {
-                        PluginLog.Error($"Failed to parse TTS backend \"{backends[backendIndex]}\".");
-                    }
+                    Configuration.Backend = newBackend;
+                    Configuration.Save();
+
+                    BackendManager.SetBackend(newBackend);
                 }
 
                 if (!BackendManager.BackendLoading)

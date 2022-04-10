@@ -102,6 +102,8 @@ namespace TextToTalk
         public int PollyPlaybackRate { get; set; } = 100;
         public IList<string> PollyLexiconFiles { get; set; }
 
+        public IDictionary<string, IDictionary<TTSBackend, bool>> RemoteLexiconEnabledBackends { get; set; }
+
         public bool UsePlayerRateLimiter { get; set; }
         public float MessagesPerSecond { get; set; } = 5;
 
@@ -115,6 +117,8 @@ namespace TextToTalk
         }
 
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
+
+        [JsonIgnore] private object cfgLock;
 
         public PluginConfiguration()
         {
@@ -130,12 +134,15 @@ namespace TextToTalk
         public void Initialize(DalamudPluginInterface pi)
         {
             this.pluginInterface = pi;
+            this.cfgLock = true;
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
             VoicePresets ??= new List<VoicePreset>();
 
             PollyLexiconFiles ??= new List<string>();
             Lexicons ??= new List<string>();
+
+            RemoteLexiconEnabledBackends ??= new Dictionary<string, IDictionary<TTSBackend, bool>>();
 
             if (!InitializedEver)
             {
@@ -193,7 +200,10 @@ namespace TextToTalk
 
         public void Save()
         {
-            this.pluginInterface.SavePluginConfig(this);
+            lock (this.cfgLock)
+            {
+                this.pluginInterface.SavePluginConfig(this);
+            }
         }
 
         public EnabledChatTypesPreset GetCurrentEnabledChatTypesPreset()

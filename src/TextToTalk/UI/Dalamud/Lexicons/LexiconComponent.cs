@@ -33,7 +33,7 @@ public class LexiconComponent
     public LexiconComponent(LexiconManager lm, LexiconRepository lr, PluginConfiguration config, Func<IList<string>> getLexiconList)
     {
         this.lexiconManager = lm;
-        this.lexiconRepoSubwindow = new LexiconRepositorySubwindow(lm, lr);
+        this.lexiconRepoSubwindow = new LexiconRepositorySubwindow(lm, lr, config);
         this.config = config;
         this.getLexiconList = getLexiconList;
     }

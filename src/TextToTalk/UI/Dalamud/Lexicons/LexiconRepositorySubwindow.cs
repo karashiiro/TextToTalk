@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Dalamud.Logging;
+using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Dalamud.Logging;
-using ImGuiNET;
+using TextToTalk.Backends;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 
@@ -18,6 +19,7 @@ public class LexiconRepositorySubwindow
 
     private readonly LexiconManager lexiconManager;
     private readonly LexiconRepository lexiconRepository;
+    private readonly PluginConfiguration config;
 
     private (LexiconPackageInfo, LexiconPackageInstallationStatus) selectedPackage;
 
@@ -26,10 +28,11 @@ public class LexiconRepositorySubwindow
     private bool remotePackagesLoading;
     private bool remotePackagesLoaded;
 
-    public LexiconRepositorySubwindow(LexiconManager lm, LexiconRepository lr)
+    public LexiconRepositorySubwindow(LexiconManager lm, LexiconRepository lr, PluginConfiguration config)
     {
         this.lexiconManager = lm;
         this.lexiconRepository = lr;
+        this.config = config;
 
         this.rpLock = true;
 
@@ -46,10 +49,11 @@ public class LexiconRepositorySubwindow
     public void Draw(ref bool visible)
     {
         ImGui.SetNextWindowSize(new Vector2(670, 480), ImGuiCond.Appearing);
-        ImGui.Begin("Lexicon Repository##TextToTalkLexiconRepositorySubwindow", ref visible);
+        ImGui.Begin("Lexicon Repository##TTTLexiconRepositorySubwindow", ref visible);
         {
             DrawPackageList();
             DrawSelectedPackageInfo();
+            DrawSelectedPackageSettings();
         }
         ImGui.End();
     }
@@ -60,9 +64,9 @@ public class LexiconRepositorySubwindow
         {
             // Fetch the list of lexicon packages
             PluginLog.Log("Fetching lexicon package list...");
-            _ = LoadPackageInfo();
+            _ = LoadPackageList();
         }
-        else if (ImGui.BeginTable("##LexiconRepoList", 3, ImGuiTableFlags.Borders))
+        else if (ImGui.BeginTable("##TTTLexiconRepoList", 3, ImGuiTableFlags.Borders))
         {
             ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 280f);
             ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 100f);
@@ -83,7 +87,7 @@ public class LexiconRepositorySubwindow
                         SetTableRowBg(packageStatus);
 
                         ImGui.TableSetColumnIndex(0);
-                        if (ImGui.Selectable($"##LexiconRepoList{packageData.InternalName}", selectedPackageData == packageData, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
+                        if (ImGui.Selectable($"##TTTLexiconRepoList{packageData.InternalName}", selectedPackageData == packageData, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
                         {
                             this.selectedPackage = remotePackage;
                         }
@@ -121,15 +125,23 @@ public class LexiconRepositorySubwindow
                 ImGui.TextWrapped(selectedPackageData.Description);
 
                 ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Text("Lexicon package files:");
+                foreach (var file in selectedPackageData.Files)
+                {
+                    ImGui.Text($" - {file}");
+                }
+
+                ImGui.Spacing();
                 if (!selectedPackageStatus.Installed)
                 {
-                    if (ImGui.Button("Install##TextToTalkLexiconRepoInstall"))
+                    if (ImGui.Button("Install##TTTLexiconRepoInstall"))
                     {
                         _ = InstallLexicon(selectedPackageData.InternalName);
                         selectedPackageStatus.Installed = true;
                     }
                 }
-                else if (ImGui.Button("Uninstall##TextToTalkLexiconRepoUninstall"))
+                else if (ImGui.Button("Uninstall##TTTLexiconRepoUninstall"))
                 {
                     UninstallLexicon(selectedPackageData.InternalName);
                     selectedPackageStatus.Installed = false;
@@ -142,7 +154,7 @@ public class LexiconRepositorySubwindow
                     {
                         ImGui.Button("Updating##TextToTalkLexiconRepoUpdating");
                     }
-                    else if (ImGui.Button("Update##TextToTalkLexiconRepoUpdate"))
+                    else if (ImGui.Button("Update##TTTLexiconRepoUpdate"))
                     {
                         selectedPackageStatus.Updating = true;
                         Task.Run(async () =>
@@ -157,10 +169,74 @@ public class LexiconRepositorySubwindow
         }
     }
 
+    private void DrawSelectedPackageSettings()
+    {
+        lock (this.rpLock)
+        {
+            var (selectedPackageData, selectedPackageStatus) = this.selectedPackage;
+            if (selectedPackageData != null && selectedPackageStatus.Installed)
+            {
+                ImGui.Separator();
+
+                ImGui.Text("Enabled for backends:");
+                ImGui.Indent();
+                {
+                    foreach (var backend in Enum.GetValues<TTSBackend>().Where(b => b != TTSBackend.Websocket))
+                    {
+                        EnsureEnabledBackends(selectedPackageData.InternalName);
+
+                        var name = backend.GetFormattedName();
+                        var otherEnabled = this.config.RemoteLexiconEnabledBackends[selectedPackageData.InternalName][backend];
+                        var currentEnabledBefore = this.config.RemoteLexiconEnabledBackends[selectedPackageData.InternalName][this.config.Backend];
+
+                        if (ImGui.Checkbox($"{name}##TTTLexiconRepoEnabledBackend{name}", ref otherEnabled))
+                        {
+                            this.config.RemoteLexiconEnabledBackends[selectedPackageData.InternalName][backend] = otherEnabled;
+                            var currentEnabled = this.config.RemoteLexiconEnabledBackends[selectedPackageData.InternalName][this.config.Backend];
+
+                            var package = this.lexiconRepository.GetPackage(selectedPackageData.InternalName);
+                            foreach (var file in selectedPackageData.Files)
+                            {
+                                var lexiconId = GetLexiconFileId(selectedPackageData.InternalName, file);
+
+                                if (otherEnabled && currentEnabled)
+                                {
+                                    using var lexiconData = package.GetPackageFileLocal(file);
+                                    try
+                                    {
+                                        this.lexiconManager.AddLexicon(lexiconData, lexiconId);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        PluginLog.LogError(e, "Failed to load lexicon.");
+                                    }
+                                }
+                                else if (currentEnabledBefore && !currentEnabled)
+                                {
+                                    try
+                                    {
+                                        this.lexiconManager.RemoveLexicon(lexiconId);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        PluginLog.LogError(e, "Failed to unload lexicon.");
+                                    }
+                                }
+                            }
+
+                            this.config.Save();
+                        }
+                    }
+                }
+                ImGui.Unindent();
+            }
+        }
+    }
+
     /// <summary>
     /// Retrieves all remote package info files for the UI list.
     /// </summary>
-    private async Task LoadPackageInfo()
+    private async Task LoadPackageList()
     {
         if (this.remotePackagesLoading) return;
         this.remotePackagesLoading = true;
@@ -215,6 +291,13 @@ public class LexiconRepositorySubwindow
 
         foreach (var package in packages)
         {
+            EnsureEnabledBackends(package.PackageName);
+
+            if (!this.config.RemoteLexiconEnabledBackends[package.PackageName][this.config.Backend])
+            {
+                continue;
+            }
+
             var packageInfo = package.GetPackageInfoLocal();
             foreach (var file in packageInfo.Files)
             {
@@ -248,6 +331,9 @@ public class LexiconRepositorySubwindow
         var package = this.lexiconRepository.GetPackage(packageName);
         var packageInfo = await package.GetPackageInfo();
 
+        // Create an enabled backends list for the new package
+        EnsureEnabledBackends(packageName);
+
         // Download each file and load it
         foreach (var file in packageInfo.Files)
         {
@@ -255,7 +341,10 @@ public class LexiconRepositorySubwindow
             await using var lexiconData = await package.GetPackageFile(file);
             try
             {
-                this.lexiconManager.AddLexicon(lexiconData, lexiconId);
+                if (this.config.RemoteLexiconEnabledBackends[package.PackageName][this.config.Backend])
+                {
+                    this.lexiconManager.AddLexicon(lexiconData, lexiconId);
+                }
             }
             catch (Exception e)
             {
@@ -273,17 +362,29 @@ public class LexiconRepositorySubwindow
         var package = this.lexiconRepository.GetPackage(packageName);
         if (!package.IsInstalled()) return;
 
-        var packageInfo = await package.GetPackageInfo();
+        EnsureEnabledBackends(packageName);
 
-        // Download each updated file and (re)load it
+        // Unload all package files
+        var packageInfoLocal = package.GetPackageInfoLocal();
+        foreach (var file in packageInfoLocal.Files)
+        {
+            var lexiconId = GetLexiconFileId(packageName, file);
+            if (this.config.RemoteLexiconEnabledBackends[package.PackageName][this.config.Backend])
+            {
+                this.lexiconManager.RemoveLexicon(lexiconId);
+            }
+        }
+
+        // Download and (re)load all package files
+        var packageInfo = await package.GetPackageInfo();
         foreach (var file in packageInfo.Files)
         {
-            if (!await package.HasUpdate(file)) continue;
-
             var lexiconId = GetLexiconFileId(packageName, file);
             await using var lexiconData = await package.GetPackageFile(file);
-            this.lexiconManager.RemoveLexicon(lexiconId);
-            this.lexiconManager.AddLexicon(lexiconData, lexiconId);
+            if (this.config.RemoteLexiconEnabledBackends[package.PackageName][this.config.Backend])
+            {
+                this.lexiconManager.AddLexicon(lexiconData, lexiconId);
+            }
         }
     }
 
@@ -319,6 +420,25 @@ public class LexiconRepositorySubwindow
         {
             PluginLog.LogError(e, "Failed to uninstall lexicon.");
         }
+    }
+
+    private void EnsureEnabledBackends(string packageName)
+    {
+        if (!this.config.RemoteLexiconEnabledBackends.TryGetValue(packageName, out _))
+        {
+            this.config.RemoteLexiconEnabledBackends[packageName] =
+                new Dictionary<TTSBackend, bool>();
+        }
+
+        foreach (var backend in Enum.GetValues<TTSBackend>().Where(b => b != TTSBackend.Websocket))
+        {
+            if (!this.config.RemoteLexiconEnabledBackends[packageName].TryGetValue(backend, out _))
+            {
+                this.config.RemoteLexiconEnabledBackends[packageName][backend] = false;
+            }
+        }
+
+        this.config.Save();
     }
 
     /// <summary>
