@@ -58,7 +58,7 @@ public class LexiconRepositorySubwindow
             {
                 ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 280f);
                 ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 100f);
-                ImGui.TableSetupColumn("Authors", ImGuiTableColumnFlags.None, 320f);
+                ImGui.TableSetupColumn("Authors", ImGuiTableColumnFlags.None, 220f);
                 ImGui.TableHeadersRow();
 
                 if (this.remotePackages != null)
