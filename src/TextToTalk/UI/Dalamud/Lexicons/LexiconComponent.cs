@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Dalamud.Interface;
+using Dalamud.Logging;
+using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using Dalamud.Interface;
-using Dalamud.Logging;
-using ImGuiNET;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI.Native;
@@ -17,7 +16,7 @@ namespace TextToTalk.UI.Dalamud.Lexicons;
 public class LexiconComponent
 {
     private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-    private static readonly Vector4 Red = new(1, 0, 0, 1);
+    private static readonly Vector4 Red = new(1.0f, 0.0f, 0.0f, 1.0f);
 
     private readonly List<Exception> lexiconRemoveExceptions = new();
     private Exception lexiconAddException;
@@ -45,6 +44,10 @@ public class LexiconComponent
         if (this.lexiconRepoSubwindowVisible)
         {
             this.lexiconRepoSubwindow.Draw(ref this.lexiconRepoSubwindowVisible);
+        }
+        else
+        {
+            this.lexiconRepoSubwindow.Clear();
         }
 
         ImGui.Text("Lexicons");

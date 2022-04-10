@@ -83,6 +83,22 @@ namespace TextToTalk.Lexicons.Updater
             return false;
         }
 
+        public async Task<bool> HasUpdate()
+        {
+            if (!IsInstalled()) return false;
+
+            var packageInfo = await GetPackageInfo();
+            foreach (var file in packageInfo.Files)
+            {
+                if (await HasUpdate(file))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public async Task<bool> HasUpdate(string filename)
         {
             // Get the package metadata

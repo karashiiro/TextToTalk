@@ -13,13 +13,16 @@ namespace TextToTalk.UI.Dalamud.Lexicons;
 
 public class LexiconRepositorySubwindow
 {
+    private static readonly uint InstalledBg = ImGui.ColorConvertFloat4ToU32(new Vector4(0.0f, 1.0f, 0.0f, 0.25f));
+    private static readonly uint HasUpdateBg = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 1.0f, 0.0f, 0.25f));
+
     private readonly LexiconManager lexiconManager;
     private readonly LexiconRepository lexiconRepository;
 
-    private (LexiconPackageInfo, LexiconPackageStatus) selectedPackage;
+    private (LexiconPackageInfo, LexiconPackageInstallationStatus) selectedPackage;
 
     private readonly object rpLock;
-    private IList<(LexiconPackageInfo, LexiconPackageStatus)> remotePackages;
+    private IList<(LexiconPackageInfo, LexiconPackageInstallationStatus)> remotePackages;
     private bool remotePackagesLoading;
     private bool remotePackagesLoaded;
 
@@ -33,6 +36,13 @@ public class LexiconRepositorySubwindow
         Task.Factory.StartNew(LoadInstalledLexicons);
     }
 
+    public void Clear()
+    {
+        this.remotePackagesLoaded = false;
+        this.remotePackages = null;
+        this.selectedPackage = default;
+    }
+
     public void Draw(ref bool visible)
     {
         ImGui.SetNextWindowSize(new Vector2(520, 480), ImGuiCond.FirstUseEver);
@@ -44,9 +54,10 @@ public class LexiconRepositorySubwindow
                 PluginLog.Log("Fetching lexicon package list...");
                 _ = LoadPackageInfo();
             }
-            else if (ImGui.BeginTable("##LexiconRepoList", 2, ImGuiTableFlags.Borders))
+            else if (ImGui.BeginTable("##LexiconRepoList", 3, ImGuiTableFlags.Borders))
             {
-                ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 380f);
+                ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 280f);
+                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 100f);
                 ImGui.TableSetupColumn("Author", ImGuiTableColumnFlags.None, 120f);
                 ImGui.TableHeadersRow();
 
@@ -56,20 +67,32 @@ public class LexiconRepositorySubwindow
                     {
                         foreach (var remotePackage in this.remotePackages)
                         {
-                            var (selectedPackageData, selectedPackageStatus) = this.selectedPackage;
+                            var (selectedPackageData, _) = this.selectedPackage;
                             var (packageData, packageStatus) = remotePackage;
 
                             ImGui.TableNextRow();
 
+                            SetTableRowBg(packageStatus);
+
                             ImGui.TableSetColumnIndex(0);
-                            if (ImGui.Selectable($"##LexiconRepoList_{packageData.InternalName}", selectedPackageData == packageData, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
+                            if (ImGui.Selectable($"##LexiconRepoList{packageData.InternalName}", selectedPackageData == packageData, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
                             {
                                 this.selectedPackage = remotePackage;
                             }
                             ImGui.SameLine(0f, 0f);
-                            ImGui.Text(packageData.Name); // TODO: Show something different if it's installed or has an update
+                            ImGui.Text(packageData.Name);
 
                             ImGui.TableSetColumnIndex(1);
+                            if (packageStatus.HasUpdate)
+                            {
+                                ImGui.Text("Has update");
+                            }
+                            else if (packageStatus.Installed)
+                            {
+                                ImGui.Text("Installed");
+                            }
+
+                            ImGui.TableSetColumnIndex(2);
                             ImGui.Text(packageData.Author);
                         }
                     }
@@ -89,16 +112,35 @@ public class LexiconRepositorySubwindow
                     ImGui.Spacing();
                     if (!selectedPackageStatus.Installed)
                     {
-                        if (ImGui.Button("Install"))
+                        if (ImGui.Button("Install##TextToTalkLexiconRepoInstall"))
                         {
                             _ = InstallLexicon(selectedPackageData.InternalName);
                             selectedPackageStatus.Installed = true;
                         }
                     }
-                    else if (ImGui.Button("Uninstall"))
+                    else if (ImGui.Button("Uninstall##TextToTalkLexiconRepoUninstall"))
                     {
                         UninstallLexicon(selectedPackageData.InternalName);
                         selectedPackageStatus.Installed = false;
+                    }
+
+                    if (selectedPackageStatus.HasUpdate)
+                    {
+                        ImGui.SameLine();
+                        if (selectedPackageStatus.Updating)
+                        {
+                            ImGui.Button("Updating##TextToTalkLexiconRepoUpdating");
+                        }
+                        else if (ImGui.Button("Update##TextToTalkLexiconRepoUpdate"))
+                        {
+                            selectedPackageStatus.Updating = true;
+                            Task.Run(async () =>
+                            {
+                                await UpdateLexicon(selectedPackageData.InternalName);
+                                selectedPackageStatus.HasUpdate = false;
+                                selectedPackageStatus.Updating = false;
+                            });
+                        }
                     }
                 }
             }
@@ -123,19 +165,12 @@ public class LexiconRepositorySubwindow
             {
                 var packageInfo = await package.GetPackageInfo();
 
-                // Check the package for updates
-                var shouldUpdate = new LexiconPackageStatus();
+                // Check the package installation status
+                var shouldUpdate = new LexiconPackageInstallationStatus();
                 if (package.IsInstalled())
                 {
                     shouldUpdate.Installed = true;
-                    foreach (var file in packageInfo.Files)
-                    {
-                        if (await package.HasUpdate(file))
-                        {
-                            shouldUpdate.HasUpdate = true;
-                            break;
-                        }
-                    }
+                    shouldUpdate.HasUpdate = await package.HasUpdate();
                 }
 
                 return (packageInfo, shouldUpdate);
@@ -283,5 +318,35 @@ public class LexiconRepositorySubwindow
     private static string GetLexiconFileId(string packageName, string filename)
     {
         return $"{packageName}.{filename}";
+    }
+
+    /// <summary>
+    /// Sets the table row's background color based on the provided package status object.
+    /// </summary>
+    private static unsafe void SetTableRowBg(LexiconPackageInstallationStatus status)
+    {
+        var rowBg0Default = ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.TableRowBg));
+        var rowBg1Default = ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.TableRowBgAlt));
+
+        if (status == null)
+        {
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, rowBg0Default);
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, rowBg1Default);
+        }
+        else if (status.HasUpdate)
+        {
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, HasUpdateBg);
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, HasUpdateBg);
+        }
+        else if (status.Installed)
+        {
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, InstalledBg);
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, InstalledBg);
+        }
+        else
+        {
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg0, rowBg0Default);
+            ImGui.TableSetBgColor(ImGuiTableBgTarget.RowBg1, rowBg1Default);
+        }
     }
 }
