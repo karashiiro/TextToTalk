@@ -48,104 +48,113 @@ public class LexiconRepositorySubwindow
         ImGui.SetNextWindowSize(new Vector2(670, 480), ImGuiCond.Appearing);
         ImGui.Begin("Lexicon Repository##TextToTalkLexiconRepositorySubwindow", ref visible);
         {
-            if (!this.remotePackagesLoaded && !this.remotePackagesLoading)
-            {
-                // Fetch the list of lexicon packages
-                PluginLog.Log("Fetching lexicon package list...");
-                _ = LoadPackageInfo();
-            }
-            else if (ImGui.BeginTable("##LexiconRepoList", 3, ImGuiTableFlags.Borders))
-            {
-                ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 280f);
-                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 100f);
-                ImGui.TableSetupColumn("Authors", ImGuiTableColumnFlags.None, 220f);
-                ImGui.TableHeadersRow();
+            DrawPackageList();
+            DrawSelectedPackageInfo();
+        }
+        ImGui.End();
+    }
 
-                if (this.remotePackages != null)
+    private void DrawPackageList()
+    {
+        if (!this.remotePackagesLoaded && !this.remotePackagesLoading)
+        {
+            // Fetch the list of lexicon packages
+            PluginLog.Log("Fetching lexicon package list...");
+            _ = LoadPackageInfo();
+        }
+        else if (ImGui.BeginTable("##LexiconRepoList", 3, ImGuiTableFlags.Borders))
+        {
+            ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 280f);
+            ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 100f);
+            ImGui.TableSetupColumn("Authors", ImGuiTableColumnFlags.None, 220f);
+            ImGui.TableHeadersRow();
+
+            if (this.remotePackages != null)
+            {
+                lock (this.rpLock)
                 {
-                    lock (this.rpLock)
+                    foreach (var remotePackage in this.remotePackages)
                     {
-                        foreach (var remotePackage in this.remotePackages)
+                        var (selectedPackageData, _) = this.selectedPackage;
+                        var (packageData, packageStatus) = remotePackage;
+
+                        ImGui.TableNextRow();
+
+                        SetTableRowBg(packageStatus);
+
+                        ImGui.TableSetColumnIndex(0);
+                        if (ImGui.Selectable($"##LexiconRepoList{packageData.InternalName}", selectedPackageData == packageData, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
                         {
-                            var (selectedPackageData, _) = this.selectedPackage;
-                            var (packageData, packageStatus) = remotePackage;
-
-                            ImGui.TableNextRow();
-
-                            SetTableRowBg(packageStatus);
-
-                            ImGui.TableSetColumnIndex(0);
-                            if (ImGui.Selectable($"##LexiconRepoList{packageData.InternalName}", selectedPackageData == packageData, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowItemOverlap, Vector2.Zero))
-                            {
-                                this.selectedPackage = remotePackage;
-                            }
-                            ImGui.SameLine(0f, 0f);
-                            ImGui.Text(packageData.Name);
-
-                            ImGui.TableSetColumnIndex(1);
-                            if (packageStatus.HasUpdate)
-                            {
-                                ImGui.Text("Has update");
-                            }
-                            else if (packageStatus.Installed)
-                            {
-                                ImGui.Text("Installed");
-                            }
-
-                            ImGui.TableSetColumnIndex(2);
-                            ImGui.Text(packageData.Author);
+                            this.selectedPackage = remotePackage;
                         }
+                        ImGui.SameLine(0f, 0f);
+                        ImGui.Text(packageData.Name);
+
+                        ImGui.TableSetColumnIndex(1);
+                        if (packageStatus.HasUpdate)
+                        {
+                            ImGui.Text("Has update");
+                        }
+                        else if (packageStatus.Installed)
+                        {
+                            ImGui.Text("Installed");
+                        }
+
+                        ImGui.TableSetColumnIndex(2);
+                        ImGui.Text(packageData.Author);
                     }
                 }
-                
-                ImGui.EndTable();
             }
 
-            lock (this.rpLock)
+            ImGui.EndTable();
+        }
+    }
+
+    private void DrawSelectedPackageInfo()
+    {
+        lock (this.rpLock)
+        {
+            var (selectedPackageData, selectedPackageStatus) = this.selectedPackage;
+            if (selectedPackageData != null)
             {
-                var (selectedPackageData, selectedPackageStatus) = this.selectedPackage;
-                if (selectedPackageData != null)
+                ImGui.Text($"{selectedPackageData.Name} by {selectedPackageData.Author}");
+                ImGui.TextWrapped(selectedPackageData.Description);
+
+                ImGui.Spacing();
+                if (!selectedPackageStatus.Installed)
                 {
-                    ImGui.Text($"{selectedPackageData.Name} by {selectedPackageData.Author}");
-                    ImGui.TextWrapped(selectedPackageData.Description);
-
-                    ImGui.Spacing();
-                    if (!selectedPackageStatus.Installed)
+                    if (ImGui.Button("Install##TextToTalkLexiconRepoInstall"))
                     {
-                        if (ImGui.Button("Install##TextToTalkLexiconRepoInstall"))
-                        {
-                            _ = InstallLexicon(selectedPackageData.InternalName);
-                            selectedPackageStatus.Installed = true;
-                        }
+                        _ = InstallLexicon(selectedPackageData.InternalName);
+                        selectedPackageStatus.Installed = true;
                     }
-                    else if (ImGui.Button("Uninstall##TextToTalkLexiconRepoUninstall"))
-                    {
-                        UninstallLexicon(selectedPackageData.InternalName);
-                        selectedPackageStatus.Installed = false;
-                    }
+                }
+                else if (ImGui.Button("Uninstall##TextToTalkLexiconRepoUninstall"))
+                {
+                    UninstallLexicon(selectedPackageData.InternalName);
+                    selectedPackageStatus.Installed = false;
+                }
 
-                    if (selectedPackageStatus.HasUpdate)
+                if (selectedPackageStatus.HasUpdate)
+                {
+                    ImGui.SameLine();
+                    if (selectedPackageStatus.Updating)
                     {
-                        ImGui.SameLine();
-                        if (selectedPackageStatus.Updating)
+                        ImGui.Button("Updating##TextToTalkLexiconRepoUpdating");
+                    }
+                    else if (ImGui.Button("Update##TextToTalkLexiconRepoUpdate"))
+                    {
+                        selectedPackageStatus.Updating = true;
+                        Task.Run(async () =>
                         {
-                            ImGui.Button("Updating##TextToTalkLexiconRepoUpdating");
-                        }
-                        else if (ImGui.Button("Update##TextToTalkLexiconRepoUpdate"))
-                        {
-                            selectedPackageStatus.Updating = true;
-                            Task.Run(async () =>
-                            {
-                                await UpdateLexicon(selectedPackageData.InternalName);
-                                selectedPackageStatus.HasUpdate = false;
-                                selectedPackageStatus.Updating = false;
-                            });
-                        }
+                            await UpdateLexicon(selectedPackageData.InternalName);
+                            selectedPackageStatus.HasUpdate = false;
+                            selectedPackageStatus.Updating = false;
+                        });
                     }
                 }
             }
         }
-        ImGui.End();
     }
 
     /// <summary>
