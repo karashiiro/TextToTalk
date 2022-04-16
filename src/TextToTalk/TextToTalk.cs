@@ -99,6 +99,7 @@ namespace TextToTalk
             this.keysDown = false;
         }
 
+        private bool presetKeysDown;
         private void CheckPresetKeybindPressed(Framework framework)
         {
             foreach (var preset in this.config.EnabledChatTypesPresets.Where(p => p.UseKeybind))
@@ -106,9 +107,20 @@ namespace TextToTalk
                 if (this.keys[(byte)preset.ModifierKey] &&
                     this.keys[(byte)preset.MajorKey])
                 {
+                    if (this.presetKeysDown) return;
+
+                    this.presetKeysDown = true;
+
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
+                    var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
+                    commandModule.Chat.Print($"TextToTalk preset -> {preset.Name}");
+                    PluginLog.Log($"TextToTalk preset -> {preset.Name}");
+
+                    return;
                 }
             }
+
+            this.presetKeysDown = false;
         }
 
         private void PollTalkAddon(Framework framework)
