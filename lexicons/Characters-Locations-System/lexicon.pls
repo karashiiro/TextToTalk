@@ -6,6 +6,7 @@
         http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
       alphabet="ipa" 
       xml:lang="en">
+<!-- Names -->
 <lexeme>
 <grapheme>Ascian</grapheme>
 <phoneme>ˈæsiːən</phoneme>
@@ -208,20 +209,8 @@
 <grapheme>Zodiark</grapheme>
 <phoneme>ˈzoʊdɪɑrk</phoneme>
 </lexeme>
-<lexeme>
-<grapheme>'s</grapheme>
-<phoneme>z</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Aetheryte</grapheme>
-<grapheme>aetheryte</grapheme>
-<phoneme>eɪθˈə.raɪt</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Aetherytes</grapheme>
-<grapheme>aetherytes</grapheme>
-<phoneme>eɪθˈə.raɪtz</phoneme>
-</lexeme>
+
+<!-- LOCATIONS -->
 <lexeme>
 <grapheme>Ahm Araeng</grapheme>
 <phoneme>ˈɑːmɐrɛng</phoneme>
@@ -357,6 +346,30 @@
 <grapheme>eikons</grapheme>
 <phoneme>ˈaɪkɒnz</phoneme>
 </lexeme>
+
+<!-- miscellaneous -->
+<lexeme>
+<grapheme>Aetheryte</grapheme>
+<grapheme>aetheryte</grapheme>
+<phoneme>eɪθˈə.raɪt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Aetherytes</grapheme>
+<grapheme>aetherytes</grapheme>
+<phoneme>eɪθˈə.raɪtz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Eld</grapheme>
+<grapheme>eld</grapheme>
+<phoneme>ɛld</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Hm,</grapheme>
+<grapheme> hm,</grapheme>
+<grapheme>Hm.</grapheme>
+<grapheme> hm.</grapheme>
+<phoneme>hm̩</phoneme>
+</lexeme>
 <lexeme>
 <grapheme>NIN</grapheme>
 <phoneme>ˈnɪndʒə</phoneme>
@@ -369,5 +382,14 @@
 <lexeme>
 <grapheme>Regen</grapheme>
 <phoneme>riˈʝen</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>'s</grapheme>
+<phoneme>z</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>'tis</grapheme>
+<grapheme>'Tis</grapheme>
+<phoneme>ˈtɪz</phoneme>
 </lexeme>
 </lexicon>
