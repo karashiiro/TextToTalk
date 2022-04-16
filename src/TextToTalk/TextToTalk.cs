@@ -71,44 +71,58 @@ namespace TextToTalk
             var framework = this.services.GetService<Framework>();
             framework.Update += PollTalkAddon;
             framework.Update += CheckKeybindPressed;
-            framework.Update += CheckPresetKeybindPressed;
 
             var commands = this.services.GetService<Dalamud.Game.Command.CommandManager>();
             this.commandManager = new CommandManager(commands, this.services);
             this.commandManager.AddCommandModule<MainCommandModule>();
         }
 
-        private bool keysDown;
+        private bool keysDown = false;
         private void CheckKeybindPressed(Framework framework)
         {
             if (!this.config.UseKeybind) return;
 
-            if (this.keys[(byte)this.config.ModifierKey] &&
-                this.keys[(byte)this.config.MajorKey])
-            {
-                if (this.keysDown) return;
-
-                this.keysDown = true;
-
-                var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
-                commandModule.ToggleTts();
-
-                return;
-            }
+            if (this.CheckTTSToggleKeybind()) return;
+            if (this.CheckPresetKeybind()) return;
 
             this.keysDown = false;
         }
 
-        private void CheckPresetKeybindPressed(Framework framework)
+        private bool CheckPresetKeybind()
         {
             foreach (var preset in this.config.EnabledChatTypesPresets.Where(p => p.UseKeybind))
             {
                 if (this.keys[(byte)preset.ModifierKey] &&
                     this.keys[(byte)preset.MajorKey])
                 {
+                    if (this.keysDown) return true;
+
+                    this.keysDown = true;
+
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
+                    var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
+                    commandModule.Chat.Print($"TextToTalk preset -> {preset.Name}");
+                    PluginLog.Log($"TextToTalk preset -> {preset.Name}");
+                    return true;
                 }
             }
+            return false;
+        }
+
+        private bool CheckTTSToggleKeybind()
+        {
+            if (this.keys[(byte)this.config.ModifierKey] &&
+                this.keys[(byte)this.config.MajorKey])
+            {
+                if (this.keysDown) return true;
+
+                this.keysDown = true;
+
+                var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
+                commandModule.ToggleTts();
+                return true;
+            }
+            return false;
         }
 
         private void PollTalkAddon(Framework framework)
@@ -244,7 +258,6 @@ namespace TextToTalk
             var framework = this.services.GetService<Framework>();
             framework.Update -= PollTalkAddon;
             framework.Update -= CheckKeybindPressed;
-            framework.Update -= CheckPresetKeybindPressed;
 
             var chat = this.services.GetService<ChatGui>();
             chat.ChatMessage -= CheckFailedToBindPort;
