@@ -150,8 +150,15 @@ public class PollyBackendUI
                 this.config.Save();
             }
 
+            ImGui.Spacing();
             if (useGenderedVoicePresets)
             {
+                if (voices.Count == 0)
+                {
+                    ImGui.TextColored(Red, "No voices are available on this voice engine for the current region.\n" +
+                                           "Please log in using a different region.");
+                }
+
                 var currentUngenderedVoiceId = this.config.PollyVoiceUngendered;
                 var currentMaleVoiceId = this.config.PollyVoiceMale;
                 var currentFemaleVoiceId = this.config.PollyVoiceFemale;
