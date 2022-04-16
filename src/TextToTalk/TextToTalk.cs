@@ -34,7 +34,6 @@ namespace TextToTalk
 
         private readonly PluginConfiguration config;
         private readonly CommandManager commandManager;
-        private readonly MainCommandModule commandModule;
         private readonly Services services;
         private readonly KeyState keys;
 
@@ -76,9 +75,6 @@ namespace TextToTalk
             var commands = this.services.GetService<Dalamud.Game.Command.CommandManager>();
             this.commandManager = new CommandManager(commands, this.services);
             this.commandManager.AddCommandModule<MainCommandModule>();
-
-            this.commandModule = new MainCommandModule();
-            this.commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
         }
 
         private bool keysDown = false;
@@ -102,8 +98,10 @@ namespace TextToTalk
                     if (this.keysDown) return true;
 
                     this.keysDown = true;
+
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
-                    this.commandModule.Chat.Print($"TextToTalk preset -> {preset.Name}");
+                    var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
+                    commandModule.Chat.Print($"TextToTalk preset -> {preset.Name}");
                     PluginLog.Log($"TextToTalk preset -> {preset.Name}");
                     return true;
                 }
@@ -119,7 +117,9 @@ namespace TextToTalk
                 if (this.keysDown) return true;
 
                 this.keysDown = true;
-                this.commandModule.ToggleTts();
+
+                var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
+                commandModule.ToggleTts();
                 return true;
             }
             return false;
