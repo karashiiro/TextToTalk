@@ -12,7 +12,6 @@ using System.Numerics;
 using System.Text.RegularExpressions;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
-using TextToTalk.UI.Dalamud;
 using TextToTalk.UI.Dalamud.Lexicons;
 
 namespace TextToTalk.Backends.Polly;
@@ -58,6 +57,10 @@ public class PollyBackendUI
         {
             this.accessKey = credentials.UserName;
             this.secretKey = credentials.Password;
+
+            var regionEndpoint = RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion)
+                ?? RegionEndpoint.EUWest1;
+            PollyLogin(regionEndpoint);
         }
     }
 
@@ -84,24 +87,11 @@ public class PollyBackendUI
             var regionEndpoint = RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion);
             if (regionEndpoint == null)
             {
-                ImGui.TextColored(Red, "Region invalid!");
+                ImGui.TextColored(Red, "Invalid region!");
             }
             else
             {
-                var polly = this.getPolly.Invoke();
-                polly?.Dispose();
-                try
-                {
-                    polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint, this.lexiconManager);
-                    var voices = polly.GetVoicesForEngine(this.config.PollyEngine);
-                    this.setPolly.Invoke(polly);
-                    this.setVoices.Invoke(voices);
-                }
-                catch (Exception e)
-                {
-                    PluginLog.LogError(e, "Failed to initialize AWS client.");
-                    PollyCredentialManager.DeleteCredentials();
-                }
+                PollyLogin(regionEndpoint);
             }
         }
 
@@ -217,6 +207,25 @@ public class PollyBackendUI
                     ImGuiVoiceNotSupported();
                 }
             }
+        }
+    }
+
+    private void PollyLogin(RegionEndpoint regionEndpoint)
+    {
+        var polly = this.getPolly.Invoke();
+        polly?.Dispose();
+        try
+        {
+            PluginLog.Log($"Logging into AWS region {regionEndpoint}.");
+            polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint, this.lexiconManager);
+            var voices = polly.GetVoicesForEngine(this.config.PollyEngine);
+            this.setPolly.Invoke(polly);
+            this.setVoices.Invoke(voices);
+        }
+        catch (Exception e)
+        {
+            PluginLog.LogError(e, "Failed to initialize AWS client.");
+            PollyCredentialManager.DeleteCredentials();
         }
     }
 
