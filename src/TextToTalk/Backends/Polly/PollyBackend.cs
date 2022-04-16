@@ -29,20 +29,6 @@ namespace TextToTalk.Backends.Polly
             var lexiconManager = new DalamudLexiconManager();
             LexiconUtils.LoadFromConfigPolly(lexiconManager, config);
 
-            var credentials = PollyCredentialManager.LoadCredentials();
-            if (credentials != null)
-            {
-                try
-                {
-                    this.polly = new PollyClient(credentials.UserName, credentials.Password, RegionEndpoint.EUWest1, lexiconManager);
-                }
-                catch (Exception e)
-                {
-                    PluginLog.LogError(e, "Failed to initialize AWS client.");
-                    PollyCredentialManager.DeleteCredentials();
-                }
-            }
-
             this.ui = new PollyBackendUI(config, lexiconManager, http,
                 () => this.polly, p => this.polly = p, () => this.voices, v => this.voices = v);
         }

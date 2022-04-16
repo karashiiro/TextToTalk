@@ -6,7 +6,6 @@ using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using TextToTalk.Lexicons;
 
@@ -41,7 +40,7 @@ namespace TextToTalk.Backends.Polly
                 voices.AddRange(voicesRes.Voices);
                 nextToken = voicesRes.NextToken;
             } while (!string.IsNullOrEmpty(nextToken));
-
+            
             return voices;
         }
 
