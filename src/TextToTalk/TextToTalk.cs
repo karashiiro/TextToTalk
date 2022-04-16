@@ -77,7 +77,6 @@ namespace TextToTalk
             this.commandManager = new CommandManager(commands, this.services);
             this.commandManager.AddCommandModule<MainCommandModule>();
 
-            this.commandModule = new MainCommandModule();
             this.commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
         }
 
