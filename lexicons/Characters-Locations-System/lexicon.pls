@@ -69,6 +69,10 @@
 <phoneme>ɛstɪŋi:ɪn</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Fordola</grapheme>
+<phoneme>fo(r)ˈdəʊlə</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Fourchenault</grapheme>
 <phoneme>fɔrʃɛˈnoʊ</phoneme>
 </lexeme>
