@@ -71,7 +71,6 @@ namespace TextToTalk
             var framework = this.services.GetService<Framework>();
             framework.Update += PollTalkAddon;
             framework.Update += CheckKeybindPressed;
-            framework.Update += CheckPresetKeybindPressed;
 
             var commands = this.services.GetService<Dalamud.Game.Command.CommandManager>();
             this.commandManager = new CommandManager(commands, this.services);
@@ -96,20 +95,14 @@ namespace TextToTalk
                 return;
             }
 
-            this.keysDown = false;
-        }
-
-        private bool presetKeysDown;
-        private void CheckPresetKeybindPressed(Framework framework)
-        {
             foreach (var preset in this.config.EnabledChatTypesPresets.Where(p => p.UseKeybind))
             {
                 if (this.keys[(byte)preset.ModifierKey] &&
                     this.keys[(byte)preset.MajorKey])
                 {
-                    if (this.presetKeysDown) return;
+                    if (this.keysDown) return;
 
-                    this.presetKeysDown = true;
+                    this.keysDown = true;
 
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
                     var commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
@@ -119,8 +112,8 @@ namespace TextToTalk
                     return;
                 }
             }
-
-            this.presetKeysDown = false;
+            
+            this.keysDown = false;
         }
 
         private void PollTalkAddon(Framework framework)
@@ -256,7 +249,6 @@ namespace TextToTalk
             var framework = this.services.GetService<Framework>();
             framework.Update -= PollTalkAddon;
             framework.Update -= CheckKeybindPressed;
-            framework.Update -= CheckPresetKeybindPressed;
 
             var chat = this.services.GetService<ChatGui>();
             chat.ChatMessage -= CheckFailedToBindPort;
