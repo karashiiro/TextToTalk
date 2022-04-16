@@ -1,7 +1,7 @@
 name: Characters Locations Polly
 author: johnysandels
 disabled: false
-description: Corrections for various characters' and locations' names
+description: Corrections for various characters' and locations' names. Amazon Polly version for any polly specific backend bugs.
 files:
   - characters.pls
   - characters2.pls
