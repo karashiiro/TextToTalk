@@ -64,7 +64,8 @@ namespace TextToTalk.Lexicons
                             Phoneme = el.Element($"{nsPrefix}phoneme")?.Value
                                 .Replace(":", "ː")
                                 .Replace(" ", "")
-                                .Replace("-", ""),
+                                .Replace("-", "")
+                                .Replace("ʤ", "d͡ʒ"),
                             Alias = el.Element($"{nsPrefix}alias")?.Value,
                         })
                     )
