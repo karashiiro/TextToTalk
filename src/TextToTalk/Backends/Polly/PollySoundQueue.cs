@@ -9,11 +9,13 @@ namespace TextToTalk.Backends.Polly
     public class PollySoundQueue : SoundQueue<PollySoundQueueItem>
     {
         private readonly AutoResetEvent speechCompleted;
+        private readonly object waveLock;
         private WaveOut waveOut;
 
         public PollySoundQueue()
         {
             this.speechCompleted = new AutoResetEvent(false);
+            this.waveLock = true;
         }
 
         protected override void OnSoundLoop(PollySoundQueueItem nextItem)
@@ -25,18 +27,22 @@ namespace TextToTalk.Backends.Polly
             var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
 
             // Play the sound
-            this.waveOut = new WaveOut();
-            this.waveOut.PlaybackStopped += (_, _) =>
+            lock (this.waveLock)
             {
-                this.speechCompleted.Set();
-            };
-            this.waveOut.Init(volumeSampleProvider);
-            this.waveOut.Play();
+                this.waveOut = new WaveOut();
+                this.waveOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
+                this.waveOut.Init(volumeSampleProvider);
+                this.waveOut.Play();
+            }
+
             this.speechCompleted.WaitOne();
 
             // Cleanup
-            this.waveOut.Dispose();
-            this.waveOut = null;
+            lock (this.waveLock)
+            {
+                this.waveOut.Dispose();
+                this.waveOut = null;
+            }
         }
 
         protected override void OnSoundCancelled()
@@ -58,7 +64,10 @@ namespace TextToTalk.Backends.Polly
         {
             try
             {
-                this.waveOut?.Stop();
+                lock (this.waveLock)
+                {
+                    this.waveOut?.Stop();
+                }
             }
             catch (ObjectDisposedException) { }
         }
@@ -67,7 +76,12 @@ namespace TextToTalk.Backends.Polly
         {
             if (disposing)
             {
-                this.waveOut?.Dispose();
+                StopWaveOut();
+
+                lock (this.waveLock)
+                {
+                    this.waveOut?.Dispose();
+                }
             }
 
             base.Dispose(disposing);
