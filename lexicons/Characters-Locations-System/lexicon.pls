@@ -141,6 +141,10 @@
 <phoneme>ˈpapʊliˌmoʊ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Pipin</grapheme>
+<phoneme>ˈpɪpɪn</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Raubahn</grapheme>
 <phoneme>ˈraʊˈbɑn</phoneme>
 </lexeme>
