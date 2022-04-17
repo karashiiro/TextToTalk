@@ -294,6 +294,11 @@
 <phoneme>kɪtɑːriːz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Kami</grapheme>
+<grapheme>kami</grapheme>
+<phoneme>ˈkɒmi</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Kugane</grapheme>
 <phoneme>kugɔneɪ</phoneme>
 </lexeme>
