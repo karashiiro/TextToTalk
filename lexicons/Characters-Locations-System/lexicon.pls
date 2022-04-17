@@ -166,6 +166,10 @@
 <phoneme>skeɪvɑ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Soroban</grapheme>
+<phoneme>ˈsɔroʊban</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Sylph</grapheme>
 <phoneme>sɪlf</phoneme>
 </lexeme>
