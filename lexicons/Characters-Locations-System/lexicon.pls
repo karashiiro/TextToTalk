@@ -207,7 +207,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Yugiri</grapheme>
-<phoneme>ˈju:gɪdi</phoneme>
+<phoneme>ˈju:gɪði</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Y'shtola</grapheme>
