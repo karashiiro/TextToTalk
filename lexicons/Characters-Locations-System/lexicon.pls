@@ -372,6 +372,10 @@
 <phoneme>ɛld</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>enclave</grapheme>
+<phoneme>ˈɑnkleɪv</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Hm,</grapheme>
 <grapheme> hm,</grapheme>
 <grapheme>Hm.</grapheme>
