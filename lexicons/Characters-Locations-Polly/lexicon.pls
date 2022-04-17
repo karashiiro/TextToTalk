@@ -142,10 +142,6 @@
 <phoneme>ˈpapʊliˌmoʊ</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Pipin</grapheme>
-<phoneme>ˈpɪpɪn</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>Raubahn</grapheme>
 <phoneme>ˈraʊˈbɑn</phoneme>
 </lexeme>
@@ -363,18 +359,6 @@
 <phoneme>eɪθˈə.raɪtz</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Eld</grapheme>
-<grapheme>eld</grapheme>
-<phoneme>ɛld</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Hm,</grapheme>
-<grapheme> hm,</grapheme>
-<grapheme>Hm.</grapheme>
-<grapheme> hm.</grapheme>
-<phoneme>hm̩</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>NIN</grapheme>
 <phoneme>ˈnɪndʒə</phoneme>
 </lexeme>
@@ -390,10 +374,5 @@
 <lexeme>
 <grapheme>'s</grapheme>
 <phoneme>z</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>'tis</grapheme>
-<grapheme>'Tis</grapheme>
-<phoneme>ˈtɪz</phoneme>
 </lexeme>
 </lexicon>
