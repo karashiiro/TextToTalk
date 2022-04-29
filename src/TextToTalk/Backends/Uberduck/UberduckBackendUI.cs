@@ -40,6 +40,9 @@ public class UberduckBackendUI
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
     public void DrawSettings(IConfigUIDelegates helpers)
     {
+        ImGui.TextColored(HintColor, "TTS may be delayed due to rate-limiting.");
+        ImGui.Spacing();
+
         ImGui.InputTextWithHint("##TTTUberduckAPIKey", "API key", ref this.apiKey, 100, ImGuiInputTextFlags.Password);
         ImGui.InputTextWithHint("##TTTUberduckAPISecret", "API secret", ref this.apiSecret, 100, ImGuiInputTextFlags.Password);
 

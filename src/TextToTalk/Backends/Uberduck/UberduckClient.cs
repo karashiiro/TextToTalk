@@ -53,10 +53,11 @@ public class UberduckClient
         PluginLog.LogDebug($"Got request UUID {uuid} from Uberduck.");
 
         // Poll for the TTS result
+        await Task.Delay(20);
+
         var path = "";
         do
         {
-            await Task.Delay(100);
             try
             {
                 var status = await GetSpeechStatus(uuid);
@@ -72,6 +73,8 @@ public class UberduckClient
             {
                 // ignored
             }
+
+            await Task.Delay(100);
         } while (string.IsNullOrEmpty(path));
 
         PluginLog.LogDebug($"Got response for TTS request {uuid}.");
