@@ -4,7 +4,7 @@ namespace TextToTalk.Backends
 {
     public class SoundQueueItem : IDisposable
     {
-        public TextSource Source { get; set; }
+        public TextSource Source { get; init; }
 
         protected virtual void Dispose(bool disposing) { }
 

@@ -102,6 +102,13 @@ namespace TextToTalk
         public int PollyPlaybackRate { get; set; } = 100;
         public IList<string> PollyLexiconFiles { get; set; }
 
+        public string UberduckVoice { get; set; }
+        public string UberduckVoiceUngendered { get; set; }
+        public string UberduckVoiceMale { get; set; }
+        public string UberduckVoiceFemale { get; set; }
+        public float UberduckVolume { get; set; } = 1.0f;
+        public int UberduckPlaybackRate { get; set; } = 100;
+
         public IDictionary<string, IDictionary<TTSBackend, bool>> RemoteLexiconEnabledBackends { get; set; }
 
         public bool UsePlayerRateLimiter { get; set; }

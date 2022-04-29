@@ -4,26 +4,31 @@ using System;
 using System.IO;
 using System.Threading;
 
-namespace TextToTalk.Backends.Polly
+namespace TextToTalk.Backends
 {
-    public class PollySoundQueue : SoundQueue<PollySoundQueueItem>
+    public class StreamSoundQueue : SoundQueue<StreamSoundQueueItem>
     {
         private readonly AutoResetEvent speechCompleted;
         private readonly object waveLock;
         private WaveOut waveOut;
 
-        public PollySoundQueue()
+        public StreamSoundQueue()
         {
             this.speechCompleted = new AutoResetEvent(false);
             this.waveLock = true;
         }
 
-        protected override void OnSoundLoop(PollySoundQueueItem nextItem)
+        protected override void OnSoundLoop(StreamSoundQueueItem nextItem)
         {
-            using var mp3Reader = new Mp3FileReader(nextItem.Data);
+            using WaveStream reader = nextItem.Format switch
+            {
+                StreamFormat.Mp3 => new Mp3FileReader(nextItem.Data),
+                StreamFormat.Wave => new WaveFileReader(nextItem.Data),
+                _ => throw new NotSupportedException(),
+            };
 
-            // Adjust the volume of the MP3 data
-            var sampleProvider = mp3Reader.ToSampleProvider();
+            // Adjust the volume of the audio data
+            var sampleProvider = reader.ToSampleProvider();
             var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
 
             // Play the sound
@@ -50,13 +55,14 @@ namespace TextToTalk.Backends.Polly
             StopWaveOut();
         }
 
-        public void EnqueueSound(MemoryStream data, TextSource source, float volume)
+        public void EnqueueSound(MemoryStream data, TextSource source, StreamFormat format, float volume)
         {
-            AddQueueItem(new PollySoundQueueItem
+            AddQueueItem(new StreamSoundQueueItem
             {
                 Data = data,
                 Volume = volume,
                 Source = source,
+                Format = format,
             });
         }
 

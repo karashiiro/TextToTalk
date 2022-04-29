@@ -1,12 +1,14 @@
 ﻿using System.IO;
 
-namespace TextToTalk.Backends.Polly
+namespace TextToTalk.Backends
 {
-    public class PollySoundQueueItem : SoundQueueItem
+    public class StreamSoundQueueItem : SoundQueueItem
     {
-        public MemoryStream Data { get; set; }
+        public MemoryStream Data { get; init; }
 
-        public float Volume { get; set; }
+        public float Volume { get; init; }
+
+        public StreamFormat Format { get; init; }
 
         protected override void Dispose(bool disposing)
         {

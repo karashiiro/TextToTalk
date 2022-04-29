@@ -6,7 +6,7 @@ namespace TextToTalk.Backends
 {
     public abstract class VoiceBackend : IDisposable
     {
-        public Vector4 TitleBarColor { get; protected set; }
+        public Vector4 TitleBarColor { get; protected init; }
 
         public abstract void Say(TextSource source, Gender gender, string text);
 
