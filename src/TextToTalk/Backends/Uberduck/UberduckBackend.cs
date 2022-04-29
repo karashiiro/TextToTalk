@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using ImGuiNET;
+using System.Collections.Generic;
 using System.Linq;
-using ImGuiNET;
 using System.Net.Http;
+using System.Threading.Tasks;
+using Dalamud.Logging;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.Uberduck;
@@ -18,7 +20,7 @@ public class UberduckBackend : VoiceBackend
 
     public UberduckBackend(PluginConfiguration config, HttpClient http)
     {
-        TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF12E4FF);
+        TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFDE7312);
 
         this.config = config;
 
@@ -43,13 +45,31 @@ public class UberduckBackend : VoiceBackend
             };
         }
 
-        // Find the configured voice in the voice list, and fall back to zwf
+        // Find the configured voice in the voice list, and fall back to ZWF
         // if it wasn't found in order to avoid a plugin crash.
         var voiceId = this.voices
             .Select(v => v.Name)
             .FirstOrDefault(id => id == voiceIdStr) ?? "zwf";
 
-        _ = this.uberduck.Say(voiceId, this.config.UberduckPlaybackRate, this.config.UberduckVolume, source, text);
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await this.uberduck.Say(voiceId, this.config.UberduckPlaybackRate, this.config.UberduckVolume, source, text);
+            }
+            catch (UberduckFailedException e)
+            {
+                PluginLog.LogError(e, $"Failed to make Uberduck TTS request ({e.StatusCode}).");
+            }
+            catch (UberduckMissingCredentialsException e)
+            {
+                PluginLog.LogWarning(e.Message);
+            }
+            catch (UberduckUnauthorizedException e)
+            {
+                PluginLog.LogError(e, "Uberduck API keys are incorrect or invalid.");
+            }
+        });
     }
 
     public override void CancelAllSpeech()

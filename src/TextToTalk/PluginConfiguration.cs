@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
+using Amazon.Polly.Model;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Migrations;
@@ -91,10 +92,10 @@ namespace TextToTalk
 
         public IList<string> Lexicons { get; set; }
 
-        public string PollyVoice { get; set; }
-        public string PollyVoiceUngendered { get; set; }
-        public string PollyVoiceMale { get; set; }
-        public string PollyVoiceFemale { get; set; }
+        public string PollyVoice { get; set; } = VoiceId.Matthew;
+        public string PollyVoiceUngendered { get; set; } = VoiceId.Matthew;
+        public string PollyVoiceMale { get; set; } = VoiceId.Matthew;
+        public string PollyVoiceFemale { get; set; } = VoiceId.Matthew;
         public string PollyEngine { get; set; } = Engine.Neural;
         public string PollyRegion { get; set; }
         public int PollySampleRate { get; set; } = 22050;
@@ -102,10 +103,10 @@ namespace TextToTalk
         public int PollyPlaybackRate { get; set; } = 100;
         public IList<string> PollyLexiconFiles { get; set; }
 
-        public string UberduckVoice { get; set; }
-        public string UberduckVoiceUngendered { get; set; }
-        public string UberduckVoiceMale { get; set; }
-        public string UberduckVoiceFemale { get; set; }
+        public string UberduckVoice { get; set; } = "zwf";
+        public string UberduckVoiceUngendered { get; set; } = "zwf";
+        public string UberduckVoiceMale { get; set; } = "zwf";
+        public string UberduckVoiceFemale { get; set; } = "zwf";
         public float UberduckVolume { get; set; } = 1.0f;
         public int UberduckPlaybackRate { get; set; } = 100;
 

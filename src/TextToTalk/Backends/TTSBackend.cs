@@ -23,5 +23,17 @@ namespace TextToTalk.Backends
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
+
+        public static bool AreLexiconsEnabled(this TTSBackend backend)
+        {
+            return backend switch
+            {
+                TTSBackend.System => true,
+                TTSBackend.Websocket => false,
+                TTSBackend.AmazonPolly => true,
+                TTSBackend.Uberduck => false,
+                _ => throw new ArgumentOutOfRangeException(nameof(backend)),
+            };
+        }
     }
 }

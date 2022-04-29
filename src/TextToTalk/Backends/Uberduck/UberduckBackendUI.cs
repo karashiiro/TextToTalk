@@ -40,8 +40,8 @@ public class UberduckBackendUI
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.InputTextWithHint("##TTTUberduckAccessKey", "Access key", ref this.apiKey, 100, ImGuiInputTextFlags.Password);
-        ImGui.InputTextWithHint("##TTTUberduckSecretKey", "Secret key", ref this.apiSecret, 100, ImGuiInputTextFlags.Password);
+        ImGui.InputTextWithHint("##TTTUberduckAPIKey", "API key", ref this.apiKey, 100, ImGuiInputTextFlags.Password);
+        ImGui.InputTextWithHint("##TTTUberduckAPISecret", "API secret", ref this.apiSecret, 100, ImGuiInputTextFlags.Password);
 
         if (ImGui.Button("Save and Login##TTTSaveUberduckAuth"))
         {

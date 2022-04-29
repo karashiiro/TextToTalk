@@ -430,7 +430,7 @@ public class LexiconRepositorySubwindow
                 new Dictionary<TTSBackend, bool>();
         }
 
-        foreach (var backend in Enum.GetValues<TTSBackend>().Where(b => b != TTSBackend.Websocket))
+        foreach (var backend in Enum.GetValues<TTSBackend>().Where(b => b.AreLexiconsEnabled()))
         {
             if (!this.config.RemoteLexiconEnabledBackends[packageName].TryGetValue(backend, out _))
             {

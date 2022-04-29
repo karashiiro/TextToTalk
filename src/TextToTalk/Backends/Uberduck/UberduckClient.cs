@@ -1,15 +1,19 @@
-﻿using Dalamud.Logging;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using Dalamud.Logging;
 
 namespace TextToTalk.Backends.Uberduck;
 
 public class UberduckClient
 {
+    private const string UrlBase = "https://api.uberduck.ai";
+
     private readonly HttpClient http;
     private readonly StreamSoundQueue soundQueue;
 
@@ -33,8 +37,7 @@ public class UberduckClient
     {
         if (!IsAuthorizationSet())
         {
-            PluginLog.LogWarning("No Uberduck authorization keys have been configured.");
-            return;
+            throw new UberduckMissingCredentialsException("No Uberduck authorization keys have been configured.");
         }
 
         var args = new UberduckSpeechRequest
@@ -43,21 +46,37 @@ public class UberduckClient
             Voice = voice,
         };
 
-        using var req = new StringContent(JsonConvert.SerializeObject(args));
-        AddAuthorization(req);
+        // Make the request
+        using var content = new StringContent(JsonConvert.SerializeObject(args));
+        var res = await SendRequest<UberduckSpeechResponse>("/speak", reqContent: content);
+        var uuid = res.Uuid;
+        PluginLog.LogDebug($"Got request UUID {uuid} from Uberduck.");
 
-        var res = await this.http.PostAsync(new Uri("https://api.uberduck.ai/speak"), req);
-        var content = await res.Content.ReadAsStringAsync();
-        var uuid = JsonConvert.DeserializeObject<UberduckSpeechResponse>(content)?.Uuid;
-
-        string path;
+        // Poll for the TTS result
+        var path = "";
         do
         {
             await Task.Delay(100);
-            var status = await GetSpeechStatus(uuid);
-            path = status.Path;
+            try
+            {
+                var status = await GetSpeechStatus(uuid);
+                if (status.FailedAt != null)
+                {
+                    PluginLog.LogWarning($"TTS request {uuid} failed for an unknown reason.");
+                    return;
+                }
+
+                path = status.Path;
+            }
+            catch (UberduckFailedException e) when (e.StatusCode is HttpStatusCode.NotFound)
+            {
+                // ignored
+            }
         } while (string.IsNullOrEmpty(path));
 
+        PluginLog.LogDebug($"Got response for TTS request {uuid}.");
+
+        // Copy the sound to a new buffer and enqueue it
         var responseStream = await this.http.GetStreamAsync(new Uri(path));
         var waveStream = new MemoryStream();
         await responseStream.CopyToAsync(waveStream);
@@ -66,20 +85,50 @@ public class UberduckClient
         this.soundQueue.EnqueueSound(waveStream, source, StreamFormat.Wave, volume);
     }
 
-    private async Task<UberduckSpeechStatusResponse> GetSpeechStatus(string uuid)
+    private Task<UberduckSpeechStatusResponse> GetSpeechStatus(string uuid)
     {
-        using var req = new StringContent("");
-        AddAuthorization(req);
-
-        var res = await this.http.PostAsync(new Uri($"https://api.uberduck.ai/speak-status?uuid={uuid}"), req);
-        var content = await res.Content.ReadAsStringAsync();
-        var status = JsonConvert.DeserializeObject<UberduckSpeechStatusResponse>(content);
-        return status;
+        return SendRequest<UberduckSpeechStatusResponse>("/speak-status", $"uuid={uuid}");
     }
 
-    private void AddAuthorization(HttpContent req)
+    private async Task<TResponse> SendRequest<TResponse>(string endpoint, string query = "", HttpContent reqContent = null) where TResponse : class
     {
-        req.Headers.Add("Authorization", $"{ApiKey}:{ApiSecret}");
+        var uriBuilder = new UriBuilder(UrlBase)
+        {
+            Path = endpoint,
+            Query = query,
+        };
+        
+        using var req = new HttpRequestMessage(reqContent != null ? HttpMethod.Post : HttpMethod.Get, uriBuilder.Uri);
+        AddAuthorization(req);
+
+        if (reqContent != null)
+        {
+            req.Content = reqContent;
+        }
+
+        var res = await this.http.SendAsync(req);
+        var resContent = await res.Content.ReadAsStringAsync();
+        if (res.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+        {
+            var detail = JsonConvert.DeserializeObject<UberduckFailedResponse>(resContent)?.Detail;
+            throw new UberduckUnauthorizedException(detail);
+        }
+        
+        if (!res.IsSuccessStatusCode)
+        {
+            var detail = JsonConvert.DeserializeObject<UberduckFailedResponse>(resContent)?.Detail;
+            throw new UberduckFailedException(res.StatusCode, detail);
+        }
+
+        return JsonConvert.DeserializeObject<TResponse>(resContent);
+    }
+
+    private void AddAuthorization(HttpRequestMessage req)
+    {
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate#basic_authentication
+        var raw = Encoding.UTF8.GetBytes($"{ApiKey}:{ApiSecret}");
+        var encodedAuth = Convert.ToBase64String(raw);
+        req.Headers.Add("Authorization", $"Basic {encodedAuth}");
     }
 
     private bool IsAuthorizationSet()
@@ -102,16 +151,22 @@ public class UberduckClient
         public string Uuid { get; init; }
     }
 
+    private class UberduckFailedResponse
+    {
+        [JsonProperty("detail")]
+        public string Detail { get; set; }
+    }
+
     private class UberduckSpeechStatusResponse
     {
         [JsonProperty("started_at")]
         public DateTime StartedAt { get; init; }
 
         [JsonProperty("failed_at")]
-        public DateTime FailedAt { get; init; }
+        public DateTime? FailedAt { get; init; }
 
         [JsonProperty("finished_at")]
-        public DateTime FinishedAt { get; init; }
+        public DateTime? FinishedAt { get; init; }
 
         [JsonProperty("path")]
         public string Path { get; init; }
