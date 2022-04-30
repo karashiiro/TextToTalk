@@ -1,5 +1,7 @@
 ﻿using ImGuiNET;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -8,7 +10,6 @@ using System.Speech.Synthesis;
 using System.Text;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
-using TextToTalk.UI.Dalamud;
 using TextToTalk.UI.Dalamud.Lexicons;
 
 namespace TextToTalk.Backends.System;
@@ -20,8 +21,9 @@ public class SystemBackendUI
 
     private readonly PluginConfiguration config;
     private readonly LexiconComponent lexiconComponent;
+    private readonly ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures;
 
-    public SystemBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http)
+    public SystemBackendUI(PluginConfiguration config, LexiconManager lexiconManager, ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures, HttpClient http)
     {
         // TODO: Make this configurable
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -31,10 +33,17 @@ public class SystemBackendUI
 
         this.config = config;
         this.lexiconComponent = new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.Lexicons);
+        this.selectVoiceFailures = selectVoiceFailures;
     }
 
+    private readonly IDictionary<string, Exception> voiceExceptions = new Dictionary<string, Exception>();
     public void DrawSettings(IConfigUIDelegates helpers)
     {
+        if (this.selectVoiceFailures.TryDequeue(out var e1))
+        {
+            this.voiceExceptions[e1.VoiceId] = e1;
+        }
+
         var currentVoicePreset = this.config.GetCurrentVoicePreset();
 
         var presets = this.config.VoicePresets.ToList();
@@ -112,8 +121,14 @@ public class SystemBackendUI
         var voiceIndex = voices.FindIndex(iv => iv.VoiceInfo?.Name == voiceName);
         if (ImGui.Combo("Voice##TTTVoice8", ref voiceIndex, voicesUi, voices.Count))
         {
+            this.voiceExceptions.Remove(voices[voiceIndex].VoiceInfo.Name);
             currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
             this.config.Save();
+        }
+
+        if (this.voiceExceptions.TryGetValue(voiceName, out var e2))
+        {
+            PrintVoiceExceptions(e2);
         }
 
         if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
@@ -168,6 +183,27 @@ public class SystemBackendUI
         {
             ImGui.TextColored(Red, "You have no voices installed. Please install more voices or use a different backend.");
         }
+    }
+
+    private static void PrintVoiceExceptions(Exception e)
+    {
+        if (e.InnerException != null)
+        {
+            ImGui.TextColored(Red, $"Voice errors:\n  {e.Message}");
+            PrintVoiceExceptionsR(e.InnerException);
+        }
+        else
+        {
+            ImGui.TextColored(Red, $"Voice error:\n  {e.Message}");
+        }
+    }
+
+    private static void PrintVoiceExceptionsR(Exception e)
+    {
+        do
+        {
+            ImGui.TextColored(Red, $"  {e.Message}");
+        } while (e.InnerException != null);
     }
 
     private static string FormatVoiceInfo(InstalledVoice iv)

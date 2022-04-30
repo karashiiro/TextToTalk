@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Dalamud.Logging;
+using System;
+using System.Collections.Concurrent;
 using System.Speech.Synthesis;
 using System.Threading;
-using Dalamud.Logging;
 using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.System
@@ -11,12 +12,14 @@ namespace TextToTalk.Backends.System
         private readonly SpeechSynthesizer speechSynthesizer;
         private readonly LexiconManager lexiconManager;
         private readonly AutoResetEvent speechCompleted;
+        private readonly ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures;
 
-        public SystemSoundQueue(LexiconManager lexiconManager)
+        public SystemSoundQueue(LexiconManager lexiconManager, ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures)
         {
             this.speechCompleted = new AutoResetEvent(false);
             this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
+            this.selectVoiceFailures = selectVoiceFailures;
 
             this.speechSynthesizer.SpeakCompleted += (_, _) =>
             {
@@ -37,7 +40,15 @@ namespace TextToTalk.Backends.System
 
         protected override void OnSoundLoop(SystemSoundQueueItem nextItem)
         {
-            this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
+            try
+            {
+                this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
+            }
+            catch (SelectVoiceFailedException e)
+            {
+                PluginLog.LogError(e, "Failed to select voice {0}", nextItem.Preset.VoiceName);
+                this.selectVoiceFailures.Enqueue(e);
+            }
 
             var ssml = this.lexiconManager.MakeSsml(nextItem.Text, this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
             PluginLog.Log(ssml);
