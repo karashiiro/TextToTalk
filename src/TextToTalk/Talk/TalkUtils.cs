@@ -81,7 +81,7 @@ namespace TextToTalk.Talk
 
         public static bool IsSpeakable(string text)
         {
-            // TextToTalk #41 Unspeakable text
+            // TextToTalk#41 Unspeakable text
             return Speakable.Match(text).Success;
         }
 
