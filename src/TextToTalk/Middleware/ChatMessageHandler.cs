@@ -2,10 +2,10 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
-using Dalamud.Logging;
 using TextToTalk.GameEnums;
 using TextToTalk.Talk;
 
