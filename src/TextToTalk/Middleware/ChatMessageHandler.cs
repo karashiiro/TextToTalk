@@ -59,18 +59,7 @@ public class ChatMessageHandler
 
                     if (config.SayPartialName)
                     {
-                        var names = speakerNameToSay.Split(' ');
-
-                        switch (config.OnlySayFirstOrLastName)
-                        {
-                            case FirstOrLastName.First:
-                                speakerNameToSay = names[0];
-                                break;
-
-                            case FirstOrLastName.Last:
-                                speakerNameToSay = names[1];
-                                break;
-                        }
+                        speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, config.OnlySayFirstOrLastName);
                     }
 
                     textValue = $"{speakerNameToSay} says {textValue}";

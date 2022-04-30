@@ -84,5 +84,22 @@ namespace TextToTalk.Talk
             // TextToTalk #41 Unspeakable text
             return Speakable.Match(text).Success;
         }
+
+        public static string GetPartialName(string name, FirstOrLastName part)
+        {
+            var names = name.Split(' ');
+
+            switch (part)
+            {
+                case FirstOrLastName.First:
+                    return names[0];
+                case FirstOrLastName.Last:
+                    if (names.Length == 1)
+                        return names[0]; // Some NPCs only have one name.
+                    return names[1];
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(part), part, "Enumeration value is out of range.");
+            }
+        }
     }
 }
