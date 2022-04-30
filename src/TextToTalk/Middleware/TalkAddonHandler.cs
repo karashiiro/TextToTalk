@@ -78,7 +78,7 @@ public class TalkAddonHandler
             return;
         }
 
-        var text = talkAddonText.Text;
+        var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
 
         if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
