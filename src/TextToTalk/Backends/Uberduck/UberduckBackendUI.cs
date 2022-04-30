@@ -55,6 +55,12 @@ public class UberduckBackendUI
             this.uberduck.ApiSecret = password;
         }
 
+        ImGui.SameLine();
+        if (ImGui.Button("Register##TTTRegisterUberduckAuth"))
+        {
+            WebBrowser.Open("https://uberduck.ai/");
+        }
+
         ImGui.TextColored(HintColor, "Credentials secured with Windows Credential Manager");
 
         ImGui.Spacing();
