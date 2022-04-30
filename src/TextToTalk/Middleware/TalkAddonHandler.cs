@@ -7,6 +7,7 @@ using Dalamud.Game.Gui;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.Talk;
 
@@ -79,9 +80,9 @@ public class TalkAddonHandler
         }
 
         var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
-
         if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
+        PluginLog.Information(text);
 
         if (talkAddonText.Speaker != "" && this.filters.ShouldSaySender())
         {
