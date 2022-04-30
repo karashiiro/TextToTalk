@@ -32,8 +32,7 @@ public class ChatMessageHandler
     {
         var textValue = TalkUtils.NormalizePunctuation(message.TextValue);
         if (this.filters.IsDuplicateQuestText(textValue)) return;
-
-        PluginLog.LogDebug("Chat message from type {0}: {1}", type, textValue);
+        PluginLog.LogDebug($"Chat ({type}): \"{textValue}\"");
 
         // This section controls speaker-related functions.
         if (sender != null && sender.TextValue != string.Empty)

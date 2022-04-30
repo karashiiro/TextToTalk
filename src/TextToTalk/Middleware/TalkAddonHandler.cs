@@ -82,7 +82,7 @@ public class TalkAddonHandler
         var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
         if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
-        PluginLog.Information(text);
+        PluginLog.LogDebug($"AddonTalk: \"{text}\"");
 
         if (talkAddonText.Speaker != "" && this.filters.ShouldSaySender())
         {
