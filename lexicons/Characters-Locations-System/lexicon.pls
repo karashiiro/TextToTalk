@@ -375,14 +375,15 @@
 <grapheme>aetherytes</grapheme>
 <phoneme>eɪθˈə.raɪtz</phoneme>
 </lexeme>
-<!-- <lexeme>
+<lexeme>
 <grapheme>Eld </grapheme>
 <grapheme>Eld.</grapheme>
 <grapheme>Eld,</grapheme>
-<grapheme> eld</grapheme>
+<grapheme> eld </grapheme>
+<grapheme> eld,</grapheme>
+<grapheme> eld.</grapheme>
 <phoneme>ɛld</phoneme>
 </lexeme>
--->
 <lexeme>
 <grapheme>enclave</grapheme>
 <phoneme>ˈɑnkleɪv</phoneme>
