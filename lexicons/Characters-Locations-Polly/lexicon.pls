@@ -114,6 +114,10 @@
 <phoneme>ɪksəˈlz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Leveilluer</grapheme>
+<phoneme>ləvɛ.jœʁ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Louisoix</grapheme>
 <phoneme>ˈlui:swɑ</phoneme>
 </lexeme>

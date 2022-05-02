@@ -114,6 +114,10 @@
 <phoneme>ɪksəˈlz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Leveilluer</grapheme>
+<phoneme>ləvɛ.jœʁ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Louisoix</grapheme>
 <phoneme>ˈlui:swɑ</phoneme>
 </lexeme>
@@ -375,7 +379,9 @@
 <grapheme>Eld </grapheme>
 <grapheme>Eld.</grapheme>
 <grapheme>Eld,</grapheme>
-<grapheme> eld</grapheme>
+<grapheme> eld </grapheme>
+<grapheme> eld,</grapheme>
+<grapheme> eld.</grapheme>
 <phoneme>ɛld</phoneme>
 </lexeme>
 <lexeme>
