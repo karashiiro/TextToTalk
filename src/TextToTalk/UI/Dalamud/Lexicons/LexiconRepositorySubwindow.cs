@@ -181,7 +181,7 @@ public class LexiconRepositorySubwindow
                 ImGui.Text("Enabled for backends:");
                 ImGui.Indent();
                 {
-                    foreach (var backend in Enum.GetValues<TTSBackend>().Where(b => b != TTSBackend.Websocket))
+                    foreach (var backend in Enum.GetValues<TTSBackend>().Where(b => b.AreLexiconsEnabled()))
                     {
                         EnsureEnabledBackends(selectedPackageData.InternalName);
 
