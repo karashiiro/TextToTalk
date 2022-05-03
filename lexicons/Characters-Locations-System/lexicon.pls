@@ -67,7 +67,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Estinien</grapheme>
-<phoneme>ɛstɪŋi:ɪn</phoneme>
+<phoneme>ɛsˈtɪni :ɪn</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Fordola</grapheme>
