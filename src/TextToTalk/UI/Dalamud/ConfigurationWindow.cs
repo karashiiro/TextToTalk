@@ -156,15 +156,15 @@ namespace TextToTalk.UI.Dalamud
                         ImGui.Spacing();
                         ImGui.Indent();
 
-                        var OnlySayFirstOrLastName = (int)Configuration.OnlySayFirstOrLastName;
+                        var onlySayFirstOrLastName = (int)Configuration.OnlySayFirstOrLastName;
 
-                        if (ImGui.RadioButton("Only say forename", ref OnlySayFirstOrLastName, (int)FirstOrLastName.First))
+                        if (ImGui.RadioButton("Only say forename", ref onlySayFirstOrLastName, (int)FirstOrLastName.First))
                         {
                             Configuration.OnlySayFirstOrLastName = FirstOrLastName.First;
                             Configuration.Save();
                         }
 
-                        if (ImGui.RadioButton("Only say surname", ref OnlySayFirstOrLastName, (int)FirstOrLastName.Last))
+                        if (ImGui.RadioButton("Only say surname", ref onlySayFirstOrLastName, (int)FirstOrLastName.Last))
                         {
                             Configuration.OnlySayFirstOrLastName = FirstOrLastName.Last;
                             Configuration.Save();
