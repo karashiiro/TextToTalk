@@ -79,7 +79,9 @@ public class ChatMessageHandler
         if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
         var senderText = sender?.TextValue; // Can't access in lambda
-        var speaker = this.objects.FirstOrDefault(a => a.Name.TextValue == senderText);
+        var speaker = string.IsNullOrEmpty(senderText)
+            ? null
+            : this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == senderText);
 
         Say?.Invoke(speaker, textValue, TextSource.Chat);
     }
