@@ -188,7 +188,7 @@ namespace TextToTalk.UI.Dalamud
                 {
                     ImGui.Indent();
 
-                    if (ImGui.DragFloat("", ref messagesPerSecond, 1, 1, 30, "%.3f message(s)/s"))
+                    if (ImGui.DragFloat("", ref messagesPerSecond, 0.1f, 0.1f, 30, "%.3f message(s)/s"))
                     {
                         Configuration.MessagesPerSecond = messagesPerSecond;
                     }
