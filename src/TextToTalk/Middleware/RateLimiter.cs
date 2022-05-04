@@ -38,9 +38,13 @@ namespace TextToTalk.Middleware
                     return false;
                 }
 
-                // Update timestamp and check if we should skip this or not
+                // Check if we should skip this or not, and update the timestamp if not
                 var shouldLimit = now - t <= limit;
-                this.times[speaker] = now;
+                if (!shouldLimit)
+                {
+                    this.times[speaker] = now;
+                }
+                
                 return shouldLimit;
             }
         }
