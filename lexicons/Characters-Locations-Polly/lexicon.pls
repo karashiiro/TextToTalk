@@ -400,4 +400,25 @@
 <grapheme>'s</grapheme>
 <phoneme>z</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>'tis</grapheme>
+<grapheme>'Tis</grapheme>
+<phoneme>ˈtɪz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lyhe Ghiah</grapheme>
+<phoneme>liegiə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lydha Lran</grapheme>
+<phoneme>ˈliːdəə lɜ(r)ˈæn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Matoya</grapheme>
+<phoneme>məˈtɔɪə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Amh Araeng</grapheme>
+<phoneme></phoneme>
+</lexeme>
 </lexicon>

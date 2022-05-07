@@ -372,11 +372,7 @@
 <phoneme>eɪθˈə.raɪtz</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Eld</grapheme>
-<grapheme>eld</grapheme>
-<phoneme>ɛld</phoneme>
-</lexeme>
-<lexeme>
+<grapheme>Enclave</grapheme>
 <grapheme>enclave</grapheme>
 <phoneme>ˈɑnkleɪv</phoneme>
 </lexeme>
@@ -408,5 +404,21 @@
 <grapheme>'tis</grapheme>
 <grapheme>'Tis</grapheme>
 <phoneme>ˈtɪz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lyhe Ghiah</grapheme>
+<phoneme>liegiə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lydha Lran</grapheme>
+<phoneme>ˈliːdəə lɜ(r)ˈæn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Matoya</grapheme>
+<phoneme>məˈtɔɪə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Amh Araeng</grapheme>
+<phoneme></phoneme>
 </lexeme>
 </lexicon>
