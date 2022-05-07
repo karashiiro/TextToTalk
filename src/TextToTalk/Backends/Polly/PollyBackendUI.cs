@@ -135,7 +135,7 @@ public class PollyBackendUI
         }
 
         var volume = (int)(this.config.PollyVolume * 100);
-        if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 200, "%d%%"))
+        if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 100))
         {
             this.config.PollyVolume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
