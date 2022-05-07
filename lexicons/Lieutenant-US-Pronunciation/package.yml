@@ -1,6 +1,0 @@
-name: Lieutenant US Pronunciation
-author: ryankhart
-disabled: false
-description: An opinionated lexicon those using UK voices but prefer the US pronunciation of "lieutenant". This forces even UK voices to say "Loo-ten-ant" rather than "Left-ten-ant".
-files:
-  - lexicon.pls

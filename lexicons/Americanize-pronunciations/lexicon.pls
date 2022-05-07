@@ -11,4 +11,9 @@
 <grapheme>lieutenant</grapheme>
 <phoneme>luˈtɛn ənt</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>Clerk</grapheme>
+<grapheme>clerk</grapheme>
+<phoneme>klɜrk</phoneme>
+</lexeme>
 </lexicon>
