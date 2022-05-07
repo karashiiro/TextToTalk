@@ -432,6 +432,10 @@
 </lexeme>
 <lexeme>
 <grapheme>Amh Araeng</grapheme>
-<phoneme></phoneme>
+<phoneme>ˈɑːm məˈræŋ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Jul</grapheme>
+<phoneme>ˈʝuːəl</phoneme>
 </lexeme>
 </lexicon>
