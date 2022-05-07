@@ -93,23 +93,10 @@ namespace TextToTalk.Lexicons
         {
             foreach (var lexicon in this.lexicons)
             {
-                foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme)))
+                foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme) || (!string.IsNullOrEmpty(lexeme.Alias) && text.Contains(lexeme.Alias))))
                 {
-                    if (!string.IsNullOrEmpty(lexeme.Alias))
-                    {
-                        text = text.Replace(lexeme.Grapheme, lexeme.Alias);
-                    }
-
-                    // Escaped punctuation doesn't work with System.Speech.
-                    var graphemeReadable = lexeme.Grapheme
-                        .Replace("'", "")
-                        .Replace("\"", "");
-
-                    var phonemeNode = lexeme.Phoneme.Contains("\"")
-                        ? $"<phoneme ph='{lexeme.Phoneme}'>{graphemeReadable}</phoneme>"
-                        : $"<phoneme ph=\"{lexeme.Phoneme}\">{graphemeReadable}</phoneme>";
-
-                    text = ReplaceGrapheme(text, lexeme.Grapheme, phonemeNode);
+                    text = WrapGrapheme(text, lexeme.Grapheme, lexeme.Phoneme);
+                    text = WrapGrapheme(text, lexeme.Alias, lexeme.Phoneme);
                 }
             }
 
@@ -133,6 +120,20 @@ namespace TextToTalk.Lexicons
             speakTag += ">";
 
             return $"{speakTag}{text}</speak>";
+        }
+
+        private static string WrapGrapheme(string text, string grapheme, string phoneme)
+        {
+            // Escaped punctuation doesn't work with System.Speech.
+            var graphemeReadable = grapheme
+                .Replace("'", "")
+                .Replace("\"", "");
+
+            var phonemeNode = phoneme.Contains("\"")
+                ? $"<phoneme ph='{phoneme}'>{graphemeReadable}</phoneme>"
+                : $"<phoneme ph=\"{phoneme}\">{graphemeReadable}</phoneme>";
+
+            return ReplaceGrapheme(text, grapheme, phonemeNode);
         }
 
         internal static string ReplaceGrapheme(string text, string oldValue, string newValue)

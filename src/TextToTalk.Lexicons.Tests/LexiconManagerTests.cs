@@ -15,7 +15,7 @@ namespace TextToTalk.Lexicons.Tests
         {
             var lm = new LexiconManager();
             var lexicon = new LexiconBuilder()
-                .WithLexeme(new Lexeme { Graphemes = new []{ "Bahamut" }, Phoneme = "bɑhɑmɪt", Alias = "Bahamoot"})
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Bahamut" }, Phoneme = "bɑhɑmɪt", Alias = "Bahamoot"})
                 .WithLexeme(new Lexeme { Graphemes = new[] { "Baldesion" }, Phoneme = "bɔldˈɛˈsiɑn" })
                 .Build();
             var xml = XDocument.Parse(lexicon);
@@ -202,6 +202,21 @@ namespace TextToTalk.Lexicons.Tests
 
             ssml = lm.MakeSsml("Amalj'aa", "en-GB");
             Assert.True(ssml.Contains("Amaljaa") && ssml.Contains("<phoneme"));
+        }
+
+        [Fact]
+        public void Aliases_AreReplaced()
+        {
+            var lm = new LexiconManager();
+            var lexicon = new LexiconBuilder()
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Bahamut" }, Phoneme = "bɑhɑmɪt", Alias = "Bahamoot"})
+                .WithLexeme(new Lexeme { Graphemes = new[] { "Baldesion" }, Phoneme = "bɔldˈɛˈsiɑn" })
+                .Build();
+            var xml = XDocument.Parse(lexicon);
+            lm.AddLexicon(xml, "test");
+            
+            var ssml = lm.MakeSsml("Bahamoot");
+            Assert.True(ssml.Contains("Bahamoot") && ssml.Contains("<phoneme"));
         }
 
         [Fact]
