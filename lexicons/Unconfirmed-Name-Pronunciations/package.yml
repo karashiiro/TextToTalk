@@ -1,0 +1,6 @@
+name: Unconfirmed Name Pronunciations
+author: ryankhart
+disabled: false
+description: A lexicon that includes unconfirmed or speculative pronunciations that have not been heard in voice acting (at least by me yet). Word pronunciations added to this lexicon are based on my own opinion, but if anyone corrects them in the TextToTalk Community Lexicon discussions page, I'd be happy to change it and add it to the main lexicon file instead.
+files:
+  - lexicon.pls
