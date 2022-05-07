@@ -368,12 +368,12 @@
 <lexeme>
 <grapheme>Aetheryte</grapheme>
 <grapheme>aetheryte</grapheme>
-<phoneme>eɪθˈə.raɪt</phoneme>
+<phoneme>ˈeɪθəraɪt</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Aetherytes</grapheme>
 <grapheme>aetherytes</grapheme>
-<phoneme>eɪθˈə.raɪtz</phoneme>
+<phoneme>ˈeɪθəraɪtz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eld </grapheme>
