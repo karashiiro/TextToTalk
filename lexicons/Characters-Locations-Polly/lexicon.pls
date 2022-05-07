@@ -142,6 +142,10 @@
 <phoneme>ˈpapʊliˌmoʊ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Pipin</grapheme>
+<phoneme>ˈpɪpɪn</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Raubahn</grapheme>
 <phoneme>ˈraʊˈbɑn</phoneme>
 </lexeme>
@@ -160,6 +164,10 @@
 <lexeme>
 <grapheme>Scaeva</grapheme>
 <phoneme>skeɪvɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Soroban</grapheme>
+<phoneme>ˈsɔroʊban</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Sylph</grapheme>
@@ -199,7 +207,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Yugiri</grapheme>
-<phoneme>ˈju:gɪdi</phoneme>
+<phoneme>ˈju:gɪði</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Y'shtola</grapheme>
@@ -286,6 +294,11 @@
 <phoneme>kɪtɑːriːz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Kami</grapheme>
+<grapheme>kami</grapheme>
+<phoneme>ˈkɒmi</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Kugane</grapheme>
 <phoneme>kugɔneɪ</phoneme>
 </lexeme>
@@ -357,6 +370,18 @@
 <grapheme>Aetherytes</grapheme>
 <grapheme>aetherytes</grapheme>
 <phoneme>eɪθˈə.raɪtz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Enclave</grapheme>
+<grapheme>enclave</grapheme>
+<phoneme>ˈɑnkleɪv</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Hm,</grapheme>
+<grapheme> hm,</grapheme>
+<grapheme>Hm.</grapheme>
+<grapheme> hm.</grapheme>
+<phoneme>hm̩</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>NIN</grapheme>
