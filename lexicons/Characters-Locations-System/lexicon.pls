@@ -368,12 +368,12 @@
 <lexeme>
 <grapheme>Aetheryte</grapheme>
 <grapheme>aetheryte</grapheme>
-<phoneme>eɪθˈə.raɪt</phoneme>
+<phoneme>ˈeɪθəraɪt</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Aetherytes</grapheme>
 <grapheme>aetherytes</grapheme>
-<phoneme>eɪθˈə.raɪtz</phoneme>
+<phoneme>ˈeɪθəraɪtz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eld </grapheme>
@@ -385,6 +385,7 @@
 <phoneme>ɛld</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Enclave</grapheme>
 <grapheme>enclave</grapheme>
 <phoneme>ˈɑnkleɪv</phoneme>
 </lexeme>
@@ -416,5 +417,45 @@
 <grapheme>'tis</grapheme>
 <grapheme>'Tis</grapheme>
 <phoneme>ˈtɪz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lyhe Ghiah</grapheme>
+<phoneme>liegiə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lydha Lran</grapheme>
+<phoneme>ˈliːdəə lɜ(r)ˈæn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Matoya</grapheme>
+<phoneme>məˈtɔɪə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Amh Araeng</grapheme>
+<phoneme>ˈɑːm məˈræŋ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Jul</grapheme>
+<phoneme>ˈʝuːəl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Tesleen</grapheme>
+<phoneme>ˈtesliːn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Eulmore</grapheme>
+<phoneme>ˈjuːlˌmɔː(r)</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Eulmorean</grapheme>
+<phoneme>juːlˈmɔː(r)ˌən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Eulmoreans</grapheme>
+<phoneme>juːlˈmɔː(r)ˌənz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Varis</grapheme>
+<phoneme>ˈvɑːrɪs</phoneme>
 </lexeme>
 </lexicon>

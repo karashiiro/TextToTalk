@@ -1,0 +1,6 @@
+name: Yugiri Western Pronunciation
+author: ryankhart
+disabled: false
+description: An opinionated lexicon that won't suit all voice types or characters speaking that simply changes the way that Yugiri is pronounced to a more western pronunciation with the 'r' sounding like an 'r' and not a 'd' or an 'l'. This pronunciation also puts the stress on the second syllable rather than the first.
+files:
+  - lexicon.pls
