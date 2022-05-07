@@ -376,6 +376,15 @@
 <phoneme>eɪθˈə.raɪtz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Eld </grapheme>
+<grapheme>Eld.</grapheme>
+<grapheme>Eld,</grapheme>
+<grapheme> eld </grapheme>
+<grapheme> eld,</grapheme>
+<grapheme> eld.</grapheme>
+<phoneme>ɛld</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Enclave</grapheme>
 <grapheme>enclave</grapheme>
 <phoneme>ˈɑnkleɪv</phoneme>
