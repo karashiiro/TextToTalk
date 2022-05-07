@@ -1,7 +1,7 @@
 [![Download count](https://img.shields.io/endpoint?url=https://vz32sgcoal.execute-api.us-east-1.amazonaws.com/TextToTalk)](https://github.com/karashiiro/TextToTalk)
 
 # TextToTalk
-Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, Amazon Polly, and external interfacing over WebSocket.
+Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, Amazon Polly, and more!
 
 ## Commands
 * `/tttconfig`: Opens the configuration window.
@@ -15,7 +15,13 @@ TextToTalk supports custom lexicons to modify how words are pronounced. For more
 
 Direct links to information will be added here eventually.
 
-## WebSocket Interfacing
+## Supported TTS providers
+* System (Windows)
+* AWS Polly
+* Uberduck
+* Websocket
+
+## WebSocket interfacing
 TextToTalk can optionally open a WebSocket server to serve messages over. There are currently two JSON-format messages that can be sent:
 
 TTS prompt:

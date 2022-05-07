@@ -30,12 +30,9 @@ public class ChatMessageHandler
 
     public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
     {
-        var textValue = message.TextValue;
+        var textValue = TalkUtils.NormalizePunctuation(message.TextValue);
         if (this.filters.IsDuplicateQuestText(textValue)) return;
-
-#if DEBUG
-        PluginLog.Log("Chat message from type {0}: {1}", type, textValue);
-#endif
+        PluginLog.LogDebug($"Chat ({type}): \"{textValue}\"");
 
         // This section controls speaker-related functions.
         if (sender != null && sender.TextValue != string.Empty)
@@ -62,18 +59,7 @@ public class ChatMessageHandler
 
                     if (config.SayPartialName)
                     {
-                        var names = speakerNameToSay.Split(' ');
-
-                        switch (config.OnlySayFirstOrLastName)
-                        {
-                            case FirstOrLastName.First:
-                                speakerNameToSay = names[0];
-                                break;
-
-                            case FirstOrLastName.Last:
-                                speakerNameToSay = names[1];
-                                break;
-                        }
+                        speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, config.OnlySayFirstOrLastName);
                     }
 
                     textValue = $"{speakerNameToSay} says {textValue}";
@@ -93,7 +79,9 @@ public class ChatMessageHandler
         if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
         var senderText = sender?.TextValue; // Can't access in lambda
-        var speaker = this.objects.FirstOrDefault(a => a.Name.TextValue == senderText);
+        var speaker = string.IsNullOrEmpty(senderText)
+            ? null
+            : this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == senderText);
 
         Say?.Invoke(speaker, textValue, TextSource.Chat);
     }

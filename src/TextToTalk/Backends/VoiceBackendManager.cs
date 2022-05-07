@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
+using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.GameEnums;
 
@@ -78,6 +79,7 @@ namespace TextToTalk.Backends
                 TTSBackend.System => new SystemBackend(this.config, this.http),
                 TTSBackend.Websocket => new WebsocketBackend(this.config, this.sharedState),
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
+                TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
                 _ => throw new NotImplementedException(),
             };
         }

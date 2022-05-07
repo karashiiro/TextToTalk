@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Concurrent;
+using System.Net.Http;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.System
@@ -8,16 +9,18 @@ namespace TextToTalk.Backends.System
         private readonly PluginConfiguration config;
         private readonly SystemBackendUI ui;
         private readonly SystemSoundQueue soundQueue;
-
+        
         public SystemBackend(PluginConfiguration config, HttpClient http)
         {
             var lexiconManager = new DalamudLexiconManager();
             LexiconUtils.LoadFromConfigSystem(lexiconManager, config);
 
-            this.ui = new SystemBackendUI(config, lexiconManager, http);
+            var selectVoiceFailures = new ConcurrentQueue<SelectVoiceFailedException>();
+
+            this.ui = new SystemBackendUI(config, lexiconManager, selectVoiceFailures, http);
 
             this.config = config;
-            this.soundQueue = new SystemSoundQueue(lexiconManager);
+            this.soundQueue = new SystemSoundQueue(lexiconManager, selectVoiceFailures);
         }
 
         public override void Say(TextSource source, Gender gender, string text)

@@ -7,6 +7,7 @@ namespace TextToTalk.Backends
         System,
         Websocket,
         AmazonPolly,
+        Uberduck,
     }
 
     public static class TTSBackendExtensions
@@ -18,6 +19,19 @@ namespace TextToTalk.Backends
                 TTSBackend.System => "System",
                 TTSBackend.Websocket => "Websocket",
                 TTSBackend.AmazonPolly => "Amazon Polly",
+                TTSBackend.Uberduck => "Uberduck",
+                _ => throw new ArgumentOutOfRangeException(nameof(backend)),
+            };
+        }
+
+        public static bool AreLexiconsEnabled(this TTSBackend backend)
+        {
+            return backend switch
+            {
+                TTSBackend.System => true,
+                TTSBackend.Websocket => false,
+                TTSBackend.AmazonPolly => true,
+                TTSBackend.Uberduck => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }

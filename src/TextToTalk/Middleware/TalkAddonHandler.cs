@@ -7,6 +7,7 @@ using Dalamud.Game.Gui;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.Talk;
 
@@ -78,10 +79,10 @@ public class TalkAddonHandler
             return;
         }
 
-        var text = talkAddonText.Text;
-
+        var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
         if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
+        PluginLog.LogDebug($"AddonTalk: \"{text}\"");
 
         if (talkAddonText.Speaker != "" && this.filters.ShouldSaySender())
         {
@@ -91,21 +92,7 @@ public class TalkAddonHandler
 
                 if (config.SayPartialName)
                 {
-                    var names = speakerNameToSay.Split(' ');
-
-                    switch (config.OnlySayFirstOrLastName)
-                    {
-                        case FirstOrLastName.First:
-                            speakerNameToSay = names[0];
-                            break;
-
-                        case FirstOrLastName.Last:
-                            if (names.Length == 1)
-                                speakerNameToSay = names[0]; // Some NPCs only have one name.
-                            else
-                                speakerNameToSay = names[1];
-                            break;
-                    }
+                    speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, config.OnlySayFirstOrLastName);
                 }
 
                 text = $"{speakerNameToSay} says {text}";

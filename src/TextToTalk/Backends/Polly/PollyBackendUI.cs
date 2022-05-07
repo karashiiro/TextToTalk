@@ -95,6 +95,12 @@ public class PollyBackendUI
             }
         }
 
+        ImGui.SameLine();
+        if (ImGui.Button("Register##TTTRegisterPollyAuth"))
+        {
+            WebBrowser.Open("https://docs.aws.amazon.com/polly/latest/dg/getting-started.html");
+        }
+
         ImGui.TextColored(HintColor, "Credentials secured with Windows Credential Manager");
 
         ImGui.Spacing();

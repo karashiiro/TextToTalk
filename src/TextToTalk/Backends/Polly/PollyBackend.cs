@@ -1,9 +1,6 @@
-﻿using Amazon;
-using Amazon.Polly;
+﻿using Amazon.Polly;
 using Amazon.Polly.Model;
-using Dalamud.Logging;
 using ImGuiNET;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;

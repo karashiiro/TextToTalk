@@ -156,15 +156,15 @@ namespace TextToTalk.UI.Dalamud
                         ImGui.Spacing();
                         ImGui.Indent();
 
-                        var OnlySayFirstOrLastName = (int)Configuration.OnlySayFirstOrLastName;
+                        var onlySayFirstOrLastName = (int)Configuration.OnlySayFirstOrLastName;
 
-                        if (ImGui.RadioButton("Only say forename", ref OnlySayFirstOrLastName, (int)FirstOrLastName.First))
+                        if (ImGui.RadioButton("Only say forename", ref onlySayFirstOrLastName, (int)FirstOrLastName.First))
                         {
                             Configuration.OnlySayFirstOrLastName = FirstOrLastName.First;
                             Configuration.Save();
                         }
 
-                        if (ImGui.RadioButton("Only say surname", ref OnlySayFirstOrLastName, (int)FirstOrLastName.Last))
+                        if (ImGui.RadioButton("Only say surname", ref onlySayFirstOrLastName, (int)FirstOrLastName.Last))
                         {
                             Configuration.OnlySayFirstOrLastName = FirstOrLastName.Last;
                             Configuration.Save();
@@ -188,7 +188,7 @@ namespace TextToTalk.UI.Dalamud
                 {
                     ImGui.Indent();
 
-                    if (ImGui.DragFloat("", ref messagesPerSecond, 1, 1, 30, "%.3f message(s)/s"))
+                    if (ImGui.DragFloat("", ref messagesPerSecond, 0.1f, 0.1f, 30, "%.3f message(s)/s"))
                     {
                         Configuration.MessagesPerSecond = messagesPerSecond;
                     }

@@ -14,14 +14,14 @@ namespace TextToTalk.Backends.Polly
     public class PollyClient : IDisposable
     {
         private readonly AmazonPollyClient client;
-        private readonly PollySoundQueue soundQueue;
+        private readonly StreamSoundQueue soundQueue;
         private readonly LexiconManager lexiconManager;
 
         public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
-            this.soundQueue = new PollySoundQueue();
+            this.soundQueue = new StreamSoundQueue();
             this.lexiconManager = lexiconManager;
         }
 
@@ -80,7 +80,7 @@ namespace TextToTalk.Backends.Polly
             await res.AudioStream.CopyToAsync(responseStream);
             responseStream.Seek(0, SeekOrigin.Begin);
 
-            this.soundQueue.EnqueueSound(responseStream, source, volume);
+            this.soundQueue.EnqueueSound(responseStream, source, StreamFormat.Mp3, volume);
         }
 
         public Task CancelAllSounds()

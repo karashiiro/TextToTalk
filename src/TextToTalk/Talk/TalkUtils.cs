@@ -59,9 +59,10 @@ namespace TextToTalk.Talk
         public static string NormalizePunctuation(string text)
         {
             return text
-                // TextToTalk#29 emdashes
-                .Replace("─", " - ") // I don't think these are the same character, but they're both used
-                .Replace("—", " - ");
+                // TextToTalk#29 emdashes and dashes and whatever else
+                .Replace("─", " - ") // These are not the same character
+                .Replace("—", " - ")
+                .Replace("–", "-"); // Hopefully, this one is only in Kan-E-Senna's name? Otherwise, I'm not sure how to parse this correctly.
         }
 
         /// <summary>
@@ -80,8 +81,25 @@ namespace TextToTalk.Talk
 
         public static bool IsSpeakable(string text)
         {
-            // TextToTalk #41 Unspeakable text
+            // TextToTalk#41 Unspeakable text
             return Speakable.Match(text).Success;
+        }
+
+        public static string GetPartialName(string name, FirstOrLastName part)
+        {
+            var names = name.Split(' ');
+
+            switch (part)
+            {
+                case FirstOrLastName.First:
+                    return names[0];
+                case FirstOrLastName.Last:
+                    if (names.Length == 1)
+                        return names[0]; // Some NPCs only have one name.
+                    return names[1];
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(part), part, "Enumeration value is out of range.");
+            }
         }
     }
 }

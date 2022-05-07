@@ -67,7 +67,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Estinien</grapheme>
-<phoneme>ɛstɪŋi:ɪn</phoneme>
+<phoneme>ɛsˈtɪni :ɪn</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Fordola</grapheme>
@@ -112,6 +112,10 @@
 <lexeme>
 <grapheme>Ixals</grapheme>
 <phoneme>ɪksəˈlz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Leveilluer</grapheme>
+<phoneme>ləvɛ.jœʁ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Louisoix</grapheme>
@@ -370,6 +374,15 @@
 <grapheme>Aetherytes</grapheme>
 <grapheme>aetherytes</grapheme>
 <phoneme>eɪθˈə.raɪtz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Eld </grapheme>
+<grapheme>Eld.</grapheme>
+<grapheme>Eld,</grapheme>
+<grapheme> eld </grapheme>
+<grapheme> eld,</grapheme>
+<grapheme> eld.</grapheme>
+<phoneme>ɛld</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Enclave</grapheme>
