@@ -165,7 +165,7 @@ namespace TextToTalk
                 TalkUtils.StripAngleBracketedText,
                 TalkUtils.ReplaceSsmlTokens,
                 TalkUtils.NormalizePunctuation,
-                TalkUtils.RemoveStutters,
+                t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
                 x => x.Trim());
 
             if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))
