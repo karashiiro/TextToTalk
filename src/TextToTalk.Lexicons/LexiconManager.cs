@@ -69,7 +69,6 @@ namespace TextToTalk.Lexicons
                             Alias = el.Element($"{nsPrefix}alias")?.Value,
                         })
                     )
-                    .Where(lexeme => !string.IsNullOrEmpty(lexeme.Phoneme))
                     .ToList(),
             };
 
@@ -93,12 +92,17 @@ namespace TextToTalk.Lexicons
         {
             foreach (var lexicon in this.lexicons)
             {
-                foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme) || (!string.IsNullOrEmpty(lexeme.Alias) && text.Contains(lexeme.Alias))))
+                foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme)))
                 {
-                    text = WrapGrapheme(text, lexeme.Grapheme, lexeme.Phoneme);
                     if (!string.IsNullOrEmpty(lexeme.Alias))
                     {
-                        text = WrapGrapheme(text, lexeme.Alias, lexeme.Phoneme);
+                        text = text.Replace(lexeme.Grapheme, lexeme.Alias);
+                        break; // Avoid replacing more than once. Many lexemes have more than one grapheme.
+                    }
+
+                    if (!string.IsNullOrEmpty(lexeme.Phoneme))
+                    {
+                        text = WrapGrapheme(text, lexeme.Grapheme, lexeme.Phoneme);
                     }
                 }
             }
