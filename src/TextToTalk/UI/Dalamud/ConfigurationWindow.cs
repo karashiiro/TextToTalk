@@ -220,6 +220,16 @@ namespace TextToTalk.UI.Dalamud
                     BackendManager.DrawSettings(this.helpers);
                 }
             }
+
+            if (ImGui.CollapsingHeader("Experimental", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                var removeStutterEnabled = Configuration.RemoveStutterEnabled;
+                if (ImGui.Checkbox("Attempt to remove stutter from NPC dialogue (default: On)", ref removeStutterEnabled))
+                {
+                    Configuration.RemoveStutterEnabled = removeStutterEnabled;
+                    Configuration.Save();
+                }
+            }
         }
 
         private void DrawChannelSettings()
