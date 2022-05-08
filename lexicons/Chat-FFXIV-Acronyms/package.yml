@@ -1,0 +1,6 @@
+name: Chat FFXIV Acronyms
+author: ryankhart
+disabled: false
+description: No longer will "NIN" be pronounced as "Nine Inch Nails" but it will be pronounced as "Ninja". Other FFXIV specific acronyms will also be added to this lexicon as well.
+files:
+  - lexicon.pls
