@@ -160,27 +160,13 @@ namespace TextToTalk
                 return;
             }
 
-            string cleanText;
-
-            if (config.RemoveStutterEnabled)
-            {
-                cleanText = Pipe(
+            var cleanText = Pipe(
                 textValue,
                 TalkUtils.StripAngleBracketedText,
                 TalkUtils.ReplaceSsmlTokens,
                 TalkUtils.NormalizePunctuation,
-                TalkUtils.RemoveStutters,
+                t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
                 x => x.Trim());
-            }
-            else
-            {
-                cleanText = Pipe(
-                textValue,
-                TalkUtils.StripAngleBracketedText,
-                TalkUtils.ReplaceSsmlTokens,
-                TalkUtils.NormalizePunctuation,
-                x => x.Trim());
-            }
 
             if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))
             {
