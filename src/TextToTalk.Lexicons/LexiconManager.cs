@@ -96,7 +96,10 @@ namespace TextToTalk.Lexicons
                 foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme) || (!string.IsNullOrEmpty(lexeme.Alias) && text.Contains(lexeme.Alias))))
                 {
                     text = WrapGrapheme(text, lexeme.Grapheme, lexeme.Phoneme);
-                    text = WrapGrapheme(text, lexeme.Alias, lexeme.Phoneme);
+                    if (!string.IsNullOrEmpty(lexeme.Alias))
+                    {
+                        text = WrapGrapheme(text, lexeme.Alias, lexeme.Phoneme);
+                    }
                 }
             }
 
