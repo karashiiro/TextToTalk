@@ -8,7 +8,6 @@
       xml:lang="en">
 <lexeme>
 <grapheme>NIN</grapheme>
-<grapheme>nin</grapheme>
 <alias>ninja</alias>
 </lexeme>
 <lexeme>
