@@ -110,6 +110,8 @@ namespace TextToTalk
         public float UberduckVolume { get; set; } = 1.0f;
         public int UberduckPlaybackRate { get; set; } = 100;
 
+        public bool RemoveStutterEnabled { get; set; } = true;
+
         public IDictionary<string, IDictionary<TTSBackend, bool>> RemoteLexiconEnabledBackends { get; set; }
 
         public bool UsePlayerRateLimiter { get; set; }
