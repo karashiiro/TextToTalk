@@ -458,4 +458,8 @@
 <grapheme>Varis</grapheme>
 <phoneme>ˈvɑːrɪs</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>Thal</grapheme>
+<phoneme>ˈθɔl</phoneme>
+</lexeme>
 </lexicon>
