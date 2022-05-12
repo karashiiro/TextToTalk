@@ -1,0 +1,6 @@
+name: Stutter Replacers
+author: ryankhart
+disabled: false
+description: An experimental attempt to make stutters sound better rather than removing them all together. If you install this, make sure to disable the stutter remover in the "Experimental" section of Synthesizer Settings tab.
+files:
+  - lexicon.pls
