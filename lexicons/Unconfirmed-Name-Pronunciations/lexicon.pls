@@ -8,7 +8,7 @@
       xml:lang="en">
 <lexeme>
 <grapheme>Licinia</grapheme>
-<phoneme>lɪˈsɪniə</phoneme>
+<phoneme>lɪˈsɪn iə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>An Lad</grapheme>
