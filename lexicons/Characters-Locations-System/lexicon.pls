@@ -6,7 +6,6 @@
         http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
       alphabet="ipa" 
       xml:lang="en">
-<!-- Names -->
 <lexeme>
 <grapheme>Ascian</grapheme>
 <phoneme>ˈæsiːən</phoneme>
@@ -221,8 +220,6 @@
 <grapheme>Zodiark</grapheme>
 <phoneme>ˈzoʊdɪɑrk</phoneme>
 </lexeme>
-
-<!-- LOCATIONS -->
 <lexeme>
 <grapheme>Ahm Araeng</grapheme>
 <phoneme>ˈɑːmɐrɛng</phoneme>
@@ -363,8 +360,6 @@
 <grapheme>eikons</grapheme>
 <phoneme>ˈaɪkɒnz</phoneme>
 </lexeme>
-
-<!-- miscellaneous -->
 <lexeme>
 <grapheme>Aetheryte</grapheme>
 <grapheme>aetheryte</grapheme>
@@ -461,5 +456,9 @@
 <lexeme>
 <grapheme>Thal</grapheme>
 <phoneme>ˈθɔl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Hmph.</grapheme>
+<phoneme>ˈhʌmf</phoneme>
 </lexeme>
 </lexicon>
