@@ -458,7 +458,8 @@
 <phoneme>ˈθɔl</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Hmph.</grapheme>
-<phoneme>ˈhʌmf</phoneme>
+<grapheme>Hmpf</grapheme>
+<grapheme>Hmph</grapheme>
+<phoneme>ˈhm̩f</phoneme>
 </lexeme>
 </lexicon>
