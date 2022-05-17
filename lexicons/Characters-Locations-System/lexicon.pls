@@ -135,7 +135,11 @@
 </lexeme>
 <lexeme>
 <grapheme>Minfilia</grapheme>
-<phoneme>mɪnˈfɪliɑ</phoneme>
+<phoneme>mɪnˈfɪliə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Minfilias</grapheme>
+<phoneme>mɪnˈfɪliəz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Nanamo</grapheme>
