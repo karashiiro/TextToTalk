@@ -7,6 +7,10 @@
       alphabet="ipa" 
       xml:lang="en">
 <lexeme>
+<grapheme>Licinia</grapheme>
+<phoneme>lɪˈsɪn iə</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>An Lad</grapheme>
 <phoneme>ɒn lɒd</phoneme>
 </lexeme>
