@@ -466,4 +466,8 @@
 <grapheme>Hmph</grapheme>
 <phoneme>ˈhm̩f</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>Kholusia</grapheme>
+<phoneme>kəˈlusiə</phoneme>
+</lexeme>
 </lexicon>
