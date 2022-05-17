@@ -470,4 +470,8 @@
 <grapheme>Kholusia</grapheme>
 <phoneme>kəˈlusiə</phoneme>
 </lexeme>
+<lexeme>
+<grapheme>Gulg</grapheme>
+<phoneme>ˈɡuəlɡ</phoneme>
+</lexeme>
 </lexicon>
