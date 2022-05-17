@@ -209,4 +209,8 @@
 <grapheme>irl</grapheme>
 <alias>IRL</alias>
 </lexeme>
+<lexeme>
+<grapheme>tho</grapheme>
+<alias>though</alias>
+</lexeme>
 </lexicon>
