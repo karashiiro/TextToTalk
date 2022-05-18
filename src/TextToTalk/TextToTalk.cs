@@ -180,6 +180,8 @@ namespace TextToTalk
 
         private bool ShouldRateLimit(GameObject speaker)
         {
+            if (speaker == null) return false;
+
             var rateLimiter = this.services.GetService<RateLimiter>();
             return this.config.UsePlayerRateLimiter &&
                    speaker.ObjectKind is ObjectKind.Player &&
