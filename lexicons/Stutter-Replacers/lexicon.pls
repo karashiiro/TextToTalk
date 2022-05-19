@@ -8,94 +8,94 @@
       xml:lang="en">
 <lexeme>
 <grapheme>B-</grapheme>
-<grapheme>b-</grapheme>
+<grapheme> b-</grapheme>
 <phoneme>βə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>C-</grapheme>
-<grapheme>c-</grapheme>
+<grapheme> c-</grapheme>
 <grapheme>K-</grapheme>
-<grapheme>k-</grapheme>
+<grapheme> k-</grapheme>
 <phoneme>kə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>D-</grapheme>
-<grapheme>d-</grapheme>
+<grapheme> d-</grapheme>
 <phoneme>də</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>F-</grapheme>
-<grapheme>f-</grapheme>
+<grapheme> f-</grapheme>
 <phoneme>fə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>G-</grapheme>
-<grapheme>g-</grapheme>
+<grapheme> g-</grapheme>
 <phoneme>ɠə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>J-</grapheme>
-<grapheme>j-</grapheme>
+<grapheme> j-</grapheme>
 <phoneme>dʒə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>L-</grapheme>
-<grapheme>l-</grapheme>
+<grapheme> l-</grapheme>
 <phoneme>lə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>M-</grapheme>
-<grapheme>m-</grapheme>
+<grapheme> m-</grapheme>
 <phoneme>mə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>N-</grapheme>
-<grapheme>n-</grapheme>
+<grapheme> n-</grapheme>
 <phoneme>nə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>P-</grapheme>
-<grapheme>p-</grapheme>
+<grapheme> p-</grapheme>
 <phoneme>pə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Q-</grapheme>
-<grapheme>q-</grapheme>
+<grapheme> q-</grapheme>
 <phoneme>kə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>R-</grapheme>
-<grapheme>r-</grapheme>
+<grapheme> r-</grapheme>
 <phoneme>rə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>S-</grapheme>
-<grapheme>s-</grapheme>
+<grapheme> s-</grapheme>
 <phoneme>sə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>T-</grapheme>
-<grapheme>t-</grapheme>
+<grapheme> t-</grapheme>
 <phoneme>tə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>V-</grapheme>
-<grapheme>v-</grapheme>
+<grapheme> v-</grapheme>
 <phoneme>və</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>W-</grapheme>
-<grapheme>w-</grapheme>
+<grapheme> w-</grapheme>
 <phoneme>wə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Y-</grapheme>
-<grapheme>y-</grapheme>
+<grapheme> y-</grapheme>
 <phoneme>jə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Z-</grapheme>
-<grapheme>-</grapheme>
+<grapheme> z-</grapheme>
 <phoneme>zə</phoneme>
 </lexeme>
 </lexicon>
