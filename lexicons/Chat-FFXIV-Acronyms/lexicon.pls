@@ -213,4 +213,8 @@
 <grapheme>tho</grapheme>
 <alias>though</alias>
 </lexeme>
+<lexeme>
+<grapheme>OP</grapheme>
+<alias>O P</alias>
+</lexeme>
 </lexicon>
