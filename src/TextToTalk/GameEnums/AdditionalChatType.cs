@@ -23,6 +23,8 @@
         DetrimentalEffectsInflictedByYou = 2735,
         ActionUsedByOtherPlayer = 8235,
         BeneficialEffectOnOtherPlayer = 8750,
+        DetrimentalEffectOnOtherPlayer = 8751,
+        BeneficialEffectOnOtherPlayerEnded = 8752,
         FreeCompanyMemberLoginNotifications = 8774,
         DetrimentalEffectOnEnemyEnded = 10929,
     }
