@@ -6,6 +6,7 @@ using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using TextToTalk.GameEnums;
 using TextToTalk.Talk;
 
@@ -30,7 +31,39 @@ public class ChatMessageHandler
 
     public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
     {
-        var textValue = TalkUtils.NormalizePunctuation(message.TextValue);
+        var textValue = message.TextValue;
+        if (!config.SayPlayerWorldName)
+        {
+            // Remove world from all names in message body
+            var world = "";
+            var cleanString = new SeStringBuilder();
+            foreach (var p in message.Payloads)
+            {
+                if (p is PlayerPayload pp)
+                {
+                    world = pp.World.Name;
+                }
+                else if (p is TextPayload tp)
+                {
+                    if (world != "" && tp.Text?.Contains(world) == true)
+                    {
+                        cleanString.AddText(tp.Text.Replace(world, ""));
+                    }
+                    else
+                    {
+                        cleanString.Add(p);
+                    }
+                }
+                else
+                {
+                    cleanString.Add(p);
+                }
+            }
+
+            textValue = cleanString.Build().TextValue;
+        }
+        
+        textValue = TalkUtils.NormalizePunctuation(textValue);
         if (this.filters.IsDuplicateQuestText(textValue)) return;
         PluginLog.LogDebug($"Chat ({type}): \"{textValue}\"");
 
@@ -56,6 +89,12 @@ public class ChatMessageHandler
                     }
 
                     var speakerNameToSay = sender.TextValue;
+                    
+                    if (!config.SayPlayerWorldName && sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
+                    {
+                        // Remove world from spoken name
+                        speakerNameToSay = player.PlayerName;
+                    }
 
                     if (config.SayPartialName)
                     {

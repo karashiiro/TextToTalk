@@ -129,11 +129,18 @@ namespace TextToTalk.UI.Dalamud
                 {
                     ImGui.Spacing();
                     ImGui.Indent();
-
+                    
                     var nameNpcWithSay = Configuration.NameNpcWithSay;
                     if (ImGui.Checkbox("Also say \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
                     {
                         Configuration.NameNpcWithSay = nameNpcWithSay;
+                        Configuration.Save();
+                    }
+                    
+                    var sayPlayerWorldName = Configuration.SayPlayerWorldName;
+                    if (ImGui.Checkbox("Say player world name", ref sayPlayerWorldName))
+                    {
+                        Configuration.SayPlayerWorldName = sayPlayerWorldName;
                         Configuration.Save();
                     }
 
@@ -144,14 +151,14 @@ namespace TextToTalk.UI.Dalamud
                         Configuration.Save();
                     }
 
-                    var SayPartialName = Configuration.SayPartialName;
-                    if (ImGui.Checkbox("Only say forename or surname", ref SayPartialName))
+                    var sayPartialName = Configuration.SayPartialName;
+                    if (ImGui.Checkbox("Only say forename or surname", ref sayPartialName))
                     {
-                        Configuration.SayPartialName = SayPartialName;
+                        Configuration.SayPartialName = sayPartialName;
                         Configuration.Save();
                     }
 
-                    if (SayPartialName)
+                    if (sayPartialName)
                     {
                         ImGui.Spacing();
                         ImGui.Indent();
@@ -272,13 +279,15 @@ namespace TextToTalk.UI.Dalamud
 
             ImGui.Spacing();
 
+            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             var enableAll = currentEnabledChatTypesPreset.EnableAllChatTypes;
             if (ImGui.Checkbox("Enable all (including undocumented)", ref enableAll))
             {
                 currentEnabledChatTypesPreset.EnableAllChatTypes = enableAll;
             }
-            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
+            
             if (enableAll) return;
+            ImGui.Spacing();
 
             var channels = Enum.GetNames(typeof(XivChatType)).Concat(Enum.GetNames(typeof(AdditionalChatType)));
             foreach (var channel in channels)

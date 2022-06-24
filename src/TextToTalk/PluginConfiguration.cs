@@ -79,6 +79,7 @@ namespace TextToTalk
         public bool NameNpcWithSay { get; set; } = true;
         public bool EnableNameWithSay { get; set; } = true;
         public bool DisallowMultipleSay { get; set; }
+        public bool SayPlayerWorldName { get; set; } = true;
         public bool SayPartialName { get; set; } = false;
         public FirstOrLastName OnlySayFirstOrLastName { get; set; } = FirstOrLastName.First;
 
