@@ -18,6 +18,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Content Include="..\..\images\icon.png" Link="images\icon.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
 		<PackageReference Include="AWSSDK.Core" Version="3.7.10.8" />
 		<PackageReference Include="AWSSDK.Polly" Version="3.7.4.10" />
