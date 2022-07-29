@@ -19,6 +19,10 @@
 <phoneme>ælɛgɛn</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Allagans</grapheme>
+<phoneme>ælɛgɛnz</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Alisaie</grapheme>
 <phoneme>ˈælɪzeɪ</phoneme>
 </lexeme>
