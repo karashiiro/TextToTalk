@@ -79,8 +79,4 @@
 	  <Folder Include="Exceptions\" />
 	</ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
-		<Exec Command="echo Running Debug Post Build (Please have Dalamud closed)&#xD;&#xA;  echo Copying to DevPlugins&#xD;&#xA;  xcopy &quot;$(TargetPath)\..&quot; &quot;%25appdata%25\XIVLauncher\devPlugins&quot; /Y /E&#xD;&#xA;  exit /b 0&#xD;&#xA;)" />
-	</Target>
-
 </Project>
