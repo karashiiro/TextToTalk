@@ -1,5 +1,6 @@
 ﻿name: TextToTalk
 author: karashiiro
-description: Chat TTS. Use /tttconfig to configure the enabled channels and triggers/exceptions.
+description: Chat and game dialogue TTS. Use /tttconfig to configure the enabled channels and triggers/exceptions.
+punchline: Chat and game dialogue TTS plugin.
 repo_url: https://github.com/karashiiro/TextToTalk
 tags: [ "tts", "trigger", "triggers", "voice", "voices", "speech", "karashiiro" ]
