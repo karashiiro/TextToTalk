@@ -10,7 +10,7 @@ namespace TextToTalk.Backends
     {
         private readonly AutoResetEvent speechCompleted;
         private readonly object waveLock;
-        private WaveOut waveOut;
+        private WasapiOut waveOut;
 
         public StreamSoundQueue()
         {
@@ -34,7 +34,7 @@ namespace TextToTalk.Backends
             // Play the sound
             lock (this.waveLock)
             {
-                this.waveOut = new WaveOut();
+                this.waveOut = new WasapiOut();
                 this.waveOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
                 this.waveOut.Init(volumeSampleProvider);
                 this.waveOut.Play();

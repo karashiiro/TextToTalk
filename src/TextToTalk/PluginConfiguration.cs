@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
-using Amazon.Polly.Model;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Migrations;

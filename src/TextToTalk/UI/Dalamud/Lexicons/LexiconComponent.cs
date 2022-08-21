@@ -6,10 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
+using Dalamud.Interface.ImGuiFileDialog;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
-using TextToTalk.UI.Native;
 
 namespace TextToTalk.UI.Dalamud.Lexicons;
 
@@ -29,8 +28,10 @@ public class LexiconComponent
     private readonly Func<IList<string>> getLexiconList;
 
     private bool lexiconRepoSubwindowVisible;
+    private FileDialog fileDialog;
 
-    public LexiconComponent(LexiconManager lm, LexiconRepository lr, PluginConfiguration config, Func<IList<string>> getLexiconList)
+    public LexiconComponent(LexiconManager lm, LexiconRepository lr, PluginConfiguration config,
+        Func<IList<string>> getLexiconList)
     {
         this.lexiconManager = lm;
         this.lexiconRepoSubwindow = new LexiconRepositorySubwindow(lm, lr, config);
@@ -40,6 +41,8 @@ public class LexiconComponent
 
     public void Draw()
     {
+        var lexicons = this.getLexiconList.Invoke();
+
         // Draw the lexicon repo subwindow
         if (this.lexiconRepoSubwindowVisible)
         {
@@ -48,6 +51,31 @@ public class LexiconComponent
         else
         {
             this.lexiconRepoSubwindow.Clear();
+        }
+
+        // Draw the file selection dialog
+        if (this.fileDialog != null)
+        {
+            this.fileDialog.Draw();
+
+            if (this.fileDialog.GetIsOk())
+            {
+                var filePath = this.fileDialog.GetResults()[0];
+                if (string.IsNullOrEmpty(filePath)) return;
+
+                try
+                {
+                    this.lexiconManager.AddLexicon(filePath);
+                    lexicons.Add(filePath);
+                    this.config.Save();
+                    this.lexiconAddSucceeded = true;
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Failed to load lexicon.");
+                    this.lexiconAddException = e;
+                }
+            }
         }
 
         ImGui.Text("Lexicons");
@@ -60,7 +88,6 @@ public class LexiconComponent
 
         ImGui.Spacing();
 
-        var lexicons = this.getLexiconList.Invoke();
         for (var i = 0; i < lexicons.Count; i++)
         {
             // Remove if no longer existent
@@ -72,7 +99,8 @@ public class LexiconComponent
             // Editing options
             var lexiconPath = lexicons[i];
             var lexiconPathBuf = Encoding.UTF8.GetBytes(lexiconPath);
-            ImGui.InputText($"##TTTLexiconText{i}", lexiconPathBuf, (uint)lexiconPathBuf.Length, ImGuiInputTextFlags.ReadOnly);
+            ImGui.InputText($"##TTTLexiconText{i}", lexiconPathBuf, (uint)lexiconPathBuf.Length,
+                ImGuiInputTextFlags.ReadOnly);
 
             if (!string.IsNullOrEmpty(lexicons[i]))
             {
@@ -150,6 +178,7 @@ public class LexiconComponent
 
             lexicons[i] = "";
         }
+
         ImGui.PopFont();
 
         return deferred;
@@ -162,26 +191,10 @@ public class LexiconComponent
             this.lexiconAddException = null;
             this.lexiconAddSucceeded = false;
 
-            var lexicons = this.getLexiconList.Invoke();
-
-            _ = Task.Run(() =>
-            {
-                var filePath = OpenFile.FileSelect();
-                if (string.IsNullOrEmpty(filePath)) return;
-
-                try
-                {
-                    this.lexiconManager.AddLexicon(filePath);
-                    lexicons.Add(filePath);
-                    this.config.Save();
-                    this.lexiconAddSucceeded = true;
-                }
-                catch (Exception e)
-                {
-                    PluginLog.LogError(e, "Failed to load lexicon.");
-                    this.lexiconAddException = e;
-                }
-            });
+            this.fileDialog = new FileDialog("##TTTLexiconOpenFileDialog", "Open a file...",
+                "PLS files (*.pls)|*.pls|XML files (*.xml)|*.xml|All files (*.*)|*.*",
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "", "", 1, true,
+                ImGuiFileDialogFlags.None);
         }
     }
 }

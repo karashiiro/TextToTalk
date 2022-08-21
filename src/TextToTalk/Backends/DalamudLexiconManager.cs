@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Xml.Linq;
 using Dalamud.Logging;
 using TextToTalk.Lexicons;
 

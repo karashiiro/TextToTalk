@@ -17,7 +17,7 @@ namespace VoiceUnlocker
             {
                 Console.WriteLine("No mobile voices found!");
                 return;
-            };
+            }
 
             // Create/open x64 voices registry
             using var speechTokens = Registry.LocalMachine.CreateSubKey(SpeechTokensPath);
