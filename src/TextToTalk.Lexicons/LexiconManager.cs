@@ -12,13 +12,18 @@ namespace TextToTalk.Lexicons
         // this SO question https://stackoverflow.com/questions/11529164/how-do-i-use-a-lexicon-with-speechsynthesizer.
         // Because of this, we just manage lexicons ourselves here.
 
-        private readonly IList<LexiconInfo> lexicons;
+        private readonly IDictionary<string, LexiconInfo> lexicons;
 
-        public int Entries => this.lexicons.SelectMany(l => l.Lexemes).Count();
+        public int Count => this.lexicons.Values.SelectMany(l => l.Lexemes).Count();
 
         public LexiconManager()
         {
-            this.lexicons = new List<LexiconInfo>();
+            this.lexicons = new Dictionary<string, LexiconInfo>();
+        }
+
+        public bool HasLexicon(string lexiconId)
+        {
+            return this.lexicons.ContainsKey(lexiconId);
         }
 
         public virtual int AddLexicon(Stream data, string lexiconId)
@@ -41,10 +46,9 @@ namespace TextToTalk.Lexicons
             }
 
             // Remove existing lexicon if it's already registered
-            var existingLexicon = this.lexicons.FirstOrDefault(li => li.Id == lexiconId);
-            if (existingLexicon != null)
+            if (this.lexicons.TryGetValue(lexiconId, out var existingLexicon))
             {
-                this.lexicons.Remove(existingLexicon);
+                this.lexicons.Remove(existingLexicon.Id);
             }
 
             var ns = xml.Root.Attribute("xmlns")?.Value ?? "";
@@ -74,23 +78,23 @@ namespace TextToTalk.Lexicons
 
             lexicon.Lexemes.Sort((a, b) => b.Grapheme.Length - a.Grapheme.Length);
 
-            this.lexicons.Add(lexicon);
+            this.lexicons[lexicon.Id] = lexicon;
 
             return lexicon.Lexemes.Count;
         }
 
         public virtual void RemoveLexicon(string lexiconId)
         {
-            var lexicon = this.lexicons.FirstOrDefault(li => li.Id == lexiconId);
-            if (lexicon != null)
+            if (this.lexicons.TryGetValue(lexiconId, out var lexicon))
             {
-                this.lexicons.Remove(lexicon);
+                this.lexicons.Remove(lexicon.Id);
             }
         }
 
-        public virtual string MakeSsml(string text, string langCode = null, int playbackRate = -1, bool includeSpeakAttributes = true)
+        public string MakeSsml(string text, string langCode = null, int playbackRate = -1,
+            bool includeSpeakAttributes = true)
         {
-            foreach (var lexicon in this.lexicons)
+            foreach (var (_, lexicon) in this.lexicons)
             {
                 foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme)))
                 {

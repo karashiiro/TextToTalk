@@ -10,9 +10,9 @@
       },
       "AWSSDK.Core": {
         "type": "Direct",
-        "requested": "[3.7.12.23, )",
-        "resolved": "3.7.12.23",
-        "contentHash": "5n9mSVksj3vsv5hm7t/GUjv36iT0s0Wu9UCBn+onTKrnIpXZjVbsHBrxzEwA5Ru6Qg0j4Ah4R/+H6LcngTOVfg=="
+        "requested": "[3.7.12.24, )",
+        "resolved": "3.7.12.24",
+        "contentHash": "uPAZ3a5Wu4k4Ml+TBAcOumZPxMpoHUHai0PdS3iLX0XPsDqAJPYviAIc1QXi2rVSDgqC2uVBxiEVSNYAgzoxbA=="
       },
       "AWSSDK.Polly": {
         "type": "Direct",
@@ -71,12 +71,6 @@
         "requested": "[6.0.0, )",
         "resolved": "6.0.0",
         "contentHash": "GQovERMrNP0Vbtgk8LzH4PlFS6lqHgsL9WkUmv8Kkxa0m0vNakitytpHZlfJ9WR7n9WKLXh68nn2kyL9mflnLg=="
-      },
-      "WebSocketSharpFork": {
-        "type": "Direct",
-        "requested": "[1.0.4, )",
-        "resolved": "1.0.4",
-        "contentHash": "gLe6No9b9NagLaOHn1lX/g8DHrvQ9PjjbH//Qld2SHfBjPbmJXYjIrMwwCVYW68hDSTqOElfhfxnjeFeOAaoXA=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -190,6 +184,9 @@
         "type": "Project"
       },
       "voiceunlocker": {
+        "type": "Project"
+      },
+      "websocket-sharp": {
         "type": "Project"
       }
     }

@@ -25,7 +25,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
-		<PackageReference Include="AWSSDK.Core" Version="3.7.12.23" />
+		<PackageReference Include="AWSSDK.Core" Version="3.7.12.24" />
 		<PackageReference Include="AWSSDK.Polly" Version="3.7.7.9" />
 		<PackageReference Include="Dalamud.CrystalTower" Version="2.0.1" />
 		<PackageReference Include="DalamudPackager" Version="2.1.7" />
@@ -33,7 +33,6 @@
 		<PackageReference Include="NAudio" Version="2.1.0" />
 		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
 		<PackageReference Include="System.Speech" Version="6.0.0" />
-		<PackageReference Include="WebSocketSharpFork" Version="1.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -41,6 +40,7 @@
 		<ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
 		<ProjectReference Include="..\TextToTalk.UngenderedOverrides\TextToTalk.UngenderedOverrides.csproj" />
 		<ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" />
+		<ProjectReference Include="..\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

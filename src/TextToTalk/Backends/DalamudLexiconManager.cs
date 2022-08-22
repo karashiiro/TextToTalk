@@ -10,7 +10,7 @@ public class DalamudLexiconManager : LexiconManager
     {
         LogPreAdd(lexiconId);
         var newEntries = base.AddLexicon(data, lexiconId);
-        LogPostAdd(lexiconId, newEntries, Entries);
+        LogPostAdd(lexiconId, newEntries, Count);
         return newEntries;
     }
 
@@ -18,7 +18,7 @@ public class DalamudLexiconManager : LexiconManager
     {
         LogPreAdd(lexiconUrl);
         var newEntries = base.AddLexicon(lexiconUrl);
-        LogPostAdd(lexiconUrl, newEntries, Entries);
+        LogPostAdd(lexiconUrl, newEntries, Count);
         return newEntries;
     }
     
@@ -26,7 +26,7 @@ public class DalamudLexiconManager : LexiconManager
     {
         LogPreRemove(lexiconId);
         base.RemoveLexicon(lexiconId);
-        LogPostRemove(lexiconId, Entries);
+        LogPostRemove(lexiconId, Count);
     }
 
     private static void LogPreAdd(string lexiconId)

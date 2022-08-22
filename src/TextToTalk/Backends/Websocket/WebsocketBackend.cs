@@ -50,13 +50,11 @@ namespace TextToTalk.Backends.Websocket
         public override void CancelAllSpeech()
         {
             this.wsServer.CancelAll();
-            PluginLog.Log("Canceled all TTS over WebSocket server.");
         }
 
         public override void CancelSay(TextSource source)
         {
             this.wsServer.Cancel(source);
-            PluginLog.Log("Canceled TTS over WebSocket server.");
         }
 
         public override void DrawSettings(IConfigUIDelegates helpers)

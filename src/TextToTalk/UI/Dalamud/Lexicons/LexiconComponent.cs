@@ -60,8 +60,10 @@ public class LexiconComponent
 
             if (this.fileDialog.GetIsOk())
             {
+                this.fileDialog.Hide();
+
                 var filePath = this.fileDialog.GetResults()[0];
-                if (string.IsNullOrEmpty(filePath)) return;
+                if (string.IsNullOrEmpty(filePath) || this.lexiconManager.HasLexicon(filePath)) return;
 
                 try
                 {
@@ -75,6 +77,8 @@ public class LexiconComponent
                     PluginLog.LogError(e, "Failed to load lexicon.");
                     this.lexiconAddException = e;
                 }
+
+                this.fileDialog = null;
             }
         }
 
@@ -191,10 +195,11 @@ public class LexiconComponent
             this.lexiconAddException = null;
             this.lexiconAddSucceeded = false;
 
-            this.fileDialog = new FileDialog("##TTTLexiconOpenFileDialog", "Open a file...",
-                "PLS files (*.pls)|*.pls|XML files (*.xml)|*.xml|All files (*.*)|*.*",
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "", "", 1, true,
+            this.fileDialog = new FileDialog("TTTLexiconOpenFileDialog", "Open a file...",
+                "Lexicon files{.pls,.xml},PLS files{.pls},XML files{.xml},.*",
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "", "", 1, false,
                 ImGuiFileDialogFlags.None);
+            this.fileDialog.Show();
         }
     }
 }

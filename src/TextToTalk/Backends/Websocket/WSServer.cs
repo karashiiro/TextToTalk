@@ -10,8 +10,7 @@ namespace TextToTalk.Backends.Websocket
 {
     public class WSServer
     {
-        private readonly ServerBehavior behavior;
-
+        private ServerBehavior behavior;
         private WebSocketServer server;
 
         private int port;
@@ -37,8 +36,10 @@ namespace TextToTalk.Backends.Websocket
             Port = port;
 
             this.server = new WebSocketServer($"ws://localhost:{Port}");
-            this.behavior = new ServerBehavior();
-            this.server.AddWebSocketService("/Messages", () => this.behavior);
+            this.server.AddWebSocketService<ServerBehavior>("/Messages", b =>
+            {
+                this.behavior = b;
+            });
         }
 
         public void Broadcast(TextSource source, Gender speakerGender, string message)
@@ -46,7 +47,7 @@ namespace TextToTalk.Backends.Websocket
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
             var ipcMessage = new IpcMessage(IpcMessageType.Say, message, speakerGender, source);
-            this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
+            this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
         public void CancelAll()
@@ -54,7 +55,7 @@ namespace TextToTalk.Backends.Websocket
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
             var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, Gender.None, TextSource.None);
-            this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
+            this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
         public void Cancel(TextSource source)
@@ -62,7 +63,7 @@ namespace TextToTalk.Backends.Websocket
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
             var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, Gender.None, source);
-            this.behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
+            this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
         public void Start()
@@ -84,7 +85,10 @@ namespace TextToTalk.Backends.Websocket
             Port = newPort;
             Stop();
             this.server = new WebSocketServer($"ws://localhost:{Port}");
-            this.server.AddWebSocketService("/Messages", () => this.behavior);
+            this.server.AddWebSocketService<ServerBehavior>("/Messages", b =>
+            {
+                this.behavior = b;
+            });
             Start();
         }
 

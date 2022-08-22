@@ -9,13 +9,13 @@ namespace TextToTalk.Backends
     public class StreamSoundQueue : SoundQueue<StreamSoundQueueItem>
     {
         private readonly AutoResetEvent speechCompleted;
-        private readonly object waveLock;
-        private WasapiOut waveOut;
+        private readonly object soundLock;
+        private DirectSoundOut soundOut;
 
         public StreamSoundQueue()
         {
             this.speechCompleted = new AutoResetEvent(false);
-            this.waveLock = true;
+            this.soundLock = true;
         }
 
         protected override void OnSoundLoop(StreamSoundQueueItem nextItem)
@@ -32,21 +32,21 @@ namespace TextToTalk.Backends
             var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
 
             // Play the sound
-            lock (this.waveLock)
+            lock (this.soundLock)
             {
-                this.waveOut = new WasapiOut();
-                this.waveOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
-                this.waveOut.Init(volumeSampleProvider);
-                this.waveOut.Play();
+                this.soundOut = new DirectSoundOut();
+                this.soundOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
+                this.soundOut.Init(volumeSampleProvider);
+                this.soundOut.Play();
             }
 
             this.speechCompleted.WaitOne();
 
             // Cleanup
-            lock (this.waveLock)
+            lock (this.soundLock)
             {
-                this.waveOut.Dispose();
-                this.waveOut = null;
+                this.soundOut.Dispose();
+                this.soundOut = null;
             }
         }
 
@@ -70,9 +70,9 @@ namespace TextToTalk.Backends
         {
             try
             {
-                lock (this.waveLock)
+                lock (this.soundLock)
                 {
-                    this.waveOut?.Stop();
+                    this.soundOut?.Stop();
                 }
             }
             catch (ObjectDisposedException) { }
@@ -84,9 +84,9 @@ namespace TextToTalk.Backends
             {
                 StopWaveOut();
 
-                lock (this.waveLock)
+                lock (this.soundLock)
                 {
-                    this.waveOut?.Dispose();
+                    this.soundOut?.Dispose();
                 }
             }
 
