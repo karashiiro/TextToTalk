@@ -10,10 +10,14 @@
     <ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
   </ItemGroup>
 
+    <PropertyGroup>
+        <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    </PropertyGroup>
+    
 	<ItemGroup>
 		<!--This needs to be copied even though it's not directly used just so that it can be located by the assembly.-->
 		<Reference Include="Newtonsoft.Json">
-			<HintPath>$(AppData)\XIVLauncher\addon\Hooks\dev\Newtonsoft.Json.dll</HintPath>
+			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
