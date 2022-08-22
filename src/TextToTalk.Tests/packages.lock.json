@@ -60,8 +60,8 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "2.1.7",
-        "contentHash": "jnZ/sdInyn07ycuWI+pPOtP/xE3v+c4+jYJfDt36FWnBF9NKqkpzfviJtPl/jGLgbaCmFIXu+Yid0N8GvdKefg=="
+        "resolved": "2.1.8",
+        "contentHash": "YqagNXs9InxmqkXzq7kLveImxnodkBEicAhydMXVp7dFjC7xb76U6zGgAax4/BWIWfZeWzr5DJyQSev31kj81A=="
       },
       "log4net": {
         "type": "Transitive",
@@ -1256,7 +1256,7 @@
           "AWSSDK.Polly": "3.7.7.9",
           "AdysTech.CredentialManager": "2.6.0",
           "Dalamud.CrystalTower": "2.0.1",
-          "DalamudPackager": "2.1.7",
+          "DalamudPackager": "2.1.8",
           "NAudio": "2.1.0",
           "System.Drawing.Common": "6.0.0",
           "System.Speech": "6.0.0",
@@ -1265,7 +1265,7 @@
           "TextToTalk.UngenderedOverrides": "1.0.0",
           "VoiceUnlocker": "1.0.0",
           "log4net": "2.0.15",
-          "websocket-sharp.csproj": "1.0.0"
+          "websocket-sharp": "1.0.0"
         }
       },
       "texttotalk.lexicons": {
@@ -1283,7 +1283,7 @@
       "voiceunlocker": {
         "type": "Project"
       },
-      "websocket-sharp.csproj": {
+      "websocket-sharp": {
         "type": "Project"
       }
     }
