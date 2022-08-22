@@ -1265,7 +1265,7 @@
           "TextToTalk.UngenderedOverrides": "1.0.0",
           "VoiceUnlocker": "1.0.0",
           "log4net": "2.0.15",
-          "websocket-sharp": "1.0.0"
+          "websocket-sharp.csproj": "1.0.0"
         }
       },
       "texttotalk.lexicons": {
@@ -1283,7 +1283,7 @@
       "voiceunlocker": {
         "type": "Project"
       },
-      "websocket-sharp": {
+      "websocket-sharp.csproj": {
         "type": "Project"
       }
     }

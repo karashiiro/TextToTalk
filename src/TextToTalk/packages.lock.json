@@ -186,7 +186,7 @@
       "voiceunlocker": {
         "type": "Project"
       },
-      "websocket-sharp": {
+      "websocket-sharp.csproj": {
         "type": "Project"
       }
     }
