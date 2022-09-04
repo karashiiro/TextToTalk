@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Speech.Synthesis;
+using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 using TextToTalk.Migrations;
@@ -174,18 +175,25 @@ namespace TextToTalk
                     MajorKey = VirtualKey.Enum.Vk0,
                 });
 
-                using var ss = new SpeechSynthesizer();
-                var defaultVoiceInfo = ss.GetInstalledVoices().FirstOrDefault();
-                if (defaultVoiceInfo != null)
+                try
                 {
-                    VoicePresets.Add(new VoicePreset
+                    using var ss = new SpeechSynthesizer();
+                    var defaultVoiceInfo = ss.GetInstalledVoices().FirstOrDefault();
+                    if (defaultVoiceInfo != null)
                     {
-                        Id = 0,
-                        Rate = ss.Rate,
-                        Volume = ss.Volume,
-                        VoiceName = defaultVoiceInfo.VoiceInfo.Name,
-                        Name = DefaultPreset,
-                    });
+                        VoicePresets.Add(new VoicePreset
+                        {
+                            Id = 0,
+                            Rate = ss.Rate,
+                            Volume = ss.Volume,
+                            VoiceName = defaultVoiceInfo.VoiceInfo.Name,
+                            Name = DefaultPreset,
+                        });
+                    }
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Failed to create default voice preset.");
                 }
 
                 InitializedEver = true;
@@ -246,7 +254,7 @@ namespace TextToTalk
 
         public VoicePreset GetCurrentVoicePreset()
         {
-            return VoicePresets.First(p => p.Id == CurrentVoicePresetId);
+            return VoicePresets.FirstOrDefault(p => p.Id == CurrentVoicePresetId);
         }
 
         public VoicePreset GetCurrentUngenderedVoicePreset()
