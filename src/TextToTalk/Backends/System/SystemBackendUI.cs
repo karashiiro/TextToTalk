@@ -136,7 +136,7 @@ public class SystemBackendUI
         }
 
         var voiceName = currentVoicePreset.VoiceName;
-        var voices = DummySynthesizer.IsValueCreated
+        var voices = DummySynthesizer.Value != null
             ? DummySynthesizer.Value.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList()
             : new List<InstalledVoice>();
         if (voices.Any())
