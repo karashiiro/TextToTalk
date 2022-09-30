@@ -15,38 +15,28 @@ using TextToTalk.Backends;
 using TextToTalk.Exceptions;
 using TextToTalk.Middleware;
 using TextToTalk.UngenderedOverrides;
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
 
 namespace TextToTalk;
 
 public class Services : IServiceProvider, IDisposable
 {
-    [PluginService]
-    private static DalamudPluginInterface PluginInterface { get; set; } = null!;
+    [PluginService] private DalamudPluginInterface PluginInterface { get; set; } = null!;
 
-    [PluginService]
-    private static CommandManager Commands { get; set; } = null!;
+    [PluginService] private CommandManager Commands { get; set; } = null!;
 
-    [PluginService]
-    private static ClientState ClientState { get; set; } = null!;
+    [PluginService] private ClientState ClientState { get; set; } = null!;
 
-    [PluginService]
-    private static Framework Framework { get; set; } = null!;
+    [PluginService] private Framework Framework { get; set; } = null!;
 
-    [PluginService]
-    private static DataManager Data { get; set; } = null!;
+    [PluginService] private DataManager Data { get; set; } = null!;
 
-    [PluginService]
-    private static ChatGui Chat { get; set; } = null!;
+    [PluginService] private ChatGui Chat { get; set; } = null!;
 
-    [PluginService]
-    private static GameGui Gui { get; set; } = null!;
+    [PluginService] private GameGui Gui { get; set; } = null!;
 
-    [PluginService]
-    private static KeyState Keys { get; set; } = null!;
+    [PluginService] private KeyState Keys { get; set; } = null!;
 
-    [PluginService]
-    private static ObjectTable Objects { get; set; } = null!;
+    [PluginService] private ObjectTable Objects { get; set; } = null!;
 
     private PluginServiceCollection serviceCollection;
 
@@ -70,15 +60,15 @@ public class Services : IServiceProvider, IDisposable
         var services = pi.Create<Services>() ?? throw new ServiceException("Failed to initialize plugin services.");
         services.serviceCollection = new PluginServiceCollection();
 
-        services.serviceCollection.AddService(PluginInterface, shouldDispose: false);
-        services.serviceCollection.AddService(Commands, shouldDispose: false);
-        services.serviceCollection.AddService(ClientState, shouldDispose: false);
-        services.serviceCollection.AddService(Framework, shouldDispose: false);
-        services.serviceCollection.AddService(Data, shouldDispose: false);
-        services.serviceCollection.AddService(Chat, shouldDispose: false);
-        services.serviceCollection.AddService(Gui, shouldDispose: false);
-        services.serviceCollection.AddService(Keys, shouldDispose: false);
-        services.serviceCollection.AddService(Objects, shouldDispose: false);
+        services.serviceCollection.AddService(services.PluginInterface, shouldDispose: false);
+        services.serviceCollection.AddService(services.Commands, shouldDispose: false);
+        services.serviceCollection.AddService(services.ClientState, shouldDispose: false);
+        services.serviceCollection.AddService(services.Framework, shouldDispose: false);
+        services.serviceCollection.AddService(services.Data, shouldDispose: false);
+        services.serviceCollection.AddService(services.Chat, shouldDispose: false);
+        services.serviceCollection.AddService(services.Gui, shouldDispose: false);
+        services.serviceCollection.AddService(services.Keys, shouldDispose: false);
+        services.serviceCollection.AddService(services.Objects, shouldDispose: false);
 
         var sharedState = new SharedState();
         var http = new HttpClient();
@@ -100,8 +90,9 @@ public class Services : IServiceProvider, IDisposable
             return (long)(1000f / config.MessagesPerSecond);
         }));
         services.serviceCollection.AddService(filters);
-        services.serviceCollection.AddService(new TalkAddonHandler(ClientState, Gui, Data, filters, Objects, config, sharedState, backendManager));
-        services.serviceCollection.AddService(new ChatMessageHandler(filters, Objects, config, sharedState));
+        services.serviceCollection.AddService(new TalkAddonHandler(services.ClientState, services.Gui, services.Data,
+            filters, services.Objects, config, sharedState, backendManager));
+        services.serviceCollection.AddService(new ChatMessageHandler(filters, services.Objects, config, sharedState));
         services.serviceCollection.AddService(new WindowManager(services.serviceCollection));
 
         return services;
