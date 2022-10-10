@@ -18,12 +18,13 @@ public class PlayerService
         this.voices = voices;
     }
 
-    public void AddPlayer(string name, uint worldId)
+    public bool AddPlayer(string name, uint worldId)
     {
-        if (TryGetPlayerByInfo(name, worldId, out _)) return;
+        if (TryGetPlayerByInfo(name, worldId, out _)) return false;
         var localId = Guid.NewGuid();
         var info = new PlayerInfo { LocalId = localId, Name = name, WorldId = worldId };
         this.players[localId] = info;
+        return true;
     }
 
     public bool TryGetPlayerByInfo(string name, uint worldId, out PlayerInfo info)

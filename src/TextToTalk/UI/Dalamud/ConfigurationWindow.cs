@@ -17,6 +17,10 @@ namespace TextToTalk.UI.Dalamud
 {
     public class ConfigurationWindow : ImmediateModeWindow
     {
+        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
+        private static readonly Vector4 Green = new(0.0f, 1.0f, 0.0f, 1.0f);
+        private static readonly Vector4 Red = new(1.0f, 0.0f, 0.0f, 1.0f);
+
         public PluginConfiguration Configuration { get; set; }
         public DataManager Data { get; set; }
         public VoiceBackendManager BackendManager { get; set; }
@@ -275,8 +279,14 @@ namespace TextToTalk.UI.Dalamud
 
         private void DrawPlayerVoiceSettings()
         {
-            if (ImGui.BeginTable("##TTTPlayerVoiceList", 3, ImGuiTableFlags.Borders))
+            ImGui.TextColored(HintColor, "Set specific voice presets for players using the options below.");
+
+            ImGui.Spacing();
+
+            var tableSize = new Vector2(0.0f, 300f);
+            if (ImGui.BeginTable("##TTTPlayerVoiceList", 3, ImGuiTableFlags.Borders, tableSize))
             {
+                ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
                 ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
                 ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
@@ -285,6 +295,7 @@ namespace TextToTalk.UI.Dalamud
                 var presets = Configuration.VoicePresets.ToList();
                 presets.Sort((a, b) => a.Id - b.Id);
                 var presetArray = presets.Select(p => p.Name).ToArray();
+
                 foreach (var (id, playerInfo) in Configuration.Players)
                 {
                     // Get player info fields
@@ -339,13 +350,11 @@ namespace TextToTalk.UI.Dalamud
                         ImGui.PushFont(UiBuilder.IconFont);
                         if (valid)
                         {
-                            ImGui.TextColored(new Vector4(0.0f, 1.0f, 0.0f, 1.0f),
-                                FontAwesomeIcon.CheckCircle.ToIconString());
+                            ImGui.TextColored(Green, FontAwesomeIcon.CheckCircle.ToIconString());
                         }
                         else
                         {
-                            ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
-                                FontAwesomeIcon.MinusCircle.ToIconString());
+                            ImGui.TextColored(Red, FontAwesomeIcon.MinusCircle.ToIconString());
                         }
 
                         ImGui.PopFont();
@@ -370,12 +379,20 @@ namespace TextToTalk.UI.Dalamud
 
             if (ImGui.Button("Add player##TTTPlayerVoiceAdd"))
             {
-                // Validate world before saving the new player
+                // Validate data before saving the new player
                 var world = GetWorldForUserInput(this.playerWorld);
-                if (world != null)
+                if (world != null && Players.AddPlayer(this.playerName, world.RowId))
                 {
-                    Players.AddPlayer(this.playerName, world.RowId);
                     Configuration.Save();
+                    PluginLog.Log($"Added player: {this.playerName}@{world.Name}");
+                }
+                else if (world == null)
+                {
+                    PluginLog.LogWarning("The provided world name was invalid");
+                }
+                else
+                {
+                    PluginLog.LogWarning("Failed to add player; this might be a duplicate entry");
                 }
             }
         }
