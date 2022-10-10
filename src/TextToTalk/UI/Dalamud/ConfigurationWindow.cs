@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using Dalamud.Data;
+using Dalamud.Interface;
+using Dalamud.Logging;
+using Lumina.Excel.GeneratedSheets;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 
@@ -14,9 +18,16 @@ namespace TextToTalk.UI.Dalamud
     public class ConfigurationWindow : ImmediateModeWindow
     {
         public PluginConfiguration Configuration { get; set; }
+        public DataManager Data { get; set; }
         public VoiceBackendManager BackendManager { get; set; }
+        public PlayerService Players { get; set; }
 
         private readonly IConfigUIDelegates helpers;
+
+        private IDictionary<Guid, string> playerWorldEditing = new Dictionary<Guid, string>();
+        private IDictionary<Guid, bool> playerWorldValid = new Dictionary<Guid, bool>();
+        private string playerName = string.Empty;
+        private string playerWorld = string.Empty;
 
         public ConfigurationWindow()
         {
@@ -34,7 +45,9 @@ namespace TextToTalk.UI.Dalamud
                 : ImGui.ColorConvertU32ToFloat4(ImGui.GetColorU32(ImGuiCol.TitleBgActive)));
 
             ImGui.SetNextWindowSize(new Vector2(520, 480), ImGuiCond.FirstUseEver);
-            ImGui.Begin($"TextToTalk Configuration (TTS {(this.Configuration.Enabled ? "Enabled" : "Disabled")})###TextToTalkConfig", ref visible);
+            ImGui.Begin(
+                $"TextToTalk Configuration (TTS {(this.Configuration.Enabled ? "Enabled" : "Disabled")})###TextToTalkConfig",
+                ref visible);
             {
                 if (ImGui.BeginTabBar("TextToTalk##tabbar"))
                 {
@@ -42,6 +55,20 @@ namespace TextToTalk.UI.Dalamud
                     {
                         DrawSynthesizerSettings();
                         ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Player Voices"))
+                    {
+                        DrawPlayerVoiceSettings();
+                        ImGui.EndTabItem();
+                    }
+                    else if (this.playerWorldEditing.Count > 0)
+                    {
+                        // Clear all user edits if the tab isn't selected anymore
+                        this.playerWorldEditing = new Dictionary<Guid, string>();
+                        this.playerWorldValid = new Dictionary<Guid, bool>();
+                        this.playerName = string.Empty;
+                        this.playerWorld = string.Empty;
                     }
 
                     if (ImGui.BeginTabItem("Channel Settings"))
@@ -82,13 +109,16 @@ namespace TextToTalk.UI.Dalamud
                     Configuration.ModifierKey = VirtualKey.IndexToEnum(kItem1);
                     Configuration.Save();
                 }
+
                 ImGui.SameLine();
                 var kItem2 = VirtualKey.EnumToIndex(Configuration.MajorKey) - 3;
-                if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind4", ref kItem2, VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
+                if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind4", ref kItem2,
+                        VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
                 {
                     Configuration.MajorKey = VirtualKey.IndexToEnum(kItem2 + 3);
                     Configuration.Save();
                 }
+
                 ImGui.PopItemWidth();
             }
 
@@ -107,7 +137,8 @@ namespace TextToTalk.UI.Dalamud
                     ImGui.Indent();
 
                     var cancelSpeechOnTextAdvance = Configuration.CancelSpeechOnTextAdvance;
-                    if (ImGui.Checkbox("Cancel the current NPC speech when new text is available or text is advanced", ref cancelSpeechOnTextAdvance))
+                    if (ImGui.Checkbox("Cancel the current NPC speech when new text is available or text is advanced",
+                            ref cancelSpeechOnTextAdvance))
                     {
                         Configuration.CancelSpeechOnTextAdvance = cancelSpeechOnTextAdvance;
                         Configuration.Save();
@@ -128,14 +159,14 @@ namespace TextToTalk.UI.Dalamud
                 {
                     ImGui.Spacing();
                     ImGui.Indent();
-                    
+
                     var nameNpcWithSay = Configuration.NameNpcWithSay;
                     if (ImGui.Checkbox("Also say \"NPC Name says:\" in NPC dialogue", ref nameNpcWithSay))
                     {
                         Configuration.NameNpcWithSay = nameNpcWithSay;
                         Configuration.Save();
                     }
-                    
+
                     var sayPlayerWorldName = Configuration.SayPlayerWorldName;
                     if (ImGui.Checkbox("Say player world name", ref sayPlayerWorldName))
                     {
@@ -144,7 +175,8 @@ namespace TextToTalk.UI.Dalamud
                     }
 
                     var disallowMultipleSay = Configuration.DisallowMultipleSay;
-                    if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks", ref disallowMultipleSay))
+                    if (ImGui.Checkbox("Only say \"Character Name says:\" the first time a character speaks",
+                            ref disallowMultipleSay))
                     {
                         Configuration.DisallowMultipleSay = disallowMultipleSay;
                         Configuration.Save();
@@ -164,13 +196,15 @@ namespace TextToTalk.UI.Dalamud
 
                         var onlySayFirstOrLastName = (int)Configuration.OnlySayFirstOrLastName;
 
-                        if (ImGui.RadioButton("Only say forename", ref onlySayFirstOrLastName, (int)FirstOrLastName.First))
+                        if (ImGui.RadioButton("Only say forename", ref onlySayFirstOrLastName,
+                                (int)FirstOrLastName.First))
                         {
                             Configuration.OnlySayFirstOrLastName = FirstOrLastName.First;
                             Configuration.Save();
                         }
 
-                        if (ImGui.RadioButton("Only say surname", ref onlySayFirstOrLastName, (int)FirstOrLastName.Last))
+                        if (ImGui.RadioButton("Only say surname", ref onlySayFirstOrLastName,
+                                (int)FirstOrLastName.Last))
                         {
                             Configuration.OnlySayFirstOrLastName = FirstOrLastName.Last;
                             Configuration.Save();
@@ -230,12 +264,129 @@ namespace TextToTalk.UI.Dalamud
             if (ImGui.CollapsingHeader("Experimental", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 var removeStutterEnabled = Configuration.RemoveStutterEnabled;
-                if (ImGui.Checkbox("Attempt to remove stutter from NPC dialogue (default: On)", ref removeStutterEnabled))
+                if (ImGui.Checkbox("Attempt to remove stutter from NPC dialogue (default: On)",
+                        ref removeStutterEnabled))
                 {
                     Configuration.RemoveStutterEnabled = removeStutterEnabled;
                     Configuration.Save();
                 }
             }
+        }
+
+        private void DrawPlayerVoiceSettings()
+        {
+            if (ImGui.BeginTable("##TTTPlayerVoiceList", 3, ImGuiTableFlags.Borders))
+            {
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
+                ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
+                ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
+                ImGui.TableHeadersRow();
+
+                var presets = Configuration.VoicePresets.ToList();
+                presets.Sort((a, b) => a.Id - b.Id);
+                var presetArray = presets.Select(p => p.Name).ToArray();
+                foreach (var (id, playerInfo) in Configuration.Players)
+                {
+                    // Get player info fields
+                    var name = playerInfo.Name;
+                    if (!playerWorldEditing.TryGetValue(id, out var worldName))
+                    {
+                        var world = Data.GetExcelSheet<World>()?.GetRow(playerInfo.WorldId);
+                        playerWorldEditing[id] = world?.Name.ToString() ?? "";
+                    }
+
+                    ImGui.TableNextRow();
+
+                    ImGui.TableSetColumnIndex(0);
+
+                    // Allow player names to be edited in the table
+                    if (ImGui.InputText($"##TTTPlayerName-{id}", ref name, 32))
+                    {
+                        playerInfo.Name = name;
+                        Configuration.Save();
+                        PluginLog.LogDebug($"Updated player name: {playerInfo.Name}@{worldName ?? ""}");
+                    }
+
+                    ImGui.TableSetColumnIndex(1);
+
+                    // Allow player worlds to be edited in the table
+                    worldName ??= "";
+                    if (ImGui.InputText($"##TTTPlayerWorld-{id}", ref worldName, 32))
+                    {
+                        this.playerWorldEditing[id] = worldName;
+
+                        // Try to get the input world
+                        var worldPending = GetWorldForUserInput(worldName);
+
+                        // Only save the result if the name actually matches a world
+                        if (worldPending != null)
+                        {
+                            this.playerWorldValid[id] = true;
+                            playerInfo.WorldId = worldPending.RowId;
+                            Configuration.Save();
+                            PluginLog.LogDebug($"Updated player world: {playerInfo.Name}@{worldPending.Name}");
+                        }
+                        else
+                        {
+                            this.playerWorldValid[id] = false;
+                        }
+                    }
+
+                    // Indicate if the operation succeeded
+                    if (this.playerWorldValid.TryGetValue(id, out var valid))
+                    {
+                        ImGui.SameLine();
+                        ImGui.PushFont(UiBuilder.IconFont);
+                        if (valid)
+                        {
+                            ImGui.TextColored(new Vector4(0.0f, 1.0f, 0.0f, 1.0f),
+                                FontAwesomeIcon.CheckCircle.ToIconString());
+                        }
+                        else
+                        {
+                            ImGui.TextColored(new Vector4(1.0f, 0.0f, 0.0f, 1.0f),
+                                FontAwesomeIcon.MinusCircle.ToIconString());
+                        }
+
+                        ImGui.PopFont();
+                    }
+
+                    // Player voice dropdown
+                    var presetIndex = Players.TryGetPlayerVoice(playerInfo, out var v) ? presets.IndexOf(v) : 0;
+                    ImGui.TableSetColumnIndex(2);
+                    if (ImGui.Combo($"##TTTPlayerVoice-{id}", ref presetIndex, presetArray, presets.Count))
+                    {
+                        Players.SetPlayerVoice(playerInfo, presets[presetIndex]);
+                        Configuration.Save();
+                        PluginLog.LogDebug($"Updated player voice: {presets[presetIndex].Name}");
+                    }
+                }
+
+                ImGui.EndTable();
+            }
+
+            ImGui.InputText("Player name##TTTPlayerVoiceName", ref this.playerName, 32);
+            ImGui.InputText("Player world##TTTPlayerVoiceWorld", ref this.playerWorld, 32);
+
+            if (ImGui.Button("Add player##TTTPlayerVoiceAdd"))
+            {
+                // Validate world before saving the new player
+                var world = GetWorldForUserInput(this.playerWorld);
+                if (world != null)
+                {
+                    Players.AddPlayer(this.playerName, world.RowId);
+                    Configuration.Save();
+                }
+            }
+        }
+
+        private World GetWorldForUserInput(string worldName)
+        {
+            return Data.GetExcelSheet<World>()?
+                .Where(w => w.IsPublic)
+                .Where(w => !string.IsNullOrWhiteSpace(w.Name))
+                .FirstOrDefault(w =>
+                    string.Equals(w.Name.RawString, worldName, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private void DrawChannelSettings()
@@ -270,7 +421,8 @@ namespace TextToTalk.UI.Dalamud
                 ImGui.SameLine();
                 if (ImGui.Button("Delete##TTT4"))
                 {
-                    var otherPreset = Configuration.EnabledChatTypesPresets.First(p => p.Id != currentEnabledChatTypesPreset.Id);
+                    var otherPreset =
+                        Configuration.EnabledChatTypesPresets.First(p => p.Id != currentEnabledChatTypesPreset.Id);
                     Configuration.SetCurrentEnabledChatTypesPreset(otherPreset.Id);
                     Configuration.EnabledChatTypesPresets.Remove(currentEnabledChatTypesPreset);
                 }
@@ -284,7 +436,7 @@ namespace TextToTalk.UI.Dalamud
             {
                 currentEnabledChatTypesPreset.EnableAllChatTypes = enableAll;
             }
-            
+
             if (enableAll) return;
             ImGui.Spacing();
 
@@ -322,7 +474,8 @@ namespace TextToTalk.UI.Dalamud
             var words = oneWord
                 .Select(c => c)
                 .Skip(1)
-                .Aggregate("" + oneWord[0], (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ? " " + c : "" + c))
+                .Aggregate("" + oneWord[0],
+                    (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ? " " + c : "" + c))
                 .Split(' ');
 
             var finalWords = new StringBuilder(oneWord.Length + 3);
@@ -333,6 +486,7 @@ namespace TextToTalk.UI.Dalamud
                 {
                     continue;
                 }
+
                 finalWords.Append(" ");
             }
 
@@ -349,6 +503,7 @@ namespace TextToTalk.UI.Dalamud
                 currentConfiguration.EnableAllChatTypes = enableAll;
                 Configuration.Save();
             }
+
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             ImGui.Dummy(new Vector2(0, 5));
 

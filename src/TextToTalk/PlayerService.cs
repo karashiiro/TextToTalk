@@ -20,6 +20,7 @@ public class PlayerService
 
     public void AddPlayer(string name, uint worldId)
     {
+        if (TryGetPlayerByInfo(name, worldId, out _)) return;
         var localId = Guid.NewGuid();
         var info = new PlayerInfo { LocalId = localId, Name = name, WorldId = worldId };
         this.players[localId] = info;
@@ -27,7 +28,8 @@ public class PlayerService
 
     public bool TryGetPlayerByInfo(string name, uint worldId, out PlayerInfo info)
     {
-        info = this.players.Values.FirstOrDefault(info => info.Name == name && info.WorldId == worldId);
+        info = this.players.Values.FirstOrDefault(info =>
+            string.Equals(info.Name, name, StringComparison.InvariantCultureIgnoreCase) && info.WorldId == worldId);
         return info != null;
     }
 
