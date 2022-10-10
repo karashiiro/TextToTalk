@@ -270,25 +270,22 @@ namespace TextToTalk
 
         public TPreset GetCurrentVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return (TPreset)VoicePresets.FirstOrDefault(
-                p => p.Id == CurrentVoicePresetId && p.EnabledBackend == Backend);
+            return VoicePresets.FirstOrDefault(p => p.Id == CurrentVoicePresetId && p.EnabledBackend == Backend) as TPreset;
         }
 
         public TPreset GetCurrentUngenderedVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return (TPreset)VoicePresets.FirstOrDefault(p =>
-                p.Id == UngenderedVoicePresetId && p.EnabledBackend == Backend);
+            return VoicePresets.FirstOrDefault(p => p.Id == UngenderedVoicePresetId && p.EnabledBackend == Backend) as TPreset;
         }
 
         public TPreset GetCurrentMaleVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return (TPreset)VoicePresets.FirstOrDefault(p => p.Id == MaleVoicePresetId && p.EnabledBackend == Backend);
+            return VoicePresets.FirstOrDefault(p => p.Id == MaleVoicePresetId && p.EnabledBackend == Backend) as TPreset;
         }
 
         public TPreset GetCurrentFemaleVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return (TPreset)VoicePresets.FirstOrDefault(p =>
-                p.Id == FemaleVoicePresetId && p.EnabledBackend == Backend);
+            return VoicePresets.FirstOrDefault(p => p.Id == FemaleVoicePresetId && p.EnabledBackend == Backend) as TPreset;
         }
 
         public bool TryCreateVoicePreset<TPreset>(out TPreset preset) where TPreset : VoicePreset, new()

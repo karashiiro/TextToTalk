@@ -1,15 +1,16 @@
 ﻿using System.Linq;
 using System.Speech.Synthesis;
+using Newtonsoft.Json;
 
 namespace TextToTalk.Backends.System;
 
 public class SystemVoicePreset : VoicePreset
 {
-    public int Rate { get; set; }
+    [JsonProperty("SystemRate")] public int Rate { get; set; }
 
-    public int Volume { get; set; }
+    [JsonProperty("SystemVolume")] public int Volume { get; set; }
 
-    public string VoiceName { get; set; }
+    [JsonProperty("SystemVoiceName")] public string VoiceName { get; set; }
 
     public override bool TrySetDefaultValues()
     {

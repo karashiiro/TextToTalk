@@ -1,4 +1,5 @@
-﻿using TextToTalk.Backends;
+﻿using Dalamud.Logging;
+using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 
 namespace TextToTalk.Migrations;
@@ -16,10 +17,11 @@ public class Migration1_17 : IConfigurationMigration
         {
             var preset = config.VoicePresets[i];
             
-            // Check if this is an instance of VoicePreset directly (or a superclass),
-            // rather than one of its inheritors.
-            if (preset.GetType().IsAssignableFrom(typeof(VoicePreset)))
+            // Check if this is an instance of VoicePreset directly, rather
+            // than one of its inheritors.
+            if (preset.GetType() == typeof(VoicePreset))
             {
+                PluginLog.Log($"Migrating preset {preset.Name}");
                 config.VoicePresets[i] = new SystemVoicePreset
                 {
                     Id = preset.Id,

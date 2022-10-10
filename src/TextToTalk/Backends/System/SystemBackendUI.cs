@@ -69,7 +69,7 @@ public class SystemBackendUI
 
         if (presets.Any())
         {
-            var presetIndex = presets.IndexOf(currentVoicePreset);
+            var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
             if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
                     presets.Count))
             {
@@ -88,7 +88,7 @@ public class SystemBackendUI
             this.config.SetCurrentVoicePreset(newPreset.Id);
         }
 
-        if (!presets.Any())
+        if (!presets.Any() || currentVoicePreset is null)
         {
             return;
         }
