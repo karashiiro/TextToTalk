@@ -16,14 +16,18 @@ using TextToTalk.Migrations;
 
 namespace TextToTalk
 {
-    
-    public enum FirstOrLastName { First, Last }
+    public enum FirstOrLastName
+    {
+        First,
+        Last
+    }
 
     public class PluginConfiguration : IPluginConfiguration
     {
         private const string DefaultPreset = "Default";
 
         #region Obsolete Members
+
         [Obsolete("Use EnabledChatTypesPresets.")]
         public bool EnableAllChatTypes { get; set; }
 
@@ -31,26 +35,22 @@ namespace TextToTalk
         // ReSharper disable once CollectionNeverUpdated.Global
         public IList<int> EnabledChatTypes { get; set; }
 
-        [Obsolete("Use VoicePresets.")]
-        public int Rate { get; set; }
+        [Obsolete("Use VoicePresets.")] public int Rate { get; set; }
 
-        [Obsolete("Use VoicePresets.")]
-        public int Volume { get; set; }
+        [Obsolete("Use VoicePresets.")] public int Volume { get; set; }
 
-        [Obsolete("Use VoicePresets.")]
-        public string VoiceName { get; set; }
+        [Obsolete("Use VoicePresets.")] public string VoiceName { get; set; }
 
-        [Obsolete("Use Backend.")]
-        public bool UseWebsocket { get; set; }
+        [Obsolete("Use Backend.")] public bool UseWebsocket { get; set; }
 
-        [Obsolete("Use PollyLexiconFiles.")]
-        public List<string> PollyLexicons { get; set; }
+        [Obsolete("Use PollyLexiconFiles.")] public List<string> PollyLexicons { get; set; }
 
         /// <summary>
         /// <c>true</c> if it is not the first time, <c>false</c> if the first time handler has not run before. This was named horribly.
         /// </summary>
         [Obsolete("Use InitializedEver.")]
         public bool FirstTime { get; set; }
+
         #endregion
 
         public int Version { get; set; }
@@ -118,6 +118,9 @@ namespace TextToTalk
         public bool UsePlayerRateLimiter { get; set; }
         public float MessagesPerSecond { get; set; } = 5;
 
+        public IDictionary<Guid, PlayerInfo> Players { get; set; }
+        public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
+
         [JsonIgnore]
         public bool InitializedEver
         {
@@ -155,6 +158,9 @@ namespace TextToTalk
 
             RemoteLexiconEnabledBackends ??= new Dictionary<string, IDictionary<TTSBackend, bool>>();
 
+            Players ??= new Dictionary<Guid, PlayerInfo>();
+            PlayerVoicePresets ??= new Dictionary<Guid, int>();
+
             if (!InitializedEver)
             {
                 EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
@@ -162,12 +168,12 @@ namespace TextToTalk
                     Id = 0,
                     EnabledChatTypes = new List<int>
                     {
-                        (int) XivChatType.Say,
-                        (int) XivChatType.Shout,
-                        (int) XivChatType.Party,
-                        (int) AdditionalChatType.BeneficialEffectOnYou,
-                        (int) AdditionalChatType.BeneficialEffectOnYouEnded,
-                        (int) AdditionalChatType.BeneficialEffectOnOtherPlayer,
+                        (int)XivChatType.Say,
+                        (int)XivChatType.Shout,
+                        (int)XivChatType.Party,
+                        (int)AdditionalChatType.BeneficialEffectOnYou,
+                        (int)AdditionalChatType.BeneficialEffectOnYouEnded,
+                        (int)AdditionalChatType.BeneficialEffectOnOtherPlayer,
                     },
                     Name = DefaultPreset,
                     UseKeybind = false,

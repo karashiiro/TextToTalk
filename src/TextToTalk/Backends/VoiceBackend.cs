@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends
 {
@@ -8,7 +7,7 @@ namespace TextToTalk.Backends
     {
         public Vector4 TitleBarColor { get; protected init; }
 
-        public abstract void Say(TextSource source, Gender gender, string text);
+        public abstract void Say(TextSource source, VoicePreset voice, string text);
 
         public abstract void CancelAllSpeech();
 

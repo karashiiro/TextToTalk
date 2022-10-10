@@ -6,7 +6,6 @@ using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
-using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends
 {
@@ -16,8 +15,7 @@ namespace TextToTalk.Backends
         private readonly PluginConfiguration config;
         private readonly SharedState sharedState;
 
-        private VoiceBackend backend;
-
+        public VoiceBackend Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
         public VoiceBackendManager(PluginConfiguration config, HttpClient http, SharedState sharedState)
@@ -29,29 +27,29 @@ namespace TextToTalk.Backends
             SetBackend(this.config.Backend);
         }
 
-        public override void Say(TextSource source, Gender gender, string text)
+        public override void Say(TextSource source, VoicePreset voice, string text)
         {
-            this.backend?.Say(source, gender, text);
+            Backend?.Say(source, voice, text);
         }
 
         public override void CancelAllSpeech()
         {
-            this.backend?.CancelAllSpeech();
+            Backend?.CancelAllSpeech();
         }
 
         public override void CancelSay(TextSource source)
         {
-            this.backend?.CancelSay(source);
+            Backend?.CancelSay(source);
         }
 
         public override void DrawSettings(IConfigUIDelegates helpers)
         {
-            this.backend?.DrawSettings(helpers);
+            Backend?.DrawSettings(helpers);
         }
 
         public override TextSource GetCurrentlySpokenTextSource()
         {
-            return this.backend?.GetCurrentlySpokenTextSource() ?? TextSource.None;
+            return Backend?.GetCurrentlySpokenTextSource() ?? TextSource.None;
         }
 
         public void SetBackend(TTSBackend backendKind)
@@ -60,8 +58,8 @@ namespace TextToTalk.Backends
             {
                 BackendLoading = true;
                 var newBackend = CreateBackendFor(backendKind);
-                var oldBackend = this.backend;
-                this.backend = newBackend;
+                var oldBackend = Backend;
+                Backend = newBackend;
                 BackendLoading = false;
                 oldBackend?.Dispose();
             });
@@ -69,7 +67,7 @@ namespace TextToTalk.Backends
 
         public Vector4 GetBackendTitleBarColor()
         {
-            return this.backend?.TitleBarColor ?? TitleBarColor;
+            return Backend?.TitleBarColor ?? TitleBarColor;
         }
 
         private VoiceBackend CreateBackendFor(TTSBackend backendKind)
@@ -88,7 +86,7 @@ namespace TextToTalk.Backends
         {
             if (disposing)
             {
-                this.backend.Dispose();
+                Backend?.Dispose();
             }
         }
     }

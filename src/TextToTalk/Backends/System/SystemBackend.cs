@@ -9,7 +9,7 @@ namespace TextToTalk.Backends.System
         private readonly PluginConfiguration config;
         private readonly SystemBackendUI ui;
         private readonly SystemSoundQueue soundQueue;
-        
+
         public SystemBackend(PluginConfiguration config, HttpClient http)
         {
             var lexiconManager = new DalamudLexiconManager();
@@ -23,20 +23,9 @@ namespace TextToTalk.Backends.System
             this.soundQueue = new SystemSoundQueue(lexiconManager, selectVoiceFailures);
         }
 
-        public override void Say(TextSource source, Gender gender, string text)
+        public override void Say(TextSource source, VoicePreset voice, string text)
         {
-            var voicePreset = this.config.GetCurrentVoicePreset();
-            if (this.config.UseGenderedVoicePresets)
-            {
-                voicePreset = gender switch
-                {
-                    Gender.Male => this.config.GetCurrentMaleVoicePreset(),
-                    Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
-                    _ => this.config.GetCurrentUngenderedVoicePreset(),
-                };
-            }
-
-            this.soundQueue.EnqueueSound(voicePreset, source, text);
+            this.soundQueue.EnqueueSound(voice, source, text);
         }
 
         public override void CancelAllSpeech()
@@ -57,6 +46,22 @@ namespace TextToTalk.Backends.System
         public override TextSource GetCurrentlySpokenTextSource()
         {
             return this.soundQueue.GetCurrentlySpokenTextSource();
+        }
+
+        public VoicePreset GetSystemVoiceForGender(Gender gender)
+        {
+            var voicePreset = this.config.GetCurrentVoicePreset();
+            if (this.config.UseGenderedVoicePresets)
+            {
+                voicePreset = gender switch
+                {
+                    Gender.Male => this.config.GetCurrentMaleVoicePreset(),
+                    Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
+                    _ => this.config.GetCurrentUngenderedVoicePreset(),
+                };
+            }
+
+            return voicePreset;
         }
 
         protected override void Dispose(bool disposing)

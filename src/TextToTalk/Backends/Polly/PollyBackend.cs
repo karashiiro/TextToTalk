@@ -30,26 +30,10 @@ namespace TextToTalk.Backends.Polly
                 () => this.polly, p => this.polly = p, () => this.voices, v => this.voices = v);
         }
 
-        public override void Say(TextSource source, Gender gender, string text)
+        public override void Say(TextSource source, VoicePreset preset, string text)
         {
-            var voiceIdStr = this.config.PollyVoice;
-            if (this.config.UseGenderedVoicePresets)
-            {
-                voiceIdStr = gender switch
-                {
-                    Gender.Male => this.config.PollyVoiceMale,
-                    Gender.Female => this.config.PollyVoiceFemale,
-                    _ => this.config.PollyVoiceUngendered,
-                };
-            }
-
-            // Find the configured voice in the voice list, and fall back to Matthew
-            // if it wasn't found in order to avoid a plugin crash.
-            var voiceId = this.voices
-                .Select(v => v.Id)
-                .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
-
-            _ = this.polly.Say(this.config.PollyEngine, voiceId, this.config.PollySampleRate, this.config.PollyPlaybackRate, this.config.PollyVolume, source, text);
+            _ = this.polly.Say(this.config.PollyEngine, preset.VoiceName, this.config.PollySampleRate,
+                this.config.PollyPlaybackRate, this.config.PollyVolume, source, text);
         }
 
         public override void CancelAllSpeech()
@@ -70,6 +54,28 @@ namespace TextToTalk.Backends.Polly
         public override TextSource GetCurrentlySpokenTextSource()
         {
             return this.polly.GetCurrentlySpokenTextSource();
+        }
+
+        public string GetPollyVoiceForGender(Gender gender)
+        {
+            var voiceIdStr = this.config.PollyVoice;
+            if (this.config.UseGenderedVoicePresets)
+            {
+                voiceIdStr = gender switch
+                {
+                    Gender.Male => this.config.PollyVoiceMale,
+                    Gender.Female => this.config.PollyVoiceFemale,
+                    _ => this.config.PollyVoiceUngendered,
+                };
+            }
+
+            // Find the configured voice in the voice list, and fall back to Matthew
+            // if it wasn't found in order to avoid a plugin crash.
+            var voiceId = this.voices
+                .Select(v => v.Id)
+                .FirstOrDefault(id => id == voiceIdStr) ?? VoiceId.Matthew;
+
+            return voiceId;
         }
 
         protected override void Dispose(bool disposing)

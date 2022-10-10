@@ -95,6 +95,9 @@ public class Services : IServiceProvider, IDisposable
         services.serviceCollection.AddService(new ChatMessageHandler(filters, services.Objects, config, sharedState));
         services.serviceCollection.AddService(new WindowManager(services.serviceCollection));
 
+        services.serviceCollection.AddService(new PlayerService(config.Players, config.PlayerVoicePresets,
+            config.VoicePresets));
+
         return services;
     }
 }

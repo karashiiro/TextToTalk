@@ -32,11 +32,11 @@ namespace TextToTalk.Backends.Websocket
             this.wsServer.Start();
         }
 
-        public override void Say(TextSource source, Gender gender, string text)
+        public override void Say(TextSource source, VoicePreset voice, string text)
         {
             try
             {
-                this.wsServer.Broadcast(source, gender, text);
+                this.wsServer.Broadcast(source, voice, text);
 #if DEBUG
                 PluginLog.Log("Sent message {0} on WebSocket server.", text);
 #endif

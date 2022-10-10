@@ -1,4 +1,6 @@
-﻿namespace TextToTalk
+﻿using Newtonsoft.Json;
+
+namespace TextToTalk
 {
     public class VoicePreset
     {

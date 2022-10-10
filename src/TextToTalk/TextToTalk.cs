@@ -13,7 +13,12 @@ using Dalamud.Plugin;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using TextToTalk.Backends;
+using TextToTalk.Backends.Polly;
+using TextToTalk.Backends.System;
+using TextToTalk.Backends.Uberduck;
+using TextToTalk.Backends.Websocket;
 using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Modules;
@@ -81,6 +86,7 @@ namespace TextToTalk
         }
 
         private bool keysDown = false;
+
         private void CheckKeybindPressed(Framework framework)
         {
             if (!this.config.UseKeybind) return;
@@ -107,6 +113,7 @@ namespace TextToTalk
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -121,6 +128,7 @@ namespace TextToTalk
                 this.commandModule.ToggleTts();
                 return true;
             }
+
             return false;
         }
 
@@ -133,7 +141,9 @@ namespace TextToTalk
         }
 
         private bool notifiedFailedToBindPort;
-        private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+
+        private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message,
+            ref bool handled)
         {
             var sharedState = this.services.GetService<SharedState>();
             var clientState = this.services.GetService<ClientState>();
@@ -146,7 +156,8 @@ namespace TextToTalk
             this.notifiedFailedToBindPort = true;
         }
 
-        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
+            ref bool handled)
         {
             if (!this.config.Enabled) return;
             var chatMessageHandler = this.services.GetService<ChatMessageHandler>();
@@ -155,11 +166,13 @@ namespace TextToTalk
 
         private void Say(GameObject speaker, string textValue, TextSource source)
         {
+            // Check if this speaker should be skipped
             if (ShouldRateLimit(speaker))
             {
                 return;
             }
 
+            // Run a preprocessing pipeline to clean the text for the speech synthesizer
             var cleanText = Pipe(
                 textValue,
                 TalkUtils.StripAngleBracketedText,
@@ -168,14 +181,90 @@ namespace TextToTalk
                 t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
                 x => x.Trim());
 
+            // Ensure that the result is clean; ignore it otherwise
             if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))
             {
                 return;
             }
 
-            var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
+            // Get the voice backend manager
             var backendManager = this.services.GetService<VoiceBackendManager>();
-            backendManager.Say(source, gender, cleanText);
+
+            // Check if the speaker is a player and we have a custom voice for this speaker
+            var playerService = this.services.GetService<PlayerService>();
+            if (speaker is PlayerCharacter pc &&
+                playerService.TryGetPlayerByInfo(pc.Name.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
+                playerService.TryGetPlayerVoice(playerInfo, out var voice))
+            {
+                backendManager.Say(source, voice, cleanText);
+            }
+            else
+            {
+                // Get the speaker's gender, if possible
+                var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
+
+                // Say the thing
+                var preset = GetVoiceForGender(backendManager, gender);
+                if (preset != null)
+                {
+                    backendManager.Say(source, preset, cleanText);
+                }
+                else
+                {
+                    PluginLog.LogWarning("Attempted to speak with null voice preset");
+                }
+            }
+        }
+
+        private VoicePreset GetVoiceForGender(VoiceBackendManager backendManager, Gender gender)
+        {
+            // TODO: Make all voice backends use a uniform system again
+            return backendManager.Backend switch
+            {
+                PollyBackend polly => GetPollyVoiceForGender(polly, gender),
+                SystemBackend sys => sys.GetSystemVoiceForGender(gender),
+                UberduckBackend uberduck => GetUberduckVoiceForGender(uberduck, gender),
+                WebsocketBackend => GetWebsocketVoiceForGender(gender),
+                _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
+            };
+        }
+
+        private VoicePreset GetPollyVoiceForGender(PollyBackend polly, Gender gender)
+        {
+            var preset = polly.GetPollyVoiceForGender(gender);
+            return new VoicePreset
+            {
+                Id = -1,
+                Name = string.Empty,
+                Rate = this.config.PollyPlaybackRate,
+                VoiceName = preset,
+                Volume = Convert.ToInt32(this.config.PollyVolume * 100),
+            };
+        }
+
+        private VoicePreset GetUberduckVoiceForGender(UberduckBackend uberduck, Gender gender)
+        {
+            var preset = uberduck.GetUberduckVoiceForGender(gender);
+            return new VoicePreset
+            {
+                Id = -1,
+                Name = string.Empty,
+                Rate = this.config.UberduckPlaybackRate,
+                VoiceName = preset,
+                Volume = Convert.ToInt32(this.config.UberduckVolume * 100),
+            };
+        }
+
+        private VoicePreset GetWebsocketVoiceForGender(Gender gender)
+        {
+            return new VoicePreset
+            {
+                Id = -1,
+                Name = gender.ToString(),
+                Rate = 3,
+                VoiceName = gender.ToString(),
+                Volume = 100,
+            };
         }
 
         private bool ShouldRateLimit(GameObject speaker)
@@ -226,11 +315,13 @@ namespace TextToTalk
             if (ungenderedOverrides.IsUngendered(modelId))
             {
                 actorGender = Gender.None;
-                PluginLog.Log($"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender overriden to: {actorGender})");
+                PluginLog.Log(
+                    $"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender overriden to: {actorGender})");
             }
             else
             {
-                PluginLog.Log($"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender read as: {actorGender})");
+                PluginLog.Log(
+                    $"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender read as: {actorGender})");
             }
 
             return actorGender;
@@ -248,6 +339,7 @@ namespace TextToTalk
         }
 
         #region IDisposable Support
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
@@ -277,6 +369,7 @@ namespace TextToTalk
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         #endregion
     }
 }

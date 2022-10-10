@@ -32,30 +32,14 @@ public class UberduckBackend : VoiceBackend
         this.ui = new UberduckBackendUI(this.config, this.uberduck, () => voices);
     }
 
-    public override void Say(TextSource source, Gender gender, string text)
+    public override void Say(TextSource source, VoicePreset voice, string text)
     {
-        var voiceIdStr = this.config.UberduckVoice;
-        if (this.config.UseGenderedVoicePresets)
-        {
-            voiceIdStr = gender switch
-            {
-                Gender.Male => this.config.UberduckVoiceMale,
-                Gender.Female => this.config.UberduckVoiceFemale,
-                _ => this.config.UberduckVoiceUngendered,
-            };
-        }
-
-        // Find the configured voice in the voice list, and fall back to ZWF
-        // if it wasn't found in order to avoid a plugin crash.
-        var voiceId = this.voices
-            .Select(v => v.Name)
-            .FirstOrDefault(id => id == voiceIdStr) ?? "zwf";
-
         _ = Task.Run(async () =>
         {
             try
             {
-                await this.uberduck.Say(voiceId, this.config.UberduckPlaybackRate, this.config.UberduckVolume, source, text);
+                await this.uberduck.Say(voice.VoiceName, this.config.UberduckPlaybackRate, this.config.UberduckVolume, source,
+                    text);
             }
             catch (UberduckFailedException e)
             {
@@ -90,6 +74,28 @@ public class UberduckBackend : VoiceBackend
     public override TextSource GetCurrentlySpokenTextSource()
     {
         return this.soundQueue.GetCurrentlySpokenTextSource();
+    }
+
+    public string GetUberduckVoiceForGender(Gender gender)
+    {
+        var voiceIdStr = this.config.UberduckVoice;
+        if (this.config.UseGenderedVoicePresets)
+        {
+            voiceIdStr = gender switch
+            {
+                Gender.Male => this.config.UberduckVoiceMale,
+                Gender.Female => this.config.UberduckVoiceFemale,
+                _ => this.config.UberduckVoiceUngendered,
+            };
+        }
+
+        // Find the configured voice in the voice list, and fall back to ZWF
+        // if it wasn't found in order to avoid a plugin crash.
+        var voiceId = this.voices
+            .Select(v => v.Name)
+            .FirstOrDefault(id => id == voiceIdStr) ?? "zwf";
+
+        return voiceId;
     }
 
     protected override void Dispose(bool disposing)
