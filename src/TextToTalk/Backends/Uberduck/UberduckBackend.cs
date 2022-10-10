@@ -1,36 +1,26 @@
 ﻿using System;
 using ImGuiNET;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dalamud.Logging;
-using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.Uberduck;
 
 public class UberduckBackend : VoiceBackend
 {
-    private readonly PluginConfiguration config;
-
     private readonly StreamSoundQueue soundQueue;
     private readonly UberduckBackendUI ui;
     private readonly UberduckClient uberduck;
-
-    private readonly IList<UberduckVoice> voices;
 
     public UberduckBackend(PluginConfiguration config, HttpClient http)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFDE7312);
 
-        this.config = config;
-
         this.soundQueue = new StreamSoundQueue();
         this.uberduck = new UberduckClient(this.soundQueue, http);
 
-        this.voices = this.uberduck.GetVoices()
-            .GetAwaiter().GetResult();
-        this.ui = new UberduckBackendUI(this.config, this.uberduck, () => voices);
+        var voices = this.uberduck.GetVoices().GetAwaiter().GetResult();
+        this.ui = new UberduckBackendUI(config, this.uberduck, () => voices);
     }
 
     public override void Say(TextSource source, VoicePreset preset, string text)
@@ -44,7 +34,7 @@ public class UberduckBackend : VoiceBackend
         {
             try
             {
-                await this.uberduck.Say(uberduckVoicePreset.VoiceName, uberduckVoicePreset.Rate,
+                await this.uberduck.Say(uberduckVoicePreset.VoiceName, uberduckVoicePreset.PlaybackRate,
                     uberduckVoicePreset.Volume, source, text);
             }
             catch (UberduckFailedException e)
@@ -80,28 +70,6 @@ public class UberduckBackend : VoiceBackend
     public override TextSource GetCurrentlySpokenTextSource()
     {
         return this.soundQueue.GetCurrentlySpokenTextSource();
-    }
-
-    public string GetUberduckVoiceForGender(Gender gender)
-    {
-        var voiceIdStr = this.config.UberduckVoice;
-        if (this.config.UseGenderedVoicePresets)
-        {
-            voiceIdStr = gender switch
-            {
-                Gender.Male => this.config.UberduckVoiceMale,
-                Gender.Female => this.config.UberduckVoiceFemale,
-                _ => this.config.UberduckVoiceUngendered,
-            };
-        }
-
-        // Find the configured voice in the voice list, and fall back to ZWF
-        // if it wasn't found in order to avoid a plugin crash.
-        var voiceId = this.voices
-            .Select(v => v.Name)
-            .FirstOrDefault(id => id == voiceIdStr) ?? "zwf";
-
-        return voiceId;
     }
 
     protected override void Dispose(bool disposing)

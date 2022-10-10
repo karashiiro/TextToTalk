@@ -19,7 +19,7 @@ namespace TextToTalk
     public enum FirstOrLastName
     {
         First,
-        Last
+        Last,
     }
 
     public class PluginConfiguration : IPluginConfiguration
@@ -51,6 +51,39 @@ namespace TextToTalk
         [Obsolete("Use InitializedEver.")]
         public bool FirstTime { get; set; }
 
+        [Obsolete] public string PollyVoice { get; set; } = VoiceId.Matthew;
+
+        [Obsolete] public string PollyVoiceUngendered { get; set; } = VoiceId.Matthew;
+
+        [Obsolete] public string PollyVoiceMale { get; set; } = VoiceId.Matthew;
+
+        [Obsolete] public string PollyVoiceFemale { get; set; } = VoiceId.Matthew;
+
+        [Obsolete] public string PollyEngine { get; set; } = Engine.Neural;
+
+        [Obsolete] public int PollySampleRate { get; set; } = 22050;
+
+        [Obsolete] public float PollyVolume { get; set; } = 1.0f;
+
+        [Obsolete] public int PollyPlaybackRate { get; set; } = 100;
+
+        [Obsolete] public string UberduckVoice { get; set; } = "zwf";
+
+        [Obsolete] public string UberduckVoiceUngendered { get; set; } = "zwf";
+
+        [Obsolete] public string UberduckVoiceMale { get; set; } = "zwf";
+
+        [Obsolete] public string UberduckVoiceFemale { get; set; } = "zwf";
+
+        [Obsolete] public float UberduckVolume { get; set; } = 1.0f;
+
+        [Obsolete] public int UberduckPlaybackRate { get; set; } = 100;
+        
+        [Obsolete] public int CurrentVoicePresetId { get; set; }
+        [Obsolete] public int UngenderedVoicePresetId { get; set; }
+        [Obsolete] public int MaleVoicePresetId { get; set; }
+        [Obsolete] public int FemaleVoicePresetId { get; set; }
+
         #endregion
 
         public int Version { get; set; }
@@ -70,10 +103,6 @@ namespace TextToTalk
 
         public int CurrentPresetId { get; set; }
         public IList<EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
-        public int CurrentVoicePresetId { get; set; }
-        public IList<VoicePreset> VoicePresets { get; set; }
-
-        public TTSBackend Backend { get; set; }
 
         public int WebsocketPort { get; set; }
 
@@ -88,29 +117,18 @@ namespace TextToTalk
         public bool CancelSpeechOnTextAdvance { get; set; }
 
         public bool UseGenderedVoicePresets { get; set; }
-        public int UngenderedVoicePresetId { get; set; }
-        public int MaleVoicePresetId { get; set; }
-        public int FemaleVoicePresetId { get; set; }
+        
+        public TTSBackend Backend { get; set; }
+        public IList<VoicePreset> VoicePresets { get; set; }
+        public IDictionary<TTSBackend, int> CurrentVoicePreset { get; set; }
+        public IDictionary<TTSBackend, int> UngenderedVoicePreset { get; set; }
+        public IDictionary<TTSBackend, int> MaleVoicePreset { get; set; }
+        public IDictionary<TTSBackend, int> FemaleVoicePreset { get; set; }
 
         public IList<string> Lexicons { get; set; }
 
-        public string PollyVoice { get; set; } = VoiceId.Matthew;
-        public string PollyVoiceUngendered { get; set; } = VoiceId.Matthew;
-        public string PollyVoiceMale { get; set; } = VoiceId.Matthew;
-        public string PollyVoiceFemale { get; set; } = VoiceId.Matthew;
-        public string PollyEngine { get; set; } = Engine.Neural;
         public string PollyRegion { get; set; }
-        public int PollySampleRate { get; set; } = 22050;
-        public float PollyVolume { get; set; } = 1.0f;
-        public int PollyPlaybackRate { get; set; } = 100;
         public IList<string> PollyLexiconFiles { get; set; }
-
-        public string UberduckVoice { get; set; } = "zwf";
-        public string UberduckVoiceUngendered { get; set; } = "zwf";
-        public string UberduckVoiceMale { get; set; } = "zwf";
-        public string UberduckVoiceFemale { get; set; } = "zwf";
-        public float UberduckVolume { get; set; } = 1.0f;
-        public int UberduckPlaybackRate { get; set; } = 100;
 
         public bool RemoveStutterEnabled { get; set; } = true;
 
@@ -153,6 +171,11 @@ namespace TextToTalk
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
             VoicePresets ??= new List<VoicePreset>();
+
+            CurrentVoicePreset ??= new Dictionary<TTSBackend, int>();
+            UngenderedVoicePreset ??= new Dictionary<TTSBackend, int>();
+            MaleVoicePreset ??= new Dictionary<TTSBackend, int>();
+            FemaleVoicePreset ??= new Dictionary<TTSBackend, int>();
 
             PollyLexiconFiles ??= new List<string>();
             Lexicons ??= new List<string>();
@@ -270,32 +293,40 @@ namespace TextToTalk
 
         public TPreset GetCurrentVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == CurrentVoicePresetId && p.EnabledBackend == Backend) as TPreset;
+            return VoicePresets.FirstOrDefault(p => p.Id == CurrentVoicePreset[Backend] && p.EnabledBackend == Backend) as
+                TPreset;
         }
 
         public TPreset GetCurrentUngenderedVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == UngenderedVoicePresetId && p.EnabledBackend == Backend) as TPreset;
+            return VoicePresets.FirstOrDefault(p => p.Id == UngenderedVoicePreset[Backend] && p.EnabledBackend == Backend) as
+                TPreset;
         }
 
         public TPreset GetCurrentMaleVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == MaleVoicePresetId && p.EnabledBackend == Backend) as TPreset;
+            return VoicePresets.FirstOrDefault(p =>
+                p.Id == MaleVoicePreset[Backend] && p.EnabledBackend == Backend) as TPreset;
         }
 
         public TPreset GetCurrentFemaleVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == FemaleVoicePresetId && p.EnabledBackend == Backend) as TPreset;
+            return VoicePresets.FirstOrDefault(p => p.Id == FemaleVoicePreset[Backend] && p.EnabledBackend == Backend) as
+                TPreset;
+        }
+
+        public int GetHighestVoicePresetId()
+        {
+            return VoicePresets.Select(p => p.Id).Max();
         }
 
         public bool TryCreateVoicePreset<TPreset>(out TPreset preset) where TPreset : VoicePreset, new()
         {
-            var highestId = VoicePresets.Select(p => p.Id).Max();
+            var highestId = GetHighestVoicePresetId();
             preset = new TPreset
             {
                 Id = highestId + 1,
                 Name = "New preset",
-                EnabledBackend = TTSBackend.System,
             };
 
             if (preset.TrySetDefaultValues())
@@ -309,7 +340,7 @@ namespace TextToTalk
 
         public void SetCurrentVoicePreset(int presetId)
         {
-            CurrentVoicePresetId = presetId;
+            CurrentVoicePreset[Backend] = presetId;
         }
     }
 }

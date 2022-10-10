@@ -226,55 +226,30 @@ namespace TextToTalk
 
         private VoicePreset GetVoiceForGender(VoiceBackendManager backendManager, Gender gender)
         {
-            // TODO: Make all voice backends use a uniform system again
             return backendManager.Backend switch
             {
-                PollyBackend polly => GetPollyVoiceForGender(polly, gender),
-                SystemBackend sys => sys.GetSystemVoiceForGender(gender),
-                UberduckBackend uberduck => GetUberduckVoiceForGender(uberduck, gender),
-                WebsocketBackend => GetWebsocketVoiceForGender(gender),
+                SystemBackend => GetVoiceForGender<SystemVoicePreset>(gender),
+                PollyBackend => GetVoiceForGender<PollyVoicePreset>(gender),
+                UberduckBackend => GetVoiceForGender<UberduckVoicePreset>(gender),
+                WebsocketBackend => GetVoiceForGender<WebsocketVoicePreset>(gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };
         }
 
-        private VoicePreset GetPollyVoiceForGender(PollyBackend polly, Gender gender)
+        private TPreset GetVoiceForGender<TPreset>(Gender gender) where TPreset : VoicePreset
         {
-            var preset = polly.GetPollyVoiceForGender(gender);
-            return new PollyVoicePreset
+            var voicePreset = this.config.GetCurrentVoicePreset<TPreset>();
+            if (this.config.UseGenderedVoicePresets)
             {
-                Id = -1,
-                Name = gender.ToString(),
-                PlaybackRate = this.config.PollyPlaybackRate,
-                SampleRate = this.config.PollySampleRate,
-                VoiceEngine = this.config.PollyEngine,
-                VoiceName = preset,
-                Volume = this.config.PollyVolume,
-                EnabledBackend = TTSBackend.AmazonPolly,
-            };
-        }
+                voicePreset = gender switch
+                {
+                    Gender.Male => this.config.GetCurrentMaleVoicePreset<TPreset>(),
+                    Gender.Female => this.config.GetCurrentFemaleVoicePreset<TPreset>(),
+                    _ => this.config.GetCurrentUngenderedVoicePreset<TPreset>(),
+                };
+            }
 
-        private VoicePreset GetUberduckVoiceForGender(UberduckBackend uberduck, Gender gender)
-        {
-            var preset = uberduck.GetUberduckVoiceForGender(gender);
-            return new UberduckVoicePreset
-            {
-                Id = -1,
-                Name = gender.ToString(),
-                Rate = this.config.UberduckPlaybackRate,
-                VoiceName = preset,
-                Volume = this.config.UberduckVolume,
-                EnabledBackend = TTSBackend.Uberduck,
-            };
-        }
-
-        private static VoicePreset GetWebsocketVoiceForGender(Gender gender)
-        {
-            return new WebsocketVoicePreset
-            {
-                Id = -1,
-                Name = gender.ToString(),
-                EnabledBackend = TTSBackend.Websocket,
-            };
+            return voicePreset;
         }
 
         private bool ShouldRateLimit(GameObject speaker)

@@ -36,7 +36,8 @@ public class PollyBackendUI
     private string secretKey = string.Empty;
 
     public PollyBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http,
-        Func<PollyClient> getPolly, Action<PollyClient> setPolly, Func<IList<Voice>> getVoices, Action<IList<Voice>> setVoices)
+        Func<PollyClient> getPolly, Action<PollyClient> setPolly, Func<IList<Voice>> getVoices,
+        Action<IList<Voice>> setVoices)
     {
         this.getPolly = getPolly;
         this.setPolly = setPolly;
@@ -49,7 +50,8 @@ public class PollyBackendUI
         var lexiconRepository = new LexiconRepository(http, downloadPath);
 
         this.config = config;
-        this.lexiconComponent = new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.PollyLexiconFiles);
+        this.lexiconComponent =
+            new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.PollyLexiconFiles);
         this.lexiconManager = lexiconManager;
 
         var credentials = PollyCredentialManager.LoadCredentials();
@@ -58,13 +60,15 @@ public class PollyBackendUI
             this.accessKey = credentials.UserName;
             this.secretKey = credentials.Password;
 
-            var regionEndpoint = RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion)
+            var regionEndpoint =
+                RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion)
                 ?? RegionEndpoint.EUWest1;
             PollyLogin(regionEndpoint);
         }
     }
 
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
+
     public void DrawSettings(IConfigUIDelegates helpers)
     {
         var region = this.config.PollyRegion;
@@ -75,8 +79,10 @@ public class PollyBackendUI
             this.config.Save();
         }
 
-        ImGui.InputTextWithHint("##TTTPollyAccessKey", "Access key", ref this.accessKey, 100, ImGuiInputTextFlags.Password);
-        ImGui.InputTextWithHint("##TTTPollySecretKey", "Secret key", ref this.secretKey, 100, ImGuiInputTextFlags.Password);
+        ImGui.InputTextWithHint("##TTTPollyAccessKey", "Access key", ref this.accessKey, 100,
+            ImGuiInputTextFlags.Password);
+        ImGui.InputTextWithHint("##TTTPollySecretKey", "Secret key", ref this.secretKey, 100,
+            ImGuiInputTextFlags.Password);
 
         if (ImGui.Button("Save and Login##TTTSavePollyAuth"))
         {
@@ -84,7 +90,8 @@ public class PollyBackendUI
             var password = Whitespace.Replace(this.secretKey, "");
             PollyCredentialManager.SaveCredentials(username, password);
 
-            var regionEndpoint = RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion);
+            var regionEndpoint =
+                RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion);
             if (regionEndpoint == null)
             {
                 ImGui.TextColored(Red, "Invalid region!");
@@ -105,39 +112,99 @@ public class PollyBackendUI
 
         ImGui.Spacing();
 
-        var engine = this.config.PollyEngine;
+        var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
+
+        var presets = this.config.GetVoicePresetsForBackend(TTSBackend.AmazonPolly).ToList();
+        presets.Sort((a, b) => a.Id - b.Id);
+
+        if (presets.Any())
+        {
+            var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
+            if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+                    presets.Count))
+            {
+                this.config.CurrentVoicePreset[TTSBackend.AmazonPolly] = presets[presetIndex].Id;
+                this.config.Save();
+            }
+        }
+        else
+        {
+            ImGui.TextColored(Red, "You have no presets. Please create one using the \"New preset\" button.");
+        }
+
+        if (ImGui.Button("New preset##TTTVoice4") &&
+            this.config.TryCreateVoicePreset<PollyVoicePreset>(out var newPreset))
+        {
+            this.config.SetCurrentVoicePreset(newPreset.Id);
+        }
+
+        if (!presets.Any() || currentVoicePreset is null)
+        {
+            return;
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Delete preset##TTTVoice5"))
+        {
+            var otherPreset = this.config.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+            this.config.SetCurrentVoicePreset(otherPreset.Id);
+
+            if (this.config.UngenderedVoicePreset[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
+            {
+                this.config.UngenderedVoicePreset[TTSBackend.AmazonPolly] = 0;
+            }
+            else if (this.config.MaleVoicePreset[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
+            {
+                this.config.MaleVoicePreset[TTSBackend.AmazonPolly] = 0;
+            }
+            else if (this.config.FemaleVoicePreset[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
+            {
+                this.config.FemaleVoicePreset[TTSBackend.AmazonPolly] = 0;
+            }
+
+            this.config.VoicePresets.Remove(currentVoicePreset);
+        }
+
+        var presetName = currentVoicePreset.Name;
+        if (ImGui.InputText("Preset name", ref presetName, 64))
+        {
+            currentVoicePreset.Name = presetName;
+            this.config.Save();
+        }
+
+        var engine = currentVoicePreset.VoiceEngine;
         var engineIndex = Array.IndexOf(Engines, engine);
         if (ImGui.Combo("Engine##TTTPollyEngine", ref engineIndex, Engines, Engines.Length))
         {
-            this.config.PollyEngine = Engines[engineIndex];
+            currentVoicePreset.VoiceEngine = Engines[engineIndex];
             this.config.Save();
 
             var polly = this.getPolly.Invoke();
-            var voices = polly?.GetVoicesForEngine(this.config.PollyEngine) ?? new List<Voice>();
+            var voices = polly?.GetVoicesForEngine(currentVoicePreset.VoiceEngine) ?? new List<Voice>();
             this.setVoices.Invoke(voices);
         }
 
         var validSampleRates = new[] { "8000", "16000", "22050", "24000" };
-        var sampleRate = this.config.PollySampleRate.ToString();
+        var sampleRate = currentVoicePreset.SampleRate.ToString();
         var sampleRateIndex = Array.IndexOf(validSampleRates, sampleRate);
         if (ImGui.Combo("Sample rate##TTTVoice6", ref sampleRateIndex, validSampleRates, validSampleRates.Length))
         {
-            this.config.PollySampleRate = int.Parse(validSampleRates[sampleRateIndex]);
+            currentVoicePreset.SampleRate = int.Parse(validSampleRates[sampleRateIndex]);
             this.config.Save();
         }
 
-        var playbackRate = this.config.PollyPlaybackRate;
+        var playbackRate = currentVoicePreset.PlaybackRate;
         if (ImGui.SliderInt("Playback rate##TTTVoice8", ref playbackRate, 20, 200, "%d%%",
-            ImGuiSliderFlags.AlwaysClamp))
+                ImGuiSliderFlags.AlwaysClamp))
         {
-            this.config.PollyPlaybackRate = playbackRate;
+            currentVoicePreset.PlaybackRate = playbackRate;
             this.config.Save();
         }
 
-        var volume = (int)(this.config.PollyVolume * 100);
+        var volume = (int)(currentVoicePreset.Volume * 100);
         if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 200, "%d%%"))
         {
-            this.config.PollyVolume = (float)Math.Round((double)volume / 100, 2);
+            currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
         }
 
@@ -165,57 +232,58 @@ public class PollyBackendUI
                                            "Please log in using a different region.");
                 }
 
-                var currentUngenderedVoiceId = this.config.PollyVoiceUngendered;
-                var currentMaleVoiceId = this.config.PollyVoiceMale;
-                var currentFemaleVoiceId = this.config.PollyVoiceFemale;
+                var currentUngenderedVoice = this.config.GetCurrentUngenderedVoicePreset<PollyVoicePreset>();
+                var currentMaleVoice = this.config.GetCurrentMaleVoicePreset<PollyVoicePreset>();
+                var currentFemaleVoice = this.config.GetCurrentFemaleVoicePreset<PollyVoicePreset>();
 
-                var ungenderedVoiceIndex = Array.IndexOf(voiceIdArray, currentUngenderedVoiceId);
+                var ungenderedVoiceIndex = Array.IndexOf(voiceIdArray, currentUngenderedVoice.VoiceName);
                 if (ImGui.Combo("Ungendered voice##TTTVoice5", ref ungenderedVoiceIndex, voiceArray, voices.Count))
                 {
-                    this.config.PollyVoiceUngendered = voiceIdArray[ungenderedVoiceIndex];
+                    currentUngenderedVoice.VoiceName = voiceIdArray[ungenderedVoiceIndex];
                     this.config.Save();
                 }
 
-                if (voices.Count > 0 && !voices.Any(v => v.Id == this.config.PollyVoiceUngendered))
+                if (voices.Count > 0 && currentUngenderedVoice is not null &&
+                    !voices.Any(v => v.Id == currentUngenderedVoice.VoiceName))
                 {
                     ImGuiVoiceNotSupported();
                 }
 
-                var maleVoiceIndex = Array.IndexOf(voiceIdArray, currentMaleVoiceId);
+                var maleVoiceIndex = Array.IndexOf(voiceIdArray, currentMaleVoice.VoiceName);
                 if (ImGui.Combo("Male voice##TTTVoice3", ref maleVoiceIndex, voiceArray, voices.Count))
                 {
-                    this.config.PollyVoiceMale = voiceIdArray[maleVoiceIndex];
+                    currentMaleVoice.VoiceName = voiceIdArray[maleVoiceIndex];
                     this.config.Save();
                 }
 
-                if (voices.Count > 0 && !voices.Any(v => v.Id == this.config.PollyVoiceMale))
+                if (voices.Count > 0 && !voices.Any(v => v.Id == currentMaleVoice.VoiceName))
                 {
                     ImGuiVoiceNotSupported();
                 }
 
-                var femaleVoiceIndex = Array.IndexOf(voiceIdArray, currentFemaleVoiceId);
+                var femaleVoiceIndex = Array.IndexOf(voiceIdArray, currentFemaleVoice.VoiceName);
                 if (ImGui.Combo("Female voice##TTTVoice4", ref femaleVoiceIndex, voiceArray, voices.Count))
                 {
-                    this.config.PollyVoiceFemale = voiceIdArray[femaleVoiceIndex];
+                    currentFemaleVoice.VoiceName = voiceIdArray[femaleVoiceIndex];
                     this.config.Save();
                 }
 
-                if (voices.Count > 0 && !voices.Any(v => v.Id == this.config.PollyVoiceFemale))
+                if (voices.Count > 0 && !voices.Any(v => v.Id == currentFemaleVoice.VoiceName))
                 {
                     ImGuiVoiceNotSupported();
                 }
             }
             else
             {
-                var currentVoiceId = this.config.PollyVoice;
-                var voiceIndex = Array.IndexOf(voiceIdArray, currentVoiceId);
+                var currentVoice = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
+                var voiceIndex = Array.IndexOf(voiceIdArray, currentVoice.VoiceName);
                 if (ImGui.Combo("Voice##TTTVoice1", ref voiceIndex, voiceArray, voices.Count))
                 {
-                    this.config.PollyVoice = voiceIdArray[voiceIndex];
+                    currentVoice.VoiceName = voiceIdArray[voiceIndex];
                     this.config.Save();
                 }
 
-                if (voices.Count > 0 && !voices.Any(v => v.Id == this.config.PollyVoice))
+                if (voices.Count > 0 && !voices.Any(v => v.Id == currentVoice.VoiceName))
                 {
                     ImGuiVoiceNotSupported();
                 }
@@ -231,7 +299,8 @@ public class PollyBackendUI
         {
             PluginLog.Log($"Logging into AWS region {regionEndpoint}.");
             polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint, this.lexiconManager);
-            var voices = polly.GetVoicesForEngine(this.config.PollyEngine);
+            var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
+            var voices = polly.GetVoicesForEngine(currentVoicePreset?.VoiceEngine ?? Engine.Neural);
             this.setPolly.Invoke(polly);
             this.setVoices.Invoke(voices);
         }

@@ -14,6 +14,8 @@ public class SystemVoicePreset : VoicePreset
 
     public override bool TrySetDefaultValues()
     {
+        EnabledBackend = TTSBackend.System;
+        
         using var ss = new SpeechSynthesizer();
         var defaultVoiceInfo = ss.GetInstalledVoices().FirstOrDefault();
         if (defaultVoiceInfo != null)
