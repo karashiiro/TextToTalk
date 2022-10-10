@@ -13,12 +13,15 @@ namespace TextToTalk.Backends.Websocket
         private WebSocketServer server;
 
         private int port;
+
         public int Port
         {
-            get => port; private set => port = value switch
+            get => port;
+            private set => port = value switch
             {
                 < IPEndPoint.MinPort or > IPEndPoint.MaxPort
-                    => throw new ArgumentOutOfRangeException($"Port must be at least {IPEndPoint.MinPort} and at most {IPEndPoint.MaxPort}."),
+                    => throw new ArgumentOutOfRangeException(
+                        $"Port must be at least {IPEndPoint.MinPort} and at most {IPEndPoint.MaxPort}."),
                 // Using the first free port in case of 0 is conventional
                 // and ensures that we know what port is ultimately used.
                 // We can't pass 0 to the server anyways, since it throws
@@ -35,10 +38,7 @@ namespace TextToTalk.Backends.Websocket
             Port = port;
 
             this.server = new WebSocketServer($"ws://localhost:{Port}");
-            this.server.AddWebSocketService<ServerBehavior>("/Messages", b =>
-            {
-                this.behavior = b;
-            });
+            this.server.AddWebSocketService<ServerBehavior>("/Messages", b => { this.behavior = b; });
         }
 
         public void Broadcast(TextSource source, VoicePreset voice, string message)
@@ -84,10 +84,7 @@ namespace TextToTalk.Backends.Websocket
             Port = newPort;
             Stop();
             this.server = new WebSocketServer($"ws://localhost:{Port}");
-            this.server.AddWebSocketService<ServerBehavior>("/Messages", b =>
-            {
-                this.behavior = b;
-            });
+            this.server.AddWebSocketService<ServerBehavior>("/Messages", b => { this.behavior = b; });
             Start();
         }
 
@@ -125,7 +122,7 @@ namespace TextToTalk.Backends.Websocket
             /// The message type; refer tp <see cref="IpcMessageType"/> for options.
             /// </summary>
             public string Type { get; set; }
-            
+
             /// <summary>
             /// The message parameter - the spoken text for speech requests, and nothing for cancellations.
             /// </summary>
@@ -141,11 +138,16 @@ namespace TextToTalk.Backends.Websocket
             /// </summary>
             public string Source { get; set; }
 
-            public IpcMessage(IpcMessageType type, string payload, VoicePreset voice, TextSource source)
+            public IpcMessage(IpcMessageType type, string payload, VoicePreset preset, TextSource source)
             {
+                if (preset is not WebsocketVoicePreset)
+                {
+                    throw new InvalidOperationException("Invalid voice preset provided.");
+                }
+
                 Type = type.ToString();
                 Payload = payload;
-                Voice = voice;
+                Voice = preset;
                 Source = source.ToString();
             }
         }

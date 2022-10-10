@@ -196,7 +196,15 @@ namespace TextToTalk
                 playerService.TryGetPlayerByInfo(pc.Name.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
                 playerService.TryGetPlayerVoice(playerInfo, out var voice))
             {
-                backendManager.Say(source, voice, cleanText);
+                if (voice.EnabledBackend != this.config.Backend)
+                {
+                    PluginLog.LogError(
+                        $"Voice preset {voice.Name} is not compatible with the {this.config.Backend} backend");
+                }
+                else
+                {
+                    backendManager.Say(source, voice, cleanText);
+                }
             }
             else
             {
@@ -211,7 +219,7 @@ namespace TextToTalk
                 }
                 else
                 {
-                    PluginLog.LogWarning("Attempted to speak with null voice preset");
+                    PluginLog.LogError("Attempted to speak with null voice preset");
                 }
             }
         }
@@ -232,38 +240,40 @@ namespace TextToTalk
         private VoicePreset GetPollyVoiceForGender(PollyBackend polly, Gender gender)
         {
             var preset = polly.GetPollyVoiceForGender(gender);
-            return new VoicePreset
+            return new PollyVoicePreset
             {
                 Id = -1,
-                Name = string.Empty,
-                Rate = this.config.PollyPlaybackRate,
+                Name = gender.ToString(),
+                PlaybackRate = this.config.PollyPlaybackRate,
+                SampleRate = this.config.PollySampleRate,
+                VoiceEngine = this.config.PollyEngine,
                 VoiceName = preset,
-                Volume = Convert.ToInt32(this.config.PollyVolume * 100),
+                Volume = this.config.PollyVolume,
+                EnabledBackend = TTSBackend.AmazonPolly,
             };
         }
 
         private VoicePreset GetUberduckVoiceForGender(UberduckBackend uberduck, Gender gender)
         {
             var preset = uberduck.GetUberduckVoiceForGender(gender);
-            return new VoicePreset
-            {
-                Id = -1,
-                Name = string.Empty,
-                Rate = this.config.UberduckPlaybackRate,
-                VoiceName = preset,
-                Volume = Convert.ToInt32(this.config.UberduckVolume * 100),
-            };
-        }
-
-        private VoicePreset GetWebsocketVoiceForGender(Gender gender)
-        {
-            return new VoicePreset
+            return new UberduckVoicePreset
             {
                 Id = -1,
                 Name = gender.ToString(),
-                Rate = 3,
-                VoiceName = gender.ToString(),
-                Volume = 100,
+                Rate = this.config.UberduckPlaybackRate,
+                VoiceName = preset,
+                Volume = this.config.UberduckVolume,
+                EnabledBackend = TTSBackend.Uberduck,
+            };
+        }
+
+        private static VoicePreset GetWebsocketVoiceForGender(Gender gender)
+        {
+            return new WebsocketVoicePreset
+            {
+                Id = -1,
+                Name = gender.ToString(),
+                EnabledBackend = TTSBackend.Websocket,
             };
         }
 

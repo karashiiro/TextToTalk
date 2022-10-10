@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System;
+using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -32,14 +33,19 @@ public class UberduckBackend : VoiceBackend
         this.ui = new UberduckBackendUI(this.config, this.uberduck, () => voices);
     }
 
-    public override void Say(TextSource source, VoicePreset voice, string text)
+    public override void Say(TextSource source, VoicePreset preset, string text)
     {
+        if (preset is not UberduckVoicePreset uberduckVoicePreset)
+        {
+            throw new InvalidOperationException("Invalid voice preset provided.");
+        }
+
         _ = Task.Run(async () =>
         {
             try
             {
-                await this.uberduck.Say(voice.VoiceName, this.config.UberduckPlaybackRate, this.config.UberduckVolume, source,
-                    text);
+                await this.uberduck.Say(uberduckVoicePreset.VoiceName, uberduckVoicePreset.Rate,
+                    uberduckVoicePreset.Volume, source, text);
             }
             catch (UberduckFailedException e)
             {

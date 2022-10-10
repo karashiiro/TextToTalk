@@ -50,14 +50,14 @@ namespace TextToTalk.Backends.System
 
         public VoicePreset GetSystemVoiceForGender(Gender gender)
         {
-            var voicePreset = this.config.GetCurrentVoicePreset();
+            var voicePreset = this.config.GetCurrentVoicePreset<SystemVoicePreset>();
             if (this.config.UseGenderedVoicePresets)
             {
                 voicePreset = gender switch
                 {
-                    Gender.Male => this.config.GetCurrentMaleVoicePreset(),
-                    Gender.Female => this.config.GetCurrentFemaleVoicePreset(),
-                    _ => this.config.GetCurrentUngenderedVoicePreset(),
+                    Gender.Male => this.config.GetCurrentMaleVoicePreset<SystemVoicePreset>(),
+                    Gender.Female => this.config.GetCurrentFemaleVoicePreset<SystemVoicePreset>(),
+                    _ => this.config.GetCurrentUngenderedVoicePreset<SystemVoicePreset>(),
                 };
             }
 

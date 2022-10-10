@@ -14,7 +14,8 @@ namespace TextToTalk.Backends.System
         private readonly AutoResetEvent speechCompleted;
         private readonly ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures;
 
-        public SystemSoundQueue(LexiconManager lexiconManager, ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures)
+        public SystemSoundQueue(LexiconManager lexiconManager,
+            ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures)
         {
             this.speechCompleted = new AutoResetEvent(false);
             this.lexiconManager = lexiconManager;
@@ -40,17 +41,23 @@ namespace TextToTalk.Backends.System
 
         protected override void OnSoundLoop(SystemSoundQueueItem nextItem)
         {
+            if (nextItem.Preset is not SystemVoicePreset systemVoicePreset)
+            {
+                throw new InvalidOperationException("Invalid voice preset provided.");
+            }
+
             try
             {
                 this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
             }
             catch (SelectVoiceFailedException e)
             {
-                PluginLog.LogError(e, "Failed to select voice {0}", nextItem.Preset.VoiceName);
+                PluginLog.LogError(e, "Failed to select voice {0}", systemVoicePreset.VoiceName);
                 this.selectVoiceFailures.Enqueue(e);
             }
 
-            var ssml = this.lexiconManager.MakeSsml(nextItem.Text, this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
+            var ssml = this.lexiconManager.MakeSsml(nextItem.Text,
+                this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
             PluginLog.Log(ssml);
 
             this.speechSynthesizer.SpeakSsmlAsync(ssml);
@@ -65,7 +72,9 @@ namespace TextToTalk.Backends.System
             {
                 this.speechSynthesizer.SpeakAsyncCancelAll();
             }
-            catch (ObjectDisposedException) { }
+            catch (ObjectDisposedException)
+            {
+            }
         }
 
         protected override void Dispose(bool disposing)

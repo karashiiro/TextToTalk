@@ -1,4 +1,5 @@
-﻿using Amazon.Polly;
+﻿using System;
+using Amazon.Polly;
 using Amazon.Polly.Model;
 using ImGuiNET;
 using System.Collections.Generic;
@@ -32,8 +33,13 @@ namespace TextToTalk.Backends.Polly
 
         public override void Say(TextSource source, VoicePreset preset, string text)
         {
-            _ = this.polly.Say(this.config.PollyEngine, preset.VoiceName, this.config.PollySampleRate,
-                this.config.PollyPlaybackRate, this.config.PollyVolume, source, text);
+            if (preset is not PollyVoicePreset pollyVoicePreset)
+            {
+                throw new InvalidOperationException("Invalid voice preset provided.");
+            }
+
+            _ = this.polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName, pollyVoicePreset.SampleRate,
+                pollyVoicePreset.PlaybackRate, pollyVoicePreset.Volume, source, text);
         }
 
         public override void CancelAllSpeech()

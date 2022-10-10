@@ -62,9 +62,9 @@ public class SystemBackendUI
             this.voiceExceptions[e1.VoiceId] = e1;
         }
 
-        var currentVoicePreset = this.config.GetCurrentVoicePreset();
+        var currentVoicePreset = this.config.GetCurrentVoicePreset<SystemVoicePreset>();
 
-        var presets = this.config.VoicePresets.ToList();
+        var presets = this.config.GetVoicePresetsForBackend(TTSBackend.System).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
 
         if (presets.Any())
@@ -82,7 +82,8 @@ public class SystemBackendUI
             ImGui.TextColored(Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
-        if (ImGui.Button("New preset##TTTVoice4") && this.config.TryCreateVoicePreset(out var newPreset))
+        if (ImGui.Button("New preset##TTTVoice4") &&
+            this.config.TryCreateVoicePreset<SystemVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
         }
@@ -174,9 +175,9 @@ public class SystemBackendUI
 
         if (useGenderedVoicePresets)
         {
-            var currentUngenderedVoicePreset = this.config.GetCurrentUngenderedVoicePreset();
-            var currentMaleVoicePreset = this.config.GetCurrentMaleVoicePreset();
-            var currentFemaleVoicePreset = this.config.GetCurrentFemaleVoicePreset();
+            var currentUngenderedVoicePreset = this.config.GetCurrentUngenderedVoicePreset<SystemVoicePreset>();
+            var currentMaleVoicePreset = this.config.GetCurrentMaleVoicePreset<SystemVoicePreset>();
+            var currentFemaleVoicePreset = this.config.GetCurrentFemaleVoicePreset<SystemVoicePreset>();
 
             var presetArray = presets.Select(p => p.Name).ToArray();
 

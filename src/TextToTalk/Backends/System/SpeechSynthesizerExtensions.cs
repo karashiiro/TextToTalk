@@ -7,18 +7,23 @@ namespace TextToTalk.Backends.System
     {
         public static void UseVoicePreset(this SpeechSynthesizer synthesizer, VoicePreset preset)
         {
-            synthesizer.Rate = preset.Rate;
-            synthesizer.Volume = preset.Volume;
-            if (synthesizer.Voice.Name != preset.VoiceName)
+            if (preset is not SystemVoicePreset systemVoicePreset)
+            {
+                throw new InvalidOperationException("Invalid voice preset provided.");
+            }
+
+            synthesizer.Rate = systemVoicePreset.Rate;
+            synthesizer.Volume = systemVoicePreset.Volume;
+            if (synthesizer.Voice.Name != systemVoicePreset.VoiceName)
             {
                 try
                 {
-                    synthesizer.SelectVoice(preset.VoiceName);
+                    synthesizer.SelectVoice(systemVoicePreset.VoiceName);
                 }
                 catch (Exception e)
                 {
-                    throw new SelectVoiceFailedException(preset.VoiceName,
-                        $"Failed to select voice \"{preset.VoiceName}\".", e);
+                    throw new SelectVoiceFailedException(systemVoicePreset.VoiceName,
+                        $"Failed to select voice \"{systemVoicePreset.VoiceName}\".", e);
                 }
             }
         }

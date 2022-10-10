@@ -292,7 +292,7 @@ namespace TextToTalk.UI.Dalamud
                 ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
                 ImGui.TableHeadersRow();
 
-                var presets = Configuration.VoicePresets.ToList();
+                var presets = Configuration.GetVoicePresetsForBackend(Configuration.Backend).ToList();
                 presets.Sort((a, b) => a.Id - b.Id);
                 var presetArray = presets.Select(p => p.Name).ToArray();
 
@@ -367,7 +367,7 @@ namespace TextToTalk.UI.Dalamud
                     {
                         Players.SetPlayerVoice(playerInfo, presets[presetIndex]);
                         Configuration.Save();
-                        PluginLog.LogDebug($"Updated player voice: {presets[presetIndex].Name}");
+                        PluginLog.LogDebug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
                     }
                 }
 
@@ -388,11 +388,11 @@ namespace TextToTalk.UI.Dalamud
                 }
                 else if (world == null)
                 {
-                    PluginLog.LogWarning("The provided world name was invalid");
+                    PluginLog.LogError("The provided world name was invalid");
                 }
                 else
                 {
-                    PluginLog.LogWarning("Failed to add player; this might be a duplicate entry");
+                    PluginLog.LogError("Failed to add player; this might be a duplicate entry");
                 }
             }
         }

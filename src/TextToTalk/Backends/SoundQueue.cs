@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Dalamud.Logging;
 
 namespace TextToTalk.Backends
 {
@@ -10,7 +11,7 @@ namespace TextToTalk.Backends
         // This used to be a ConcurrentQueue<T>, but was changed so that items could be
         // queried and removed from the middle.
         private readonly IList<TQueueItem> queuedSounds;
-        
+
         private readonly Thread soundThread;
 
         private TQueueItem currentItem;
@@ -34,7 +35,16 @@ namespace TextToTalk.Backends
                     Thread.Sleep(100);
                     continue;
                 }
-                OnSoundLoop(this.currentItem);
+
+                try
+                {
+                    OnSoundLoop(this.currentItem);
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Error occurred during sound loop.");
+                }
+
                 this.currentItem.Dispose();
                 this.currentItem = null;
             }

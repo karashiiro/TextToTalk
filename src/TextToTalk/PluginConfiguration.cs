@@ -6,9 +6,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Speech.Synthesis;
 using Dalamud.Logging;
 using TextToTalk.Backends;
+using TextToTalk.Backends.System;
 using TextToTalk.GameEnums;
 using TextToTalk.Migrations;
 
@@ -63,6 +63,7 @@ namespace TextToTalk
 
         public bool MigratedTo1_5 { get; set; }
         public bool MigratedTo1_6 { get; set; }
+        public bool MigratedTo1_17 { get; set; }
 
         public IList<Trigger> Bad { get; set; }
         public IList<Trigger> Good { get; set; }
@@ -183,18 +184,20 @@ namespace TextToTalk
 
                 try
                 {
-                    using var ss = new SpeechSynthesizer();
-                    var defaultVoiceInfo = ss.GetInstalledVoices().FirstOrDefault();
-                    if (defaultVoiceInfo != null)
+                    var defaultPreset = new SystemVoicePreset
                     {
-                        VoicePresets.Add(new VoicePreset
-                        {
-                            Id = 0,
-                            Rate = ss.Rate,
-                            Volume = ss.Volume,
-                            VoiceName = defaultVoiceInfo.VoiceInfo.Name,
-                            Name = DefaultPreset,
-                        });
+                        Id = 0,
+                        Name = DefaultPreset,
+                        EnabledBackend = TTSBackend.System,
+                    };
+
+                    if (defaultPreset.TrySetDefaultValues())
+                    {
+                        VoicePresets.Add(defaultPreset);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Failed to set values for default preset.");
                     }
                 }
                 catch (Exception e)
@@ -205,11 +208,13 @@ namespace TextToTalk
                 InitializedEver = true;
                 MigratedTo1_5 = true;
                 MigratedTo1_6 = true;
+                MigratedTo1_17 = true;
             }
 
             if (InitializedEver)
             {
-                var migrations = new IConfigurationMigration[] { new Migration1_5(), new Migration1_6() };
+                var migrations = new IConfigurationMigration[]
+                    { new Migration1_5(), new Migration1_6(), new Migration1_17() };
                 foreach (var migration in migrations)
                 {
                     if (migration.ShouldMigrate(this))
@@ -253,58 +258,56 @@ namespace TextToTalk
             return preset;
         }
 
+        public IList<VoicePreset> GetVoicePresetsForBackend(TTSBackend backend)
+        {
+            return VoicePresets.Where(p => p.EnabledBackend == backend).ToList();
+        }
+
         public void SetCurrentEnabledChatTypesPreset(int presetId)
         {
             CurrentPresetId = presetId;
         }
 
-        public VoicePreset GetCurrentVoicePreset()
+        public TPreset GetCurrentVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == CurrentVoicePresetId);
+            return (TPreset)VoicePresets.FirstOrDefault(
+                p => p.Id == CurrentVoicePresetId && p.EnabledBackend == Backend);
         }
 
-        public VoicePreset GetCurrentUngenderedVoicePreset()
+        public TPreset GetCurrentUngenderedVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == UngenderedVoicePresetId);
+            return (TPreset)VoicePresets.FirstOrDefault(p =>
+                p.Id == UngenderedVoicePresetId && p.EnabledBackend == Backend);
         }
 
-        public VoicePreset GetCurrentMaleVoicePreset()
+        public TPreset GetCurrentMaleVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == MaleVoicePresetId);
+            return (TPreset)VoicePresets.FirstOrDefault(p => p.Id == MaleVoicePresetId && p.EnabledBackend == Backend);
         }
 
-        public VoicePreset GetCurrentFemaleVoicePreset()
+        public TPreset GetCurrentFemaleVoicePreset<TPreset>() where TPreset : VoicePreset
         {
-            return VoicePresets.FirstOrDefault(p => p.Id == FemaleVoicePresetId);
+            return (TPreset)VoicePresets.FirstOrDefault(p =>
+                p.Id == FemaleVoicePresetId && p.EnabledBackend == Backend);
         }
 
-        public bool TryCreateVoicePreset(out VoicePreset preset)
+        public bool TryCreateVoicePreset<TPreset>(out TPreset preset) where TPreset : VoicePreset, new()
         {
-            preset = null;
-
-            using var ss = new SpeechSynthesizer();
-
             var highestId = VoicePresets.Select(p => p.Id).Max();
-            var defaultVoiceInfo = ss.GetInstalledVoices().FirstOrDefault();
-            if (defaultVoiceInfo != null)
+            preset = new TPreset
             {
-                preset = new VoicePreset
-                {
-                    Id = highestId + 1,
-                    Rate = ss.Rate,
-                    Volume = ss.Volume,
-                    VoiceName = defaultVoiceInfo.VoiceInfo.Name,
-                    Name = "New preset",
-                };
+                Id = highestId + 1,
+                Name = "New preset",
+                EnabledBackend = TTSBackend.System,
+            };
 
+            if (preset.TrySetDefaultValues())
+            {
                 VoicePresets.Add(preset);
-            }
-            else
-            {
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         public void SetCurrentVoicePreset(int presetId)

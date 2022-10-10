@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using TextToTalk.Backends;
+using TextToTalk.Backends.System;
 
 namespace TextToTalk.Migrations
 {
@@ -26,7 +28,7 @@ namespace TextToTalk.Migrations
                 MajorKey = VirtualKey.Enum.Vk0,
             });
 
-            config.VoicePresets.Add(new VoicePreset
+            config.VoicePresets.Add(new SystemVoicePreset
             {
                 Id = 0,
                 Name = "Default",
@@ -37,6 +39,7 @@ namespace TextToTalk.Migrations
                 VoiceName = config.VoiceName,
 #pragma warning restore 618
 #pragma warning restore CS1062 // The best overloaded Add method for the collection initializer element is obsolete
+                EnabledBackend = TTSBackend.System,
             });
 
             config.MigratedTo1_5 = true;
