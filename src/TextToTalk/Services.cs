@@ -96,7 +96,7 @@ public class Services : IServiceProvider, IDisposable
         services.serviceCollection.AddService(new WindowManager(services.serviceCollection));
 
         services.serviceCollection.AddService(new PlayerService(config.Players, config.PlayerVoicePresets,
-            config.VoicePresets));
+            config.VoicePresetConfig.VoicePresets));
 
         return services;
     }

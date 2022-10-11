@@ -2,7 +2,7 @@
 
 namespace TextToTalk.Backends
 {
-    public enum TTSBackend
+    public enum TTSBackend : long
     {
         System,
         Websocket,

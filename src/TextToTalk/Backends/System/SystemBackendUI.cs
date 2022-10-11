@@ -96,23 +96,23 @@ public class SystemBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTSystemVoice5"))
         {
-            var otherPreset = this.config.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+            var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
 
-            if (this.config.UngenderedVoicePreset[TTSBackend.System] == currentVoicePreset.Id)
+            if (this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System] == currentVoicePreset.Id)
             {
-                this.config.UngenderedVoicePreset[TTSBackend.System] = 0;
+                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System] = 0;
             }
-            else if (this.config.MaleVoicePreset[TTSBackend.System] == currentVoicePreset.Id)
+            else if (this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System] == currentVoicePreset.Id)
             {
-                this.config.MaleVoicePreset[TTSBackend.System] = 0;
+                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System] = 0;
             }
-            else if (this.config.FemaleVoicePreset[TTSBackend.System] == currentVoicePreset.Id)
+            else if (this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System] == currentVoicePreset.Id)
             {
-                this.config.FemaleVoicePreset[TTSBackend.System] = 0;
+                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System] = 0;
             }
 
-            this.config.VoicePresets.Remove(currentVoicePreset);
+            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
         }
 
         var presetName = currentVoicePreset.Name;
@@ -184,21 +184,21 @@ public class SystemBackendUI
             var ungenderedPresetIndex = presets.IndexOf(currentUngenderedVoicePreset);
             if (ImGui.Combo("Ungendered preset##TTTSystemVoice12", ref ungenderedPresetIndex, presetArray, presets.Count))
             {
-                this.config.UngenderedVoicePreset[TTSBackend.System] = presets[ungenderedPresetIndex].Id;
+                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System] = presets[ungenderedPresetIndex].Id;
                 this.config.Save();
             }
 
             var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
             if (ImGui.Combo("Male preset##TTTSystemVoice10", ref malePresetIndex, presetArray, presets.Count))
             {
-                this.config.MaleVoicePreset[TTSBackend.System] = presets[malePresetIndex].Id;
+                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System] = presets[malePresetIndex].Id;
                 this.config.Save();
             }
 
             var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
             if (ImGui.Combo("Female preset##TTTSystemVoice11", ref femalePresetIndex, presetArray, presets.Count))
             {
-                this.config.FemaleVoicePreset[TTSBackend.System] = presets[femalePresetIndex].Id;
+                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System] = presets[femalePresetIndex].Id;
                 this.config.Save();
             }
         }

@@ -147,23 +147,23 @@ public class PollyBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTPollyVoice5"))
         {
-            var otherPreset = this.config.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+            var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
 
-            if (this.config.UngenderedVoicePreset[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
+            if (this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
             {
-                this.config.UngenderedVoicePreset[TTSBackend.AmazonPolly] = 0;
+                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly] = 0;
             }
-            else if (this.config.MaleVoicePreset[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
+            else if (this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
             {
-                this.config.MaleVoicePreset[TTSBackend.AmazonPolly] = 0;
+                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly] = 0;
             }
-            else if (this.config.FemaleVoicePreset[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
+            else if (this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
             {
-                this.config.FemaleVoicePreset[TTSBackend.AmazonPolly] = 0;
+                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly] = 0;
             }
 
-            this.config.VoicePresets.Remove(currentVoicePreset);
+            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
         }
 
         var presetName = currentVoicePreset.Name;
@@ -256,21 +256,21 @@ public class PollyBackendUI
                 if (ImGui.Combo("Ungendered preset##TTTPollyEnabledUPresetSelect", ref ungenderedVoiceIndex, presetNamesArray,
                         presets.Count))
                 {
-                    this.config.UngenderedVoicePreset[TTSBackend.AmazonPolly] = presetsArray[ungenderedVoiceIndex].Id;
+                    this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
 
                 var maleVoiceIndex = Array.IndexOf(presetsArray, currentMaleVoice);
                 if (ImGui.Combo("Male preset##TTTPollyEnabledMPresetSelect", ref maleVoiceIndex, presetNamesArray, presets.Count))
                 {
-                    this.config.MaleVoicePreset[TTSBackend.AmazonPolly] = presetsArray[maleVoiceIndex].Id;
+                    this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly] = presetsArray[maleVoiceIndex].Id;
                     this.config.Save();
                 }
 
                 var femaleVoiceIndex = Array.IndexOf(presetsArray, currentFemaleVoice);
                 if (ImGui.Combo("Female preset##TTTPollyEnabledFPresetSelect", ref femaleVoiceIndex, presetNamesArray, presets.Count))
                 {
-                    this.config.FemaleVoicePreset[TTSBackend.AmazonPolly] = presetsArray[femaleVoiceIndex].Id;
+                    this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly] = presetsArray[femaleVoiceIndex].Id;
                     this.config.Save();
                 }
             }

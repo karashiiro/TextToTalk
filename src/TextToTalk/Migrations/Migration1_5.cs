@@ -28,7 +28,7 @@ namespace TextToTalk.Migrations
                 MajorKey = VirtualKey.Enum.Vk0,
             });
 
-            config.VoicePresets.Add(new SystemVoicePreset
+            config.VoicePresetConfig.VoicePresets.Add(new SystemVoicePreset
             {
                 Id = 0,
                 Name = "Default",

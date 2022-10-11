@@ -102,23 +102,23 @@ public class UberduckBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTUberduckVoice5"))
         {
-            var otherPreset = this.config.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+            var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
 
-            if (this.config.UngenderedVoicePreset[TTSBackend.Uberduck] == currentVoicePreset.Id)
+            if (this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck] == currentVoicePreset.Id)
             {
-                this.config.UngenderedVoicePreset[TTSBackend.Uberduck] = 0;
+                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck] = 0;
             }
-            else if (this.config.MaleVoicePreset[TTSBackend.Uberduck] == currentVoicePreset.Id)
+            else if (this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck] == currentVoicePreset.Id)
             {
-                this.config.MaleVoicePreset[TTSBackend.Uberduck] = 0;
+                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck] = 0;
             }
-            else if (this.config.FemaleVoicePreset[TTSBackend.Uberduck] == currentVoicePreset.Id)
+            else if (this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck] == currentVoicePreset.Id)
             {
-                this.config.FemaleVoicePreset[TTSBackend.Uberduck] = 0;
+                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck] = 0;
             }
 
-            this.config.VoicePresets.Remove(currentVoicePreset);
+            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
         }
 
         var presetName = currentVoicePreset.Name;
@@ -184,14 +184,14 @@ public class UberduckBackendUI
                 if (ImGui.Combo("Ungendered preset##TTTUberduckVoice5", ref ungenderedVoiceIndex, presetNamesArray,
                         presets.Count))
                 {
-                    this.config.UngenderedVoicePreset[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
+                    this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
 
                 var maleVoiceIndex = Array.IndexOf(presetsArray, currentMaleVoice);
                 if (ImGui.Combo("Male preset##TTTUberduckVoice3", ref maleVoiceIndex, presetNamesArray, presets.Count))
                 {
-                    this.config.MaleVoicePreset[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
+                    this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
 
@@ -199,7 +199,7 @@ public class UberduckBackendUI
                 if (ImGui.Combo("Female preset##TTTUberduckVoice4", ref femaleVoiceIndex, presetNamesArray,
                         presets.Count))
                 {
-                    this.config.FemaleVoicePreset[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
+                    this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
             }
