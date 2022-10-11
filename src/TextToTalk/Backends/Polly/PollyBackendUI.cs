@@ -116,14 +116,15 @@ public class PollyBackendUI
 
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.AmazonPolly).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
+        var presetsArray = presets.ToArray();
+        var presetNamesArray = presets.Select(p => p.Name).ToArray();
 
         if (presets.Any())
         {
-            var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
-            if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
-                    presets.Count))
+            var presetIndex = presets.IndexOf(currentVoicePreset);
+            if (ImGui.Combo("Preset##TTTPollyPresetSelect", ref presetIndex, presetNamesArray, presets.Count))
             {
-                this.config.CurrentVoicePreset[TTSBackend.AmazonPolly] = presets[presetIndex].Id;
+                this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
                 this.config.Save();
             }
         }
@@ -132,7 +133,7 @@ public class PollyBackendUI
             ImGui.TextColored(Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
-        if (ImGui.Button("New preset##TTTVoice4") &&
+        if (ImGui.Button("New preset##TTTPollyVoice4") &&
             this.config.TryCreateVoicePreset<PollyVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
@@ -144,7 +145,7 @@ public class PollyBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Delete preset##TTTVoice5"))
+        if (ImGui.Button("Delete preset##TTTPollyVoice5"))
         {
             var otherPreset = this.config.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
@@ -166,7 +167,7 @@ public class PollyBackendUI
         }
 
         var presetName = currentVoicePreset.Name;
-        if (ImGui.InputText("Preset name", ref presetName, 64))
+        if (ImGui.InputText("Preset name##TTTPollyVoice99", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
             this.config.Save();
@@ -179,22 +180,47 @@ public class PollyBackendUI
             currentVoicePreset.VoiceEngine = Engines[engineIndex];
             this.config.Save();
 
-            var polly = this.getPolly.Invoke();
-            var voices = polly?.GetVoicesForEngine(currentVoicePreset.VoiceEngine) ?? new List<Voice>();
-            this.setVoices.Invoke(voices);
+            {
+                var polly = this.getPolly.Invoke();
+                var voices = polly?.GetVoicesForEngine(currentVoicePreset.VoiceEngine) ?? new List<Voice>();
+                this.setVoices.Invoke(voices);
+            }
+        }
+
+        {
+            var voices = this.getVoices.Invoke();
+            var voiceArray = voices.Select(v => v.Name).ToArray();
+            var voiceIdArray = voices.Select(v => v.Id).ToArray();
+            var voiceIndex = Array.IndexOf(voiceIdArray, currentVoicePreset.VoiceName);
+            if (ImGui.Combo("Voice##TTTPollyVoice98", ref voiceIndex, voiceArray, voices.Count))
+            {
+                currentVoicePreset.VoiceName = voiceIdArray[voiceIndex];
+                this.config.Save();
+            }
+
+            switch (voices.Count)
+            {
+                case 0:
+                    ImGui.TextColored(Red, "No voices are available on this voice engine for the current region.\n" +
+                                           "Please log in using a different region.");
+                    break;
+                case > 0 when !voices.Any(v => v.Id == currentVoicePreset.VoiceName):
+                    ImGuiVoiceNotSupported();
+                    break;
+            }
         }
 
         var validSampleRates = new[] { "8000", "16000", "22050", "24000" };
         var sampleRate = currentVoicePreset.SampleRate.ToString();
         var sampleRateIndex = Array.IndexOf(validSampleRates, sampleRate);
-        if (ImGui.Combo("Sample rate##TTTVoice6", ref sampleRateIndex, validSampleRates, validSampleRates.Length))
+        if (ImGui.Combo("Sample rate##TTTPollyVoice6", ref sampleRateIndex, validSampleRates, validSampleRates.Length))
         {
             currentVoicePreset.SampleRate = int.Parse(validSampleRates[sampleRateIndex]);
             this.config.Save();
         }
 
         var playbackRate = currentVoicePreset.PlaybackRate;
-        if (ImGui.SliderInt("Playback rate##TTTVoice8", ref playbackRate, 20, 200, "%d%%",
+        if (ImGui.SliderInt("Playback rate##TTTPollyVoice8", ref playbackRate, 20, 200, "%d%%",
                 ImGuiSliderFlags.AlwaysClamp))
         {
             currentVoicePreset.PlaybackRate = playbackRate;
@@ -202,7 +228,7 @@ public class PollyBackendUI
         }
 
         var volume = (int)(currentVoicePreset.Volume * 100);
-        if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 200, "%d%%"))
+        if (ImGui.SliderInt("Volume##TTTPollyVoice7", ref volume, 0, 200, "%d%%"))
         {
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
@@ -212,12 +238,8 @@ public class PollyBackendUI
         ImGui.Spacing();
 
         {
-            var voices = this.getVoices.Invoke();
-            var voiceArray = voices.Select(v => v.Name).ToArray();
-            var voiceIdArray = voices.Select(v => v.Id).ToArray();
-
             var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
-            if (ImGui.Checkbox("Use gendered voices##TTTVoice2", ref useGenderedVoicePresets))
+            if (ImGui.Checkbox("Use gendered voices##TTTPollyVoice2", ref useGenderedVoicePresets))
             {
                 this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
                 this.config.Save();
@@ -226,66 +248,30 @@ public class PollyBackendUI
             ImGui.Spacing();
             if (useGenderedVoicePresets)
             {
-                if (voices.Count == 0)
-                {
-                    ImGui.TextColored(Red, "No voices are available on this voice engine for the current region.\n" +
-                                           "Please log in using a different region.");
-                }
-
                 var currentUngenderedVoice = this.config.GetCurrentUngenderedVoicePreset<PollyVoicePreset>();
                 var currentMaleVoice = this.config.GetCurrentMaleVoicePreset<PollyVoicePreset>();
                 var currentFemaleVoice = this.config.GetCurrentFemaleVoicePreset<PollyVoicePreset>();
 
-                var ungenderedVoiceIndex = Array.IndexOf(voiceIdArray, currentUngenderedVoice.VoiceName);
-                if (ImGui.Combo("Ungendered voice##TTTVoice5", ref ungenderedVoiceIndex, voiceArray, voices.Count))
+                var ungenderedVoiceIndex = Array.IndexOf(presetsArray, currentUngenderedVoice);
+                if (ImGui.Combo("Ungendered preset##TTTPollyEnabledUPresetSelect", ref ungenderedVoiceIndex, presetNamesArray,
+                        presets.Count))
                 {
-                    currentUngenderedVoice.VoiceName = voiceIdArray[ungenderedVoiceIndex];
+                    this.config.UngenderedVoicePreset[TTSBackend.AmazonPolly] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
 
-                if (voices.Count > 0 && currentUngenderedVoice is not null &&
-                    !voices.Any(v => v.Id == currentUngenderedVoice.VoiceName))
+                var maleVoiceIndex = Array.IndexOf(presetsArray, currentMaleVoice);
+                if (ImGui.Combo("Male preset##TTTPollyEnabledMPresetSelect", ref maleVoiceIndex, presetNamesArray, presets.Count))
                 {
-                    ImGuiVoiceNotSupported();
-                }
-
-                var maleVoiceIndex = Array.IndexOf(voiceIdArray, currentMaleVoice.VoiceName);
-                if (ImGui.Combo("Male voice##TTTVoice3", ref maleVoiceIndex, voiceArray, voices.Count))
-                {
-                    currentMaleVoice.VoiceName = voiceIdArray[maleVoiceIndex];
+                    this.config.MaleVoicePreset[TTSBackend.AmazonPolly] = presetsArray[maleVoiceIndex].Id;
                     this.config.Save();
                 }
 
-                if (voices.Count > 0 && !voices.Any(v => v.Id == currentMaleVoice.VoiceName))
+                var femaleVoiceIndex = Array.IndexOf(presetsArray, currentFemaleVoice);
+                if (ImGui.Combo("Female preset##TTTPollyEnabledFPresetSelect", ref femaleVoiceIndex, presetNamesArray, presets.Count))
                 {
-                    ImGuiVoiceNotSupported();
-                }
-
-                var femaleVoiceIndex = Array.IndexOf(voiceIdArray, currentFemaleVoice.VoiceName);
-                if (ImGui.Combo("Female voice##TTTVoice4", ref femaleVoiceIndex, voiceArray, voices.Count))
-                {
-                    currentFemaleVoice.VoiceName = voiceIdArray[femaleVoiceIndex];
+                    this.config.FemaleVoicePreset[TTSBackend.AmazonPolly] = presetsArray[femaleVoiceIndex].Id;
                     this.config.Save();
-                }
-
-                if (voices.Count > 0 && !voices.Any(v => v.Id == currentFemaleVoice.VoiceName))
-                {
-                    ImGuiVoiceNotSupported();
-                }
-            }
-            else
-            {
-                var currentVoice = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
-                var voiceIndex = Array.IndexOf(voiceIdArray, currentVoice.VoiceName);
-                if (ImGui.Combo("Voice##TTTVoice1", ref voiceIndex, voiceArray, voices.Count))
-                {
-                    currentVoice.VoiceName = voiceIdArray[voiceIndex];
-                    this.config.Save();
-                }
-
-                if (voices.Count > 0 && !voices.Any(v => v.Id == currentVoice.VoiceName))
-                {
-                    ImGuiVoiceNotSupported();
                 }
             }
         }

@@ -70,10 +70,10 @@ public class SystemBackendUI
         if (presets.Any())
         {
             var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
-            if (ImGui.Combo("Preset##TTTVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+            if (ImGui.Combo("Preset##TTTSystemVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
                     presets.Count))
             {
-                this.config.CurrentVoicePreset[TTSBackend.System] = presets[presetIndex].Id;
+                this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
                 this.config.Save();
             }
         }
@@ -82,7 +82,7 @@ public class SystemBackendUI
             ImGui.TextColored(Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
-        if (ImGui.Button("New preset##TTTVoice4") &&
+        if (ImGui.Button("New preset##TTTSystemVoice4") &&
             this.config.TryCreateVoicePreset<SystemVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
@@ -94,7 +94,7 @@ public class SystemBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Delete preset##TTTVoice5"))
+        if (ImGui.Button("Delete preset##TTTSystemVoice5"))
         {
             var otherPreset = this.config.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
@@ -116,21 +116,21 @@ public class SystemBackendUI
         }
 
         var presetName = currentVoicePreset.Name;
-        if (ImGui.InputText("Preset name", ref presetName, 64))
+        if (ImGui.InputText("Preset name##TTTSystemVoice99", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
             this.config.Save();
         }
 
         var rate = currentVoicePreset.Rate;
-        if (ImGui.SliderInt("Rate##TTTVoice6", ref rate, -10, 10))
+        if (ImGui.SliderInt("Rate##TTTSystemVoice6", ref rate, -10, 10))
         {
             currentVoicePreset.Rate = rate;
             this.config.Save();
         }
 
         var volume = currentVoicePreset.Volume;
-        if (ImGui.SliderInt("Volume##TTTVoice7", ref volume, 0, 100))
+        if (ImGui.SliderInt("Volume##TTTSystemVoice7", ref volume, 0, 100))
         {
             currentVoicePreset.Volume = volume;
             this.config.Save();
@@ -144,7 +144,7 @@ public class SystemBackendUI
         {
             var voicesUi = voices.Select(FormatVoiceInfo).ToArray();
             var voiceIndex = voices.FindIndex(iv => iv.VoiceInfo?.Name == voiceName);
-            if (ImGui.Combo("Voice##TTTVoice8", ref voiceIndex, voicesUi, voices.Count))
+            if (ImGui.Combo("Voice##TTTSystemVoice8", ref voiceIndex, voicesUi, voices.Count))
             {
                 this.voiceExceptions.Remove(voices[voiceIndex].VoiceInfo.Name);
                 currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
@@ -167,7 +167,7 @@ public class SystemBackendUI
         ImGui.Spacing();
 
         var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
-        if (ImGui.Checkbox("Use gendered voice presets##TTTVoice9", ref useGenderedVoicePresets))
+        if (ImGui.Checkbox("Use gendered voice presets##TTTSystemVoice9", ref useGenderedVoicePresets))
         {
             this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
             this.config.Save();
@@ -182,21 +182,21 @@ public class SystemBackendUI
             var presetArray = presets.Select(p => p.Name).ToArray();
 
             var ungenderedPresetIndex = presets.IndexOf(currentUngenderedVoicePreset);
-            if (ImGui.Combo("Ungendered preset##TTTVoice12", ref ungenderedPresetIndex, presetArray, presets.Count))
+            if (ImGui.Combo("Ungendered preset##TTTSystemVoice12", ref ungenderedPresetIndex, presetArray, presets.Count))
             {
                 this.config.UngenderedVoicePreset[TTSBackend.System] = presets[ungenderedPresetIndex].Id;
                 this.config.Save();
             }
 
             var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
-            if (ImGui.Combo("Male preset##TTTVoice10", ref malePresetIndex, presetArray, presets.Count))
+            if (ImGui.Combo("Male preset##TTTSystemVoice10", ref malePresetIndex, presetArray, presets.Count))
             {
                 this.config.MaleVoicePreset[TTSBackend.System] = presets[malePresetIndex].Id;
                 this.config.Save();
             }
 
             var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
-            if (ImGui.Combo("Female preset##TTTVoice11", ref femalePresetIndex, presetArray, presets.Count))
+            if (ImGui.Combo("Female preset##TTTSystemVoice11", ref femalePresetIndex, presetArray, presets.Count))
             {
                 this.config.FemaleVoicePreset[TTSBackend.System] = presets[femalePresetIndex].Id;
                 this.config.Save();
