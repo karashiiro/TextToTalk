@@ -32,6 +32,7 @@ namespace TextToTalk.UI.Dalamud
         private IDictionary<Guid, bool> playerWorldValid = new Dictionary<Guid, bool>();
         private string playerName = string.Empty;
         private string playerWorld = string.Empty;
+        private string playerWorldError = string.Empty;
 
         public ConfigurationWindow()
         {
@@ -73,6 +74,7 @@ namespace TextToTalk.UI.Dalamud
                         this.playerWorldValid = new Dictionary<Guid, bool>();
                         this.playerName = string.Empty;
                         this.playerWorld = string.Empty;
+                        this.playerWorldError = string.Empty;
                     }
 
                     if (ImGui.BeginTabItem("Channel Settings"))
@@ -376,6 +378,10 @@ namespace TextToTalk.UI.Dalamud
 
             ImGui.InputText("Player name##TTTPlayerVoiceName", ref this.playerName, 32);
             ImGui.InputText("Player world##TTTPlayerVoiceWorld", ref this.playerWorld, 32);
+            if (!string.IsNullOrEmpty(this.playerWorldError))
+            {
+                ImGui.TextColored(Red, this.playerWorldError);
+            }
 
             if (ImGui.Button("Add player##TTTPlayerVoiceAdd"))
             {
@@ -388,10 +394,12 @@ namespace TextToTalk.UI.Dalamud
                 }
                 else if (world == null)
                 {
+                    this.playerWorldError = "Unknown world.";
                     PluginLog.LogError("The provided world name was invalid");
                 }
                 else
                 {
+                    this.playerWorldError = "Failed to add player - is this a duplicate?";
                     PluginLog.LogError("Failed to add player; this might be a duplicate entry");
                 }
             }
