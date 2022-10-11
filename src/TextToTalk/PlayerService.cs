@@ -27,6 +27,12 @@ public class PlayerService
         return true;
     }
 
+    public void DeletePlayer(PlayerInfo info)
+    {
+        this.players.Remove(info.LocalId);
+        this.playerVoices.Remove(info.LocalId);
+    } 
+
     public bool TryGetPlayerByInfo(string name, uint worldId, out PlayerInfo info)
     {
         info = this.players.Values.FirstOrDefault(info =>

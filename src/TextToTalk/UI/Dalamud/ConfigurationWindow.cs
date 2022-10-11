@@ -286,9 +286,10 @@ namespace TextToTalk.UI.Dalamud
             ImGui.Spacing();
 
             var tableSize = new Vector2(0.0f, 300f);
-            if (ImGui.BeginTable("##TTTPlayerVoiceList", 3, ImGuiTableFlags.Borders, tableSize))
+            if (ImGui.BeginTable("##TTTPlayerVoiceList", 4, ImGuiTableFlags.Borders, tableSize))
             {
                 ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
+                ImGui.TableSetupColumn("##TTTPlayerVoiceDelete", ImGuiTableColumnFlags.None, 30f);
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
                 ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
                 ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
@@ -298,6 +299,7 @@ namespace TextToTalk.UI.Dalamud
                 presets.Sort((a, b) => a.Id - b.Id);
                 var presetArray = presets.Select(p => p.Name).ToArray();
 
+                var toDelete = new List<PlayerInfo>();
                 foreach (var (id, playerInfo) in Configuration.Players)
                 {
                     // Get player info fields
@@ -312,6 +314,23 @@ namespace TextToTalk.UI.Dalamud
 
                     ImGui.TableSetColumnIndex(0);
 
+                    ImGui.PushFont(UiBuilder.IconFont);
+                    if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTPlayerVoiceDelete-{id}"))
+                    {
+                        toDelete.Add(playerInfo);
+                    }
+
+                    ImGui.PopFont();
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.Text("Delete");
+                        ImGui.EndTooltip();
+                    }
+
+                    ImGui.TableSetColumnIndex(1);
+
                     // Allow player names to be edited in the table
                     if (ImGui.InputText($"##TTTPlayerName-{id}", ref name, 32))
                     {
@@ -320,7 +339,7 @@ namespace TextToTalk.UI.Dalamud
                         PluginLog.LogDebug($"Updated player name: {playerInfo.Name}@{worldName ?? ""}");
                     }
 
-                    ImGui.TableSetColumnIndex(1);
+                    ImGui.TableSetColumnIndex(2);
 
                     // Allow player worlds to be edited in the table
                     worldName ??= "";
@@ -364,13 +383,23 @@ namespace TextToTalk.UI.Dalamud
 
                     // Player voice dropdown
                     var presetIndex = Players.TryGetPlayerVoice(playerInfo, out var v) ? presets.IndexOf(v) : 0;
-                    ImGui.TableSetColumnIndex(2);
+                    ImGui.TableSetColumnIndex(3);
                     if (ImGui.Combo($"##TTTPlayerVoice-{id}", ref presetIndex, presetArray, presets.Count))
                     {
                         Players.SetPlayerVoice(playerInfo, presets[presetIndex]);
                         Configuration.Save();
                         PluginLog.LogDebug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
                     }
+                }
+
+                foreach (var playerInfo in toDelete)
+                {
+                    Players.DeletePlayer(playerInfo);
+                }
+
+                if (toDelete.Any())
+                {
+                    Configuration.Save();
                 }
 
                 ImGui.EndTable();
