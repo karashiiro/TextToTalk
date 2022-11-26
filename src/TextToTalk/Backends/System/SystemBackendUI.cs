@@ -17,9 +17,6 @@ namespace TextToTalk.Backends.System;
 
 public class SystemBackendUI
 {
-    private static readonly Vector4 Red = new(1, 0, 0, 1);
-    private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-
     private static readonly Lazy<SpeechSynthesizer> DummySynthesizer = new(() =>
     {
         try
@@ -55,7 +52,7 @@ public class SystemBackendUI
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.TextColored(HintColor, "This TTS provider is only supported on Windows.");
+        ImGui.TextColored(BackendUI.HintColor, "This TTS provider is only supported on Windows.");
 
         if (this.selectVoiceFailures.TryDequeue(out var e1))
         {
@@ -79,7 +76,7 @@ public class SystemBackendUI
         }
         else
         {
-            ImGui.TextColored(Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         if (ImGui.Button("New preset##TTTSystemVoice4") &&
@@ -98,19 +95,10 @@ public class SystemBackendUI
         {
             var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
-
-            if (this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System] = 0;
-            }
-            else if (this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System] = 0;
-            }
-            else if (this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System] = 0;
-            }
+            
+            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
 
             this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
         }
@@ -175,30 +163,21 @@ public class SystemBackendUI
 
         if (useGenderedVoicePresets)
         {
-            var currentUngenderedVoicePreset = this.config.GetCurrentUngenderedVoicePreset<SystemVoicePreset>();
-            var currentMaleVoicePreset = this.config.GetCurrentMaleVoicePreset<SystemVoicePreset>();
-            var currentFemaleVoicePreset = this.config.GetCurrentFemaleVoicePreset<SystemVoicePreset>();
-
-            var presetArray = presets.Select(p => p.Name).ToArray();
-
-            var ungenderedPresetIndex = presets.IndexOf(currentUngenderedVoicePreset);
-            if (ImGui.Combo("Ungendered preset##TTTSystemVoice12", ref ungenderedPresetIndex, presetArray, presets.Count))
+            if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTSystemVoice12",
+                    this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System], presets))
             {
-                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System] = presets[ungenderedPresetIndex].Id;
                 this.config.Save();
             }
 
-            var malePresetIndex = presets.IndexOf(currentMaleVoicePreset);
-            if (ImGui.Combo("Male preset##TTTSystemVoice10", ref malePresetIndex, presetArray, presets.Count))
+            if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTSystemVoice10",
+                    this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System], presets))
             {
-                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System] = presets[malePresetIndex].Id;
                 this.config.Save();
             }
 
-            var femalePresetIndex = presets.IndexOf(currentFemaleVoicePreset);
-            if (ImGui.Combo("Female preset##TTTSystemVoice11", ref femalePresetIndex, presetArray, presets.Count))
+            if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTSystemVoice11",
+                    this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System], presets))
             {
-                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System] = presets[femalePresetIndex].Id;
                 this.config.Save();
             }
         }
@@ -208,12 +187,12 @@ public class SystemBackendUI
     {
         if (e.InnerException != null)
         {
-            ImGui.TextColored(Red, $"Voice errors:\n  {e.Message}");
+            ImGui.TextColored(BackendUI.Red, $"Voice errors:\n  {e.Message}");
             PrintVoiceExceptionsR(e.InnerException);
         }
         else
         {
-            ImGui.TextColored(Red, $"Voice error:\n  {e.Message}");
+            ImGui.TextColored(BackendUI.Red, $"Voice error:\n  {e.Message}");
         }
     }
 
@@ -221,7 +200,7 @@ public class SystemBackendUI
     {
         do
         {
-            ImGui.TextColored(Red, $"  {e.Message}");
+            ImGui.TextColored(BackendUI.Red, $"  {e.Message}");
         } while (e.InnerException != null);
     }
 

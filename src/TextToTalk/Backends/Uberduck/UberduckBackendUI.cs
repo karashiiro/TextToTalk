@@ -9,9 +9,6 @@ namespace TextToTalk.Backends.Uberduck;
 
 public class UberduckBackendUI
 {
-    private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-    private static readonly Vector4 Red = new(1, 0, 0, 1);
-
     private readonly PluginConfiguration config;
     private readonly UberduckClient uberduck;
     private readonly Func<IList<UberduckVoice>> getVoices;
@@ -41,7 +38,7 @@ public class UberduckBackendUI
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.TextColored(HintColor, "TTS may be delayed due to rate-limiting.");
+        ImGui.TextColored(BackendUI.HintColor, "TTS may be delayed due to rate-limiting.");
         ImGui.Spacing();
 
         ImGui.InputTextWithHint("##TTTUberduckAPIKey", "API key", ref this.apiKey, 100, ImGuiInputTextFlags.Password);
@@ -63,7 +60,7 @@ public class UberduckBackendUI
             WebBrowser.Open("https://uberduck.ai/");
         }
 
-        ImGui.TextColored(HintColor, "Credentials secured with Windows Credential Manager");
+        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
 
         ImGui.Spacing();
 
@@ -71,13 +68,12 @@ public class UberduckBackendUI
 
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.Uberduck).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
-        var presetsArray = presets.ToArray();
-        var presetNamesArray = presets.Select(p => p.Name).ToArray();
 
         if (presets.Any())
         {
             var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
-            if (ImGui.Combo("Preset##TTTUberduckVoice3", ref presetIndex, presetNamesArray, presets.Count))
+            if (ImGui.Combo("Preset##TTTUberduckVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+                    presets.Count))
             {
                 this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
                 this.config.Save();
@@ -85,7 +81,7 @@ public class UberduckBackendUI
         }
         else
         {
-            ImGui.TextColored(Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         if (ImGui.Button("New preset##TTTUberduckVoice4") &&
@@ -105,18 +101,9 @@ public class UberduckBackendUI
             var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
 
-            if (this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck] = 0;
-            }
-            else if (this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck] = 0;
-            }
-            else if (this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck] = 0;
-            }
+            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
 
             this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
         }
@@ -141,7 +128,7 @@ public class UberduckBackendUI
 
             if (voices.Count == 0)
             {
-                ImGui.TextColored(Red, "No voices were found. This might indicate a temporary service outage.");
+                ImGui.TextColored(BackendUI.Red, "No voices were found. This might indicate a temporary service outage.");
             }
         }
 
@@ -161,7 +148,7 @@ public class UberduckBackendUI
         }
 
         ImGui.Text("Lexicons");
-        ImGui.TextColored(HintColor, "Lexicons are not supported on the Uberduck backend.");
+        ImGui.TextColored(BackendUI.HintColor, "Lexicons are not supported on the Uberduck backend.");
 
         ImGui.Spacing();
 
@@ -176,38 +163,24 @@ public class UberduckBackendUI
             ImGui.Spacing();
             if (useGenderedVoicePresets)
             {
-                var currentUngenderedVoice = this.config.GetCurrentUngenderedVoicePreset<UberduckVoicePreset>();
-                var currentMaleVoice = this.config.GetCurrentMaleVoicePreset<UberduckVoicePreset>();
-                var currentFemaleVoice = this.config.GetCurrentFemaleVoicePreset<UberduckVoicePreset>();
-
-                var ungenderedVoiceIndex = Array.IndexOf(presetsArray, currentUngenderedVoice);
-                if (ImGui.Combo("Ungendered preset##TTTUberduckVoice5", ref ungenderedVoiceIndex, presetNamesArray,
-                        presets.Count))
+                if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTUberduckVoice5",
+                        this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck], presets))
                 {
-                    this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
-
-                var maleVoiceIndex = Array.IndexOf(presetsArray, currentMaleVoice);
-                if (ImGui.Combo("Male preset##TTTUberduckVoice3", ref maleVoiceIndex, presetNamesArray, presets.Count))
+                
+                if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTUberduckVoice3",
+                        this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck], presets))
                 {
-                    this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
-
-                var femaleVoiceIndex = Array.IndexOf(presetsArray, currentFemaleVoice);
-                if (ImGui.Combo("Female preset##TTTUberduckVoice4", ref femaleVoiceIndex, presetNamesArray,
-                        presets.Count))
+                
+                if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTUberduckVoice4",
+                        this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck], presets))
                 {
-                    this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck] = presetsArray[ungenderedVoiceIndex].Id;
                     this.config.Save();
                 }
             }
         }
-    }
-
-    private static void ImGuiVoiceNotSupported()
-    {
-        ImGui.TextColored(Red, "Voice not supported");
     }
 }

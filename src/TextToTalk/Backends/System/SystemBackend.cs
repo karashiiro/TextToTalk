@@ -48,22 +48,6 @@ namespace TextToTalk.Backends.System
             return this.soundQueue.GetCurrentlySpokenTextSource();
         }
 
-        public VoicePreset GetSystemVoiceForGender(Gender gender)
-        {
-            var voicePreset = this.config.GetCurrentVoicePreset<SystemVoicePreset>();
-            if (this.config.UseGenderedVoicePresets)
-            {
-                voicePreset = gender switch
-                {
-                    Gender.Male => this.config.GetCurrentMaleVoicePreset<SystemVoicePreset>(),
-                    Gender.Female => this.config.GetCurrentFemaleVoicePreset<SystemVoicePreset>(),
-                    _ => this.config.GetCurrentUngenderedVoicePreset<SystemVoicePreset>(),
-                };
-            }
-
-            return voicePreset;
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)

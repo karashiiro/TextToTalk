@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Numerics;
 using System.Text.RegularExpressions;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
@@ -18,8 +17,6 @@ namespace TextToTalk.Backends.Polly;
 
 public class PollyBackendUI
 {
-    private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-    private static readonly Vector4 Red = new(1, 0, 0, 1);
     private static readonly string[] Regions = RegionEndpoint.EnumerableAllRegions.Select(r => r.SystemName).ToArray();
     private static readonly string[] Engines = { Engine.Neural, Engine.Standard };
 
@@ -94,7 +91,7 @@ public class PollyBackendUI
                 RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion);
             if (regionEndpoint == null)
             {
-                ImGui.TextColored(Red, "Invalid region!");
+                ImGui.TextColored(BackendUI.Red, "Invalid region!");
             }
             else
             {
@@ -108,7 +105,7 @@ public class PollyBackendUI
             WebBrowser.Open("https://docs.aws.amazon.com/polly/latest/dg/getting-started.html");
         }
 
-        ImGui.TextColored(HintColor, "Credentials secured with Windows Credential Manager");
+        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
 
         ImGui.Spacing();
 
@@ -116,13 +113,12 @@ public class PollyBackendUI
 
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.AmazonPolly).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
-        var presetsArray = presets.ToArray();
-        var presetNamesArray = presets.Select(p => p.Name).ToArray();
 
         if (presets.Any())
         {
             var presetIndex = presets.IndexOf(currentVoicePreset);
-            if (ImGui.Combo("Preset##TTTPollyPresetSelect", ref presetIndex, presetNamesArray, presets.Count))
+            if (ImGui.Combo("Preset##TTTPollyPresetSelect", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+                    presets.Count))
             {
                 this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
                 this.config.Save();
@@ -130,7 +126,7 @@ public class PollyBackendUI
         }
         else
         {
-            ImGui.TextColored(Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         if (ImGui.Button("New preset##TTTPollyVoice4") &&
@@ -147,21 +143,13 @@ public class PollyBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTPollyVoice5"))
         {
-            var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
-            this.config.SetCurrentVoicePreset(otherPreset.Id);
+            var otherPreset = this.config.VoicePresetConfig.VoicePresets.FirstOrDefault(
+                p => p.Id != currentVoicePreset.Id && p.EnabledBackend == TTSBackend.AmazonPolly);
+            this.config.SetCurrentVoicePreset(otherPreset?.Id ?? 0);
 
-            if (this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly] = 0;
-            }
-            else if (this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly] = 0;
-            }
-            else if (this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly] == currentVoicePreset.Id)
-            {
-                this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly] = 0;
-            }
+            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
 
             this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
         }
@@ -201,11 +189,12 @@ public class PollyBackendUI
             switch (voices.Count)
             {
                 case 0:
-                    ImGui.TextColored(Red, "No voices are available on this voice engine for the current region.\n" +
-                                           "Please log in using a different region.");
+                    ImGui.TextColored(BackendUI.Red,
+                        "No voices are available on this voice engine for the current region.\n" +
+                        "Please log in using a different region.");
                     break;
                 case > 0 when !voices.Any(v => v.Id == currentVoicePreset.VoiceName):
-                    ImGuiVoiceNotSupported();
+                    BackendUI.ImGuiVoiceNotSupported();
                     break;
             }
         }
@@ -248,31 +237,25 @@ public class PollyBackendUI
             ImGui.Spacing();
             if (useGenderedVoicePresets)
             {
-                var currentUngenderedVoice = this.config.GetCurrentUngenderedVoicePreset<PollyVoicePreset>();
-                var currentMaleVoice = this.config.GetCurrentMaleVoicePreset<PollyVoicePreset>();
-                var currentFemaleVoice = this.config.GetCurrentFemaleVoicePreset<PollyVoicePreset>();
-
-                var ungenderedVoiceIndex = Array.IndexOf(presetsArray, currentUngenderedVoice);
-                if (ImGui.Combo("Ungendered preset##TTTPollyEnabledUPresetSelect", ref ungenderedVoiceIndex, presetNamesArray,
-                        presets.Count))
+                if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTPollyEnabledUPresetSelect",
+                        this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly], presets))
                 {
-                    this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly] = presetsArray[ungenderedVoiceIndex].Id;
+                    this.config.Save();
+                }
+                
+                if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTPollyEnabledMPresetSelect",
+                        this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly], presets))
+                {
+                    this.config.Save();
+                }
+                
+                if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTPollyEnabledFPresetSelect",
+                        this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly], presets))
+                {
                     this.config.Save();
                 }
 
-                var maleVoiceIndex = Array.IndexOf(presetsArray, currentMaleVoice);
-                if (ImGui.Combo("Male preset##TTTPollyEnabledMPresetSelect", ref maleVoiceIndex, presetNamesArray, presets.Count))
-                {
-                    this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly] = presetsArray[maleVoiceIndex].Id;
-                    this.config.Save();
-                }
-
-                var femaleVoiceIndex = Array.IndexOf(presetsArray, currentFemaleVoice);
-                if (ImGui.Combo("Female preset##TTTPollyEnabledFPresetSelect", ref femaleVoiceIndex, presetNamesArray, presets.Count))
-                {
-                    this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly] = presetsArray[femaleVoiceIndex].Id;
-                    this.config.Save();
-                }
+                ImGui.TextColored(BackendUI.HintColor, "If multiple presets are selected, they will be randomly assigned to characters.");
             }
         }
     }
@@ -295,10 +278,5 @@ public class PollyBackendUI
             PluginLog.LogError(e, "Failed to initialize AWS client.");
             PollyCredentialManager.DeleteCredentials();
         }
-    }
-
-    private static void ImGuiVoiceNotSupported()
-    {
-        ImGui.TextColored(Red, "Voice not supported on this engine");
     }
 }

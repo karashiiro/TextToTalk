@@ -22,10 +22,10 @@ public class VoicePresetConfiguration
     // also can't be loaded from within the plugin because of restrictions on collectable assemblies.
     [JsonProperty] private IList<IDictionary<string, object>> VoicePresetsRaw { get; set; }
 
-    public IDictionary<TTSBackend, int> CurrentVoicePresets { get; init; }
-    public IDictionary<TTSBackend, int> UngenderedVoicePresets { get; init; }
-    public IDictionary<TTSBackend, int> MaleVoicePresets { get; init; }
-    public IDictionary<TTSBackend, int> FemaleVoicePresets { get; init; }
+    public IDictionary<TTSBackend, int> CurrentVoicePreset { get; init; }
+    public IDictionary<TTSBackend, SortedSet<int>> UngenderedVoicePresets { get; init; }
+    public IDictionary<TTSBackend, SortedSet<int>> MaleVoicePresets { get; init; }
+    public IDictionary<TTSBackend, SortedSet<int>> FemaleVoicePresets { get; init; }
 
     [JsonIgnore] private static readonly JsonSerializerSettings SerializerSettings = new()
     {
@@ -39,10 +39,10 @@ public class VoicePresetConfiguration
         this.cfgLock = true;
 
         VoicePresets = new List<VoicePreset>();
-        CurrentVoicePresets = new Dictionary<TTSBackend, int>();
-        UngenderedVoicePresets = new Dictionary<TTSBackend, int>();
-        MaleVoicePresets = new Dictionary<TTSBackend, int>();
-        FemaleVoicePresets = new Dictionary<TTSBackend, int>();
+        CurrentVoicePreset = new Dictionary<TTSBackend, int>();
+        UngenderedVoicePresets = new Dictionary<TTSBackend, SortedSet<int>>();
+        MaleVoicePresets = new Dictionary<TTSBackend, SortedSet<int>>();
+        FemaleVoicePresets = new Dictionary<TTSBackend, SortedSet<int>>();
     }
 
     public void SaveToFile(string path)
