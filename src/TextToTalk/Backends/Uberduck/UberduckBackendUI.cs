@@ -180,6 +180,8 @@ public class UberduckBackendUI
                 {
                     this.config.Save();
                 }
+
+                BackendUI.ImGuiMultiVoiceHint();
             }
         }
     }
