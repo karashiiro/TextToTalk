@@ -14,6 +14,7 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Standart.Hash.xxHash;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -212,7 +213,7 @@ namespace TextToTalk
                 var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
 
                 // Say the thing
-                var preset = GetVoiceForGender(backendManager, gender);
+                var preset = GetVoiceForSpeaker(backendManager, speaker.Name.TextValue, gender);
                 if (preset != null)
                 {
                     backendManager.Say(source, preset, cleanText);
@@ -224,32 +225,40 @@ namespace TextToTalk
             }
         }
 
-        private VoicePreset GetVoiceForGender(VoiceBackendManager backendManager, Gender gender)
+        private VoicePreset GetVoiceForSpeaker(VoiceBackendManager backendManager, string name, Gender gender)
         {
             return backendManager.Backend switch
             {
-                SystemBackend => GetVoiceForGender<SystemVoicePreset>(gender),
-                PollyBackend => GetVoiceForGender<PollyVoicePreset>(gender),
-                UberduckBackend => GetVoiceForGender<UberduckVoicePreset>(gender),
-                WebsocketBackend => GetVoiceForGender<WebsocketVoicePreset>(gender),
+                SystemBackend => GetVoiceForSpeaker<SystemVoicePreset>(name, gender),
+                PollyBackend => GetVoiceForSpeaker<PollyVoicePreset>(name, gender),
+                UberduckBackend => GetVoiceForSpeaker<UberduckVoicePreset>(name, gender),
+                WebsocketBackend => GetVoiceForSpeaker<WebsocketVoicePreset>(name, gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };
         }
 
-        private TPreset GetVoiceForGender<TPreset>(Gender gender) where TPreset : VoicePreset
+        private TPreset GetVoiceForSpeaker<TPreset>(string name, Gender gender) where TPreset : VoicePreset
         {
-            var voicePreset = this.config.GetCurrentVoicePreset<TPreset>();
-            if (this.config.UseGenderedVoicePresets)
+            if (!this.config.UseGenderedVoicePresets)
             {
-                voicePreset = gender switch
-                {
-                    Gender.Male => this.config.GetCurrentMaleVoicePreset<TPreset>(),
-                    Gender.Female => this.config.GetCurrentFemaleVoicePreset<TPreset>(),
-                    _ => this.config.GetCurrentUngenderedVoicePreset<TPreset>(),
-                };
+                return this.config.GetCurrentVoicePreset<TPreset>();
+            }
+            
+            var voicePresets = gender switch
+            {
+                Gender.Male => this.config.GetCurrentMaleVoicePresets<TPreset>(),
+                Gender.Female => this.config.GetCurrentFemaleVoicePresets<TPreset>(),
+                _ => this.config.GetCurrentUngenderedVoicePresets<TPreset>(),
+            };
+            if (voicePresets.Length < 1)
+            {
+                return null;
             }
 
-            return voicePreset;
+            // Use xxHash instead of the built-in GetHashCode because GetHashCode is randomized on program launch.
+            var nameHash = xxHash32.ComputeHash(name);
+            var voicePresetIndex = (int)(nameHash % (uint)voicePresets.Length);
+            return voicePresets[voicePresetIndex];
         }
 
         private bool ShouldRateLimit(GameObject speaker)

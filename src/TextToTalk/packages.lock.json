@@ -57,6 +57,12 @@
           "NAudio.WinMM": "2.1.0"
         }
       },
+      "Standart.Hash.xxHash": {
+        "type": "Direct",
+        "requested": "[4.0.5, )",
+        "resolved": "4.0.5",
+        "contentHash": "2QC9zDPFT/SOnP7iFdK3AwakEcJ7D3zDoU7IwIAOyEhY4WQ2GQBvLqZ29/R1BSujPNtGHMITmVW1d+VjvLg6lg=="
+      },
       "System.Drawing.Common": {
         "type": "Direct",
         "requested": "[6.0.0, )",

@@ -394,6 +394,11 @@
         "resolved": "4.3.0",
         "contentHash": "VB5cn/7OzUfzdnC8tqAIMQciVLiq2epm2NrAm1E9OjNRyG4lVhfR61SMcLizejzQP8R8Uf/0l5qOIbUEi+RdEg=="
       },
+      "Standart.Hash.xxHash": {
+        "type": "Transitive",
+        "resolved": "4.0.5",
+        "contentHash": "2QC9zDPFT/SOnP7iFdK3AwakEcJ7D3zDoU7IwIAOyEhY4WQ2GQBvLqZ29/R1BSujPNtGHMITmVW1d+VjvLg6lg=="
+      },
       "System.AppContext": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1258,6 +1263,7 @@
           "Dalamud.CrystalTower": "2.0.1",
           "DalamudPackager": "2.1.8",
           "NAudio": "2.1.0",
+          "Standart.Hash.xxHash": "4.0.5",
           "System.Drawing.Common": "6.0.0",
           "System.Speech": "6.0.0",
           "TextToTalk.Lexicons": "1.0.0",
