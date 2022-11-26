@@ -14,6 +14,11 @@ public static class BackendUI
     {
         ImGui.TextColored(Red, "Voice not supported on this engine");
     }
+
+    public static void ImGuiMultiVoiceHint()
+    {
+        ImGui.TextColored(BackendUI.HintColor, "If multiple presets are selected per gender, they will be randomly assigned to characters.");
+    }
     
     public static bool ImGuiPresetCombo(string label, SortedSet<int> selectedPresets, List<VoicePreset> presets)
     {

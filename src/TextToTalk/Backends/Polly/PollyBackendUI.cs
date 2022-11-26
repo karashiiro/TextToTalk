@@ -255,7 +255,7 @@ public class PollyBackendUI
                     this.config.Save();
                 }
 
-                ImGui.TextColored(BackendUI.HintColor, "If multiple presets are selected, they will be randomly assigned to characters.");
+                BackendUI.ImGuiMultiVoiceHint();
             }
         }
     }

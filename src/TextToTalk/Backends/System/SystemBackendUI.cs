@@ -180,6 +180,8 @@ public class SystemBackendUI
             {
                 this.config.Save();
             }
+
+            BackendUI.ImGuiMultiVoiceHint();
         }
     }
 
