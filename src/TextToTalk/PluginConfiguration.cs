@@ -35,9 +35,8 @@ namespace TextToTalk
         [Obsolete("Use EnabledChatTypesPresets.")]
         // ReSharper disable once CollectionNeverUpdated.Global
         public IList<int> EnabledChatTypes { get; set; }
-        
-        [Obsolete]
-        public IList<VoicePreset> VoicePresets { get; set; }
+
+        [Obsolete] public IList<VoicePreset> VoicePresets { get; set; }
 
         [Obsolete("Use VoicePresets.")] public int Rate { get; set; }
 
@@ -254,7 +253,7 @@ namespace TextToTalk
                 VoicePresetConfig.SaveToFile(GetVoicePresetsConfigPath());
             }
         }
-        
+
         private string GetVoicePresetsConfigPath()
         {
             // ReSharper disable once InconsistentlySynchronizedField
@@ -293,7 +292,7 @@ namespace TextToTalk
         {
             CurrentPresetId = presetId;
         }
-       
+
         public TPreset GetCurrentVoicePreset<TPreset>() where TPreset : VoicePreset
         {
             return VoicePresetConfig.VoicePresets.FirstOrDefault(p =>
@@ -323,7 +322,9 @@ namespace TextToTalk
 
         public int GetHighestVoicePresetId()
         {
-            return VoicePresetConfig.VoicePresets.Select(p => p.Id).Max();
+            return VoicePresetConfig.VoicePresets.Count == 0
+                ? 0
+                : VoicePresetConfig.VoicePresets.Select(p => p.Id).Max();
         }
 
         public bool TryCreateVoicePreset<TPreset>(out TPreset preset) where TPreset : VoicePreset, new()

@@ -1,5 +1,6 @@
-﻿using Dalamud.CrystalTower.Commands.Attributes;
-using Dalamud.CrystalTower.UI;
+﻿using System;
+using System.Collections.Generic;
+using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Logging;
 using TextToTalk.Backends;
@@ -9,55 +10,90 @@ using TextToTalk.UI.Dalamud;
 
 namespace TextToTalk.Modules
 {
-    public class MainCommandModule
+    public class MainCommandModule : IDisposable
     {
-        public ChatGui Chat { get; set; }
-        public PluginConfiguration Config { get; set; }
-        public SharedState State { get; set; }
-        public WindowManager Windows { get; set; }
-        public VoiceBackendManager BackendManager { get; set; }
+        private readonly ChatGui chat;
+        private readonly CommandManager commandManager;
 
-        [Command("/canceltts")]
-        [HelpMessage("Cancel all queued TTS messages.")]
-        public void CancelTts(string command = "", string args = "")
+        private readonly PluginConfiguration config;
+        private readonly VoiceBackendManager backendManager;
+        private readonly ConfigurationWindow configurationWindow;
+
+        private readonly IList<string> commandNames;
+
+        public MainCommandModule(ChatGui chat, CommandManager commandManager, PluginConfiguration config,
+            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow)
         {
-            BackendManager.CancelAllSpeech();
+            this.chat = chat;
+            this.commandManager = commandManager;
+
+            this.config = config;
+            this.backendManager = backendManager;
+            this.configurationWindow = configurationWindow;
+
+            this.commandNames = new List<string>();
+
+            AddCommand("/canceltts", CancelTts, "Cancel all queued TTS messages.");
+            AddCommand("/toggletts", ToggleTts, "Toggle TextToTalk's text-to-speech.");
+            AddCommand("/disabletts", DisableTts, "Disable TextToTalk's text-to-speech.");
+            AddCommand("/enabletts", EnableTts, "Enable TextToTalk's text-to-speech.");
+            AddCommand("/tttconfig", ToggleConfig, "Toggle TextToTalk's configuration window.");
         }
 
-        [Command("/toggletts")]
-        [HelpMessage("Toggle TextToTalk's text-to-speech.")]
+        public void CancelTts(string command = "", string args = "")
+        {
+            this.backendManager.CancelAllSpeech();
+        }
+
         public void ToggleTts(string command = "", string args = "")
         {
-            if (Config.Enabled)
+            if (this.config.Enabled)
                 DisableTts();
             else
                 EnableTts();
         }
 
-        [Command("/disabletts")]
-        [HelpMessage("Disable TextToTalk's text-to-speech.")]
         public void DisableTts(string command = "", string args = "")
         {
-            Config.Enabled = false;
+            this.config.Enabled = false;
             CancelTts();
-            Chat.Print("TTS disabled.");
+            this.chat.Print("TTS disabled.");
             PluginLog.Log("TTS disabled.");
         }
 
-        [Command("/enabletts")]
-        [HelpMessage("Enable TextToTalk's text-to-speech.")]
         public void EnableTts(string command = "", string args = "")
         {
-            Config.Enabled = true;
-            Chat.Print("TTS enabled.");
+            this.config.Enabled = true;
+            this.chat.Print("TTS enabled.");
             PluginLog.Log("TTS enabled.");
         }
 
-        [Command("/tttconfig")]
-        [HelpMessage("Toggle TextToTalk's configuration window.")]
-        public void ToggleConfig(string command, string args)
+        public void ToggleConfig(string command = "", string args = "")
         {
-            Windows.ToggleWindow<ConfigurationWindow>();
+            this.configurationWindow.Toggle();
+        }
+
+        private void AddCommand(string name, CommandInfo.HandlerDelegate method, string help)
+        {
+            this.commandManager.AddHandler(name, new CommandInfo(method)
+            {
+                HelpMessage = help,
+                ShowInHelp = true,
+            });
+            this.commandNames.Add(name);
+        }
+
+        private void RemoveCommand(string name)
+        {
+            this.commandManager.RemoveHandler(name);
+        }
+
+        public void Dispose()
+        {
+            foreach (var commandName in this.commandNames)
+            {
+                RemoveCommand(commandName);
+            }
         }
     }
 }

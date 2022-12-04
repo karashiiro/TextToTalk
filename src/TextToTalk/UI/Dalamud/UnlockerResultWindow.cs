@@ -1,21 +1,21 @@
 ﻿using System.Numerics;
-using Dalamud.CrystalTower.UI;
+using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
 namespace TextToTalk.UI.Dalamud
 {
-    public class UnlockerResultWindow : ImmediateModeWindow
+    public class UnlockerResultWindow : Window
     {
         public string Text { get; set; }
 
-        public override void Draw(ref bool visible)
+        public UnlockerResultWindow() : base("VoiceUnlocker Result", ImGuiWindowFlags.NoResize)
         {
-            ImGui.SetNextWindowSize(new Vector2(320, 90));
-            ImGui.Begin("VoiceUnlocker Result", ref visible, ImGuiWindowFlags.NoResize);
-            {
-                ImGui.TextWrapped(Text);
-            }
-            ImGui.End();
+            Size = new Vector2(320, 90);
+        }
+
+        public override void Draw()
+        {
+            ImGui.TextWrapped(Text);
         }
     }
 }

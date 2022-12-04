@@ -26,7 +26,8 @@ public class TalkAddonHandler
 
     public Action<GameObject, string, TextSource> Say { get; set; }
 
-    public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config, SharedState sharedState, VoiceBackendManager backendManager)
+    public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
+        ObjectTable objects, PluginConfiguration config, SharedState sharedState, VoiceBackendManager backendManager)
     {
         this.clientState = clientState;
         this.gui = gui;
@@ -103,7 +104,8 @@ public class TalkAddonHandler
         var speaker = this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == talkAddonText.Speaker);
 
         // Cancel TTS if it's currently Talk addon text, if configured
-        if (this.config.CancelSpeechOnTextAdvance && this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
+        if (this.config.CancelSpeechOnTextAdvance &&
+            this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
         {
             this.backendManager.CancelSay(TextSource.TalkAddon);
         }

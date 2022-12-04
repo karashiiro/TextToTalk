@@ -6,36 +6,32 @@ namespace TextToTalk.Middleware;
 public class MessageHandlerFilters
 {
     private readonly PluginConfiguration config;
-    private readonly Services services;
+    private readonly SharedState sharedState;
 
-    public MessageHandlerFilters(Services services, PluginConfiguration config)
+    public MessageHandlerFilters(SharedState sharedState, PluginConfiguration config)
     {
-        this.services = services;
+        this.sharedState = sharedState;
         this.config = config;
     }
 
     public bool IsDuplicateQuestText(string text)
     {
-        var sharedState = this.services.GetService<SharedState>();
-        return sharedState.LastQuestText == text;
+        return this.sharedState.LastQuestText == text;
     }
 
     public void SetLastQuestText(string text)
     {
-        var sharedState = this.services.GetService<SharedState>();
-        sharedState.LastQuestText = text;
+        this.sharedState.LastQuestText = text;
     }
 
     public bool IsSameSpeaker(string speaker)
     {
-        var sharedState = this.services.GetService<SharedState>();
-        return sharedState.LastSpeaker == speaker;
+        return this.sharedState.LastSpeaker == speaker;
     }
 
     public void SetLastSpeaker(string speaker)
     {
-        var sharedState = this.services.GetService<SharedState>();
-        sharedState.LastSpeaker = speaker;
+        this.sharedState.LastSpeaker = speaker;
     }
 
     public bool ShouldSaySender()

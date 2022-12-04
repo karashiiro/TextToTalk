@@ -1,10 +1,10 @@
 ﻿using System.Numerics;
-using Dalamud.CrystalTower.UI;
+using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
 namespace TextToTalk.UI.Dalamud
 {
-    public class VoiceUnlockerWindow : ImmediateModeWindow
+    public class VoiceUnlockerWindow : Window
     {
         private const string ManualTutorialText = "Manual tutorial";
         private const string EnableAllText = "Enable all system voices";
@@ -14,53 +14,63 @@ namespace TextToTalk.UI.Dalamud
         private static readonly Vector4 DarkRed = ImGui.ColorConvertU32ToFloat4(0xFF00007D);
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
-        public override void Draw(ref bool visible)
+        private readonly WindowController controller;
+
+        public VoiceUnlockerWindow(WindowController controller) : base("VoiceUnlocker", ImGuiWindowFlags.NoResize)
+        {
+            this.controller = controller;
+
+            Size = new Vector2(480, 320);
+        }
+
+        public override void PreDraw()
         {
             ImGui.PushStyleColor(ImGuiCol.TitleBgActive, Red);
             ImGui.PushStyleColor(ImGuiCol.CheckMark, Red);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, LightRed);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, DarkRed);
+        }
 
-            ImGui.SetNextWindowSize(new Vector2(480, 320));
-            ImGui.Begin("VoiceUnlocker", ref visible, ImGuiWindowFlags.NoResize);
+        public override void Draw()
+        {
+            ImGui.TextWrapped("This modification has only been tested on Windows 10.");
+            ImGui.TextWrapped("This function will enable all system TTS voices by " +
+                              "copying keys between sections of your system registry. " +
+                              "This modification may not be automatically undone. If " +
+                              "you would like to perform this modification manually, " +
+                              $"please click the \"{ManualTutorialText}\" button.");
+            ImGui.TextWrapped("If you would like to proceed with the automatic " +
+                              $"configuration, please click the \"{EnableAllText}\" " +
+                              "button. System instability related to registry modifications " +
+                              "you have performed previously are not taken into account, " +
+                              "and support will not be provided for those use cases.");
+
+            ImGui.Spacing();
+
+            if (ImGui.Button($"{ManualTutorialText}##VoiceUnlockerButton1"))
             {
-                ImGui.TextWrapped("This modification has only been tested on Windows 10.");
-                ImGui.TextWrapped("This function will enable all system TTS voices by " +
-                                  "copying keys between sections of your system registry. " +
-                                  "This modification may not be automatically undone. If " +
-                                  "you would like to perform this modification manually, " +
-                                  $"please click the \"{ManualTutorialText}\" button.");
-                ImGui.TextWrapped("If you would like to proceed with the automatic " +
-                                  $"configuration, please click the \"{EnableAllText}\" " +
-                                  "button. System instability related to registry modifications " +
-                                  "you have performed previously are not taken into account, " +
-                                  "and support will not be provided for those use cases.");
-
-                ImGui.Spacing();
-
-                if (ImGui.Button($"{ManualTutorialText}##VoiceUnlockerButton1"))
-                {
-                    WebBrowser.Open("https://www.reddit.com/r/Windows10/comments/96dx8z/how_unlock_all_windows_10_hidden_tts_voices_for/");
-                }
-
-                ImGui.Spacing();
-
-                if (ImGui.Button($"{EnableAllText}##VoiceUnlockerButton2"))
-                {
-                    var resultWindow = GetWindow<UnlockerResultWindow>();
-
-                    resultWindow.Text = VoiceUnlockerRunner.Execute()
-                        ? "Registry modification succeeded. Changes will be applied upon restarting the game."
-                        : "VoiceUnlocker failed to start. No registry modifications were made.";
-
-                    visible = false;
-                    OpenWindow<UnlockerResultWindow>();
-                }
-
-                ImGui.TextColored(HintColor, "Administrative privileges will be requested");
+                WebBrowser.Open(
+                    "https://www.reddit.com/r/Windows10/comments/96dx8z/how_unlock_all_windows_10_hidden_tts_voices_for/");
             }
-            ImGui.End();
 
+            ImGui.Spacing();
+
+            if (ImGui.Button($"{EnableAllText}##VoiceUnlockerButton2"))
+            {
+                var resultText = VoiceUnlockerRunner.Execute()
+                    ? "Registry modification succeeded. Changes will be applied upon restarting the game."
+                    : "VoiceUnlocker failed to start. No registry modifications were made.";
+
+                IsOpen = false;
+                this.controller.SetUnlockerResult(resultText);
+                this.controller.OpenUnlockerResultWindow();
+            }
+
+            ImGui.TextColored(HintColor, "Administrative privileges will be requested");
+        }
+
+        public override void PostDraw()
+        {
             ImGui.PopStyleColor(4);
         }
     }

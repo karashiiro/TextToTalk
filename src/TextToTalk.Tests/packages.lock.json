@@ -53,11 +53,6 @@
           "AWSSDK.Core": "[3.7.12.23, 4.0.0)"
         }
       },
-      "Dalamud.CrystalTower": {
-        "type": "Transitive",
-        "resolved": "2.0.1",
-        "contentHash": "NFOFEm98UtPWp/qq/rWtAzgyURtdZdXnOo4qPpwk/XYoo0p69/yI8a4uzfq3YyEMg8Go0hKEqggE8xw1h4pfNQ=="
-      },
       "DalamudPackager": {
         "type": "Transitive",
         "resolved": "2.1.8",
@@ -1257,21 +1252,20 @@
       "texttotalk": {
         "type": "Project",
         "dependencies": {
-          "AWSSDK.Core": "3.7.12.24",
-          "AWSSDK.Polly": "3.7.7.9",
-          "AdysTech.CredentialManager": "2.6.0",
-          "Dalamud.CrystalTower": "2.0.1",
-          "DalamudPackager": "2.1.8",
-          "NAudio": "2.1.0",
-          "Standart.Hash.xxHash": "4.0.5",
-          "System.Drawing.Common": "6.0.0",
-          "System.Speech": "6.0.0",
-          "TextToTalk.Lexicons": "1.0.0",
-          "TextToTalk.Lexicons.Updater": "1.0.0",
-          "TextToTalk.UngenderedOverrides": "1.0.0",
-          "VoiceUnlocker": "1.0.0",
-          "log4net": "2.0.15",
-          "websocket-sharp": "1.0.0"
+          "AWSSDK.Core": "[3.7.12.24, )",
+          "AWSSDK.Polly": "[3.7.7.9, )",
+          "AdysTech.CredentialManager": "[2.6.0, )",
+          "DalamudPackager": "[2.1.8, )",
+          "NAudio": "[2.1.0, )",
+          "Standart.Hash.xxHash": "[4.0.5, )",
+          "System.Drawing.Common": "[6.0.0, )",
+          "System.Speech": "[6.0.0, )",
+          "TextToTalk.Lexicons": "[1.0.0, )",
+          "TextToTalk.Lexicons.Updater": "[1.0.0, )",
+          "TextToTalk.UngenderedOverrides": "[1.0.0, )",
+          "VoiceUnlocker": "[1.0.0, )",
+          "log4net": "[2.0.15, )",
+          "websocket-sharp": "[1.0.0, )"
         }
       },
       "texttotalk.lexicons": {
@@ -1280,7 +1274,7 @@
       "texttotalk.lexicons.updater": {
         "type": "Project",
         "dependencies": {
-          "YamlDotNet": "12.0.0"
+          "YamlDotNet": "[12.0.0, )"
         }
       },
       "texttotalk.ungenderedoverrides": {

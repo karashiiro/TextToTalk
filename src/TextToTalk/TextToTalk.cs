@@ -1,6 +1,4 @@
-﻿using Dalamud.CrystalTower.Commands;
-using Dalamud.CrystalTower.UI;
-using Dalamud.Game;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -12,8 +10,13 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
+using Dalamud.Data;
+using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.Command;
+using Dalamud.Interface.Windowing;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Polly;
@@ -24,6 +27,7 @@ using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
+using TextToTalk.UI;
 using TextToTalk.UI.Dalamud;
 using TextToTalk.UngenderedOverrides;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
@@ -38,57 +42,115 @@ namespace TextToTalk
         private const bool InitiallyVisible = false;
 #endif
 
-        private readonly PluginConfiguration config;
-        private readonly CommandManager commandManager;
+        private readonly DalamudPluginInterface pluginInterface;
         private readonly MainCommandModule commandModule;
-        private readonly Services services;
         private readonly KeyState keys;
+        private readonly ChatGui chat;
+        private readonly Framework framework;
+        private readonly ClientState clientState;
+
+        private readonly PluginConfiguration config;
+        private readonly VoiceBackendManager backendManager;
+        private readonly TalkAddonHandler talkAddonHandler;
+        private readonly ChatMessageHandler chatMessageHandler;
+        private readonly RateLimiter rateLimiter;
+        private readonly UngenderedOverrideManager ungenderedOverrides;
+        private readonly PlayerService playerService;
+        private readonly SharedState sharedState;
+        private readonly WindowSystem windows;
+
+        private readonly UnlockerResultWindow unlockerResultWindow;
+        private readonly VoiceUnlockerWindow voiceUnlockerWindow;
+        private readonly ConfigurationWindow configurationWindow;
+        private readonly ChannelPresetModificationWindow channelPresetModificationWindow;
+
+        private readonly HttpClient http;
 
         public string Name => "TextToTalk";
 
-        public TextToTalk([RequiredVersion("1.0")] DalamudPluginInterface pi)
+        public TextToTalk(
+            [RequiredVersion("1.0")] DalamudPluginInterface pi,
+            [RequiredVersion("1.0")] KeyState keyState,
+            [RequiredVersion("1.0")] ChatGui chat,
+            [RequiredVersion("1.0")] Framework framework,
+            [RequiredVersion("1.0")] ClientState clientState,
+            [RequiredVersion("1.0")] GameGui gui,
+            [RequiredVersion("1.0")] DataManager data,
+            [RequiredVersion("1.0")] ObjectTable objects,
+            [RequiredVersion("1.0")] CommandManager commandManager)
         {
-            this.config = (PluginConfiguration)pi.GetPluginConfig() ?? new PluginConfiguration();
-            this.config.Initialize(pi);
+            this.pluginInterface = pi;
+            this.clientState = clientState;
+            this.keys = keyState;
+            this.chat = chat;
+            this.framework = framework;
 
-            this.services = Services.Create(pi, this.config);
+            this.windows = new WindowSystem("TextToTalk");
 
-            var ui = this.services.GetService<WindowManager>();
-            ui.AddWindow<UnlockerResultWindow>(initiallyVisible: false);
-            ui.AddWindow<VoiceUnlockerWindow>(initiallyVisible: false);
-            ui.AddWindow<ChannelPresetModificationWindow>(initiallyVisible: false);
-            ui.AddWindow<ConfigurationWindow>(InitiallyVisible);
+            this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
+            this.config.Initialize(this.pluginInterface);
 
-            var talkAddonHandler = this.services.GetService<TalkAddonHandler>();
-            talkAddonHandler.Say += Say;
+            this.sharedState = new SharedState();
 
-            var chatMessageHandler = this.services.GetService<ChatMessageHandler>();
-            chatMessageHandler.Say += Say;
+            this.http = new HttpClient();
+            this.backendManager = new VoiceBackendManager(config, this.http, this.sharedState);
 
-            pi.UiBuilder.Draw += ui.Draw;
+            this.playerService = new PlayerService(this.config.Players, this.config.PlayerVoicePresets,
+                this.config.VoicePresetConfig.VoicePresets);
+
+            this.unlockerResultWindow = new UnlockerResultWindow();
+            this.channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
+            var windowController =
+                new WindowController(this.unlockerResultWindow, this.channelPresetModificationWindow);
+            this.voiceUnlockerWindow = new VoiceUnlockerWindow(windowController);
+            this.configurationWindow = new ConfigurationWindow(this.config, data, this.backendManager,
+                this.playerService, windowController, this.voiceUnlockerWindow)
+            {
+                IsOpen = InitiallyVisible,
+            };
+
+            this.windows.AddWindow(this.unlockerResultWindow);
+            this.windows.AddWindow(this.voiceUnlockerWindow);
+            this.windows.AddWindow(this.configurationWindow);
+            this.windows.AddWindow(this.channelPresetModificationWindow);
+
+            this.pluginInterface.UiBuilder.Draw += this.windows.Draw;
+
+            var filters = new MessageHandlerFilters(this.sharedState, config);
+            this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, this.config,
+                this.sharedState, this.backendManager);
+            this.talkAddonHandler.Say += Say;
+
+            this.chatMessageHandler = new ChatMessageHandler(filters, objects, config, this.sharedState);
+            this.chatMessageHandler.Say += Say;
+
+            this.rateLimiter = new RateLimiter(() =>
+            {
+                if (config.MessagesPerSecond == 0)
+                {
+                    return long.MaxValue;
+                }
+
+                return (long)(1000f / config.MessagesPerSecond);
+            });
+
+            this.ungenderedOverrides = new UngenderedOverrideManager();
+
             pi.UiBuilder.OpenConfigUi += OpenConfigUi;
 
-            var keyState = this.services.GetService<KeyState>();
-            this.keys = keyState;
+            this.chat.ChatMessage += OnChatMessage;
+            this.chat.ChatMessage += CheckFailedToBindPort;
 
-            var chat = this.services.GetService<ChatGui>();
-            chat.ChatMessage += OnChatMessage;
-            chat.ChatMessage += CheckFailedToBindPort;
+            this.framework.Update += PollTalkAddon;
+            this.framework.Update += CheckKeybindPressed;
 
-            var framework = this.services.GetService<Framework>();
-            framework.Update += PollTalkAddon;
-            framework.Update += CheckKeybindPressed;
-
-            var commands = this.services.GetService<Dalamud.Game.Command.CommandManager>();
-            this.commandManager = new CommandManager(commands, this.services);
-            this.commandManager.AddCommandModule<MainCommandModule>();
-
-            this.commandModule = this.commandManager.GetCommandModule<MainCommandModule>();
+            this.commandModule = new MainCommandModule(this.chat, commandManager, this.config, this.backendManager,
+                this.configurationWindow);
         }
 
         private bool keysDown = false;
 
-        private void CheckKeybindPressed(Framework framework)
+        private void CheckKeybindPressed(Framework f)
         {
             if (!this.config.UseKeybind) return;
 
@@ -109,7 +171,7 @@ namespace TextToTalk
 
                     this.keysDown = true;
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
-                    this.commandModule.Chat.Print($"TextToTalk preset -> {preset.Name}");
+                    this.chat.Print($"TextToTalk preset -> {preset.Name}");
                     PluginLog.Log($"TextToTalk preset -> {preset.Name}");
                     return true;
                 }
@@ -133,11 +195,10 @@ namespace TextToTalk
             return false;
         }
 
-        private void PollTalkAddon(Framework framework)
+        private void PollTalkAddon(Framework f)
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            var talkAddonHandler = this.services.GetService<TalkAddonHandler>();
             talkAddonHandler.PollAddon(framework);
         }
 
@@ -146,10 +207,6 @@ namespace TextToTalk
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message,
             ref bool handled)
         {
-            var sharedState = this.services.GetService<SharedState>();
-            var clientState = this.services.GetService<ClientState>();
-            var chat = this.services.GetService<ChatGui>();
-
             if (!clientState.IsLoggedIn || !sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
             chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
                        "Please close the owner of that port and reload the Websocket server, " +
@@ -161,7 +218,6 @@ namespace TextToTalk
             ref bool handled)
         {
             if (!this.config.Enabled) return;
-            var chatMessageHandler = this.services.GetService<ChatMessageHandler>();
             chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
         }
 
@@ -188,11 +244,7 @@ namespace TextToTalk
                 return;
             }
 
-            // Get the voice backend manager
-            var backendManager = this.services.GetService<VoiceBackendManager>();
-
             // Check if the speaker is a player and we have a custom voice for this speaker
-            var playerService = this.services.GetService<PlayerService>();
             if (speaker is PlayerCharacter pc &&
                 playerService.TryGetPlayerByInfo(pc.Name.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
                 playerService.TryGetPlayerVoice(playerInfo, out var voice))
@@ -213,7 +265,7 @@ namespace TextToTalk
                 var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
 
                 // Say the thing
-                var preset = GetVoiceForSpeaker(backendManager, speaker.Name.TextValue, gender);
+                var preset = GetVoiceForSpeaker(speaker.Name.TextValue, gender);
                 if (preset != null)
                 {
                     backendManager.Say(source, preset, cleanText);
@@ -225,7 +277,7 @@ namespace TextToTalk
             }
         }
 
-        private VoicePreset GetVoiceForSpeaker(VoiceBackendManager backendManager, string name, Gender gender)
+        private VoicePreset GetVoiceForSpeaker(string name, Gender gender)
         {
             return backendManager.Backend switch
             {
@@ -243,7 +295,7 @@ namespace TextToTalk
             {
                 return this.config.GetCurrentVoicePreset<TPreset>();
             }
-            
+
             var voicePresets = gender switch
             {
                 Gender.Male => this.config.GetCurrentMaleVoicePresets<TPreset>(),
@@ -263,7 +315,6 @@ namespace TextToTalk
 
         private bool ShouldRateLimit(GameObject speaker)
         {
-            var rateLimiter = this.services.GetService<RateLimiter>();
             return this.config.UsePlayerRateLimiter &&
                    speaker.ObjectKind is ObjectKind.Player &&
                    rateLimiter.TryRateLimit(speaker.Name.TextValue);
@@ -305,7 +356,6 @@ namespace TextToTalk
             }
 
             // Get the override state and log the model ID so that we can add it to our overrides file if needed.
-            var ungenderedOverrides = this.services.GetService<UngenderedOverrideManager>();
             if (ungenderedOverrides.IsUngendered(modelId))
             {
                 actorGender = Gender.None;
@@ -323,8 +373,7 @@ namespace TextToTalk
 
         private void OpenConfigUi()
         {
-            var ui = this.services.GetService<WindowManager>();
-            ui.ShowWindow<ConfigurationWindow>();
+            this.configurationWindow.IsOpen = true;
         }
 
         private static T Pipe<T>(T input, params Func<T, T>[] transforms)
@@ -338,24 +387,25 @@ namespace TextToTalk
         {
             if (!disposing) return;
 
-            this.commandManager.Dispose();
+            this.windows.RemoveWindow(this.unlockerResultWindow);
+            this.windows.RemoveWindow(this.voiceUnlockerWindow);
+            this.windows.RemoveWindow(this.configurationWindow);
+            this.windows.RemoveWindow(this.channelPresetModificationWindow);
+            
+            this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
 
-            var framework = this.services.GetService<Framework>();
-            framework.Update -= PollTalkAddon;
-            framework.Update -= CheckKeybindPressed;
+            this.framework.Update -= PollTalkAddon;
+            this.framework.Update -= CheckKeybindPressed;
 
-            var chat = this.services.GetService<ChatGui>();
-            chat.ChatMessage -= CheckFailedToBindPort;
-            chat.ChatMessage -= OnChatMessage;
+            this.chat.ChatMessage -= CheckFailedToBindPort;
+            this.chat.ChatMessage -= OnChatMessage;
 
-            var ui = this.services.GetService<WindowManager>();
-            var pi = this.services.GetService<DalamudPluginInterface>();
-            pi.UiBuilder.OpenConfigUi -= OpenConfigUi;
-            pi.UiBuilder.Draw -= ui.Draw;
+            this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 
-            pi.SavePluginConfig(this.config);
+            this.pluginInterface.SavePluginConfig(this.config);
 
-            this.services.Dispose();
+            this.backendManager.Dispose();
+            this.http.Dispose();
         }
 
         public void Dispose()
