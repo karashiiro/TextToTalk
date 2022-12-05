@@ -385,6 +385,8 @@ namespace TextToTalk
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
+            
+            this.commandModule.Dispose();
 
             this.windows.RemoveWindow(this.unlockerResultWindow);
             this.windows.RemoveWindow(this.voiceUnlockerWindow);
