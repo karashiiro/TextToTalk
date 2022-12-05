@@ -296,27 +296,28 @@ namespace TextToTalk
         public TPreset GetCurrentVoicePreset<TPreset>() where TPreset : VoicePreset
         {
             return VoicePresetConfig.VoicePresets.FirstOrDefault(p =>
-                p.Id == VoicePresetConfig.CurrentVoicePreset[Backend] && p.EnabledBackend == Backend) as TPreset;
+                VoicePresetConfig.CurrentVoicePreset.TryGetValue(Backend, out var id) && p.Id == id &&
+                p.EnabledBackend == Backend) as TPreset;
         }
 
         public TPreset[] GetCurrentUngenderedVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             return VoicePresetConfig.VoicePresets.Where(p =>
-                    VoicePresetConfig.UngenderedVoicePresets[Backend].Contains(p.Id) && p.EnabledBackend == Backend)
+                    VoicePresetConfig.GetUngenderedPresets(Backend).Contains(p.Id) && p.EnabledBackend == Backend)
                 .Cast<TPreset>().ToArray();
         }
 
         public TPreset[] GetCurrentMaleVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             return VoicePresetConfig.VoicePresets.Where(p =>
-                    VoicePresetConfig.MaleVoicePresets[Backend].Contains(p.Id) && p.EnabledBackend == Backend)
+                    VoicePresetConfig.GetMalePresets(Backend).Contains(p.Id) && p.EnabledBackend == Backend)
                 .Cast<TPreset>().ToArray();
         }
 
         public TPreset[] GetCurrentFemaleVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             return VoicePresetConfig.VoicePresets.Where(p =>
-                    VoicePresetConfig.FemaleVoicePresets[Backend].Contains(p.Id) && p.EnabledBackend == Backend)
+                    VoicePresetConfig.GetFemalePresets(Backend).Contains(p.Id) && p.EnabledBackend == Backend)
                 .Cast<TPreset>().ToArray();
         }
 
