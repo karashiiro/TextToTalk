@@ -45,7 +45,7 @@ namespace TextToTalk.UI
             this.controller = windowController;
             this.helpers = new ConfigUIDelegates { OpenVoiceUnlockerAction = () => voiceUnlockerWindow.IsOpen = true };
 
-            Size = new Vector2(520, 480);
+            Size = new Vector2(540, 480);
         }
 
         public override void PreDraw()
