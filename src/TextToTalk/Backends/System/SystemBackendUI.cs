@@ -164,19 +164,19 @@ public class SystemBackendUI
         if (useGenderedVoicePresets)
         {
             if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTSystemVoice12",
-                    this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System], presets))
+                    this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }
 
             if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTSystemVoice10",
-                    this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System], presets))
+                    this.config.VoicePresetConfig.GetMalePresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }
 
             if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTSystemVoice11",
-                    this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System], presets))
+                    this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }

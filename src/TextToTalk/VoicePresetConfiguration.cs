@@ -45,6 +45,60 @@ public class VoicePresetConfiguration
         FemaleVoicePresets = new Dictionary<TTSBackend, SortedSet<int>>();
     }
 
+    /// <summary>
+    /// Retrieves the ungendered voice presets for the specified backend, creating the set if it
+    /// doesn't yet exist.
+    /// </summary>
+    /// <param name="backend">The backend to select voices for.</param>
+    /// <returns></returns>
+    public SortedSet<int> GetUngenderedPresets(TTSBackend backend)
+    {
+        if (UngenderedVoicePresets.TryGetValue(backend, out var presets))
+        {
+            return presets;
+        }
+
+        var newPresets = new SortedSet<int>();
+        UngenderedVoicePresets[backend] = newPresets;
+        return newPresets;
+    }
+    
+    /// <summary>
+    /// Retrieves the male voice presets for the specified backend, creating the set if it
+    /// doesn't yet exist.
+    /// </summary>
+    /// <param name="backend">The backend to select voices for.</param>
+    /// <returns></returns>
+    public SortedSet<int> GetMalePresets(TTSBackend backend)
+    {
+        if (MaleVoicePresets.TryGetValue(backend, out var presets))
+        {
+            return presets;
+        }
+
+        var newPresets = new SortedSet<int>();
+        MaleVoicePresets[backend] = newPresets;
+        return newPresets;
+    }
+    
+    /// <summary>
+    /// Retrieves the female voice presets for the specified backend, creating the set if it
+    /// doesn't yet exist.
+    /// </summary>
+    /// <param name="backend">The backend to select voices for.</param>
+    /// <returns></returns>
+    public SortedSet<int> GetFemalePresets(TTSBackend backend)
+    {
+        if (FemaleVoicePresets.TryGetValue(backend, out var presets))
+        {
+            return presets;
+        }
+
+        var newPresets = new SortedSet<int>();
+        FemaleVoicePresets[backend] = newPresets;
+        return newPresets;
+    }
+
     public void SaveToFile(string path)
     {
         var serializerSettings = SerializerSettings;

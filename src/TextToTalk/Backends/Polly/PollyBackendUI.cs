@@ -238,19 +238,19 @@ public class PollyBackendUI
             if (useGenderedVoicePresets)
             {
                 if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTPollyEnabledUPresetSelect",
-                        this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly], presets))
+                        this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.AmazonPolly), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTPollyEnabledMPresetSelect",
-                        this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly], presets))
+                        this.config.VoicePresetConfig.GetMalePresets(TTSBackend.AmazonPolly), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTPollyEnabledFPresetSelect",
-                        this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly], presets))
+                        this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.AmazonPolly), presets))
                 {
                     this.config.Save();
                 }

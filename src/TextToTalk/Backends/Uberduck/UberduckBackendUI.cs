@@ -164,19 +164,19 @@ public class UberduckBackendUI
             if (useGenderedVoicePresets)
             {
                 if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTUberduckVoice5",
-                        this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck], presets))
+                        this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTUberduckVoice3",
-                        this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck], presets))
+                        this.config.VoicePresetConfig.GetMalePresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTUberduckVoice4",
-                        this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck], presets))
+                        this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }
