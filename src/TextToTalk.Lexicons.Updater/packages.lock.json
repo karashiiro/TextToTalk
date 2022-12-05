@@ -4,9 +4,9 @@
     "net6.0": {
       "YamlDotNet": {
         "type": "Direct",
-        "requested": "[12.0.0, )",
-        "resolved": "12.0.0",
-        "contentHash": "sMp20zI63j7xVoor98vGeDxteLeyuAlM330L7XbXxMMPjLdP1mwoK/5Nn/8Vldc9hUMN5otkg88bVLEtQnPdaw=="
+        "requested": "[12.0.2, )",
+        "resolved": "12.0.2",
+        "contentHash": "IFj2oDZYJIv5sM8mqaj5edVrpgUyoXk/wCGqZQJrgys/0tBajajpjRSgFM+iA/9ILOfTsPYKtcDcwvqBnBcNIg=="
       }
     }
   }

@@ -42,15 +42,15 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "3.7.12.24",
-        "contentHash": "uPAZ3a5Wu4k4Ml+TBAcOumZPxMpoHUHai0PdS3iLX0XPsDqAJPYviAIc1QXi2rVSDgqC2uVBxiEVSNYAgzoxbA=="
+        "resolved": "3.7.101",
+        "contentHash": "VArrp8MkHFe45d6NlPn+3CCZN4kBsmRVDv8FtbGMt6QdVQ4iEPYLY7f0hMJgXY8siUYEIsBoMNU/Tw9YI3SJCg=="
       },
       "AWSSDK.Polly": {
         "type": "Transitive",
-        "resolved": "3.7.7.9",
-        "contentHash": "JhsS6vXvpvIWYNTu746DGBS0S6lYcKydvK781RrQykxvIZ9fm5ox3mr4TCgBqGFbguIS12MbHfOsiyyl1LJMtA==",
+        "resolved": "3.7.103",
+        "contentHash": "r1xEZ6UZnkbc5bXL7ZaBKQR/lR55KuqhQS4YKXr0aqfifCQbYZfH5/DYEo6uPB/A3EVpSihKP3J8m8NItzc8nw==",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.12.23, 4.0.0)"
+          "AWSSDK.Core": "[3.7.101, 4.0.0)"
         }
       },
       "DalamudPackager": {
@@ -1246,14 +1246,14 @@
       },
       "YamlDotNet": {
         "type": "Transitive",
-        "resolved": "12.0.0",
-        "contentHash": "sMp20zI63j7xVoor98vGeDxteLeyuAlM330L7XbXxMMPjLdP1mwoK/5Nn/8Vldc9hUMN5otkg88bVLEtQnPdaw=="
+        "resolved": "12.0.2",
+        "contentHash": "IFj2oDZYJIv5sM8mqaj5edVrpgUyoXk/wCGqZQJrgys/0tBajajpjRSgFM+iA/9ILOfTsPYKtcDcwvqBnBcNIg=="
       },
       "texttotalk": {
         "type": "Project",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.12.24, )",
-          "AWSSDK.Polly": "[3.7.7.9, )",
+          "AWSSDK.Core": "[3.7.101, )",
+          "AWSSDK.Polly": "[3.7.103, )",
           "AdysTech.CredentialManager": "[2.6.0, )",
           "DalamudPackager": "[2.1.8, )",
           "NAudio": "[2.1.0, )",
@@ -1274,7 +1274,7 @@
       "texttotalk.lexicons.updater": {
         "type": "Project",
         "dependencies": {
-          "YamlDotNet": "[12.0.0, )"
+          "YamlDotNet": "[12.0.2, )"
         }
       },
       "texttotalk.ungenderedoverrides": {
