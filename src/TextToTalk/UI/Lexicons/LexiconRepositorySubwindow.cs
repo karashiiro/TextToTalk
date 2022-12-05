@@ -1,16 +1,16 @@
-﻿using Dalamud.Logging;
-using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Dalamud.Logging;
+using ImGuiNET;
 using TextToTalk.Backends;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 
-namespace TextToTalk.UI.Dalamud.Lexicons;
+namespace TextToTalk.UI.Lexicons;
 
 public class LexiconRepositorySubwindow
 {

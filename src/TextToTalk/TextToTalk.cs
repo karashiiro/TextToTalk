@@ -28,7 +28,6 @@ using TextToTalk.Middleware;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
 using TextToTalk.UI;
-using TextToTalk.UI.Dalamud;
 using TextToTalk.UngenderedOverrides;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 

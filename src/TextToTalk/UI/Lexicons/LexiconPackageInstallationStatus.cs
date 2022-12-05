@@ -1,4 +1,4 @@
-﻿namespace TextToTalk.UI.Dalamud.Lexicons;
+﻿namespace TextToTalk.UI.Lexicons;
 
 public class LexiconPackageInstallationStatus
 {

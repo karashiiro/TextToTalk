@@ -4,7 +4,7 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Logging;
 using TextToTalk.Backends;
-using TextToTalk.UI.Dalamud;
+using TextToTalk.UI;
 
 // ReSharper disable UnusedMember.Global
 

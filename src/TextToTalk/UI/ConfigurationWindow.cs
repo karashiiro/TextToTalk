@@ -1,19 +1,19 @@
-﻿using Dalamud.Game.Text;
-using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using Dalamud.Data;
+using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
+using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using TextToTalk.Backends;
 using TextToTalk.GameEnums;
 
-namespace TextToTalk.UI.Dalamud
+namespace TextToTalk.UI
 {
     public class ConfigurationWindow : Window
     {

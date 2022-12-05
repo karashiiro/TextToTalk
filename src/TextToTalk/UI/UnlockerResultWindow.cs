@@ -2,7 +2,7 @@
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
-namespace TextToTalk.UI.Dalamud
+namespace TextToTalk.UI
 {
     public class UnlockerResultWindow : Window
     {

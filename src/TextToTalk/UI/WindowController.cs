@@ -1,6 +1,4 @@
-﻿using TextToTalk.UI.Dalamud;
-
-namespace TextToTalk.UI;
+﻿namespace TextToTalk.UI;
 
 public class WindowController
 {

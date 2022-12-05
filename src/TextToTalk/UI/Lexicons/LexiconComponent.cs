@@ -1,16 +1,16 @@
-﻿using Dalamud.Interface;
-using Dalamud.Logging;
-using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Text;
+using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Logging;
+using ImGuiNET;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 
-namespace TextToTalk.UI.Dalamud.Lexicons;
+namespace TextToTalk.UI.Lexicons;
 
 public class LexiconComponent
 {

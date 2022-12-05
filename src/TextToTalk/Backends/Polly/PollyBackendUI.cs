@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
-using TextToTalk.UI.Dalamud.Lexicons;
+using TextToTalk.UI.Lexicons;
 
 namespace TextToTalk.Backends.Polly;
 

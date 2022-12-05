@@ -11,7 +11,7 @@ using System.Text;
 using Dalamud.Logging;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
-using TextToTalk.UI.Dalamud.Lexicons;
+using TextToTalk.UI.Lexicons;
 
 namespace TextToTalk.Backends.System;
 
