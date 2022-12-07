@@ -1,4 +1,5 @@
-﻿using Dalamud.Game;
+﻿#nullable enable
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -86,7 +87,7 @@ namespace TextToTalk
 
             this.windows = new WindowSystem("TextToTalk");
 
-            this.config = (PluginConfiguration)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
+            this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
             this.sharedState = new SharedState();
@@ -220,10 +221,10 @@ namespace TextToTalk
             chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
         }
 
-        private void Say(GameObject speaker, string textValue, TextSource source)
+        private void Say(GameObject? speaker, string textValue, TextSource source)
         {
             // Check if this speaker should be skipped
-            if (ShouldRateLimit(speaker))
+            if (speaker != null && ShouldRateLimit(speaker))
             {
                 return;
             }
@@ -264,7 +265,7 @@ namespace TextToTalk
                 var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
 
                 // Say the thing
-                var preset = GetVoiceForSpeaker(speaker.Name.TextValue, gender);
+                var preset = GetVoiceForSpeaker(speaker?.Name.TextValue, gender);
                 if (preset != null)
                 {
                     backendManager.Say(source, preset, cleanText);
@@ -276,7 +277,7 @@ namespace TextToTalk
             }
         }
 
-        private VoicePreset GetVoiceForSpeaker(string name, Gender gender)
+        private VoicePreset? GetVoiceForSpeaker(string? name, Gender gender)
         {
             return backendManager.Backend switch
             {
@@ -288,7 +289,7 @@ namespace TextToTalk
             };
         }
 
-        private TPreset GetVoiceForSpeaker<TPreset>(string name, Gender gender) where TPreset : VoicePreset
+        private TPreset? GetVoiceForSpeaker<TPreset>(string? name, Gender gender) where TPreset : VoicePreset
         {
             if (!this.config.UseGenderedVoicePresets)
             {
@@ -319,20 +320,15 @@ namespace TextToTalk
                    rateLimiter.TryRateLimit(speaker.Name.TextValue);
         }
 
-        private unsafe Gender GetCharacterGender(GameObject gObj)
+        private unsafe Gender GetCharacterGender(GameObject? gObj)
         {
-            if (gObj == null)
+            if (gObj == null || gObj.Address == IntPtr.Zero)
             {
                 PluginLog.Log("GameObject is null; cannot check gender.");
                 return Gender.None;
             }
 
             var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)gObj.Address;
-            if (charaStruct == null)
-            {
-                PluginLog.Warning("Failed to retrieve character struct.");
-                return Gender.None;
-            }
 
             // Get actor gender as defined by its struct.
             var actorGender = (Gender)charaStruct->CustomizeData[1];

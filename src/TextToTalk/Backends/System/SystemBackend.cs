@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Http;
-using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.System
 {

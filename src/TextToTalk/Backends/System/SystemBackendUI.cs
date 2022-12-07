@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Numerics;
 using System.Speech.Synthesis;
 using System.Text;
 using Dalamud.Logging;

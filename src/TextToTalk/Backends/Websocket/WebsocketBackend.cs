@@ -4,7 +4,6 @@ using System;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
-using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.Websocket
 {
