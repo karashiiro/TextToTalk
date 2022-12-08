@@ -296,6 +296,11 @@ namespace TextToTalk
                 return this.config.GetCurrentVoicePreset<TPreset>();
             }
 
+            if (name == null)
+            {
+                return this.config.GetCurrentUngenderedVoicePresets<TPreset>().FirstOrDefault();
+            }
+
             var voicePresets = gender switch
             {
                 Gender.Male => this.config.GetCurrentMaleVoicePresets<TPreset>(),
