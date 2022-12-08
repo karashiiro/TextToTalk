@@ -306,7 +306,7 @@ namespace TextToTalk
             }
 
             // Use xxHash instead of the built-in GetHashCode because GetHashCode is randomized on program launch.
-            var nameHash = string.IsNullOrEmpty(name) ? xxHash32.ComputeHash(name) : 0;
+            var nameHash = string.IsNullOrEmpty(name) ? 0 : xxHash32.ComputeHash(name);
             var voicePresetIndex = (int)(nameHash % (uint)voicePresets.Length);
             return voicePresets[voicePresetIndex];
         }
