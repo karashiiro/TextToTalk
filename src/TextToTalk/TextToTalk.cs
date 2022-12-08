@@ -59,10 +59,7 @@ namespace TextToTalk
         private readonly SharedState sharedState;
         private readonly WindowSystem windows;
 
-        private readonly UnlockerResultWindow unlockerResultWindow;
-        private readonly VoiceUnlockerWindow voiceUnlockerWindow;
         private readonly ConfigurationWindow configurationWindow;
-        private readonly ChannelPresetModificationWindow channelPresetModificationWindow;
 
         private readonly HttpClient http;
 
@@ -98,21 +95,21 @@ namespace TextToTalk
             this.playerService = new PlayerService(this.config.Players, this.config.PlayerVoicePresets,
                 this.config.VoicePresetConfig.VoicePresets);
 
-            this.unlockerResultWindow = new UnlockerResultWindow();
-            this.channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
+            var unlockerResultWindow = new UnlockerResultWindow();
+            var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
             var windowController =
-                new WindowController(this.unlockerResultWindow, this.channelPresetModificationWindow);
-            this.voiceUnlockerWindow = new VoiceUnlockerWindow(windowController);
+                new WindowController(unlockerResultWindow, channelPresetModificationWindow);
+            var voiceUnlockerWindow = new VoiceUnlockerWindow(windowController);
             this.configurationWindow = new ConfigurationWindow(this.config, data, this.backendManager,
-                this.playerService, windowController, this.voiceUnlockerWindow)
+                this.playerService, windowController, voiceUnlockerWindow)
             {
                 IsOpen = InitiallyVisible,
             };
 
-            this.windows.AddWindow(this.unlockerResultWindow);
-            this.windows.AddWindow(this.voiceUnlockerWindow);
+            this.windows.AddWindow(unlockerResultWindow);
+            this.windows.AddWindow(voiceUnlockerWindow);
             this.windows.AddWindow(this.configurationWindow);
-            this.windows.AddWindow(this.channelPresetModificationWindow);
+            this.windows.AddWindow(channelPresetModificationWindow);
 
             this.pluginInterface.UiBuilder.Draw += this.windows.Draw;
 
@@ -296,11 +293,6 @@ namespace TextToTalk
                 return this.config.GetCurrentVoicePreset<TPreset>();
             }
 
-            if (name == null)
-            {
-                return this.config.GetCurrentUngenderedVoicePresets<TPreset>().FirstOrDefault();
-            }
-
             var voicePresets = gender switch
             {
                 Gender.Male => this.config.GetCurrentMaleVoicePresets<TPreset>(),
@@ -314,7 +306,7 @@ namespace TextToTalk
             }
 
             // Use xxHash instead of the built-in GetHashCode because GetHashCode is randomized on program launch.
-            var nameHash = xxHash32.ComputeHash(name);
+            var nameHash = string.IsNullOrEmpty(name) ? xxHash32.ComputeHash(name) : 0;
             var voicePresetIndex = (int)(nameHash % (uint)voicePresets.Length);
             return voicePresets[voicePresetIndex];
         }
@@ -389,21 +381,19 @@ namespace TextToTalk
             if (!disposing) return;
             
             this.commandModule.Dispose();
-
-            this.windows.RemoveWindow(this.unlockerResultWindow);
-            this.windows.RemoveWindow(this.voiceUnlockerWindow);
-            this.windows.RemoveWindow(this.configurationWindow);
-            this.windows.RemoveWindow(this.channelPresetModificationWindow);
             
-            this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
-
-            this.framework.Update -= PollTalkAddon;
             this.framework.Update -= CheckKeybindPressed;
+            this.framework.Update -= PollTalkAddon;
 
             this.chat.ChatMessage -= CheckFailedToBindPort;
             this.chat.ChatMessage -= OnChatMessage;
-
+            
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+
+            this.chatMessageHandler.Say -= Say;
+            this.talkAddonHandler.Say -= Say;
+
+            this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
 
             this.pluginInterface.SavePluginConfig(this.config);
 
