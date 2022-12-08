@@ -302,7 +302,8 @@ namespace TextToTalk
                 Gender.Female => this.config.GetCurrentFemaleVoicePresets<TPreset>(),
                 _ => this.config.GetCurrentUngenderedVoicePresets<TPreset>(),
             };
-            if (voicePresets.Length < 1)
+            
+            if (voicePresets == null || voicePresets.Length < 1)
             {
                 return null;
             }
