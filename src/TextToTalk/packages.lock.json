@@ -38,6 +38,12 @@
           "System.Configuration.ConfigurationManager": "4.5.0"
         }
       },
+      "Microsoft.CognitiveServices.Speech": {
+        "type": "Direct",
+        "requested": "[1.24.2, )",
+        "resolved": "1.24.2",
+        "contentHash": "q29BbE0UNdwt89oU+HkFDwOq4Qvu1puZLdKuUNlRtLHlN3iFZcTGEnW2sUmZWE6mL92OJMxZ7KpvvUu0gCRcVw=="
+      },
       "NAudio": {
         "type": "Direct",
         "requested": "[2.1.0, )",

@@ -71,6 +71,11 @@
         "resolved": "17.3.0",
         "contentHash": "/xxz+e29F2V5pePtInjbLffoqWVTm60KCX87vSj2laNboeWq65WFJ634fGtBcMZO3VEfOmh9/XcoWEfLlWWG+g=="
       },
+      "Microsoft.CognitiveServices.Speech": {
+        "type": "Transitive",
+        "resolved": "1.24.2",
+        "contentHash": "q29BbE0UNdwt89oU+HkFDwOq4Qvu1puZLdKuUNlRtLHlN3iFZcTGEnW2sUmZWE6mL92OJMxZ7KpvvUu0gCRcVw=="
+      },
       "Microsoft.CSharp": {
         "type": "Transitive",
         "resolved": "4.0.1",
@@ -1256,6 +1261,7 @@
           "AWSSDK.Polly": "[3.7.103, )",
           "AdysTech.CredentialManager": "[2.6.0, )",
           "DalamudPackager": "[2.1.8, )",
+          "Microsoft.CognitiveServices.Speech": "[1.24.2, )",
           "NAudio": "[2.1.0, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
           "System.Drawing.Common": "[6.0.0, )",

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using TextToTalk.Backends;
+using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -182,8 +183,18 @@ public class VoicePresetConfiguration
             },
             TTSBackend.Websocket => new WebsocketVoicePreset
             {
-                Id = Convert.ToInt32((long)corrupted["Id"]), Name = (string)corrupted["Name"],
+                Id = Convert.ToInt32((long)corrupted["Id"]),
+                Name = (string)corrupted["Name"],
                 EnabledBackend = TTSBackend.Websocket,
+            },
+            TTSBackend.Azure => new AzureVoicePreset
+            {
+                Id = Convert.ToInt32((long)corrupted["Id"]),
+                Name = (string)corrupted["Name"],
+                PlaybackRate = Convert.ToInt32((long)corrupted["PlaybackRate"]),
+                Volume = Convert.ToSingle((double)corrupted["Volume"]),
+                VoiceName = (string)corrupted["VoiceName"],
+                EnabledBackend = TTSBackend.Azure,
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),
         };

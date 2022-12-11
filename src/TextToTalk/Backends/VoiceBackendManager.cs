@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Numerics;
 using System.Threading.Tasks;
+using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -78,6 +79,7 @@ namespace TextToTalk.Backends
                 TTSBackend.Websocket => new WebsocketBackend(this.config, this.sharedState),
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
+                TTSBackend.Azure => new AzureBackend(this.config, this.http),
                 _ => throw new NotImplementedException(),
             };
         }

@@ -29,6 +29,7 @@
 		<PackageReference Include="AWSSDK.Polly" Version="3.7.103" />
 		<PackageReference Include="DalamudPackager" Version="2.1.8" />
 		<PackageReference Include="log4net" Version="2.0.15" />
+		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.24.2" />
 		<PackageReference Include="NAudio" Version="2.1.0" />
 		<PackageReference Include="Standart.Hash.xxHash" Version="4.0.5" />
 		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
