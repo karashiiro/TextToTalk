@@ -158,6 +158,13 @@ namespace TextToTalk.UI
                         config.Save();
                     }
 
+                    var skipVoicedQuestText = config.SkipVoicedQuestText;
+                    if (ImGui.Checkbox("Skip reading voice-acted NPC dialogue", ref skipVoicedQuestText))
+                    {
+                        config.SkipVoicedQuestText = skipVoicedQuestText;
+                        config.Save();
+                    }
+
                     ImGui.Unindent();
                 }
 

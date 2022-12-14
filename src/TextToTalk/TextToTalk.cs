@@ -53,6 +53,7 @@ namespace TextToTalk
         private readonly VoiceBackendManager backendManager;
         private readonly TalkAddonHandler talkAddonHandler;
         private readonly ChatMessageHandler chatMessageHandler;
+        private readonly SoundHandler soundHandler;
         private readonly RateLimiter rateLimiter;
         private readonly UngenderedOverrideManager ungenderedOverrides;
         private readonly PlayerService playerService;
@@ -74,7 +75,8 @@ namespace TextToTalk
             [RequiredVersion("1.0")] GameGui gui,
             [RequiredVersion("1.0")] DataManager data,
             [RequiredVersion("1.0")] ObjectTable objects,
-            [RequiredVersion("1.0")] CommandManager commandManager)
+            [RequiredVersion("1.0")] CommandManager commandManager,
+            [RequiredVersion("1.0")] SigScanner sigScanner)
         {
             this.pluginInterface = pi;
             this.clientState = clientState;
@@ -120,6 +122,8 @@ namespace TextToTalk
 
             this.chatMessageHandler = new ChatMessageHandler(filters, objects, config, this.sharedState);
             this.chatMessageHandler.Say += Say;
+
+            this.soundHandler = new SoundHandler(this.talkAddonHandler, sigScanner);
 
             this.rateLimiter = new RateLimiter(() =>
             {
@@ -196,7 +200,7 @@ namespace TextToTalk
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            talkAddonHandler.PollAddon(framework);
+            talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.FrameworkUpdate);
         }
 
         private bool notifiedFailedToBindPort;
@@ -389,6 +393,8 @@ namespace TextToTalk
             this.chat.ChatMessage -= OnChatMessage;
             
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+            
+            this.soundHandler.Dispose();
 
             this.chatMessageHandler.Say -= Say;
             this.talkAddonHandler.Say -= Say;

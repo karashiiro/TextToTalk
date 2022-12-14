@@ -39,7 +39,13 @@ public class TalkAddonHandler
         this.backendManager = backendManager;
     }
 
-    public unsafe void PollAddon(Framework framework)
+    public enum PollSource
+    {
+        FrameworkUpdate,
+        VoiceLinePlayback,
+    }
+    
+    public unsafe void PollAddon(PollSource pollSource)
     {
         if (!this.clientState.IsLoggedIn)
         {
@@ -50,7 +56,7 @@ public class TalkAddonHandler
         if (this.sharedState.TalkAddon == IntPtr.Zero)
         {
             this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk", 1);
-            return;
+            if (this.sharedState.TalkAddon == IntPtr.Zero) return;
         }
 
         var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
@@ -84,6 +90,12 @@ public class TalkAddonHandler
         if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
         PluginLog.LogDebug($"AddonTalk: \"{text}\"");
+
+        if (pollSource == PollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
+        {
+            PluginLog.Log($"Skipping voice-acted line: {text}");
+            return;
+        }
 
         if (talkAddonText.Speaker != "" && this.filters.ShouldSaySender())
         {
