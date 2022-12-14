@@ -118,6 +118,7 @@ namespace TextToTalk
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;
         public bool CancelSpeechOnTextAdvance { get; set; }
+        public bool SkipVoicedQuestText { get; set; } = true;
 
         public bool UseGenderedVoicePresets { get; set; }
 
