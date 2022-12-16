@@ -45,4 +45,24 @@ public static class LexiconUtils
             }
         }
     }
+    
+    public static void LoadFromConfigAzure(LexiconManager lexiconManager, PluginConfiguration config)
+    {
+        for (var i = 0; i < config.AzureLexiconFiles.Count; i++)
+        {
+            var lexicon = config.AzureLexiconFiles[i];
+
+            try
+            {
+                lexiconManager.AddLexicon(lexicon);
+            }
+            catch (Exception e)
+            {
+                PluginLog.LogError(e, "Failed to add lexicon - removing from configuration.");
+                config.AzureLexiconFiles.RemoveAt(i);
+                config.Save();
+                i--;
+            }
+        }
+    }
 }

@@ -16,7 +16,7 @@ public class AzureBackend : VoiceBackend
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFF96800);
 
         var lexiconManager = new DalamudLexiconManager();
-        LexiconUtils.LoadFromConfigPolly(lexiconManager, config);
+        LexiconUtils.LoadFromConfigAzure(lexiconManager, config);
 
         IList<string> voices = new List<string>();
         this.ui = new AzureBackendUI(config, lexiconManager, http,

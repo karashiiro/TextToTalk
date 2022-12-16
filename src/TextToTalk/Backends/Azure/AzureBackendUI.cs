@@ -173,6 +173,7 @@ public class AzureBackendUI
             this.config.Save();
         }
 
+        this.lexiconComponent.Draw();
         ImGui.Spacing();
 
         {

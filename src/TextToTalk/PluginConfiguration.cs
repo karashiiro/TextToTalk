@@ -129,6 +129,8 @@ namespace TextToTalk
 
         public string PollyRegion { get; set; }
         public IList<string> PollyLexiconFiles { get; set; }
+        
+        public IList<string> AzureLexiconFiles { get; set; }
 
         public bool RemoveStutterEnabled { get; set; } = true;
 
@@ -173,6 +175,7 @@ namespace TextToTalk
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
 
+            AzureLexiconFiles ??= new List<string>();
             PollyLexiconFiles ??= new List<string>();
             Lexicons ??= new List<string>();
 
