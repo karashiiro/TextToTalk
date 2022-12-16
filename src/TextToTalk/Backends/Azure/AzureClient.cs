@@ -5,21 +5,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using Microsoft.CognitiveServices.Speech;
+using Microsoft.CognitiveServices.Speech.Audio;
 using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.Azure;
 
 public class AzureClient : IDisposable
 {
-    private readonly SpeechConfig config;
+    private readonly SpeechConfig speechConfig;
     private readonly SpeechSynthesizer synthesizer;
     private readonly StreamSoundQueue soundQueue;
     private readonly LexiconManager lexiconManager;
 
     public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager)
     {
-        this.config = SpeechConfig.FromSubscription(subscriptionKey, region);
-        this.synthesizer = new SpeechSynthesizer(config);
+        var audioConfig = AudioConfig.FromWavFileOutput("NUL");
+        this.speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+        this.synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
         this.soundQueue = new StreamSoundQueue();
         this.lexiconManager = lexiconManager;
     }
@@ -40,7 +42,7 @@ public class AzureClient : IDisposable
         var ssml = this.lexiconManager.MakeSsml(text, playbackRate: playbackRate, includeSpeakAttributes: false);
         PluginLog.Log(ssml);
 
-        this.config.SpeechSynthesisVoiceName = voice;
+        this.speechConfig.SpeechSynthesisVoiceName = voice;
         var res = await this.synthesizer.SpeakSsmlAsync(ssml);
 
         HandleResult(res, volume, source);
@@ -89,7 +91,7 @@ public class AzureClient : IDisposable
 
     public void Dispose()
     {
-        this.synthesizer.Dispose();
-        this.soundQueue.Dispose();
+        this.synthesizer?.Dispose();
+        this.soundQueue?.Dispose();
     }
 }

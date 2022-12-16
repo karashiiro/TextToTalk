@@ -20,6 +20,7 @@ using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
+using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -286,6 +287,7 @@ namespace TextToTalk
                 PollyBackend => GetVoiceForSpeaker<PollyVoicePreset>(name, gender),
                 UberduckBackend => GetVoiceForSpeaker<UberduckVoicePreset>(name, gender),
                 WebsocketBackend => GetVoiceForSpeaker<WebsocketVoicePreset>(name, gender),
+                AzureBackend => GetVoiceForSpeaker<AzureVoicePreset>(name, gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };
         }

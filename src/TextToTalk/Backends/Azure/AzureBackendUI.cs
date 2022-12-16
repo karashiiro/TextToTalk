@@ -22,8 +22,8 @@ public class AzureBackendUI
     private readonly Func<IList<string>> getVoices;
     private readonly Action<IList<string>> setVoices;
 
-    private string accessKey = string.Empty;
-    private string secretKey = string.Empty;
+    private string region = string.Empty;
+    private string subscriptionKey = string.Empty;
     
     public AzureBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http,
         Func<AzureClient> getAzure, Action<AzureClient> setAzure, Func<IList<string>> getVoices,
@@ -47,11 +47,10 @@ public class AzureBackendUI
         var credentials = AzureCredentialManager.LoadCredentials();
         if (credentials != null)
         {
-            this.accessKey = credentials.UserName;
-            this.secretKey = credentials.Password;
+            this.region = credentials.UserName;
+            this.subscriptionKey = credentials.Password;
 
-            var regionEndpoint = "uswest";
-            AzureLogin(regionEndpoint);
+            AzureLogin();
         }
     }
     
@@ -59,30 +58,28 @@ public class AzureBackendUI
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.InputTextWithHint("##TTTPollyAccessKey", "Access key", ref this.accessKey, 100,
-            ImGuiInputTextFlags.Password);
-        ImGui.InputTextWithHint("##TTTPollySecretKey", "Secret key", ref this.secretKey, 100,
+        ImGui.InputTextWithHint("##TTTAzureRegion", "Region", ref this.region, 100);
+        ImGui.InputTextWithHint("##TTTAzureSubscriptionKey", "Subscription key", ref this.subscriptionKey, 100,
             ImGuiInputTextFlags.Password);
 
-        if (ImGui.Button("Save and Login##TTTSavePollyAuth"))
+        if (ImGui.Button("Save and Login##TTTSaveAzureAuth"))
         {
-            var username = Whitespace.Replace(this.accessKey, "");
-            var password = Whitespace.Replace(this.secretKey, "");
-            AzureCredentialManager.SaveCredentials(username, password);
+            this.region = Whitespace.Replace(this.region, "");
+            this.subscriptionKey = Whitespace.Replace(this.subscriptionKey, "");
+            AzureCredentialManager.SaveCredentials(this.region, this.subscriptionKey);
 
-            var regionEndpoint = "uswest";
-            AzureLogin(regionEndpoint);
+            AzureLogin();
         }
     }
     
-    private void AzureLogin(string region)
+    private void AzureLogin()
     {
         var azure = this.getAzure.Invoke();
         azure?.Dispose();
         try
         {
             PluginLog.Log($"Logging into Azure region {region}.");
-            azure = new AzureClient(this.accessKey, region, this.lexiconManager);
+            azure = new AzureClient(this.subscriptionKey, this.region, this.lexiconManager);
             var voices = azure.GetVoices();
             this.setAzure.Invoke(azure);
             this.setVoices.Invoke(voices);
