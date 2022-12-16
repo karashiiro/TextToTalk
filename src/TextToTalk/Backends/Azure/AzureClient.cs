@@ -40,20 +40,24 @@ public class AzureClient : IDisposable
 
     public async Task Say(string voice, int playbackRate, float volume, TextSource source, string text)
     {
-        var ssml = this.lexiconManager.MakeSsml(text, playbackRate: playbackRate, includeSpeakAttributes: false);
+        var ssml = this.lexiconManager.MakeSsml(
+            text,
+            voice: voice,
+            langCode: "en-US",
+            playbackRate: playbackRate,
+            includeSpeakAttributes: true);
         PluginLog.Log(ssml);
 
-        this.speechConfig.SpeechSynthesisVoiceName = voice;
         var res = await this.synthesizer.SpeakSsmlAsync(ssml);
 
         HandleResult(res);
-        
+
         var soundStream = new MemoryStream(res.AudioData);
         soundStream.Seek(0, SeekOrigin.Begin);
 
-        this.soundQueue.EnqueueSound(soundStream, source, StreamFormat.Mp3, volume);
+        this.soundQueue.EnqueueSound(soundStream, source, StreamFormat.Wave, volume);
     }
-    
+
     public Task CancelAllSounds()
     {
         this.soundQueue.CancelAllSounds();
@@ -65,7 +69,7 @@ public class AzureClient : IDisposable
         this.soundQueue.CancelFromSource(source);
         return Task.CompletedTask;
     }
-    
+
     private static void HandleResult(SynthesisVoicesResult res)
     {
         if (!string.IsNullOrEmpty(res.ErrorDetails))
@@ -76,7 +80,7 @@ public class AzureClient : IDisposable
 
     private static void HandleResult(SpeechSynthesisResult res)
     {
-        if (res.Reason != ResultReason.Canceled)
+        if (res.Reason == ResultReason.Canceled)
         {
             var cancellation = SpeechSynthesisCancellationDetails.FromResult(res);
             if (cancellation.Reason == CancellationReason.Error)

@@ -91,7 +91,11 @@ namespace TextToTalk.Lexicons
             }
         }
 
-        public string MakeSsml(string text, string langCode = null, int playbackRate = -1,
+        public string MakeSsml(
+            string text,
+            string voice = null,
+            string langCode = null,
+            int playbackRate = -1,
             bool includeSpeakAttributes = true)
         {
             foreach (var (_, lexicon) in this.lexicons)
@@ -114,6 +118,12 @@ namespace TextToTalk.Lexicons
             if (playbackRate >= 0)
             {
                 text = $"<prosody rate=\"{playbackRate}%\">{text}</prosody>";
+            }
+
+            if (voice != null)
+            {
+                // Azure Cognitive Services requires voices to be provided like this.
+                text = $"<voice name=\"{voice}\">{text}</voice>";
             }
 
             // Generate speak tag
