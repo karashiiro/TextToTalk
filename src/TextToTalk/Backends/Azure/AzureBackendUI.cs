@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using Dalamud.Logging;
@@ -69,6 +70,118 @@ public class AzureBackendUI
             AzureCredentialManager.SaveCredentials(this.region, this.subscriptionKey);
 
             AzureLogin();
+        }
+        
+        ImGui.SameLine();
+        if (ImGui.Button("Register##TTTRegisterAzureAuth"))
+        {
+            WebBrowser.Open("https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/index-text-to-speech");
+        }
+        
+        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+
+        ImGui.Spacing();
+
+        var currentVoicePreset = this.config.GetCurrentVoicePreset<AzureVoicePreset>();
+
+        var presets = this.config.GetVoicePresetsForBackend(TTSBackend.Azure).ToList();
+        presets.Sort((a, b) => a.Id - b.Id);
+
+        if (presets.Any())
+        {
+            var presetIndex = presets.IndexOf(currentVoicePreset);
+            if (ImGui.Combo("Preset##TTTAzurePresetSelect", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+                    presets.Count))
+            {
+                this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
+                this.config.Save();
+            }
+        }
+        else
+        {
+            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+        }
+
+        if (ImGui.Button("New preset##TTTAzureVoice4") &&
+            this.config.TryCreateVoicePreset<AzureVoicePreset>(out var newPreset))
+        {
+            this.config.SetCurrentVoicePreset(newPreset.Id);
+        }
+
+        if (!presets.Any() || currentVoicePreset is null)
+        {
+            return;
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Delete preset##TTTAzureVoice5"))
+        {
+            var otherPreset = this.config.VoicePresetConfig.VoicePresets.FirstOrDefault(
+                p => p.Id != currentVoicePreset.Id && p.EnabledBackend == TTSBackend.Azure);
+            this.config.SetCurrentVoicePreset(otherPreset?.Id ?? 0);
+
+            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
+            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
+
+            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
+        }
+        
+        var presetName = currentVoicePreset.Name;
+        if (ImGui.InputText("Preset name##TTTAzureVoice99", ref presetName, 64))
+        {
+            currentVoicePreset.Name = presetName;
+            this.config.Save();
+        }
+        
+        var playbackRate = currentVoicePreset.PlaybackRate;
+        if (ImGui.SliderInt("Playback rate##TTTAzureVoice8", ref playbackRate, 20, 200, "%d%%",
+                ImGuiSliderFlags.AlwaysClamp))
+        {
+            currentVoicePreset.PlaybackRate = playbackRate;
+            this.config.Save();
+        }
+
+        var volume = (int)(currentVoicePreset.Volume * 100);
+        if (ImGui.SliderInt("Volume##TTTAzureVoice7", ref volume, 0, 200, "%d%%"))
+        {
+            currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
+            this.config.Save();
+        }
+        
+        ImGui.Spacing();
+
+        {
+            var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
+            if (ImGui.Checkbox("Use gendered voices##TTTAzureVoice2", ref useGenderedVoicePresets))
+            {
+                this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
+                this.config.Save();
+            }
+
+            ImGui.Spacing();
+            if (useGenderedVoicePresets)
+            {
+                if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTAzureEnabledUPresetSelect",
+                        this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.Azure), presets))
+                {
+                    this.config.Save();
+                }
+                
+                if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTAzureEnabledMPresetSelect",
+                        this.config.VoicePresetConfig.GetMalePresets(TTSBackend.Azure), presets))
+                {
+                    this.config.Save();
+                }
+                
+                if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTAzureEnabledFPresetSelect",
+                        this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.Azure), presets))
+                {
+                    this.config.Save();
+                }
+
+                BackendUI.ImGuiMultiVoiceHint();
+            }
         }
     }
     
