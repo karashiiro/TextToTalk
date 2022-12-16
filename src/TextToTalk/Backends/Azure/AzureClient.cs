@@ -34,6 +34,7 @@ public class AzureClient : IDisposable
     public IList<string> GetVoices()
     {
         var res = this.synthesizer.GetVoicesAsync().GetAwaiter().GetResult();
+        HandleResult(res);
         return res.Voices.Select(voice => voice.Name).ToList();
     }
 
@@ -45,38 +46,14 @@ public class AzureClient : IDisposable
         this.speechConfig.SpeechSynthesisVoiceName = voice;
         var res = await this.synthesizer.SpeakSsmlAsync(ssml);
 
-        HandleResult(res, volume, source);
-    }
-
-    private void HandleResult(SpeechSynthesisResult res, float volume, TextSource source)
-    {
-        if (res.Reason != ResultReason.Canceled)
-        {
-            var cancellation = SpeechSynthesisCancellationDetails.FromResult(res);
-            if (cancellation.Reason == CancellationReason.Error)
-            {
-                PluginLog.LogError($"Speech request error: ({cancellation.ErrorCode}) \"{cancellation.ErrorDetails}\"");
-            }
-            else
-            {
-                PluginLog.LogWarning($"Speech request failed in state \"{cancellation.Reason}\"");
-            }
-
-            return;
-        }
-
-        if (res.Reason != ResultReason.SynthesizingAudioCompleted)
-        {
-            PluginLog.LogWarning($"Speech request completed in incomplete state \"{res.Reason}\"");
-            return;
-        }
-
+        HandleResult(res);
+        
         var soundStream = new MemoryStream(res.AudioData);
         soundStream.Seek(0, SeekOrigin.Begin);
 
         this.soundQueue.EnqueueSound(soundStream, source, StreamFormat.Mp3, volume);
     }
-
+    
     public Task CancelAllSounds()
     {
         this.soundQueue.CancelAllSounds();
@@ -87,6 +64,37 @@ public class AzureClient : IDisposable
     {
         this.soundQueue.CancelFromSource(source);
         return Task.CompletedTask;
+    }
+    
+    private static void HandleResult(SynthesisVoicesResult res)
+    {
+        if (!string.IsNullOrEmpty(res.ErrorDetails))
+        {
+            PluginLog.LogError($"Azure request error: ({res.Reason}) \"{res.ErrorDetails}\"");
+        }
+    }
+
+    private static void HandleResult(SpeechSynthesisResult res)
+    {
+        if (res.Reason != ResultReason.Canceled)
+        {
+            var cancellation = SpeechSynthesisCancellationDetails.FromResult(res);
+            if (cancellation.Reason == CancellationReason.Error)
+            {
+                PluginLog.LogError($"Azure request error: ({cancellation.ErrorCode}) \"{cancellation.ErrorDetails}\"");
+            }
+            else
+            {
+                PluginLog.LogWarning($"Azure request failed in state \"{cancellation.Reason}\"");
+            }
+
+            return;
+        }
+
+        if (res.Reason != ResultReason.SynthesizingAudioCompleted)
+        {
+            PluginLog.LogWarning($"Speech synthesis request completed in incomplete state \"{res.Reason}\"");
+        }
     }
 
     public void Dispose()

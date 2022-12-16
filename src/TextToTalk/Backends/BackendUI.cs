@@ -14,6 +14,11 @@ public static class BackendUI
     {
         ImGui.TextColored(Red, "Voice not supported on this engine");
     }
+    
+    public static void ImGuiVoiceNotSelected()
+    {
+        ImGui.TextColored(Red, "No voice selected");
+    }
 
     public static void ImGuiMultiVoiceHint()
     {

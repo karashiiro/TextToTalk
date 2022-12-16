@@ -25,7 +25,7 @@ public class AzureBackendUI
 
     private string region = string.Empty;
     private string subscriptionKey = string.Empty;
-    
+
     public AzureBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http,
         Func<AzureClient> getAzure, Action<AzureClient> setAzure, Func<IList<string>> getVoices,
         Action<IList<string>> setVoices)
@@ -54,7 +54,7 @@ public class AzureBackendUI
             AzureLogin();
         }
     }
-    
+
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
 
     public void DrawSettings(IConfigUIDelegates helpers)
@@ -71,13 +71,14 @@ public class AzureBackendUI
 
             AzureLogin();
         }
-        
+
         ImGui.SameLine();
         if (ImGui.Button("Register##TTTRegisterAzureAuth"))
         {
-            WebBrowser.Open("https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/index-text-to-speech");
+            WebBrowser.Open(
+                "https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/index-text-to-speech");
         }
-        
+
         ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
 
         ImGui.Spacing();
@@ -126,14 +127,37 @@ public class AzureBackendUI
 
             this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
         }
-        
+
         var presetName = currentVoicePreset.Name;
         if (ImGui.InputText("Preset name##TTTAzureVoice99", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
             this.config.Save();
         }
-        
+
+        {
+            var voices = this.getVoices.Invoke();
+            var voiceArray = voices.ToArray();
+            var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
+            if (ImGui.Combo("Voice##TTTAzureVoice98", ref voiceIndex, voiceArray, voices.Count))
+            {
+                currentVoicePreset.VoiceName = voiceArray[voiceIndex];
+                this.config.Save();
+            }
+
+            switch (voices.Count)
+            {
+                case 0:
+                    ImGui.TextColored(BackendUI.Red,
+                        "No voices are available on this voice engine for the current region.\n" +
+                        "Please log in using a different region.");
+                    break;
+                case > 0 when !voices.Any(v => v == currentVoicePreset.VoiceName):
+                    BackendUI.ImGuiVoiceNotSelected();
+                    break;
+            }
+        }
+
         var playbackRate = currentVoicePreset.PlaybackRate;
         if (ImGui.SliderInt("Playback rate##TTTAzureVoice8", ref playbackRate, 20, 200, "%d%%",
                 ImGuiSliderFlags.AlwaysClamp))
@@ -148,7 +172,7 @@ public class AzureBackendUI
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
         }
-        
+
         ImGui.Spacing();
 
         {
@@ -167,13 +191,13 @@ public class AzureBackendUI
                 {
                     this.config.Save();
                 }
-                
+
                 if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTAzureEnabledMPresetSelect",
                         this.config.VoicePresetConfig.GetMalePresets(TTSBackend.Azure), presets))
                 {
                     this.config.Save();
                 }
-                
+
                 if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTAzureEnabledFPresetSelect",
                         this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.Azure), presets))
                 {
@@ -184,7 +208,7 @@ public class AzureBackendUI
             }
         }
     }
-    
+
     private void AzureLogin()
     {
         var azure = this.getAzure.Invoke();
