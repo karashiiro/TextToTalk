@@ -5,24 +5,15 @@ using TextToTalk.Backends;
 
 namespace TextToTalk.Migrations;
 
-public class Migration1_18_2 : IConfigurationMigration
+public class Migration1_18_3 : IConfigurationMigration
 {
     public bool ShouldMigrate(PluginConfiguration config)
     {
-        return !config.MigratedTo1_18_2;
+        return !config.MigratedTo1_18_3;
     }
 
     public void Migrate(PluginConfiguration config)
     {
-        // This can be null if the configuration file was created on v1.18.1
-        if (config.VoicePresetConfig.CurrentVoicePresets != null)
-        {
-            foreach (var (backend, id) in config.VoicePresetConfig.CurrentVoicePresets)
-            {
-                config.VoicePresetConfig.CurrentVoicePreset[backend] = id;
-            }
-        }
-
         if (config.VoicePresetConfig.UngenderedVoicePresetsBroken != null)
         {
             foreach (var (backend, o) in config.VoicePresetConfig.UngenderedVoicePresetsBroken)
@@ -98,6 +89,6 @@ public class Migration1_18_2 : IConfigurationMigration
             }
         }
 
-        config.MigratedTo1_18_2 = true;
+        config.MigratedTo1_18_3 = true;
     }
 }

@@ -21,11 +21,11 @@ public class VoicePresetConfiguration
     [Obsolete("Use CurrentVoicePreset.")] public IDictionary<TTSBackend, int> CurrentVoicePresets { get; set; }
 
     [JsonProperty("UngenderedVoicePresets")]
-    public IDictionary<TTSBackend, int> UngenderedVoicePresetsBroken { get; init; }
+    public IDictionary<TTSBackend, object> UngenderedVoicePresetsBroken { get; init; }
 
-    [JsonProperty("MaleVoicePresets")] public IDictionary<TTSBackend, int> MaleVoicePresetsBroken { get; init; }
+    [JsonProperty("MaleVoicePresets")] public IDictionary<TTSBackend, object> MaleVoicePresetsBroken { get; init; }
 
-    [JsonProperty("FemaleVoicePresets")] public IDictionary<TTSBackend, int> FemaleVoicePresetsBroken { get; init; }
+    [JsonProperty("FemaleVoicePresets")] public IDictionary<TTSBackend, object> FemaleVoicePresetsBroken { get; init; }
 
     #endregion
 
