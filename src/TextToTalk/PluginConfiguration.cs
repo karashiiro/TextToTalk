@@ -232,12 +232,13 @@ namespace TextToTalk
                 MigratedTo1_5 = true;
                 MigratedTo1_6 = true;
                 MigratedTo1_17 = true;
+                MigratedTo1_18_2 = true;
             }
 
             if (InitializedEver)
             {
                 var migrations = new IConfigurationMigration[]
-                    { new Migration1_5(), new Migration1_6(), new Migration1_17() };
+                    { new Migration1_5(), new Migration1_6(), new Migration1_17(), new Migration1_18_2() };
                 foreach (var migration in migrations)
                 {
                     if (migration.ShouldMigrate(this))
