@@ -1,7 +1,7 @@
 [![Download count](https://img.shields.io/endpoint?url=https://vz32sgcoal.execute-api.us-east-1.amazonaws.com/TextToTalk)](https://github.com/karashiiro/TextToTalk)
 
 # TextToTalk
-Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, Amazon Polly, and more!
+Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, several TTS providers, and more!
 
 ## Commands
 * `/tttconfig`: Opens the configuration window.
@@ -18,6 +18,7 @@ Direct links to information will be added here eventually.
 ## Supported TTS providers
 * System (Windows)
 * AWS Polly
+* Azure (Microsoft Cognitive Services)
 * Uberduck
 * Websocket
 
