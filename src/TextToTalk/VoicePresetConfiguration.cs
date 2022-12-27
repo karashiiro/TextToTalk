@@ -16,13 +16,20 @@ namespace TextToTalk;
 
 public class VoicePresetConfiguration
 {
+    #region Obsolete Members
+
+    [Obsolete("Use CurrentVoicePreset.")]
+    public IDictionary<TTSBackend, int> CurrentVoicePresets { get; set; }
+
+    #endregion
+    
     [JsonIgnore] public IList<VoicePreset> VoicePresets { get; private set; }
 
     // Newtonsoft.Json doesn't like handling inheritance. This should probably go into LiteDB or something instead.
     // Saving VoicePreset objects correctly saves type information, but that gets completely ignored on load. It
     // also can't be loaded from within the plugin because of restrictions on collectable assemblies.
     [JsonProperty] private IList<IDictionary<string, object>> VoicePresetsRaw { get; set; }
-
+    
     public IDictionary<TTSBackend, int> CurrentVoicePreset { get; init; }
     public IDictionary<TTSBackend, SortedSet<int>> UngenderedVoicePresets { get; init; }
     public IDictionary<TTSBackend, SortedSet<int>> MaleVoicePresets { get; init; }

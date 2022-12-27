@@ -100,6 +100,7 @@ namespace TextToTalk
         public bool MigratedTo1_5 { get; set; }
         public bool MigratedTo1_6 { get; set; }
         public bool MigratedTo1_17 { get; set; }
+        public bool MigratedTo1_18_2 { get; set; }
 
         public IList<Trigger> Bad { get; set; }
         public IList<Trigger> Good { get; set; }
