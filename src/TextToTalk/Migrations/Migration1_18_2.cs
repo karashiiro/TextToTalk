@@ -23,6 +23,30 @@ public class Migration1_18_2 : IConfigurationMigration
             }
         }
 
+        if (config.VoicePresetConfig.UngenderedVoicePresetsBroken != null)
+        {
+            foreach (var (backend, id) in config.VoicePresetConfig.UngenderedVoicePresetsBroken)
+            {
+                config.VoicePresetConfig.GetUngenderedPresets(backend).Add(id);
+            }
+        }
+        
+        if (config.VoicePresetConfig.MaleVoicePresetsBroken != null)
+        {
+            foreach (var (backend, id) in config.VoicePresetConfig.MaleVoicePresetsBroken)
+            {
+                config.VoicePresetConfig.GetMalePresets(backend).Add(id);
+            }
+        }
+        
+        if (config.VoicePresetConfig.FemaleVoicePresetsBroken != null)
+        {
+            foreach (var (backend, id) in config.VoicePresetConfig.FemaleVoicePresetsBroken)
+            {
+                config.VoicePresetConfig.GetFemalePresets(backend).Add(id);
+            }
+        }
+
         config.MigratedTo1_18_2 = true;
     }
 }

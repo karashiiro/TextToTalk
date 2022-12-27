@@ -18,21 +18,32 @@ public class VoicePresetConfiguration
 {
     #region Obsolete Members
 
-    [Obsolete("Use CurrentVoicePreset.")]
-    public IDictionary<TTSBackend, int> CurrentVoicePresets { get; set; }
+    [Obsolete("Use CurrentVoicePreset.")] public IDictionary<TTSBackend, int> CurrentVoicePresets { get; set; }
+
+    [JsonProperty("UngenderedVoicePresets")]
+    public IDictionary<TTSBackend, int> UngenderedVoicePresetsBroken { get; init; }
+
+    [JsonProperty("MaleVoicePresets")] public IDictionary<TTSBackend, int> MaleVoicePresetsBroken { get; init; }
+
+    [JsonProperty("FemaleVoicePresets")] public IDictionary<TTSBackend, int> FemaleVoicePresetsBroken { get; init; }
 
     #endregion
-    
+
     [JsonIgnore] public IList<VoicePreset> VoicePresets { get; private set; }
 
     // Newtonsoft.Json doesn't like handling inheritance. This should probably go into LiteDB or something instead.
     // Saving VoicePreset objects correctly saves type information, but that gets completely ignored on load. It
     // also can't be loaded from within the plugin because of restrictions on collectable assemblies.
     [JsonProperty] private IList<IDictionary<string, object>> VoicePresetsRaw { get; set; }
-    
+
     public IDictionary<TTSBackend, int> CurrentVoicePreset { get; init; }
+
+    [JsonProperty("_UngenderedVoicePresets")]
     public IDictionary<TTSBackend, SortedSet<int>> UngenderedVoicePresets { get; init; }
-    public IDictionary<TTSBackend, SortedSet<int>> MaleVoicePresets { get; init; }
+
+    [JsonProperty("_MaleVoicePresets")] public IDictionary<TTSBackend, SortedSet<int>> MaleVoicePresets { get; init; }
+
+    [JsonProperty("_FemaleVoicePresets")]
     public IDictionary<TTSBackend, SortedSet<int>> FemaleVoicePresets { get; init; }
 
     [JsonIgnore] private static readonly JsonSerializerSettings SerializerSettings = new()
@@ -70,7 +81,7 @@ public class VoicePresetConfiguration
         UngenderedVoicePresets[backend] = newPresets;
         return newPresets;
     }
-    
+
     /// <summary>
     /// Retrieves the male voice presets for the specified backend, creating the set if it
     /// doesn't yet exist.
@@ -88,7 +99,7 @@ public class VoicePresetConfiguration
         MaleVoicePresets[backend] = newPresets;
         return newPresets;
     }
-    
+
     /// <summary>
     /// Retrieves the female voice presets for the specified backend, creating the set if it
     /// doesn't yet exist.
