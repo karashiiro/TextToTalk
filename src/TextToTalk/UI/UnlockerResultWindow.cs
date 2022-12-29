@@ -8,9 +8,10 @@ namespace TextToTalk.UI
     {
         public string Text { get; set; }
 
-        public UnlockerResultWindow() : base("VoiceUnlocker Result", ImGuiWindowFlags.NoResize)
+        public UnlockerResultWindow() : base("VoiceUnlocker Result")
         {
             Size = new Vector2(320, 90);
+            SizeCondition = ImGuiCond.FirstUseEver;
         }
 
         public override void Draw()

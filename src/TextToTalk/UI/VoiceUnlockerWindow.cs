@@ -16,11 +16,12 @@ namespace TextToTalk.UI
 
         private readonly WindowController controller;
 
-        public VoiceUnlockerWindow(WindowController controller) : base("VoiceUnlocker", ImGuiWindowFlags.NoResize)
+        public VoiceUnlockerWindow(WindowController controller) : base("VoiceUnlocker")
         {
             this.controller = controller;
 
             Size = new Vector2(480, 320);
+            SizeCondition = ImGuiCond.FirstUseEver;
         }
 
         public override void PreDraw()
