@@ -143,15 +143,17 @@ public class PollyBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTPollyVoice5"))
         {
-            var otherPreset = this.config.VoicePresetConfig.VoicePresets.FirstOrDefault(
+            var voiceConfig = this.config.GetVoiceConfig();
+            
+            var otherPreset = voiceConfig.VoicePresets.FirstOrDefault(
                 p => p.Id != currentVoicePreset.Id && p.EnabledBackend == TTSBackend.AmazonPolly);
             this.config.SetCurrentVoicePreset(otherPreset?.Id ?? 0);
 
-            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
+            voiceConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
+            voiceConfig.MaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
+            voiceConfig.FemaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
 
-            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
+            voiceConfig.VoicePresets.Remove(currentVoicePreset);
         }
 
         var presetName = currentVoicePreset.Name;
@@ -237,20 +239,22 @@ public class PollyBackendUI
             ImGui.Spacing();
             if (useGenderedVoicePresets)
             {
+                var voiceConfig = this.config.GetVoiceConfig();
+                
                 if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTPollyEnabledUPresetSelect",
-                        this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.AmazonPolly), presets))
+                        voiceConfig.GetUngenderedPresets(TTSBackend.AmazonPolly), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTPollyEnabledMPresetSelect",
-                        this.config.VoicePresetConfig.GetMalePresets(TTSBackend.AmazonPolly), presets))
+                        voiceConfig.GetMalePresets(TTSBackend.AmazonPolly), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTPollyEnabledFPresetSelect",
-                        this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.AmazonPolly), presets))
+                        voiceConfig.GetFemalePresets(TTSBackend.AmazonPolly), presets))
                 {
                     this.config.Save();
                 }

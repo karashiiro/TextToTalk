@@ -97,14 +97,16 @@ public class UberduckBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTUberduckVoice5"))
         {
-            var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+            var voiceConfig = this.config.GetVoiceConfig();
+            
+            var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
 
-            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
+            voiceConfig.UngenderedVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
+            voiceConfig.MaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
+            voiceConfig.FemaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
 
-            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
+            voiceConfig.VoicePresets.Remove(currentVoicePreset);
         }
 
         var presetName = currentVoicePreset.Name;
@@ -162,20 +164,22 @@ public class UberduckBackendUI
             ImGui.Spacing();
             if (useGenderedVoicePresets)
             {
+                var voiceConfig = this.config.GetVoiceConfig();
+                
                 if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTUberduckVoice5",
-                        this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.Uberduck), presets))
+                        voiceConfig.GetUngenderedPresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTUberduckVoice3",
-                        this.config.VoicePresetConfig.GetMalePresets(TTSBackend.Uberduck), presets))
+                        voiceConfig.GetMalePresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }
                 
                 if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTUberduckVoice4",
-                        this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.Uberduck), presets))
+                        voiceConfig.GetFemalePresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }

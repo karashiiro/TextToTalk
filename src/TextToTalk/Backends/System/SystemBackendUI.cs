@@ -92,14 +92,16 @@ public class SystemBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTSystemVoice5"))
         {
-            var otherPreset = this.config.VoicePresetConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
+            var voiceConfig = this.config.GetVoiceConfig();
+            
+            var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
             
-            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
+            voiceConfig.UngenderedVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
+            voiceConfig.MaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
+            voiceConfig.FemaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
 
-            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
+            voiceConfig.VoicePresets.Remove(currentVoicePreset);
         }
 
         var presetName = currentVoicePreset.Name;
@@ -162,20 +164,22 @@ public class SystemBackendUI
 
         if (useGenderedVoicePresets)
         {
+            var voiceConfig = this.config.GetVoiceConfig();
+            
             if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTSystemVoice12",
-                    this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.System), presets))
+                    voiceConfig.GetUngenderedPresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }
 
             if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTSystemVoice10",
-                    this.config.VoicePresetConfig.GetMalePresets(TTSBackend.System), presets))
+                    voiceConfig.GetMalePresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }
 
             if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTSystemVoice11",
-                    this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.System), presets))
+                    voiceConfig.GetFemalePresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }

@@ -14,75 +14,75 @@ public class Migration1_18_3 : IConfigurationMigration
 
     public void Migrate(PluginConfiguration config)
     {
-        if (config.VoicePresetConfig.UngenderedVoicePresetsBroken != null)
+        if (config.GetVoiceConfig().UngenderedVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.VoicePresetConfig.UngenderedVoicePresetsBroken)
+            foreach (var (backend, o) in config.GetVoiceConfig().UngenderedVoicePresetsBroken)
             {
                 if (o is int id)
                 {
-                    config.VoicePresetConfig.GetUngenderedPresets(backend).Add(id);
+                    config.GetVoiceConfig().GetUngenderedPresets(backend).Add(id);
                 }
                 else if (o is IEnumerable<int> ids)
                 {
-                    if (config.VoicePresetConfig.UngenderedVoicePresets[backend] == null)
+                    if (config.GetVoiceConfig().UngenderedVoicePresets[backend] == null)
                     {
-                        config.VoicePresetConfig.UngenderedVoicePresets[backend] = new SortedSet<int>(ids);
+                        config.GetVoiceConfig().UngenderedVoicePresets[backend] = new SortedSet<int>(ids);
                     }
                     else
                     {
                         foreach (var idv in ids)
                         {
-                            config.VoicePresetConfig.GetUngenderedPresets(backend).Add(idv);
+                            config.GetVoiceConfig().GetUngenderedPresets(backend).Add(idv);
                         }
                     }
                 }
             }
         }
         
-        if (config.VoicePresetConfig.MaleVoicePresetsBroken != null)
+        if (config.GetVoiceConfig().MaleVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.VoicePresetConfig.MaleVoicePresetsBroken)
+            foreach (var (backend, o) in config.GetVoiceConfig().MaleVoicePresetsBroken)
             {
                 if (o is int id)
                 {
-                    config.VoicePresetConfig.GetMalePresets(backend).Add(id);
+                    config.GetVoiceConfig().GetMalePresets(backend).Add(id);
                 }
                 else if (o is IEnumerable<int> ids)
                 {
-                    if (config.VoicePresetConfig.MaleVoicePresets[backend] == null)
+                    if (config.GetVoiceConfig().MaleVoicePresets[backend] == null)
                     {
-                        config.VoicePresetConfig.MaleVoicePresets[backend] = new SortedSet<int>(ids);
+                        config.GetVoiceConfig().MaleVoicePresets[backend] = new SortedSet<int>(ids);
                     }
                     else
                     {
                         foreach (var idv in ids)
                         {
-                            config.VoicePresetConfig.GetMalePresets(backend).Add(idv);
+                            config.GetVoiceConfig().GetMalePresets(backend).Add(idv);
                         }
                     }
                 }
             }
         }
         
-        if (config.VoicePresetConfig.FemaleVoicePresetsBroken != null)
+        if (config.GetVoiceConfig().FemaleVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.VoicePresetConfig.FemaleVoicePresetsBroken)
+            foreach (var (backend, o) in config.GetVoiceConfig().FemaleVoicePresetsBroken)
             {
                 if (o is int id)
                 {
-                    config.VoicePresetConfig.GetFemalePresets(backend).Add(id);
+                    config.GetVoiceConfig().GetFemalePresets(backend).Add(id);
                 }
                 else if (o is IEnumerable<int> ids)
                 {
-                    if (config.VoicePresetConfig.FemaleVoicePresets[backend] == null)
+                    if (config.GetVoiceConfig().FemaleVoicePresets[backend] == null)
                     {
-                        config.VoicePresetConfig.FemaleVoicePresets[backend] = new SortedSet<int>(ids);
+                        config.GetVoiceConfig().FemaleVoicePresets[backend] = new SortedSet<int>(ids);
                     }
                     else
                     {
                         foreach (var idv in ids)
                         {
-                            config.VoicePresetConfig.GetFemalePresets(backend).Add(idv);
+                            config.GetVoiceConfig().GetFemalePresets(backend).Add(idv);
                         }
                     }
                 }

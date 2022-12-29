@@ -32,7 +32,7 @@ public class Migration1_17 : IConfigurationMigration
                 if (preset.GetType() == typeof(VoicePreset))
                 {
                     PluginLog.Log($"Migrating preset {preset.Name}");
-                    config.VoicePresetConfig.VoicePresets.Add(new SystemVoicePreset
+                    config.GetVoiceConfig().VoicePresets.Add(new SystemVoicePreset
                     {
                         Id = preset.Id,
                         Name = preset.Name,
@@ -44,12 +44,12 @@ public class Migration1_17 : IConfigurationMigration
                 }
             }
 
-            config.VoicePresetConfig.CurrentVoicePreset[TTSBackend.System] = config.CurrentVoicePresetId;
-            config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.System] =
+            config.GetVoiceConfig().CurrentVoicePreset[TTSBackend.System] = config.CurrentVoicePresetId;
+            config.GetVoiceConfig().UngenderedVoicePresets[TTSBackend.System] =
                 new SortedSet<int> { config.UngenderedVoicePresetId };
-            config.VoicePresetConfig.MaleVoicePresets[TTSBackend.System] =
+            config.GetVoiceConfig().MaleVoicePresets[TTSBackend.System] =
                 new SortedSet<int> { config.MaleVoicePresetId };
-            config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.System] =
+            config.GetVoiceConfig().FemaleVoicePresets[TTSBackend.System] =
                 new SortedSet<int> { config.FemaleVoicePresetId };
         }
 
@@ -63,8 +63,8 @@ public class Migration1_17 : IConfigurationMigration
                 defaultPreset.VoiceName = config.PollyVoiceUngendered ?? config.PollyVoice ?? VoiceId.Matthew;
                 defaultPreset.PlaybackRate = config.PollyPlaybackRate;
                 defaultPreset.SampleRate = config.PollySampleRate;
-                config.VoicePresetConfig.CurrentVoicePreset[TTSBackend.AmazonPolly] = defaultPreset.Id;
-                config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly] =
+                config.GetVoiceConfig().CurrentVoicePreset[TTSBackend.AmazonPolly] = defaultPreset.Id;
+                config.GetVoiceConfig().UngenderedVoicePresets[TTSBackend.AmazonPolly] =
                     new SortedSet<int> { defaultPreset.Id };
             }
             
@@ -76,7 +76,7 @@ public class Migration1_17 : IConfigurationMigration
                 malePreset.VoiceName = config.PollyVoiceMale ?? VoiceId.Matthew;
                 malePreset.PlaybackRate = config.PollyPlaybackRate;
                 malePreset.SampleRate = config.PollySampleRate;
-                config.VoicePresetConfig.MaleVoicePresets[TTSBackend.AmazonPolly] =
+                config.GetVoiceConfig().MaleVoicePresets[TTSBackend.AmazonPolly] =
                     new SortedSet<int> { malePreset.Id };
             }
             
@@ -88,7 +88,7 @@ public class Migration1_17 : IConfigurationMigration
                 femalePreset.VoiceName = config.PollyVoiceFemale ?? VoiceId.Matthew;
                 femalePreset.PlaybackRate = config.PollyPlaybackRate;
                 femalePreset.SampleRate = config.PollySampleRate;
-                config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.AmazonPolly] =
+                config.GetVoiceConfig().FemaleVoicePresets[TTSBackend.AmazonPolly] =
                     new SortedSet<int> { femalePreset.Id };
             }
         }
@@ -101,8 +101,8 @@ public class Migration1_17 : IConfigurationMigration
                 defaultPreset.Volume = config.UberduckVolume;
                 defaultPreset.PlaybackRate = config.UberduckPlaybackRate;
                 defaultPreset.VoiceName = config.UberduckVoiceUngendered ?? config.UberduckVoice ?? "zwf";
-                config.VoicePresetConfig.CurrentVoicePreset[TTSBackend.Uberduck] = defaultPreset.Id;
-                config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Uberduck] =
+                config.GetVoiceConfig().CurrentVoicePreset[TTSBackend.Uberduck] = defaultPreset.Id;
+                config.GetVoiceConfig().UngenderedVoicePresets[TTSBackend.Uberduck] =
                     new SortedSet<int> { defaultPreset.Id };
             }
             
@@ -112,7 +112,7 @@ public class Migration1_17 : IConfigurationMigration
                 malePreset.Volume = config.UberduckVolume;
                 malePreset.PlaybackRate = config.UberduckPlaybackRate;
                 malePreset.VoiceName = config.UberduckVoiceMale ?? "zwf";
-                config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Uberduck] = new SortedSet<int> { malePreset.Id };
+                config.GetVoiceConfig().MaleVoicePresets[TTSBackend.Uberduck] = new SortedSet<int> { malePreset.Id };
             }
             
             if (config.UseGenderedVoicePresets && config.TryCreateVoicePreset<UberduckVoicePreset>(out var femalePreset))
@@ -121,7 +121,7 @@ public class Migration1_17 : IConfigurationMigration
                 femalePreset.Volume = config.UberduckVolume;
                 femalePreset.PlaybackRate = config.UberduckPlaybackRate;
                 femalePreset.VoiceName = config.UberduckVoiceFemale ?? "zwf";
-                config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Uberduck] =
+                config.GetVoiceConfig().FemaleVoicePresets[TTSBackend.Uberduck] =
                     new SortedSet<int> { femalePreset.Id };
             }
         }
@@ -131,21 +131,21 @@ public class Migration1_17 : IConfigurationMigration
             if (config.TryCreateVoicePreset<WebsocketVoicePreset>(out var defaultPreset))
             {
                 defaultPreset.Name = "Default";
-                config.VoicePresetConfig.CurrentVoicePreset[TTSBackend.Websocket] = defaultPreset.Id;
-                config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Websocket] =
+                config.GetVoiceConfig().CurrentVoicePreset[TTSBackend.Websocket] = defaultPreset.Id;
+                config.GetVoiceConfig().UngenderedVoicePresets[TTSBackend.Websocket] =
                     new SortedSet<int> { defaultPreset.Id };
             }
             
             if (config.UseGenderedVoicePresets && config.TryCreateVoicePreset<WebsocketVoicePreset>(out var malePreset))
             {
                 malePreset.Name = "Male";
-                config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Websocket] = new SortedSet<int> { malePreset.Id };
+                config.GetVoiceConfig().MaleVoicePresets[TTSBackend.Websocket] = new SortedSet<int> { malePreset.Id };
             }
             
             if (config.UseGenderedVoicePresets && config.TryCreateVoicePreset<WebsocketVoicePreset>(out var femalePreset))
             {
                 femalePreset.Name = "Female";
-                config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Websocket] =
+                config.GetVoiceConfig().FemaleVoicePresets[TTSBackend.Websocket] =
                     new SortedSet<int> { femalePreset.Id };
             }
         }
@@ -169,7 +169,7 @@ public class Migration1_17 : IConfigurationMigration
 
         if (preset.TrySetDefaultValues())
         {
-            config.VoicePresetConfig.VoicePresets.Add(preset);
+            config.GetVoiceConfig().VoicePresets.Add(preset);
             return true;
         }
 

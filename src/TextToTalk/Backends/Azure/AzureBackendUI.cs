@@ -117,15 +117,17 @@ public class AzureBackendUI
         ImGui.SameLine();
         if (ImGui.Button("Delete preset##TTTAzureVoice5"))
         {
-            var otherPreset = this.config.VoicePresetConfig.VoicePresets.FirstOrDefault(
+            var voiceConfig = this.config.GetVoiceConfig();
+            
+            var otherPreset = voiceConfig.VoicePresets.FirstOrDefault(
                 p => p.Id != currentVoicePreset.Id && p.EnabledBackend == TTSBackend.Azure);
             this.config.SetCurrentVoicePreset(otherPreset?.Id ?? 0);
 
-            this.config.VoicePresetConfig.UngenderedVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.MaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
-            this.config.VoicePresetConfig.FemaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
+            voiceConfig.UngenderedVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
+            voiceConfig.MaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
+            voiceConfig.FemaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
 
-            this.config.VoicePresetConfig.VoicePresets.Remove(currentVoicePreset);
+            voiceConfig.VoicePresets.Remove(currentVoicePreset);
         }
 
         var presetName = currentVoicePreset.Name;
@@ -187,20 +189,22 @@ public class AzureBackendUI
             ImGui.Spacing();
             if (useGenderedVoicePresets)
             {
+                var voiceConfig = this.config.GetVoiceConfig();
+                
                 if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTAzureEnabledUPresetSelect",
-                        this.config.VoicePresetConfig.GetUngenderedPresets(TTSBackend.Azure), presets))
+                        voiceConfig.GetUngenderedPresets(TTSBackend.Azure), presets))
                 {
                     this.config.Save();
                 }
 
                 if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTAzureEnabledMPresetSelect",
-                        this.config.VoicePresetConfig.GetMalePresets(TTSBackend.Azure), presets))
+                        voiceConfig.GetMalePresets(TTSBackend.Azure), presets))
                 {
                     this.config.Save();
                 }
 
                 if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTAzureEnabledFPresetSelect",
-                        this.config.VoicePresetConfig.GetFemalePresets(TTSBackend.Azure), presets))
+                        voiceConfig.GetFemalePresets(TTSBackend.Azure), presets))
                 {
                     this.config.Save();
                 }

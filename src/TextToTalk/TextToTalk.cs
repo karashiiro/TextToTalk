@@ -96,7 +96,7 @@ namespace TextToTalk
             this.backendManager = new VoiceBackendManager(config, this.http, this.sharedState);
 
             this.playerService = new PlayerService(this.config.Players, this.config.PlayerVoicePresets,
-                this.config.VoicePresetConfig.VoicePresets);
+                this.config.GetVoiceConfig().VoicePresets);
 
             var unlockerResultWindow = new UnlockerResultWindow();
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
