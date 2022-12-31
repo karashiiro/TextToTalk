@@ -9,4 +9,7 @@ public class UberduckVoice
 
     [JsonProperty("name")]
     public string Name { get; init; }
+    
+    [JsonProperty("category")]
+    public string Category { get; init; }
 }

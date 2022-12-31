@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -26,11 +28,15 @@ public class UberduckClient
         this.soundQueue = soundQueue;
     }
 
-    public async Task<IList<UberduckVoice>> GetVoices()
+    public async Task<IDictionary<string, IList<UberduckVoice>>> GetVoices()
     {
         var voicesRes = await this.http.GetStringAsync(new Uri("https://api.uberduck.ai/voices?mode=tts-basic"));
         var voices = JsonConvert.DeserializeObject<IList<UberduckVoice>>(voicesRes);
-        return voices;
+        return voices
+            .GroupBy(v => v.Category)
+            .ToImmutableSortedDictionary(
+                g => g.Key,
+                g => (IList<UberduckVoice>)g.OrderByDescending(v => v.DisplayName).ToList());
     }
 
     public async Task Say(string voice, int playbackRate, float volume, TextSource source, string text)
@@ -93,14 +99,15 @@ public class UberduckClient
         return SendRequest<UberduckSpeechStatusResponse>("/speak-status", $"uuid={uuid}");
     }
 
-    private async Task<TResponse> SendRequest<TResponse>(string endpoint, string query = "", HttpContent reqContent = null) where TResponse : class
+    private async Task<TResponse> SendRequest<TResponse>(string endpoint, string query = "",
+        HttpContent reqContent = null) where TResponse : class
     {
         var uriBuilder = new UriBuilder(UrlBase)
         {
             Path = endpoint,
             Query = query,
         };
-        
+
         using var req = new HttpRequestMessage(reqContent != null ? HttpMethod.Post : HttpMethod.Get, uriBuilder.Uri);
         AddAuthorization(req);
 
@@ -116,7 +123,7 @@ public class UberduckClient
             var detail = JsonConvert.DeserializeObject<UberduckFailedResponse>(resContent)?.Detail;
             throw new UberduckUnauthorizedException(detail);
         }
-        
+
         if (!res.IsSuccessStatusCode)
         {
             var detail = JsonConvert.DeserializeObject<UberduckFailedResponse>(resContent)?.Detail;
@@ -141,37 +148,29 @@ public class UberduckClient
 
     private class UberduckSpeechRequest
     {
-        [JsonProperty("speech")]
-        public string Speech { get; init; }
+        [JsonProperty("speech")] public string Speech { get; init; }
 
-        [JsonProperty("voice")]
-        public string Voice { get; init; }
+        [JsonProperty("voice")] public string Voice { get; init; }
     }
 
     private class UberduckSpeechResponse
     {
-        [JsonProperty("uuid")]
-        public string Uuid { get; init; }
+        [JsonProperty("uuid")] public string Uuid { get; init; }
     }
 
     private class UberduckFailedResponse
     {
-        [JsonProperty("detail")]
-        public string Detail { get; set; }
+        [JsonProperty("detail")] public string Detail { get; set; }
     }
 
     private class UberduckSpeechStatusResponse
     {
-        [JsonProperty("started_at")]
-        public DateTime StartedAt { get; init; }
+        [JsonProperty("started_at")] public DateTime StartedAt { get; init; }
 
-        [JsonProperty("failed_at")]
-        public DateTime? FailedAt { get; init; }
+        [JsonProperty("failed_at")] public DateTime? FailedAt { get; init; }
 
-        [JsonProperty("finished_at")]
-        public DateTime? FinishedAt { get; init; }
+        [JsonProperty("finished_at")] public DateTime? FinishedAt { get; init; }
 
-        [JsonProperty("path")]
-        public string Path { get; init; }
+        [JsonProperty("path")] public string Path { get; init; }
     }
 }

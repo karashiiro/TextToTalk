@@ -10,13 +10,13 @@ public class UberduckBackendUI
 {
     private readonly PluginConfiguration config;
     private readonly UberduckClient uberduck;
-    private readonly Func<IList<UberduckVoice>> getVoices;
+    private readonly Func<IDictionary<string, IList<UberduckVoice>>> getVoices;
 
     private string apiKey = string.Empty;
     private string apiSecret = string.Empty;
 
     public UberduckBackendUI(PluginConfiguration config, UberduckClient uberduck,
-        Func<IList<UberduckVoice>> getVoices)
+        Func<IDictionary<string, IList<UberduckVoice>>> getVoices)
     {
         this.config = config;
         this.uberduck = uberduck;
@@ -87,6 +87,7 @@ public class UberduckBackendUI
             this.config.TryCreateVoicePreset<UberduckVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
+            this.config.Save();
         }
 
         if (!presets.Any() || currentVoicePreset is null)
@@ -98,7 +99,7 @@ public class UberduckBackendUI
         if (ImGui.Button("Delete preset##TTTUberduckVoice5"))
         {
             var voiceConfig = this.config.GetVoiceConfig();
-            
+
             var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
 
@@ -110,26 +111,45 @@ public class UberduckBackendUI
         }
 
         var presetName = currentVoicePreset.Name;
-        if (ImGui.InputText("Preset name##TTUberduckVoice99", ref presetName, 64))
+        if (ImGui.InputText("Preset name##TTTUberduckVoice99", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
             this.config.Save();
         }
 
         {
-            var voices = this.getVoices.Invoke();
-            var voiceArray = voices.Select(v => v.DisplayName).ToArray();
-            var voiceIdArray = voices.Select(v => v.Name).ToArray();
-            var voiceIndex = Array.IndexOf(voiceIdArray, currentVoicePreset.VoiceName);
-            if (ImGui.Combo("Voice##TTTUberduckVoice5", ref voiceIndex, voiceArray, voices.Count))
+            var voiceCategories = this.getVoices.Invoke();
+            var voiceCategoriesFlat = voiceCategories.SelectMany(vc => vc.Value).ToList();
+            var voiceDisplayNames = voiceCategoriesFlat.Select(v => v.DisplayName).ToArray();
+            var voiceIds = voiceCategoriesFlat.Select(v => v.Name).ToArray();
+            var voiceIndex = Array.IndexOf(voiceIds, currentVoicePreset.VoiceName);
+            if (ImGui.BeginCombo("Voice##TTTUberduckVoice5", voiceDisplayNames[voiceIndex]))
             {
-                currentVoicePreset.VoiceName = voiceIdArray[voiceIndex];
-                this.config.Save();
+                foreach (var (category, voices) in voiceCategories)
+                {
+                    ImGui.Selectable(category, false, ImGuiSelectableFlags.Disabled);
+                    foreach (var voice in voices)
+                    {
+                        if (ImGui.Selectable($"  {voice.DisplayName}"))
+                        {
+                            currentVoicePreset.VoiceName = voice.Name;
+                            this.config.Save();
+                        }
+
+                        if (voice.Name == currentVoicePreset.VoiceName)
+                        {
+                            ImGui.SetItemDefaultFocus();
+                        }
+                    }
+                }
+
+                ImGui.EndCombo();
             }
 
-            if (voices.Count == 0)
+            if (voiceCategoriesFlat.Count == 0)
             {
-                ImGui.TextColored(BackendUI.Red, "No voices were found. This might indicate a temporary service outage.");
+                ImGui.TextColored(BackendUI.Red,
+                    "No voices were found. This might indicate a temporary service outage.");
             }
         }
 
@@ -165,19 +185,19 @@ public class UberduckBackendUI
             if (useGenderedVoicePresets)
             {
                 var voiceConfig = this.config.GetVoiceConfig();
-                
+
                 if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTUberduckVoice5",
                         voiceConfig.GetUngenderedPresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }
-                
+
                 if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTUberduckVoice3",
                         voiceConfig.GetMalePresets(TTSBackend.Uberduck), presets))
                 {
                     this.config.Save();
                 }
-                
+
                 if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTUberduckVoice4",
                         voiceConfig.GetFemalePresets(TTSBackend.Uberduck), presets))
                 {
