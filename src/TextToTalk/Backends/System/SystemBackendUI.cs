@@ -82,6 +82,7 @@ public class SystemBackendUI
             this.config.TryCreateVoicePreset<SystemVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
+            this.config.Save();
         }
 
         if (!presets.Any() || currentVoicePreset is null)

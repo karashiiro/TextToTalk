@@ -107,6 +107,7 @@ public class AzureBackendUI
             this.config.TryCreateVoicePreset<AzureVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
+            this.config.Save();
         }
 
         if (!presets.Any() || currentVoicePreset is null)

@@ -133,6 +133,7 @@ public class PollyBackendUI
             this.config.TryCreateVoicePreset<PollyVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
+            this.config.Save();
         }
 
         if (!presets.Any() || currentVoicePreset is null)
