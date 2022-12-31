@@ -21,11 +21,15 @@
         BeneficialEffectOnYouEnded = 2224,
         DamageDealtByYou = 2729,
         DetrimentalEffectsInflictedByYou = 2735,
+        EnemiesDefeatedByYou = 2874,
         ActionUsedByOtherPlayer = 8235,
         BeneficialEffectOnOtherPlayer = 8750,
         DetrimentalEffectOnOtherPlayer = 8751,
         BeneficialEffectOnOtherPlayerEnded = 8752,
         FreeCompanyMemberLoginNotifications = 8774,
+        ActionReadiedByEngagedEnemy = 10283,
+        DamagedYouAreDealt = 10409,
+        FailedAttacksOnYou = 10410,
         DetrimentalEffectOnEnemyEnded = 10929,
     }
 }
