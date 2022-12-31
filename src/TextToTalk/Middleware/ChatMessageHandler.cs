@@ -21,7 +21,8 @@ public class ChatMessageHandler
 
     public Action<GameObject, string, TextSource> Say { get; set; }
 
-    public ChatMessageHandler(MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config, SharedState sharedState)
+    public ChatMessageHandler(MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config,
+        SharedState sharedState)
     {
         this.filters = filters;
         this.objects = objects;
@@ -29,7 +30,8 @@ public class ChatMessageHandler
         this.sharedState = sharedState;
     }
 
-    public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+    public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
+        ref bool handled)
     {
         var textValue = message.TextValue;
         if (!config.SayPlayerWorldName)
@@ -62,7 +64,7 @@ public class ChatMessageHandler
 
             textValue = cleanString.Build().TextValue;
         }
-        
+
         textValue = TalkUtils.NormalizePunctuation(textValue);
         if (this.filters.IsDuplicateQuestText(textValue)) return;
         PluginLog.LogDebug($"Chat ({type}): \"{textValue}\"");
@@ -89,8 +91,9 @@ public class ChatMessageHandler
                     }
 
                     var speakerNameToSay = sender.TextValue;
-                    
-                    if (!config.SayPlayerWorldName && sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
+
+                    if (!config.SayPlayerWorldName &&
+                        sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
                     {
                         // Remove world from spoken name
                         speakerNameToSay = player.PlayerName;
@@ -118,6 +121,12 @@ public class ChatMessageHandler
         if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
 
         var senderText = sender?.TextValue; // Can't access in lambda
+
+        if (!this.filters.ShouldSayFromYou(senderText))
+        {
+            return;
+        }
+
         var speaker = string.IsNullOrEmpty(senderText)
             ? null
             : this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == senderText);

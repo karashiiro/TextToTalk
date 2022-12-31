@@ -116,9 +116,7 @@ namespace TextToTalk
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
 
-            this.pluginInterface.UiBuilder.Draw += this.windows.Draw;
-
-            var filters = new MessageHandlerFilters(this.sharedState, config);
+            var filters = new MessageHandlerFilters(this.sharedState, config, this.clientState);
             this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, this.config,
                 this.sharedState, this.backendManager);
 

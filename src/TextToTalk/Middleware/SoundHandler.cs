@@ -13,14 +13,16 @@ namespace TextToTalk.Middleware;
 public class SoundHandler : IDisposable
 {
     // Signature strings drawn from Anna Clemens's Sound Filter plugin -
-    // https://git.anna.lgbt/ascclemens/SoundFilter/src/branch/main/SoundFilter/Filter.cs#L12
+    // https://git.anna.lgbt/ascclemens/SoundFilter/src/commit/3b8512b4cd2f3ea0a0d162db4fa251ccb61f7dc4/SoundFilter/Filter.cs#L12
     private const string LoadSoundFileSig = "E8 ?? ?? ?? ?? 48 85 C0 75 04 B0 F6";
+
     private const string PlaySpecificSoundSig =
         "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 33 F6 8B DA 48 8B F9 0F BA E2 0F";
 
     private delegate IntPtr LoadSoundFileDelegate(IntPtr resourceHandlePtr, uint arg2);
+
     private delegate IntPtr PlaySpecificSoundDelegate(IntPtr soundPtr, int arg2);
-    
+
     private readonly Hook<LoadSoundFileDelegate>? loadSoundFileHook;
     private readonly Hook<PlaySpecificSoundDelegate>? playSpecificSoundHook;
 
@@ -28,42 +30,49 @@ public class SoundHandler : IDisposable
     private static readonly int SoundDataOffset = Marshal.SizeOf<IntPtr>();
 
     private const string SoundContainerFileNameSuffix = ".scd";
+
     private static readonly Regex IgnoredSoundFileNameRegex = new(
         @"^(bgcommon|music|sound/(battle|foot|instruments|strm|vfx|voice/Vo_Emote|zingle))/");
+
     private static readonly Regex VoiceLineFileNameRegex = new(@"^cut/.*/(vo_|voice)");
     private readonly HashSet<IntPtr> knownVoiceLinePtrs = new();
-    
+
     private readonly TalkAddonHandler talkAddonHandler;
 
     public SoundHandler(TalkAddonHandler talkAddonHandler, SigScanner sigScanner)
     {
         this.talkAddonHandler = talkAddonHandler;
-        
+
         if (sigScanner.TryScanText(LoadSoundFileSig, out var loadSoundFilePtr))
         {
             this.loadSoundFileHook = Hook<LoadSoundFileDelegate>.FromAddress(loadSoundFilePtr, LoadSoundFileDetour);
             this.loadSoundFileHook.Enable();
             PluginLog.Log("Hooked into LoadSoundFile");
-        } else {
+        }
+        else
+        {
             PluginLog.LogError("Failed to hook into LoadSoundFile");
         }
-    
+
         if (sigScanner.TryScanText(PlaySpecificSoundSig, out var playSpecificSoundPtr))
         {
-            this.playSpecificSoundHook = Hook<PlaySpecificSoundDelegate>.FromAddress(playSpecificSoundPtr, PlaySpecificSoundDetour);
+            this.playSpecificSoundHook =
+                Hook<PlaySpecificSoundDelegate>.FromAddress(playSpecificSoundPtr, PlaySpecificSoundDetour);
             this.playSpecificSoundHook.Enable();
             PluginLog.Log("Hooked into PlaySpecificSound");
-        } else {
+        }
+        else
+        {
             PluginLog.LogError("Failed to hook into PlaySpecificSound");
         }
     }
-    
+
     public void Dispose()
     {
         this.loadSoundFileHook?.Dispose();
         this.playSpecificSoundHook?.Dispose();
     }
-    
+
     private IntPtr LoadSoundFileDetour(IntPtr resourceHandlePtr, uint arg2)
     {
         var result = this.loadSoundFileHook!.Original(resourceHandlePtr, arg2);
@@ -75,7 +84,7 @@ public class SoundHandler : IDisposable
             {
                 fileName = ((ResourceHandle*)resourceHandlePtr)->FileName.ToString();
             }
-            
+
             if (fileName.EndsWith(SoundContainerFileNameSuffix))
             {
                 var resourceDataPtr = Marshal.ReadIntPtr(resourceHandlePtr + ResourceDataOffset);
@@ -92,7 +101,7 @@ public class SoundHandler : IDisposable
                             isVoiceLine = true;
                         }
                     }
-                    
+
                     if (isVoiceLine)
                     {
                         PluginLog.Log($"Discovered voice line at address {resourceDataPtr:x}");

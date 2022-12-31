@@ -44,7 +44,7 @@ public class TalkAddonHandler
         FrameworkUpdate,
         VoiceLinePlayback,
     }
-    
+
     public unsafe void PollAddon(PollSource pollSource)
     {
         if (!this.clientState.IsLoggedIn)
@@ -114,6 +114,10 @@ public class TalkAddonHandler
         }
 
         var speaker = this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == talkAddonText.Speaker);
+        if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue))
+        {
+            return;
+        }
 
         // Cancel TTS if it's currently Talk addon text, if configured
         if (this.config.CancelSpeechOnTextAdvance &&

@@ -130,7 +130,7 @@ namespace TextToTalk
 
         public string PollyRegion { get; set; }
         public IList<string> PollyLexiconFiles { get; set; }
-        
+
         public IList<string> AzureLexiconFiles { get; set; }
 
         public bool RemoveStutterEnabled { get; set; } = true;
@@ -139,6 +139,8 @@ namespace TextToTalk
 
         public bool UsePlayerRateLimiter { get; set; }
         public float MessagesPerSecond { get; set; } = 5;
+
+        public bool SkipMessagesFromYou { get; set; }
 
         public IDictionary<Guid, PlayerInfo> Players { get; set; }
         public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
@@ -155,7 +157,7 @@ namespace TextToTalk
         [JsonIgnore] private DalamudPluginInterface pluginInterface;
 
         [JsonIgnore] private object cfgLock;
-        
+
         [JsonIgnore] private VoicePresetConfiguration voicePresetConfig;
 
         public PluginConfiguration()
@@ -241,7 +243,10 @@ namespace TextToTalk
             if (InitializedEver)
             {
                 var migrations = new IConfigurationMigration[]
-                    { new Migration1_5(), new Migration1_6(), new Migration1_17(), new Migration1_18_2(), new Migration1_18_3() };
+                {
+                    new Migration1_5(), new Migration1_6(), new Migration1_17(), new Migration1_18_2(),
+                    new Migration1_18_3()
+                };
                 foreach (var migration in migrations)
                 {
                     if (migration.ShouldMigrate(this))

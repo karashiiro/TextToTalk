@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.Text;
+﻿using Dalamud.Game.ClientState;
+using Dalamud.Game.Text;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Middleware;
@@ -7,11 +8,13 @@ public class MessageHandlerFilters
 {
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
+    private readonly ClientState clientState;
 
-    public MessageHandlerFilters(SharedState sharedState, PluginConfiguration config)
+    public MessageHandlerFilters(SharedState sharedState, PluginConfiguration config, ClientState clientState)
     {
         this.sharedState = sharedState;
         this.config = config;
+        this.clientState = clientState;
     }
 
     public bool IsDuplicateQuestText(string text)
@@ -41,6 +44,13 @@ public class MessageHandlerFilters
 
     public bool ShouldSaySender(XivChatType type)
     {
-        return this.config.EnableNameWithSay && (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
+        return this.config.EnableNameWithSay &&
+               (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
+    }
+
+    public bool ShouldSayFromYou(string speaker)
+    {
+        return !this.config.SkipMessagesFromYou && !string.IsNullOrEmpty(speaker) &&
+               this.clientState.LocalPlayer?.Name.TextValue == speaker;
     }
 }
