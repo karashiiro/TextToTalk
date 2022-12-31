@@ -90,6 +90,8 @@ namespace TextToTalk
             this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
+            WarnIfNoPresetsConfiguredForBackend(this.config.Backend);
+
             this.sharedState = new SharedState();
 
             this.http = new HttpClient();
@@ -119,10 +121,8 @@ namespace TextToTalk
             var filters = new MessageHandlerFilters(this.sharedState, config);
             this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, this.config,
                 this.sharedState, this.backendManager);
-            this.talkAddonHandler.Say += Say;
 
             this.chatMessageHandler = new ChatMessageHandler(filters, objects, config, this.sharedState);
-            this.chatMessageHandler.Say += Say;
 
             this.soundHandler = new SoundHandler(this.talkAddonHandler, sigScanner);
 
@@ -138,16 +138,10 @@ namespace TextToTalk
 
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
-            pi.UiBuilder.OpenConfigUi += OpenConfigUi;
-
-            this.chat.ChatMessage += OnChatMessage;
-            this.chat.ChatMessage += CheckFailedToBindPort;
-
-            this.framework.Update += PollTalkAddon;
-            this.framework.Update += CheckKeybindPressed;
-
             this.commandModule = new MainCommandModule(this.chat, commandManager, this.config, this.backendManager,
                 this.configurationWindow);
+
+            RegisterCallbacks();
         }
 
         private bool keysDown = false;
@@ -305,7 +299,7 @@ namespace TextToTalk
                 Gender.Female => this.config.GetCurrentFemaleVoicePresets<TPreset>(),
                 _ => this.config.GetCurrentUngenderedVoicePresets<TPreset>(),
             };
-            
+
             if (voicePresets == null || voicePresets.Length < 1)
             {
                 return null;
@@ -375,6 +369,54 @@ namespace TextToTalk
             this.configurationWindow.IsOpen = true;
         }
 
+        private void RegisterCallbacks()
+        {
+            this.pluginInterface.UiBuilder.Draw += this.windows.Draw;
+            this.talkAddonHandler.Say += Say;
+            this.chatMessageHandler.Say += Say;
+
+            this.pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+
+            this.chat.ChatMessage += OnChatMessage;
+            this.chat.ChatMessage += CheckFailedToBindPort;
+
+            this.framework.Update += PollTalkAddon;
+            this.framework.Update += CheckKeybindPressed;
+        }
+
+        private void UnregisterCallbacks()
+        {
+            this.framework.Update -= CheckKeybindPressed;
+            this.framework.Update -= PollTalkAddon;
+
+            this.chat.ChatMessage -= CheckFailedToBindPort;
+            this.chat.ChatMessage -= OnChatMessage;
+
+            this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+
+            this.chatMessageHandler.Say -= Say;
+            this.talkAddonHandler.Say -= Say;
+
+            this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
+        }
+
+        private void WarnIfNoPresetsConfiguredForBackend(TTSBackend backend)
+        {
+            if (this.config.Enabled &&
+                this.config.GetVoiceConfig().VoicePresets.All(vp => vp.EnabledBackend != backend))
+            {
+                try
+                {
+                    this.chat.Print(
+                        "You have no voice presets configured. Please create a voice preset in the TextToTalk configuration.");
+                }
+                catch (Exception e)
+                {
+                    PluginLog.LogError(e, "Failed to print chat message.");
+                }
+            }
+        }
+
         private static T Pipe<T>(T input, params Func<T, T>[] transforms)
         {
             return transforms.Aggregate(input, (agg, next) => next(agg));
@@ -385,23 +427,12 @@ namespace TextToTalk
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
-            
+
+            UnregisterCallbacks();
+
             this.commandModule.Dispose();
-            
-            this.framework.Update -= CheckKeybindPressed;
-            this.framework.Update -= PollTalkAddon;
 
-            this.chat.ChatMessage -= CheckFailedToBindPort;
-            this.chat.ChatMessage -= OnChatMessage;
-            
-            this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
-            
             this.soundHandler.Dispose();
-
-            this.chatMessageHandler.Say -= Say;
-            this.talkAddonHandler.Say -= Say;
-
-            this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
 
             this.pluginInterface.SavePluginConfig(this.config);
 
