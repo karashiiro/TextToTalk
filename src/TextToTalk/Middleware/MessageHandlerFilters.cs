@@ -50,7 +50,11 @@ public class MessageHandlerFilters
 
     public bool ShouldSayFromYou(string speaker)
     {
-        return !this.config.SkipMessagesFromYou && !string.IsNullOrEmpty(speaker) &&
-               this.clientState.LocalPlayer?.Name.TextValue == speaker;
+        if (string.IsNullOrEmpty(speaker))
+        {
+            return true;
+        }
+
+        return !this.config.SkipMessagesFromYou || this.clientState.LocalPlayer?.Name.TextValue != speaker;
     }
 }
