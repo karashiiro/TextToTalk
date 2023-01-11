@@ -1,5 +1,4 @@
 ﻿using Dalamud.Data;
-using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
