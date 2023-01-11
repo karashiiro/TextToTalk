@@ -19,15 +19,15 @@ public class SoundHandler : IDisposable
     private const string PlaySpecificSoundSig =
         "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 33 F6 8B DA 48 8B F9 0F BA E2 0F";
 
-    private delegate IntPtr LoadSoundFileDelegate(IntPtr resourceHandlePtr, uint arg2);
+    private delegate nint LoadSoundFileDelegate(nint resourceHandlePtr, uint arg2);
 
-    private delegate IntPtr PlaySpecificSoundDelegate(IntPtr soundPtr, int arg2);
+    private delegate nint PlaySpecificSoundDelegate(nint soundPtr, int arg2);
 
     private readonly Hook<LoadSoundFileDelegate>? loadSoundFileHook;
     private readonly Hook<PlaySpecificSoundDelegate>? playSpecificSoundHook;
 
     private static readonly int ResourceDataOffset = Marshal.SizeOf<ResourceHandle>();
-    private static readonly int SoundDataOffset = Marshal.SizeOf<IntPtr>();
+    private static readonly int SoundDataOffset = Marshal.SizeOf<nint>();
 
     private const string SoundContainerFileNameSuffix = ".scd";
 
@@ -35,7 +35,7 @@ public class SoundHandler : IDisposable
         @"^(bgcommon|music|sound/(battle|foot|instruments|strm|vfx|voice/Vo_Emote|zingle))/");
 
     private static readonly Regex VoiceLineFileNameRegex = new(@"^cut/.*/(vo_|voice)");
-    private readonly HashSet<IntPtr> knownVoiceLinePtrs = new();
+    private readonly HashSet<nint> knownVoiceLinePtrs = new();
 
     private readonly TalkAddonHandler talkAddonHandler;
 
@@ -73,7 +73,7 @@ public class SoundHandler : IDisposable
         this.playSpecificSoundHook?.Dispose();
     }
 
-    private IntPtr LoadSoundFileDetour(IntPtr resourceHandlePtr, uint arg2)
+    private nint LoadSoundFileDetour(nint resourceHandlePtr, uint arg2)
     {
         var result = this.loadSoundFileHook!.Original(resourceHandlePtr, arg2);
 
@@ -88,7 +88,7 @@ public class SoundHandler : IDisposable
             if (fileName.EndsWith(SoundContainerFileNameSuffix))
             {
                 var resourceDataPtr = Marshal.ReadIntPtr(resourceHandlePtr + ResourceDataOffset);
-                if (resourceDataPtr != IntPtr.Zero)
+                if (resourceDataPtr != nint.Zero)
                 {
                     var isVoiceLine = false;
 
@@ -128,7 +128,7 @@ public class SoundHandler : IDisposable
         return result;
     }
 
-    private IntPtr PlaySpecificSoundDetour(IntPtr soundPtr, int arg2)
+    private nint PlaySpecificSoundDetour(nint soundPtr, int arg2)
     {
         var result = this.playSpecificSoundHook!.Original(soundPtr, arg2);
 

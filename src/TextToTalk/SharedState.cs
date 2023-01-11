@@ -10,6 +10,6 @@ namespace TextToTalk
 
         public bool WSFailedToBindPort { get; set; }
 
-        public IntPtr TalkAddon { get; set; }
+        public nint TalkAddon { get; set; }
     }
 }

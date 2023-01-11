@@ -32,7 +32,7 @@ namespace TextToTalk.Talk
             if (textLength is <= 0 or > int.MaxValue) return "";
 
             var textBytes = new byte[textLength];
-            Marshal.Copy((IntPtr)textPtr, textBytes, 0, (int)textLength);
+            Marshal.Copy((nint)textPtr, textBytes, 0, (int)textLength);
             var seString = SeString.Parse(textBytes);
             return seString.TextValue
                 .Trim()

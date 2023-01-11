@@ -49,14 +49,14 @@ public class TalkAddonHandler
     {
         if (!this.clientState.IsLoggedIn)
         {
-            this.sharedState.TalkAddon = IntPtr.Zero;
+            this.sharedState.TalkAddon = nint.Zero;
             return;
         }
 
-        if (this.sharedState.TalkAddon == IntPtr.Zero)
+        if (this.sharedState.TalkAddon == nint.Zero)
         {
             this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk", 1);
-            if (this.sharedState.TalkAddon == IntPtr.Zero) return;
+            if (this.sharedState.TalkAddon == nint.Zero) return;
         }
 
         var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
