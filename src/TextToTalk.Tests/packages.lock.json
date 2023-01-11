@@ -148,8 +148,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "hqTM5628jSsQiv+HGpiq3WKBl2c8v1KZfby2J6Pr7pEPlK9waPdgEO6b8A/+/xn/yZ9ulv8HuqK71ONy2tg67A=="
+        "resolved": "7.0.0",
+        "contentHash": "2nXPrhdAyAzir0gLl8Yy8S5Mnm/uBSQQA7jEsILOS1MTyS7DbmV1NgViMtvV1sfCD1ebITpNwb1NIinKeJgUVQ=="
       },
       "NAudio": {
         "type": "Transitive",
@@ -511,10 +511,10 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "NfuoKUiP2nUWwKZN6twGqXioIe1zVD0RIj2t976A+czLHr2nY454RwwXs6JU9Htc6mwqL6Dn/nEL3dpVf2jOhg==",
+        "resolved": "7.0.0",
+        "contentHash": "KIX+oBU38pxkKPxvLcLfIkOV5Ien8ReN78wro7OF5/erwcmortzeFx+iBswlh2Vz6gVne0khocQudGwaO1Ey6A==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "6.0.0"
+          "Microsoft.Win32.SystemEvents": "7.0.0"
         }
       },
       "System.Dynamic.Runtime": {
@@ -1092,8 +1092,8 @@
       },
       "System.Speech": {
         "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "GQovERMrNP0Vbtgk8LzH4PlFS6lqHgsL9WkUmv8Kkxa0m0vNakitytpHZlfJ9WR7n9WKLXh68nn2kyL9mflnLg=="
+        "resolved": "7.0.0",
+        "contentHash": "7E0uB92Cx2sXR67HW9rMKJqDACdLuz9t3I3OwZUFDzAgwKXWuY6CYeRT/NiypHcyZO2be9+0H0w0M6fn7HQtgQ=="
       },
       "System.Text.Encoding": {
         "type": "Transitive",
@@ -1264,8 +1264,8 @@
           "Microsoft.CognitiveServices.Speech": "[1.24.2, )",
           "NAudio": "[2.1.0, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
-          "System.Drawing.Common": "[6.0.0, )",
-          "System.Speech": "[6.0.0, )",
+          "System.Drawing.Common": "[7.0.0, )",
+          "System.Speech": "[7.0.0, )",
           "TextToTalk.Lexicons": "[1.0.0, )",
           "TextToTalk.Lexicons.Updater": "[1.0.0, )",
           "TextToTalk.UngenderedOverrides": "[1.0.0, )",
