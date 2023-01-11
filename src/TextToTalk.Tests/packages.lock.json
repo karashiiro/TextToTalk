@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net6.0": {
+    "net7.0": {
       "coverlet.collector": {
         "type": "Direct",
         "requested": "[3.1.2, )",
@@ -55,8 +55,8 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "2.1.8",
-        "contentHash": "YqagNXs9InxmqkXzq7kLveImxnodkBEicAhydMXVp7dFjC7xb76U6zGgAax4/BWIWfZeWzr5DJyQSev31kj81A=="
+        "resolved": "2.1.10",
+        "contentHash": "S6NrvvOnLgT4GDdgwuKVJjbFo+8ZEj+JsEYk9ojjOR/MMfv1dIFpT8aRJQfI24rtDcw1uF+GnSSMN4WW1yt7fw=="
       },
       "log4net": {
         "type": "Transitive",
@@ -1260,7 +1260,7 @@
           "AWSSDK.Core": "[3.7.101, )",
           "AWSSDK.Polly": "[3.7.103, )",
           "AdysTech.CredentialManager": "[2.6.0, )",
-          "DalamudPackager": "[2.1.8, )",
+          "DalamudPackager": "[2.1.10, )",
           "Microsoft.CognitiveServices.Speech": "[1.24.2, )",
           "NAudio": "[2.1.0, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
