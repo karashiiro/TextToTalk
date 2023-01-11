@@ -4,3 +4,5 @@ description: Chat and game dialogue TTS. Use /tttconfig to configure the enabled
 punchline: Chat and game dialogue TTS plugin.
 repo_url: https://github.com/karashiiro/TextToTalk
 tags: [ "tts", "trigger", "triggers", "voice", "voices", "speech", "karashiiro" ]
+icon_url: https://raw.githubusercontent.com/karashiiro/TextToTalk/main/images/icon.png
+image_urls: [ "https://raw.githubusercontent.com/karashiiro/TextToTalk/main/images/image1.png" ]
