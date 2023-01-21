@@ -14,6 +14,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using Dalamud.Data;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Command;
@@ -76,6 +77,7 @@ namespace TextToTalk
             [RequiredVersion("1.0")] GameGui gui,
             [RequiredVersion("1.0")] DataManager data,
             [RequiredVersion("1.0")] ObjectTable objects,
+            [RequiredVersion("1.0")] Condition condition,
             [RequiredVersion("1.0")] CommandManager commandManager,
             [RequiredVersion("1.0")] SigScanner sigScanner)
         {
@@ -117,7 +119,7 @@ namespace TextToTalk
             this.windows.AddWindow(channelPresetModificationWindow);
 
             var filters = new MessageHandlerFilters(this.sharedState, config, this.clientState);
-            this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, this.config,
+            this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, condition, this.config,
                 this.sharedState, this.backendManager);
 
             this.chatMessageHandler = new ChatMessageHandler(filters, objects, config, this.sharedState);

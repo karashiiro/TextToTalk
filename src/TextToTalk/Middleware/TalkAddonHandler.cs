@@ -6,6 +6,7 @@ using Dalamud.Game.Gui;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.Talk;
@@ -19,6 +20,7 @@ public class TalkAddonHandler
     private readonly DataManager data;
     private readonly MessageHandlerFilters filters;
     private readonly ObjectTable objects;
+    private readonly Condition condition;
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
     private readonly VoiceBackendManager backendManager;
@@ -26,13 +28,15 @@ public class TalkAddonHandler
     public Action<GameObject, string, TextSource> Say { get; set; }
 
     public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
-        ObjectTable objects, PluginConfiguration config, SharedState sharedState, VoiceBackendManager backendManager)
+        ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState,
+        VoiceBackendManager backendManager)
     {
         this.clientState = clientState;
         this.gui = gui;
         this.data = data;
         this.filters = filters;
         this.objects = objects;
+        this.condition = condition;
         this.config = config;
         this.sharedState = sharedState;
         this.backendManager = backendManager;
@@ -46,7 +50,7 @@ public class TalkAddonHandler
 
     public unsafe void PollAddon(PollSource pollSource)
     {
-        if (!this.clientState.IsLoggedIn)
+        if (!this.clientState.IsLoggedIn || this.condition[ConditionFlag.CreatingCharacter])
         {
             this.sharedState.TalkAddon = nint.Zero;
             return;
