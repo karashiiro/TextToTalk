@@ -59,6 +59,7 @@ namespace TextToTalk
         private readonly RateLimiter rateLimiter;
         private readonly UngenderedOverrideManager ungenderedOverrides;
         private readonly PlayerService playerService;
+        private readonly NpcService npcService;
         private readonly SharedState sharedState;
         private readonly WindowSystem windows;
 
@@ -101,6 +102,8 @@ namespace TextToTalk
 
             this.playerService = new PlayerService(this.config.Players, this.config.PlayerVoicePresets,
                 this.config.GetVoiceConfig().VoicePresets);
+            this.npcService = new NpcService(this.config.Npcs, this.config.NpcVoicePresets,
+                this.config.GetVoiceConfig().VoicePresets);
 
             var unlockerResultWindow = new UnlockerResultWindow();
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
@@ -108,7 +111,7 @@ namespace TextToTalk
                 new WindowController(unlockerResultWindow, channelPresetModificationWindow);
             var voiceUnlockerWindow = new VoiceUnlockerWindow(windowController);
             this.configurationWindow = new ConfigurationWindow(this.config, data, this.backendManager,
-                this.playerService, windowController, voiceUnlockerWindow)
+                this.playerService, this.npcService, windowController, voiceUnlockerWindow)
             {
                 IsOpen = InitiallyVisible,
             };
@@ -119,7 +122,8 @@ namespace TextToTalk
             this.windows.AddWindow(channelPresetModificationWindow);
 
             var filters = new MessageHandlerFilters(this.sharedState, config, this.clientState);
-            this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, condition, this.config,
+            this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, condition,
+                this.config,
                 this.sharedState, this.backendManager);
 
             this.chatMessageHandler = new ChatMessageHandler(filters, objects, config, this.sharedState);
@@ -243,16 +247,33 @@ namespace TextToTalk
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is PlayerCharacter pc &&
                 playerService.TryGetPlayerByInfo(pc.Name.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
-                playerService.TryGetPlayerVoice(playerInfo, out var voice))
+                playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
             {
-                if (voice.EnabledBackend != this.config.Backend)
+                if (playerVoice.EnabledBackend != this.config.Backend)
                 {
                     PluginLog.LogError(
-                        $"Voice preset {voice.Name} is not compatible with the {this.config.Backend} backend");
+                        $"Voice preset {playerVoice.Name} is not compatible with the {this.config.Backend} backend");
                 }
                 else
                 {
-                    backendManager.Say(source, voice, cleanText);
+                    backendManager.Say(source, playerVoice, cleanText);
+                }
+            }
+            else if (speaker is not null &&
+                     // Some characters have emdashes in their names, which should be treated
+                     // as hyphens for the sake of the plugin.
+                     npcService.TryGetNpcByInfo(TalkUtils.NormalizePunctuation(speaker.Name.TextValue),
+                         out var npcInfo) &&
+                     npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
+            {
+                if (npcVoice.EnabledBackend != this.config.Backend)
+                {
+                    PluginLog.LogError(
+                        $"Voice preset {npcVoice.Name} is not compatible with the {this.config.Backend} backend");
+                }
+                else
+                {
+                    backendManager.Say(source, npcVoice, cleanText);
                 }
             }
             else

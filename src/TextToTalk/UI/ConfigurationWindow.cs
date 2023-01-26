@@ -25,6 +25,7 @@ namespace TextToTalk.UI
         private readonly DataManager data;
         private readonly VoiceBackendManager backendManager;
         private readonly PlayerService players;
+        private readonly NpcService npc;
         private readonly WindowController controller;
         private readonly IConfigUIDelegates helpers;
 
@@ -33,15 +34,18 @@ namespace TextToTalk.UI
         private string playerName = string.Empty;
         private string playerWorld = string.Empty;
         private string playerWorldError = string.Empty;
+        private string npcName = string.Empty;
 
         public ConfigurationWindow(PluginConfiguration config, DataManager data, VoiceBackendManager backendManager,
-            PlayerService players, WindowController windowController, Window voiceUnlockerWindow) : base(
+            PlayerService players, NpcService npc, WindowController windowController,
+            Window voiceUnlockerWindow) : base(
             "TextToTalk Configuration###TextToTalkConfig")
         {
             this.config = config;
             this.data = data;
             this.backendManager = backendManager;
             this.players = players;
+            this.npc = npc;
             this.controller = windowController;
             this.helpers = new ConfigUIDelegates { OpenVoiceUnlockerAction = () => voiceUnlockerWindow.IsOpen = true };
 
@@ -88,6 +92,17 @@ namespace TextToTalk.UI
                     this.playerName = string.Empty;
                     this.playerWorld = string.Empty;
                     this.playerWorldError = string.Empty;
+                }
+
+                if (ImGui.BeginTabItem("NPC Voices"))
+                {
+                    DrawNpcVoiceSettings();
+                    ImGui.EndTabItem();
+                }
+                else
+                {
+                    // Clear all user edits if the tab isn't selected anymore
+                    this.npcName = string.Empty;
                 }
 
                 if (ImGui.BeginTabItem("Channel Settings"))
@@ -465,6 +480,101 @@ namespace TextToTalk.UI
                 .Where(w => !string.IsNullOrWhiteSpace(w.Name))
                 .FirstOrDefault(w =>
                     string.Equals(w.Name.RawString, worldName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private void DrawNpcVoiceSettings()
+        {
+            ImGui.TextColored(HintColor, "Set specific voice presets for NPCs using the options below.");
+
+            ImGui.Spacing();
+
+            var tableSize = new Vector2(0.0f, 300f);
+            if (ImGui.BeginTable("##TTTNpcVoiceList", 4, ImGuiTableFlags.Borders, tableSize))
+            {
+                ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
+                ImGui.TableSetupColumn("##TTTNpcVoiceDelete", ImGuiTableColumnFlags.None, 30f);
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 300f);
+                ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 300f);
+                ImGui.TableHeadersRow();
+
+                var presets = config.GetVoicePresetsForBackend(config.Backend).ToList();
+                presets.Sort((a, b) => a.Id - b.Id);
+                var presetArray = presets.Select(p => p.Name).ToArray();
+
+                var toDelete = new List<NpcInfo>();
+                foreach (var (id, npcInfo) in config.Npcs)
+                {
+                    // Get NPC info fields
+                    var name = npcInfo.Name;
+
+                    ImGui.TableNextRow();
+
+                    ImGui.TableSetColumnIndex(0);
+
+                    ImGui.PushFont(UiBuilder.IconFont);
+                    if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTNpcVoiceDelete-{id}"))
+                    {
+                        toDelete.Add(npcInfo);
+                    }
+
+                    ImGui.PopFont();
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.Text("Delete");
+                        ImGui.EndTooltip();
+                    }
+
+                    ImGui.TableSetColumnIndex(1);
+
+                    // Allow player names to be edited in the table
+                    if (ImGui.InputText($"##TTTNpcName-{id}", ref name, 32))
+                    {
+                        npcInfo.Name = name;
+                        config.Save();
+                        PluginLog.LogDebug($"Updated NPC name: {npcInfo.Name}");
+                    }
+
+                    // NPC voice dropdown
+                    var presetIndex = npc.TryGetNpcVoice(npcInfo, out var v) ? presets.IndexOf(v) : 0;
+                    ImGui.TableSetColumnIndex(2);
+                    if (ImGui.Combo($"##TTTNpcVoice-{id}", ref presetIndex, presetArray, presets.Count))
+                    {
+                        npc.SetNpcVoice(npcInfo, presets[presetIndex]);
+                        config.Save();
+                        PluginLog.LogDebug($"Updated voice for {name}: {presets[presetIndex].Name}");
+                    }
+                }
+
+                foreach (var npcInfo in toDelete)
+                {
+                    npc.DeleteNpc(npcInfo);
+                }
+
+                if (toDelete.Any())
+                {
+                    config.Save();
+                }
+
+                ImGui.EndTable();
+            }
+
+            ImGui.InputText("NPC name##TTTNpcVoiceName", ref this.npcName, 32);
+
+            if (ImGui.Button("Add NPC##TTTNpcVoiceAdd"))
+            {
+                if (npc.AddNpc(this.npcName))
+                {
+                    config.Save();
+                    PluginLog.Log($"Added NPC: {this.npcName}");
+                }
+                else
+                {
+                    this.playerWorldError = "Failed to add NPC - is this a duplicate?";
+                    PluginLog.LogError("Failed to add NPC; this might be a duplicate entry");
+                }
+            }
         }
 
         private void DrawChannelSettings()

@@ -145,6 +145,9 @@ namespace TextToTalk
         public IDictionary<Guid, PlayerInfo> Players { get; set; }
         public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
 
+        public IDictionary<Guid, NpcInfo> Npcs { get; set; }
+        public IDictionary<Guid, int> NpcVoicePresets { get; set; }
+
         [JsonIgnore]
         public bool InitializedEver
         {
@@ -188,6 +191,9 @@ namespace TextToTalk
 
             Players ??= new Dictionary<Guid, PlayerInfo>();
             PlayerVoicePresets ??= new Dictionary<Guid, int>();
+
+            Npcs ??= new Dictionary<Guid, NpcInfo>();
+            NpcVoicePresets ??= new Dictionary<Guid, int>();
 
             if (!InitializedEver)
             {
