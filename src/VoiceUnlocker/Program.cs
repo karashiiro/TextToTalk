@@ -46,7 +46,15 @@ namespace VoiceUnlocker
             // Copy registry key values
             foreach (var valueName in src.GetValueNames())
             {
-                dst.SetValue(valueName, src.GetValue(valueName));
+                // All of the voice keys have environment variables embedded in
+                // their paths - it's probably fine if those get expanded, but
+                // better to be safe than sorry
+                var value = src.GetValue(valueName, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+                var valueKind = src.GetValueKind(valueName);
+                if (value != null)
+                {
+                    dst.SetValue(valueName, value, valueKind);
+                }
             }
 
             // Recurse down through subkeys
