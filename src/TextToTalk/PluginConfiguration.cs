@@ -203,11 +203,10 @@ namespace TextToTalk
                     EnabledChatTypes = new List<int>
                     {
                         (int)XivChatType.Say,
+                        (int)XivChatType.Yell,
                         (int)XivChatType.Shout,
                         (int)XivChatType.Party,
-                        (int)AdditionalChatType.BeneficialEffectOnYou,
-                        (int)AdditionalChatType.BeneficialEffectOnYouEnded,
-                        (int)AdditionalChatType.BeneficialEffectOnOtherPlayer,
+                        (int)XivChatType.NPCDialogue,
                     },
                     Name = DefaultPreset,
                     UseKeybind = false,
