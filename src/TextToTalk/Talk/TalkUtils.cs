@@ -5,6 +5,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using TextToTalk.Middleware;
 
 namespace TextToTalk.Talk
 {
@@ -15,6 +16,15 @@ namespace TextToTalk.Talk
         private static readonly Regex Bracketed = new(@"<[^<]*>", RegexOptions.Compiled);
 
         public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
+        {
+            return new TalkAddonText
+            {
+                Speaker = ReadTextNode(talkAddon->AtkTextNode220),
+                Text = ReadTextNode(talkAddon->AtkTextNode228),
+            };
+        }
+
+        public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonBattleTalk* talkAddon)
         {
             return new TalkAddonText
             {
@@ -42,7 +52,12 @@ namespace TextToTalk.Talk
 
         public static unsafe bool IsVisible(AddonTalk* talkAddon)
         {
-            return talkAddon->AtkUnitBase.IsVisible;
+            return talkAddon == null || talkAddon->AtkUnitBase.IsVisible;
+        }
+
+        public static unsafe bool IsVisible(AddonBattleTalk* talkAddon)
+        {
+            return talkAddon == null || talkAddon->AtkUnitBase.IsVisible;
         }
 
         public static string StripAngleBracketedText(string text)
@@ -62,7 +77,8 @@ namespace TextToTalk.Talk
                 // TextToTalk#29 emdashes and dashes and whatever else
                 .Replace("─", " - ") // These are not the same character
                 .Replace("—", " - ")
-                .Replace("–", "-"); // Hopefully, this one is only in Kan-E-Senna's name? Otherwise, I'm not sure how to parse this correctly.
+                .Replace("–",
+                    "-"); // Hopefully, this one is only in Kan-E-Senna's name? Otherwise, I'm not sure how to parse this correctly.
         }
 
         /// <summary>

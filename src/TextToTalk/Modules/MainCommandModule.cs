@@ -4,6 +4,7 @@ using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Logging;
 using TextToTalk.Backends;
+using TextToTalk.Middleware;
 using TextToTalk.UI;
 
 // ReSharper disable UnusedMember.Global
@@ -19,10 +20,13 @@ namespace TextToTalk.Modules
         private readonly VoiceBackendManager backendManager;
         private readonly ConfigurationWindow configurationWindow;
 
+        private readonly BattleTalkAddonHandler battleTalkAddonHandler;
+
         private readonly IList<string> commandNames;
 
         public MainCommandModule(ChatGui chat, CommandManager commandManager, PluginConfiguration config,
-            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow)
+            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow,
+            BattleTalkAddonHandler battleTalkAddonHandler)
         {
             this.chat = chat;
             this.commandManager = commandManager;
@@ -33,11 +37,20 @@ namespace TextToTalk.Modules
 
             this.commandNames = new List<string>();
 
+            this.battleTalkAddonHandler = battleTalkAddonHandler;
+
+            AddCommand("/showbattletalk", ShowBattleTalk, "");
+
             AddCommand("/canceltts", CancelTts, "Cancel all queued TTS messages.");
             AddCommand("/toggletts", ToggleTts, "Toggle TextToTalk's text-to-speech.");
             AddCommand("/disabletts", DisableTts, "Disable TextToTalk's text-to-speech.");
             AddCommand("/enabletts", EnableTts, "Enable TextToTalk's text-to-speech.");
             AddCommand("/tttconfig", ToggleConfig, "Toggle TextToTalk's configuration window.");
+        }
+
+        public void ShowBattleTalk(string command = "", string args = "")
+        {
+            this.battleTalkAddonHandler.ShowBattleTalk("Test", "Test Text", 60f, 0);
         }
 
         public void CancelTts(string command = "", string args = "")

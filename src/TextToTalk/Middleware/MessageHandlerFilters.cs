@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState;
 using Dalamud.Game.Text;
+using Dalamud.Logging;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Middleware;
@@ -22,9 +23,19 @@ public class MessageHandlerFilters
         return this.sharedState.LastQuestText == text;
     }
 
+    public bool IsDuplicateBattleText(string text)
+    {
+        return this.sharedState.LastBattleText == text;
+    }
+
     public void SetLastQuestText(string text)
     {
         this.sharedState.LastQuestText = text;
+    }
+
+    public void SetLastBattleText(string text)
+    {
+        this.sharedState.LastBattleText = text;
     }
 
     public bool IsSameSpeaker(string speaker)
@@ -45,7 +56,8 @@ public class MessageHandlerFilters
     public bool ShouldSaySender(XivChatType type)
     {
         return this.config.EnableNameWithSay &&
-               (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
+               (this.config.NameNpcWithSay ||
+                (type != XivChatType.NPCDialogue && type != XivChatType.NPCDialogueAnnouncements));
     }
 
     public bool ShouldSayFromYou(string speaker)
