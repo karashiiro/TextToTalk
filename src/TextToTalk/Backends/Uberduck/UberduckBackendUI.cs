@@ -172,27 +172,7 @@ public class UberduckBackendUI
             ImGui.Spacing();
             if (this.config.UseGenderedVoicePresets)
             {
-                var voiceConfig = this.config.GetVoiceConfig();
-
-                if (BackendUI.ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetUngenderedPresets(TTSBackend.Uberduck), presets))
-                {
-                    this.config.Save();
-                }
-
-                if (BackendUI.ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetMalePresets(TTSBackend.Uberduck), presets))
-                {
-                    this.config.Save();
-                }
-
-                if (BackendUI.ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetFemalePresets(TTSBackend.Uberduck), presets))
-                {
-                    this.config.Save();
-                }
-
-                BackendUI.ImGuiMultiVoiceHint();
+                BackendUI.GenderedPresetConfig("Uberduck", TTSBackend.Uberduck, this.config, presets);
             }
         }
     }

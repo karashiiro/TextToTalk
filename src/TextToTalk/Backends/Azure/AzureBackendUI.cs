@@ -176,27 +176,7 @@ public class AzureBackendUI
             ImGui.Spacing();
             if (this.config.UseGenderedVoicePresets)
             {
-                var voiceConfig = this.config.GetVoiceConfig();
-
-                if (BackendUI.ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetUngenderedPresets(TTSBackend.Azure), presets))
-                {
-                    this.config.Save();
-                }
-
-                if (BackendUI.ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetMalePresets(TTSBackend.Azure), presets))
-                {
-                    this.config.Save();
-                }
-
-                if (BackendUI.ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetFemalePresets(TTSBackend.Azure), presets))
-                {
-                    this.config.Save();
-                }
-
-                BackendUI.ImGuiMultiVoiceHint();
+                BackendUI.GenderedPresetConfig("Azure", TTSBackend.Azure, this.config, presets);
             }
         }
     }
