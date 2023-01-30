@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using TextToTalk.UI;
 
 namespace TextToTalk.Backends;
 
@@ -9,6 +10,32 @@ public static class BackendUI
 {
     public static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
     public static readonly Vector4 Red = new(1, 0, 0, 1);
+
+    public static void GenderedPresetConfig(string uniq, TTSBackend backend, PluginConfiguration config,
+        List<VoicePreset> presets)
+    {
+        var voiceConfig = config.GetVoiceConfig();
+
+        if (ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create(uniq: uniq)}",
+                voiceConfig.GetUngenderedPresets(TTSBackend.Azure), presets))
+        {
+            config.Save();
+        }
+
+        if (ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create(uniq: uniq)}",
+                voiceConfig.GetMalePresets(TTSBackend.Azure), presets))
+        {
+            config.Save();
+        }
+
+        if (ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create(uniq: uniq)}",
+                voiceConfig.GetFemalePresets(TTSBackend.Azure), presets))
+        {
+            config.Save();
+        }
+
+        ImGuiMultiVoiceHint();
+    }
 
     public static void NewPresetButton<TPreset>(string label, PluginConfiguration config)
         where TPreset : VoicePreset, new()

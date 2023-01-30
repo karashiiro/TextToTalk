@@ -227,27 +227,7 @@ public class PollyBackendUI
             ImGui.Spacing();
             if (this.config.UseGenderedVoicePresets)
             {
-                var voiceConfig = this.config.GetVoiceConfig();
-
-                if (BackendUI.ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetUngenderedPresets(TTSBackend.AmazonPolly), presets))
-                {
-                    this.config.Save();
-                }
-
-                if (BackendUI.ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetMalePresets(TTSBackend.AmazonPolly), presets))
-                {
-                    this.config.Save();
-                }
-
-                if (BackendUI.ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create()}",
-                        voiceConfig.GetFemalePresets(TTSBackend.AmazonPolly), presets))
-                {
-                    this.config.Save();
-                }
-
-                BackendUI.ImGuiMultiVoiceHint();
+                BackendUI.GenderedPresetConfig("Polly", TTSBackend.AmazonPolly, this.config, presets);
             }
         }
     }
