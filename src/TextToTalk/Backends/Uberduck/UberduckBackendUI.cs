@@ -163,15 +163,14 @@ public class UberduckBackendUI
         ImGui.Spacing();
 
         {
-            var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
-            if (ImGui.Checkbox($"Use gendered voices##{MemoizedId.Create()}", ref useGenderedVoicePresets))
-            {
-                this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
-                this.config.Save();
-            }
+            Components.Toggle(
+                    $"Use gendered voices##{MemoizedId.Create()}",
+                    this.config,
+                    cfg => cfg.UseGenderedVoicePresets)
+                .AndThen(this.config.Save);
 
             ImGui.Spacing();
-            if (useGenderedVoicePresets)
+            if (this.config.UseGenderedVoicePresets)
             {
                 var voiceConfig = this.config.GetVoiceConfig();
 
