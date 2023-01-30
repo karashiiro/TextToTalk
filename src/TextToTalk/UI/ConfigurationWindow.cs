@@ -523,7 +523,6 @@ namespace TextToTalk.UI
 
                     // NPC voice dropdown
                     var presetIndex = this.npc.TryGetNpcVoice(npcInfo, out var v) ? presets.IndexOf(v) : 0;
-                    ImGui.TableSetColumnIndex(2);
                     if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray,
                             presets.Count))
                     {
