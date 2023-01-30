@@ -4,6 +4,7 @@ using System;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+using TextToTalk.UI;
 
 namespace TextToTalk.Backends.Websocket
 {
@@ -61,9 +62,11 @@ namespace TextToTalk.Backends.Websocket
             var port = this.config.WebsocketPort;
             var portBytes = Encoding.UTF8.GetBytes(port.ToString());
             var inputBuffer = new byte[6]; // One extra byte for the null terminator
-            Array.Copy(portBytes, inputBuffer, portBytes.Length > inputBuffer.Length ? inputBuffer.Length : portBytes.Length);
+            Array.Copy(portBytes, inputBuffer,
+                portBytes.Length > inputBuffer.Length ? inputBuffer.Length : portBytes.Length);
 
-            if (ImGui.InputText("Port##TTTVoice12", inputBuffer, (uint)inputBuffer.Length, ImGuiInputTextFlags.CharsDecimal))
+            if (ImGui.InputText($"Port##{MemoizedId.Create()}", inputBuffer, (uint)inputBuffer.Length,
+                    ImGuiInputTextFlags.CharsDecimal))
             {
                 if (int.TryParse(Encoding.UTF8.GetString(inputBuffer), out var newPort))
                 {
@@ -87,11 +90,12 @@ namespace TextToTalk.Backends.Websocket
                 }
             }
 
-            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
+            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f),
+                $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
 
             ImGui.Spacing();
 
-            if (ImGui.Button("Restart server##TTTVoice13"))
+            if (ImGui.Button($"Restart server##{MemoizedId.Create()}"))
             {
                 this.wsServer.RestartWithPort(this.config.WebsocketPort);
             }

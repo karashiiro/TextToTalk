@@ -10,6 +10,7 @@ using System.Text;
 using Dalamud.Logging;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
+using TextToTalk.UI;
 using TextToTalk.UI.Lexicons;
 
 namespace TextToTalk.Backends.System;
@@ -66,7 +67,7 @@ public class SystemBackendUI
         if (presets.Any())
         {
             var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
-            if (ImGui.Combo("Preset##TTTSystemVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+            if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
                     presets.Count))
             {
                 this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
@@ -78,7 +79,7 @@ public class SystemBackendUI
             ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
-        if (ImGui.Button("New preset##TTTSystemVoice4") &&
+        if (ImGui.Button($"New preset##{MemoizedId.Create()}") &&
             this.config.TryCreateVoicePreset<SystemVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
@@ -91,13 +92,13 @@ public class SystemBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Delete preset##TTTSystemVoice5"))
+        if (ImGui.Button($"Delete preset##{MemoizedId.Create()}"))
         {
             var voiceConfig = this.config.GetVoiceConfig();
-            
+
             var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
             this.config.SetCurrentVoicePreset(otherPreset.Id);
-            
+
             voiceConfig.UngenderedVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
             voiceConfig.MaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
             voiceConfig.FemaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
@@ -106,21 +107,21 @@ public class SystemBackendUI
         }
 
         var presetName = currentVoicePreset.Name;
-        if (ImGui.InputText("Preset name##TTTSystemVoice99", ref presetName, 64))
+        if (ImGui.InputText($"Preset name##{MemoizedId.Create()}", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
             this.config.Save();
         }
 
         var rate = currentVoicePreset.Rate;
-        if (ImGui.SliderInt("Rate##TTTSystemVoice6", ref rate, -10, 10))
+        if (ImGui.SliderInt($"Rate##{MemoizedId.Create()}", ref rate, -10, 10))
         {
             currentVoicePreset.Rate = rate;
             this.config.Save();
         }
 
         var volume = currentVoicePreset.Volume;
-        if (ImGui.SliderInt("Volume##TTTSystemVoice7", ref volume, 0, 100))
+        if (ImGui.SliderInt($"Volume##{MemoizedId.Create()}", ref volume, 0, 100))
         {
             currentVoicePreset.Volume = volume;
             this.config.Save();
@@ -134,7 +135,7 @@ public class SystemBackendUI
         {
             var voicesUi = voices.Select(FormatVoiceInfo).ToArray();
             var voiceIndex = voices.FindIndex(iv => iv.VoiceInfo?.Name == voiceName);
-            if (ImGui.Combo("Voice##TTTSystemVoice8", ref voiceIndex, voicesUi, voices.Count))
+            if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voicesUi, voices.Count))
             {
                 this.voiceExceptions.Remove(voices[voiceIndex].VoiceInfo.Name);
                 currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
@@ -147,7 +148,7 @@ public class SystemBackendUI
             }
         }
 
-        if (ImGui.Button("Don't see all of your voices?##VoiceUnlockerSuggestion"))
+        if (ImGui.Button($"Don't see all of your voices?##{MemoizedId.Create()}"))
         {
             helpers.OpenVoiceUnlocker();
         }
@@ -157,7 +158,7 @@ public class SystemBackendUI
         ImGui.Spacing();
 
         var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
-        if (ImGui.Checkbox("Use gendered voice presets##TTTSystemVoice9", ref useGenderedVoicePresets))
+        if (ImGui.Checkbox($"Use gendered voice presets##{MemoizedId.Create()}", ref useGenderedVoicePresets))
         {
             this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
             this.config.Save();
@@ -166,20 +167,20 @@ public class SystemBackendUI
         if (useGenderedVoicePresets)
         {
             var voiceConfig = this.config.GetVoiceConfig();
-            
-            if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTSystemVoice12",
+
+            if (BackendUI.ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create()}",
                     voiceConfig.GetUngenderedPresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }
 
-            if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTSystemVoice10",
+            if (BackendUI.ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create()}",
                     voiceConfig.GetMalePresets(TTSBackend.System), presets))
             {
                 this.config.Save();
             }
 
-            if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTSystemVoice11",
+            if (BackendUI.ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create()}",
                     voiceConfig.GetFemalePresets(TTSBackend.System), presets))
             {
                 this.config.Save();
