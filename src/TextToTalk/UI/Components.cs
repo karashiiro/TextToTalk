@@ -8,25 +8,11 @@ namespace TextToTalk.UI;
 
 public static class Components
 {
-    private static readonly Dictionary<object, object> CachedExpressions = new();
-
-    private static Func<T, bool> FetchOrCompileExpression<T>(Expression<Func<T, bool>> expr)
-    {
-        if (CachedExpressions.TryGetValue(expr, out var fn))
-        {
-            return (Func<T, bool>)fn;
-        }
-
-        var nextFn = expr.Compile();
-        CachedExpressions[expr] = nextFn;
-        return nextFn;
-    }
-
     public static IContinuation Toggle<T>(string label, T obj, Expression<Func<T, bool>> propertySelector)
     {
         var continuation = new Continuation();
 
-        var getValue = FetchOrCompileExpression(propertySelector);
+        var getValue = propertySelector.Compile();
         var value = getValue(obj);
         if (ImGui.Checkbox(label, ref value))
         {
