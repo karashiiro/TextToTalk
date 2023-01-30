@@ -8,6 +8,7 @@ using Dalamud.Logging;
 using ImGuiNET;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
+using TextToTalk.UI;
 using TextToTalk.UI.Lexicons;
 
 namespace TextToTalk.Backends.Azure;
@@ -59,11 +60,11 @@ public class AzureBackendUI
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.InputTextWithHint("##TTTAzureRegion", "Region", ref this.region, 100);
-        ImGui.InputTextWithHint("##TTTAzureSubscriptionKey", "Subscription key", ref this.subscriptionKey, 100,
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Region", ref this.region, 100);
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Subscription key", ref this.subscriptionKey, 100,
             ImGuiInputTextFlags.Password);
 
-        if (ImGui.Button("Save and Login##TTTSaveAzureAuth"))
+        if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
             this.region = Whitespace.Replace(this.region, "");
             this.subscriptionKey = Whitespace.Replace(this.subscriptionKey, "");
@@ -73,7 +74,7 @@ public class AzureBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Register##TTTRegisterAzureAuth"))
+        if (ImGui.Button($"Register##{MemoizedId.Create()}"))
         {
             WebBrowser.Open(
                 "https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/index-text-to-speech");
@@ -91,7 +92,7 @@ public class AzureBackendUI
         if (presets.Any())
         {
             var presetIndex = presets.IndexOf(currentVoicePreset);
-            if (ImGui.Combo("Preset##TTTAzurePresetSelect", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+            if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
                     presets.Count))
             {
                 this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
@@ -103,7 +104,7 @@ public class AzureBackendUI
             ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
-        if (ImGui.Button("New preset##TTTAzureVoice4") &&
+        if (ImGui.Button($"New preset##{MemoizedId.Create()}") &&
             this.config.TryCreateVoicePreset<AzureVoicePreset>(out var newPreset))
         {
             this.config.SetCurrentVoicePreset(newPreset.Id);
@@ -116,10 +117,10 @@ public class AzureBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Delete preset##TTTAzureVoice5"))
+        if (ImGui.Button($"Delete preset##{MemoizedId.Create()}"))
         {
             var voiceConfig = this.config.GetVoiceConfig();
-            
+
             var otherPreset = voiceConfig.VoicePresets.FirstOrDefault(
                 p => p.Id != currentVoicePreset.Id && p.EnabledBackend == TTSBackend.Azure);
             this.config.SetCurrentVoicePreset(otherPreset?.Id ?? 0);
@@ -132,7 +133,7 @@ public class AzureBackendUI
         }
 
         var presetName = currentVoicePreset.Name;
-        if (ImGui.InputText("Preset name##TTTAzureVoice99", ref presetName, 64))
+        if (ImGui.InputText($"Preset name##{MemoizedId.Create()}", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
             this.config.Save();
@@ -142,7 +143,7 @@ public class AzureBackendUI
             var voices = this.getVoices.Invoke();
             var voiceArray = voices.ToArray();
             var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
-            if (ImGui.Combo("Voice##TTTAzureVoice98", ref voiceIndex, voiceArray, voices.Count))
+            if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))
             {
                 currentVoicePreset.VoiceName = voiceArray[voiceIndex];
                 this.config.Save();
@@ -162,7 +163,7 @@ public class AzureBackendUI
         }
 
         var playbackRate = currentVoicePreset.PlaybackRate;
-        if (ImGui.SliderInt("Playback rate##TTTAzureVoice8", ref playbackRate, 20, 200, "%d%%",
+        if (ImGui.SliderInt($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 20, 200, "%d%%",
                 ImGuiSliderFlags.AlwaysClamp))
         {
             currentVoicePreset.PlaybackRate = playbackRate;
@@ -170,7 +171,7 @@ public class AzureBackendUI
         }
 
         var volume = (int)(currentVoicePreset.Volume * 100);
-        if (ImGui.SliderInt("Volume##TTTAzureVoice7", ref volume, 0, 200, "%d%%"))
+        if (ImGui.SliderInt($"Volume##{MemoizedId.Create()}", ref volume, 0, 200, "%d%%"))
         {
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
@@ -181,7 +182,7 @@ public class AzureBackendUI
 
         {
             var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
-            if (ImGui.Checkbox("Use gendered voices##TTTAzureVoice2", ref useGenderedVoicePresets))
+            if (ImGui.Checkbox($"Use gendered voices##{MemoizedId.Create()}", ref useGenderedVoicePresets))
             {
                 this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
                 this.config.Save();
@@ -191,20 +192,20 @@ public class AzureBackendUI
             if (useGenderedVoicePresets)
             {
                 var voiceConfig = this.config.GetVoiceConfig();
-                
-                if (BackendUI.ImGuiPresetCombo("Ungendered preset(s)##TTTAzureEnabledUPresetSelect",
+
+                if (BackendUI.ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create()}",
                         voiceConfig.GetUngenderedPresets(TTSBackend.Azure), presets))
                 {
                     this.config.Save();
                 }
 
-                if (BackendUI.ImGuiPresetCombo("Male preset(s)##TTTAzureEnabledMPresetSelect",
+                if (BackendUI.ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create()}",
                         voiceConfig.GetMalePresets(TTSBackend.Azure), presets))
                 {
                     this.config.Save();
                 }
 
-                if (BackendUI.ImGuiPresetCombo("Female preset(s)##TTTAzureEnabledFPresetSelect",
+                if (BackendUI.ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create()}",
                         voiceConfig.GetFemalePresets(TTSBackend.Azure), presets))
                 {
                     this.config.Save();

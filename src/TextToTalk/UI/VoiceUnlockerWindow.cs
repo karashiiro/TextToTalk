@@ -48,7 +48,7 @@ namespace TextToTalk.UI
 
             ImGui.Spacing();
 
-            if (ImGui.Button($"{ManualTutorialText}##VoiceUnlockerButton1"))
+            if (ImGui.Button($"{ManualTutorialText}##{MemoizedId.Create()}"))
             {
                 WebBrowser.Open(
                     "https://www.reddit.com/r/Windows10/comments/96dx8z/how_unlock_all_windows_10_hidden_tts_voices_for/");
@@ -56,7 +56,7 @@ namespace TextToTalk.UI
 
             ImGui.Spacing();
 
-            if (ImGui.Button($"{EnableAllText}##VoiceUnlockerButton2"))
+            if (ImGui.Button($"{EnableAllText}##{MemoizedId.Create()}"))
             {
                 var resultText = VoiceUnlockerRunner.Execute()
                     ? "Registry modification succeeded. Changes will be applied upon restarting the game."

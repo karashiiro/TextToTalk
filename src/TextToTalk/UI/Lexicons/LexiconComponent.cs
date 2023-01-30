@@ -103,7 +103,7 @@ public class LexiconComponent
             // Editing options
             var lexiconPath = lexicons[i];
             var lexiconPathBuf = Encoding.UTF8.GetBytes(lexiconPath);
-            ImGui.InputText($"##TTTLexiconText{i}", lexiconPathBuf, (uint)lexiconPathBuf.Length,
+            ImGui.InputText($"##{MemoizedId.Create(uniq: $"{i}")}", lexiconPathBuf, (uint)lexiconPathBuf.Length,
                 ImGuiInputTextFlags.ReadOnly);
 
             if (!string.IsNullOrEmpty(lexicons[i]))
@@ -158,7 +158,7 @@ public class LexiconComponent
         Action deferred = null;
 
         ImGui.PushFont(UiBuilder.IconFont);
-        if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##TTTLexiconRemove{i}"))
+        if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##{MemoizedId.Create(uniq: $"{i}")}"))
         {
             try
             {
@@ -190,7 +190,7 @@ public class LexiconComponent
 
     private void LexiconAddButton()
     {
-        if (ImGui.Button("Open Lexicon##TTTLexiconAdd"))
+        if (ImGui.Button($"Open Lexicon##{MemoizedId.Create()}"))
         {
             this.lexiconAddException = null;
             this.lexiconAddSucceeded = false;

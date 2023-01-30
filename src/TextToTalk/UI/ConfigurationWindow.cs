@@ -71,7 +71,7 @@ namespace TextToTalk.UI
 
         public override void Draw()
         {
-            if (ImGui.BeginTabBar("TextToTalk##tabbar"))
+            if (ImGui.BeginTabBar($"TextToTalk##{MemoizedId.Create()}"))
             {
                 if (ImGui.BeginTabItem("Synthesizer Settings"))
                 {
@@ -123,10 +123,10 @@ namespace TextToTalk.UI
 
         private void DrawSynthesizerSettings()
         {
-            if (ImGui.CollapsingHeader("Keybinds##TextToTalkKeybind1"))
+            if (ImGui.CollapsingHeader($"Keybinds##{MemoizedId.Create()}"))
             {
                 var useKeybind = config.UseKeybind;
-                if (ImGui.Checkbox("Enable Keybind##TextToTalkKeybind2", ref useKeybind))
+                if (ImGui.Checkbox($"Enable Keybind##{MemoizedId.Create()}", ref useKeybind))
                 {
                     config.UseKeybind = useKeybind;
                     config.Save();
@@ -134,7 +134,7 @@ namespace TextToTalk.UI
 
                 ImGui.PushItemWidth(100f);
                 var kItem1 = VirtualKey.EnumToIndex(config.ModifierKey);
-                if (ImGui.Combo("##TextToTalkKeybind3", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
+                if (ImGui.Combo($"##{MemoizedId.Create()}", ref kItem1, VirtualKey.Names.Take(3).ToArray(), 3))
                 {
                     config.ModifierKey = VirtualKey.IndexToEnum(kItem1);
                     config.Save();
@@ -142,7 +142,7 @@ namespace TextToTalk.UI
 
                 ImGui.SameLine();
                 var kItem2 = VirtualKey.EnumToIndex(config.MajorKey) - 3;
-                if (ImGui.Combo("TTS Toggle Keybind##TextToTalkKeybind4", ref kItem2,
+                if (ImGui.Combo($"TTS Toggle Keybind##{MemoizedId.Create()}", ref kItem2,
                         VirtualKey.Names.Skip(3).ToArray(), VirtualKey.Names.Length - 3))
                 {
                     config.MajorKey = VirtualKey.IndexToEnum(kItem2 + 3);
@@ -282,14 +282,15 @@ namespace TextToTalk.UI
                 }
             }
 
-            if (ImGui.CollapsingHeader("Voices##TTTVoicePre1", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader($"Voices##{MemoizedId.Create()}", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 var backends = Enum.GetValues<TTSBackend>();
                 var backendsDisplay = backends.Select(b => b.GetFormattedName()).ToArray();
                 var backend = config.Backend;
                 var backendIndex = Array.IndexOf(backends, backend);
 
-                if (ImGui.Combo("Voice backend##TTTVoicePre2", ref backendIndex, backendsDisplay, backends.Length))
+                if (ImGui.Combo($"Voice backend##{MemoizedId.Create()}", ref backendIndex, backendsDisplay,
+                        backends.Length))
                 {
                     var newBackend = backends[backendIndex];
 
@@ -325,7 +326,7 @@ namespace TextToTalk.UI
             ImGui.Spacing();
 
             var tableSize = new Vector2(0.0f, 300f);
-            if (ImGui.BeginTable("##TTTPlayerVoiceList", 4, ImGuiTableFlags.Borders, tableSize))
+            if (ImGui.BeginTable($"##{MemoizedId.Create()}", 4, ImGuiTableFlags.Borders, tableSize))
             {
                 ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
                 ImGui.TableSetupColumn("##TTTPlayerVoiceDelete", ImGuiTableColumnFlags.None, 30f);
@@ -354,7 +355,8 @@ namespace TextToTalk.UI
                     ImGui.TableSetColumnIndex(0);
 
                     ImGui.PushFont(UiBuilder.IconFont);
-                    if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTPlayerVoiceDelete-{id}"))
+                    if (ImGui.Button(
+                            $"{FontAwesomeIcon.Trash.ToIconString()}##{MemoizedId.Create(uniq: id.ToString())}"))
                     {
                         toDelete.Add(playerInfo);
                     }
@@ -371,7 +373,7 @@ namespace TextToTalk.UI
                     ImGui.TableSetColumnIndex(1);
 
                     // Allow player names to be edited in the table
-                    if (ImGui.InputText($"##TTTPlayerName-{id}", ref name, 32))
+                    if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
                     {
                         playerInfo.Name = name;
                         config.Save();
@@ -382,7 +384,7 @@ namespace TextToTalk.UI
 
                     // Allow player worlds to be edited in the table
                     worldName ??= "";
-                    if (ImGui.InputText($"##TTTPlayerWorld-{id}", ref worldName, 32))
+                    if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref worldName, 32))
                     {
                         this.playerWorldEditing[id] = worldName;
 
@@ -423,7 +425,8 @@ namespace TextToTalk.UI
                     // Player voice dropdown
                     var presetIndex = players.TryGetPlayerVoice(playerInfo, out var v) ? presets.IndexOf(v) : 0;
                     ImGui.TableSetColumnIndex(3);
-                    if (ImGui.Combo($"##TTTPlayerVoice-{id}", ref presetIndex, presetArray, presets.Count))
+                    if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray,
+                            presets.Count))
                     {
                         players.SetPlayerVoice(playerInfo, presets[presetIndex]);
                         config.Save();
@@ -444,14 +447,14 @@ namespace TextToTalk.UI
                 ImGui.EndTable();
             }
 
-            ImGui.InputText("Player name##TTTPlayerVoiceName", ref this.playerName, 32);
-            ImGui.InputText("Player world##TTTPlayerVoiceWorld", ref this.playerWorld, 32);
+            ImGui.InputText($"Player name##{MemoizedId.Create()}", ref this.playerName, 32);
+            ImGui.InputText($"Player world##{MemoizedId.Create()}", ref this.playerWorld, 32);
             if (!string.IsNullOrEmpty(this.playerWorldError))
             {
                 ImGui.TextColored(Red, this.playerWorldError);
             }
 
-            if (ImGui.Button("Add player##TTTPlayerVoiceAdd"))
+            if (ImGui.Button($"Add player##{MemoizedId.Create()}"))
             {
                 // Validate data before saving the new player
                 var world = GetWorldForUserInput(this.playerWorld);
@@ -489,10 +492,10 @@ namespace TextToTalk.UI
             ImGui.Spacing();
 
             var tableSize = new Vector2(0.0f, 300f);
-            if (ImGui.BeginTable("##TTTNpcVoiceList", 4, ImGuiTableFlags.Borders, tableSize))
+            if (ImGui.BeginTable($"##{MemoizedId.Create()}", 4, ImGuiTableFlags.Borders, tableSize))
             {
                 ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                ImGui.TableSetupColumn("##TTTNpcVoiceDelete", ImGuiTableColumnFlags.None, 30f);
+                ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 300f);
                 ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 300f);
                 ImGui.TableHeadersRow();
@@ -512,7 +515,8 @@ namespace TextToTalk.UI
                     ImGui.TableSetColumnIndex(0);
 
                     ImGui.PushFont(UiBuilder.IconFont);
-                    if (ImGui.Button($"{FontAwesomeIcon.Trash.ToIconString()}##TTTNpcVoiceDelete-{id}"))
+                    if (ImGui.Button(
+                            $"{FontAwesomeIcon.Trash.ToIconString()}##{MemoizedId.Create(uniq: id.ToString())}"))
                     {
                         toDelete.Add(npcInfo);
                     }
@@ -529,7 +533,7 @@ namespace TextToTalk.UI
                     ImGui.TableSetColumnIndex(1);
 
                     // Allow player names to be edited in the table
-                    if (ImGui.InputText($"##TTTNpcName-{id}", ref name, 32))
+                    if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
                     {
                         npcInfo.Name = name;
                         config.Save();
@@ -539,7 +543,8 @@ namespace TextToTalk.UI
                     // NPC voice dropdown
                     var presetIndex = npc.TryGetNpcVoice(npcInfo, out var v) ? presets.IndexOf(v) : 0;
                     ImGui.TableSetColumnIndex(2);
-                    if (ImGui.Combo($"##TTTNpcVoice-{id}", ref presetIndex, presetArray, presets.Count))
+                    if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray,
+                            presets.Count))
                     {
                         npc.SetNpcVoice(npcInfo, presets[presetIndex]);
                         config.Save();
@@ -560,9 +565,9 @@ namespace TextToTalk.UI
                 ImGui.EndTable();
             }
 
-            ImGui.InputText("NPC name##TTTNpcVoiceName", ref this.npcName, 32);
+            ImGui.InputText($"NPC name##{MemoizedId.Create()}", ref this.npcName, 32);
 
-            if (ImGui.Button("Add NPC##TTTNpcVoiceAdd"))
+            if (ImGui.Button($"Add NPC##{MemoizedId.Create()}"))
             {
                 if (npc.AddNpc(this.npcName))
                 {
@@ -584,13 +589,14 @@ namespace TextToTalk.UI
             var presets = config.EnabledChatTypesPresets.ToList();
             presets.Sort((a, b) => a.Id - b.Id);
             var presetIndex = presets.IndexOf(currentEnabledChatTypesPreset);
-            if (ImGui.Combo("Preset##TTT1", ref presetIndex, presets.Select(p => p.Name).ToArray(), presets.Count))
+            if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+                    presets.Count))
             {
                 config.CurrentPresetId = presets[presetIndex].Id;
                 config.Save();
             }
 
-            if (ImGui.Button("New preset##TTT2"))
+            if (ImGui.Button($"New preset##{MemoizedId.Create()}"))
             {
                 var newPreset = config.NewChatTypesPreset();
                 config.SetCurrentEnabledChatTypesPreset(newPreset.Id);
@@ -599,7 +605,7 @@ namespace TextToTalk.UI
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Edit##TTT3"))
+            if (ImGui.Button($"Edit##{MemoizedId.Create()}"))
             {
                 this.controller.OpenChannelPresetModificationWindow();
             }
@@ -607,7 +613,7 @@ namespace TextToTalk.UI
             if (config.EnabledChatTypesPresets.Count > 1)
             {
                 ImGui.SameLine();
-                if (ImGui.Button("Delete##TTT4"))
+                if (ImGui.Button($"Delete##{MemoizedId.Create()}"))
                 {
                     var otherPreset =
                         config.EnabledChatTypesPresets.First(p => p.Id != currentEnabledChatTypesPreset.Id);
@@ -706,7 +712,8 @@ namespace TextToTalk.UI
             for (var i = 0; i < listItems.Count; i++)
             {
                 var str = listItems[i].Text;
-                if (ImGui.InputTextWithHint($"###TextToTalk{kind}{i}", $"Enter {kind} here...", ref str, 100))
+                if (ImGui.InputTextWithHint($"###{MemoizedId.Create(uniq: $"{kind}{i}")}", $"Enter {kind} here...",
+                        ref str, 100))
                 {
                     listItems[i].Text = str;
                     config.Save();
@@ -714,14 +721,14 @@ namespace TextToTalk.UI
 
                 ImGui.SameLine();
                 var isRegex = listItems[i].IsRegex;
-                if (ImGui.Checkbox($"Regex###TextToTalkRegex{kind}{i}", ref isRegex))
+                if (ImGui.Checkbox($"Regex###{MemoizedId.Create(uniq: $"{kind}{i}")}", ref isRegex))
                 {
                     listItems[i].IsRegex = isRegex;
                     config.Save();
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button($"Remove###TextToTalkRemove{kind}{i}"))
+                if (ImGui.Button($"Remove###{MemoizedId.Create(uniq: $"{kind}{i}")}"))
                 {
                     listItems[i].ShouldRemove = true;
                 }
@@ -736,7 +743,7 @@ namespace TextToTalk.UI
                 }
             }
 
-            if (ImGui.Button($"Add {kind}"))
+            if (ImGui.Button($"Add {kind}###{MemoizedId.Create(uniq: kind)}"))
             {
                 listItems.Add(new Trigger());
             }
