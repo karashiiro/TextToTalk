@@ -35,6 +35,7 @@ namespace TextToTalk.UI
         private string playerWorld = string.Empty;
         private string playerWorldError = string.Empty;
         private string npcName = string.Empty;
+        private string npcError = string.Empty;
 
         public ConfigurationWindow(PluginConfiguration config, DataManager data, VoiceBackendManager backendManager,
             PlayerService players, NpcService npc, WindowController windowController,
@@ -103,6 +104,7 @@ namespace TextToTalk.UI
                 {
                     // Clear all user edits if the tab isn't selected anymore
                     this.npcName = string.Empty;
+                    this.npcError = string.Empty;
                 }
 
                 if (ImGui.BeginTabItem("Channel Settings"))
@@ -532,6 +534,11 @@ namespace TextToTalk.UI
             }
 
             ImGui.InputText($"NPC name##{MemoizedId.Create()}", ref this.npcName, 32);
+            
+            if (!string.IsNullOrEmpty(this.npcError))
+            {
+                ImGui.TextColored(Red, this.npcError);
+            }
 
             if (ImGui.Button($"Add NPC##{MemoizedId.Create()}"))
             {
@@ -542,7 +549,7 @@ namespace TextToTalk.UI
                 }
                 else
                 {
-                    this.playerWorldError = "Failed to add NPC - is this a duplicate?";
+                    this.npcError = "Failed to add NPC - is this a duplicate?";
                     PluginLog.LogError("Failed to add NPC; this might be a duplicate entry");
                 }
             }
