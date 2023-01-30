@@ -498,7 +498,7 @@ namespace TextToTalk.UI
 
                     ImGui.TableSetColumnIndex(1);
 
-                    // Allow player names to be edited in the table
+                    // Allow NPC names to be edited in the table
                     if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
                     {
                         npcInfo.Name = name;
