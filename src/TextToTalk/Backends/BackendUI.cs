@@ -10,11 +10,21 @@ public static class BackendUI
     public static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
     public static readonly Vector4 Red = new(1, 0, 0, 1);
 
+    public static void NewPresetButton<TPreset>(string label, PluginConfiguration config)
+        where TPreset : VoicePreset, new()
+    {
+        if (ImGui.Button(label) && config.TryCreateVoicePreset<TPreset>(out var newPreset))
+        {
+            config.SetCurrentVoicePreset(newPreset.Id);
+            config.Save();
+        }
+    }
+
     public static void ImGuiVoiceNotSupported()
     {
         ImGui.TextColored(Red, "Voice not supported on this engine");
     }
-    
+
     public static void ImGuiVoiceNotSelected()
     {
         ImGui.TextColored(Red, "No voice selected");
