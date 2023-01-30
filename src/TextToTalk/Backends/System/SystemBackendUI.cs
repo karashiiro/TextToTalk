@@ -144,14 +144,13 @@ public class SystemBackendUI
 
         ImGui.Spacing();
 
-        var useGenderedVoicePresets = this.config.UseGenderedVoicePresets;
-        if (ImGui.Checkbox($"Use gendered voice presets##{MemoizedId.Create()}", ref useGenderedVoicePresets))
-        {
-            this.config.UseGenderedVoicePresets = useGenderedVoicePresets;
-            this.config.Save();
-        }
+        Components.Toggle(
+                $"Use gendered voice presets##{MemoizedId.Create()}",
+                this.config,
+                cfg => cfg.UseGenderedVoicePresets)
+            .AndThen(this.config.Save);
 
-        if (useGenderedVoicePresets)
+        if (this.config.UseGenderedVoicePresets)
         {
             var voiceConfig = this.config.GetVoiceConfig();
 
