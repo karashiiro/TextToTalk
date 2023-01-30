@@ -41,11 +41,11 @@ public class UberduckBackendUI
         ImGui.TextColored(BackendUI.HintColor, "TTS may be delayed due to rate-limiting.");
         ImGui.Spacing();
 
-        ImGui.InputTextWithHint($"##TTTUberduckAPIKey", "API key", ref this.apiKey, 100, ImGuiInputTextFlags.Password);
-        ImGui.InputTextWithHint($"##TTTUberduckAPISecret", "API secret", ref this.apiSecret, 100,
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref this.apiKey, 100, ImGuiInputTextFlags.Password);
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API secret", ref this.apiSecret, 100,
             ImGuiInputTextFlags.Password);
 
-        if (ImGui.Button($"Save and Login##TTTSaveUberduckAuth"))
+        if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
             var username = Whitespace.Replace(this.apiKey, "");
             var password = Whitespace.Replace(this.apiSecret, "");
@@ -55,7 +55,7 @@ public class UberduckBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Register##TTTRegisterUberduckAuth"))
+        if (ImGui.Button($"Register##{MemoizedId.Create()}"))
         {
             WebBrowser.Open("https://uberduck.ai/");
         }
@@ -72,7 +72,7 @@ public class UberduckBackendUI
         if (presets.Any())
         {
             var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
-            if (ImGui.Combo($"Preset##TTTUberduckVoice3", ref presetIndex, presets.Select(p => p.Name).ToArray(),
+            if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
                     presets.Count))
             {
                 this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
@@ -92,7 +92,7 @@ public class UberduckBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Delete preset##TTTUberduckVoice5"))
+        if (ImGui.Button($"Delete preset##{MemoizedId.Create()}"))
         {
             var voiceConfig = this.config.GetVoiceConfig();
 
