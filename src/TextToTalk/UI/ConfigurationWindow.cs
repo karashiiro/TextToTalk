@@ -294,33 +294,36 @@ namespace TextToTalk.UI
             ImGui.Spacing();
 
             var tableSize = new Vector2(0.0f, 300f);
-            if (ImGui.BeginTable($"##{MemoizedId.Create()}", 4, ImGuiTableFlags.Borders, tableSize))
-            {
-                ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
-                ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
-                ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
-                ImGui.TableHeadersRow();
-
-                var presets = this.config.GetVoicePresetsForBackend(this.config.Backend).ToList();
-                presets.Sort((a, b) => a.Id - b.Id);
-                var presetArray = presets.Select(p => p.Name).ToArray();
-
-                var toDelete = new List<PlayerInfo>();
-                foreach (var (id, playerInfo) in this.config.Players)
+            var presets = this.config.GetVoicePresetsForBackend(this.config.Backend).ToList();
+            presets.Sort((a, b) => a.Id - b.Id);
+            var presetArray = presets.Select(p => p.Name).ToArray();
+            var toDelete = new List<PlayerInfo>();
+            Components.Table($"##{MemoizedId.Create()}", tableSize, ImGuiTableFlags.Borders,
+                () =>
                 {
-                    // Get player info fields
-                    var name = playerInfo.Name;
-                    if (!playerWorldEditing.TryGetValue(id, out var worldName))
+                    ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
+                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
+                    ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
+                    ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
+                    ImGui.TableHeadersRow();
+                },
+                () => this.config.Players
+                    .Select(row =>
                     {
-                        var world = data.GetExcelSheet<World>()?.GetRow(playerInfo.WorldId);
-                        playerWorldEditing[id] = world?.Name.ToString() ?? "";
-                    }
+                        var (id, playerInfo) = row;
 
-                    ImGui.TableNextRow();
+                        if (!this.playerWorldEditing.TryGetValue(id, out var worldName))
+                        {
+                            var world = data.GetExcelSheet<World>()?.GetRow(playerInfo.WorldId);
+                            this.playerWorldEditing[id] = world?.Name.ToString() ?? "";
+                        }
 
-                    ImGui.TableSetColumnIndex(0);
+                        return (id, playerInfo, worldName);
+                    }),
+                row =>
+                {
+                    var (id, playerInfo, _) = row;
 
                     ImGui.PushFont(UiBuilder.IconFont);
                     if (ImGui.Button(
@@ -337,8 +340,11 @@ namespace TextToTalk.UI
                         ImGui.Text("Delete");
                         ImGui.EndTooltip();
                     }
-
-                    ImGui.TableSetColumnIndex(1);
+                },
+                row =>
+                {
+                    var (id, playerInfo, worldName) = row;
+                    var name = playerInfo.Name;
 
                     // Allow player names to be edited in the table
                     if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
@@ -347,8 +353,10 @@ namespace TextToTalk.UI
                         this.config.Save();
                         PluginLog.LogDebug($"Updated player name: {playerInfo.Name}@{worldName ?? ""}");
                     }
-
-                    ImGui.TableSetColumnIndex(2);
+                },
+                row =>
+                {
+                    var (id, playerInfo, worldName) = row;
 
                     // Allow player worlds to be edited in the table
                     worldName ??= "";
@@ -389,10 +397,14 @@ namespace TextToTalk.UI
 
                         ImGui.PopFont();
                     }
+                },
+                row =>
+                {
+                    var (id, playerInfo, worldName) = row;
+                    var name = playerInfo.Name;
 
                     // Player voice dropdown
                     var presetIndex = this.players.TryGetPlayerVoice(playerInfo, out var v) ? presets.IndexOf(v) : 0;
-                    ImGui.TableSetColumnIndex(3);
                     if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray,
                             presets.Count))
                     {
@@ -400,19 +412,16 @@ namespace TextToTalk.UI
                         this.config.Save();
                         PluginLog.LogDebug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
                     }
-                }
+                });
 
+            if (toDelete.Any())
+            {
                 foreach (var playerInfo in toDelete)
                 {
                     this.players.DeletePlayer(playerInfo);
                 }
 
-                if (toDelete.Any())
-                {
-                    this.config.Save();
-                }
-
-                ImGui.EndTable();
+                this.config.Save();
             }
 
             ImGui.InputText($"Player name##{MemoizedId.Create()}", ref this.playerName, 32);
@@ -460,27 +469,23 @@ namespace TextToTalk.UI
             ImGui.Spacing();
 
             var tableSize = new Vector2(0.0f, 300f);
-            if (ImGui.BeginTable($"##{MemoizedId.Create()}", 4, ImGuiTableFlags.Borders, tableSize))
-            {
-                ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 300f);
-                ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 300f);
-                ImGui.TableHeadersRow();
-
-                var presets = this.config.GetVoicePresetsForBackend(this.config.Backend).ToList();
-                presets.Sort((a, b) => a.Id - b.Id);
-                var presetArray = presets.Select(p => p.Name).ToArray();
-
-                var toDelete = new List<NpcInfo>();
-                foreach (var (id, npcInfo) in this.config.Npcs)
+            var presets = this.config.GetVoicePresetsForBackend(this.config.Backend).ToList();
+            presets.Sort((a, b) => a.Id - b.Id);
+            var presetArray = presets.Select(p => p.Name).ToArray();
+            var toDelete = new List<NpcInfo>();
+            Components.Table($"##{MemoizedId.Create()}", tableSize, ImGuiTableFlags.Borders,
+                () =>
                 {
-                    // Get NPC info fields
-                    var name = npcInfo.Name;
-
-                    ImGui.TableNextRow();
-
-                    ImGui.TableSetColumnIndex(0);
+                    ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
+                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 300f);
+                    ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 300f);
+                    ImGui.TableHeadersRow();
+                },
+                () => this.config.Npcs,
+                row =>
+                {
+                    var (id, npcInfo) = row;
 
                     ImGui.PushFont(UiBuilder.IconFont);
                     if (ImGui.Button(
@@ -497,8 +502,11 @@ namespace TextToTalk.UI
                         ImGui.Text("Delete");
                         ImGui.EndTooltip();
                     }
-
-                    ImGui.TableSetColumnIndex(1);
+                },
+                row =>
+                {
+                    var (id, npcInfo) = row;
+                    var name = npcInfo.Name;
 
                     // Allow NPC names to be edited in the table
                     if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
@@ -507,6 +515,11 @@ namespace TextToTalk.UI
                         this.config.Save();
                         PluginLog.LogDebug($"Updated NPC name: {npcInfo.Name}");
                     }
+                },
+                row =>
+                {
+                    var (id, npcInfo) = row;
+                    var name = npcInfo.Name;
 
                     // NPC voice dropdown
                     var presetIndex = this.npc.TryGetNpcVoice(npcInfo, out var v) ? presets.IndexOf(v) : 0;
@@ -518,23 +531,20 @@ namespace TextToTalk.UI
                         this.config.Save();
                         PluginLog.LogDebug($"Updated voice for {name}: {presets[presetIndex].Name}");
                     }
-                }
+                });
 
+            if (toDelete.Any())
+            {
                 foreach (var npcInfo in toDelete)
                 {
                     this.npc.DeleteNpc(npcInfo);
                 }
 
-                if (toDelete.Any())
-                {
-                    this.config.Save();
-                }
-
-                ImGui.EndTable();
+                this.config.Save();
             }
 
             ImGui.InputText($"NPC name##{MemoizedId.Create()}", ref this.npcName, 32);
-            
+
             if (!string.IsNullOrEmpty(this.npcError))
             {
                 ImGui.TextColored(Red, this.npcError);
