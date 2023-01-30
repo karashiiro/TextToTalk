@@ -87,19 +87,11 @@ public class SystemBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Delete preset##{MemoizedId.Create()}"))
-        {
-            var voiceConfig = this.config.GetVoiceConfig();
-
-            var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
-            this.config.SetCurrentVoicePreset(otherPreset.Id);
-
-            voiceConfig.UngenderedVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
-            voiceConfig.MaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
-            voiceConfig.FemaleVoicePresets[TTSBackend.System].Remove(currentVoicePreset.Id);
-
-            voiceConfig.VoicePresets.Remove(currentVoicePreset);
-        }
+        BackendUI.DeletePresetButton(
+            $"Delete preset##{MemoizedId.Create()}",
+            currentVoicePreset,
+            TTSBackend.System,
+            this.config);
 
         var presetName = currentVoicePreset.Name;
         if (ImGui.InputText($"Preset name##{MemoizedId.Create()}", ref presetName, 64))
