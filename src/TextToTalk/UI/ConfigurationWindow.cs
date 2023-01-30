@@ -295,7 +295,7 @@ namespace TextToTalk.UI
             if (ImGui.BeginTable($"##{MemoizedId.Create()}", 4, ImGuiTableFlags.Borders, tableSize))
             {
                 ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                ImGui.TableSetupColumn("##TTTPlayerVoiceDelete", ImGuiTableColumnFlags.None, 30f);
+                ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
                 ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
                 ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
