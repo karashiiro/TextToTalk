@@ -41,7 +41,8 @@ public class UberduckBackendUI
         ImGui.TextColored(BackendUI.HintColor, "TTS may be delayed due to rate-limiting.");
         ImGui.Spacing();
 
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref this.apiKey, 100, ImGuiInputTextFlags.Password);
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref this.apiKey, 100,
+            ImGuiInputTextFlags.Password);
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API secret", ref this.apiSecret, 100,
             ImGuiInputTextFlags.Password);
 
@@ -92,19 +93,11 @@ public class UberduckBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Delete preset##{MemoizedId.Create()}"))
-        {
-            var voiceConfig = this.config.GetVoiceConfig();
-
-            var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != currentVoicePreset.Id);
-            this.config.SetCurrentVoicePreset(otherPreset.Id);
-
-            voiceConfig.UngenderedVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
-            voiceConfig.MaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
-            voiceConfig.FemaleVoicePresets[TTSBackend.Uberduck].Remove(currentVoicePreset.Id);
-
-            voiceConfig.VoicePresets.Remove(currentVoicePreset);
-        }
+        BackendUI.DeletePresetButton(
+            $"Delete preset##{MemoizedId.Create()}",
+            currentVoicePreset,
+            TTSBackend.Uberduck,
+            this.config);
 
         var presetName = currentVoicePreset.Name;
         if (ImGui.InputText($"Preset name##{MemoizedId.Create()}", ref presetName, 64))

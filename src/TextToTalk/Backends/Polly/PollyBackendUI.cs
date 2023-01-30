@@ -138,20 +138,11 @@ public class PollyBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Delete preset##{MemoizedId.Create()}"))
-        {
-            var voiceConfig = this.config.GetVoiceConfig();
-
-            var otherPreset = voiceConfig.VoicePresets.FirstOrDefault(
-                p => p.Id != currentVoicePreset.Id && p.EnabledBackend == TTSBackend.AmazonPolly);
-            this.config.SetCurrentVoicePreset(otherPreset?.Id ?? 0);
-
-            voiceConfig.UngenderedVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
-            voiceConfig.MaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
-            voiceConfig.FemaleVoicePresets[TTSBackend.AmazonPolly].Remove(currentVoicePreset.Id);
-
-            voiceConfig.VoicePresets.Remove(currentVoicePreset);
-        }
+        BackendUI.DeletePresetButton(
+            $"Delete preset##{MemoizedId.Create()}",
+            currentVoicePreset,
+            TTSBackend.AmazonPolly,
+            this.config);
 
         var presetName = currentVoicePreset.Name;
         if (ImGui.InputText($"Preset name##{MemoizedId.Create()}", ref presetName, 64))

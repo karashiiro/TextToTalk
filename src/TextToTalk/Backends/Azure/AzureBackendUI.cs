@@ -112,20 +112,11 @@ public class AzureBackendUI
         }
 
         ImGui.SameLine();
-        if (ImGui.Button($"Delete preset##{MemoizedId.Create()}"))
-        {
-            var voiceConfig = this.config.GetVoiceConfig();
-
-            var otherPreset = voiceConfig.VoicePresets.FirstOrDefault(
-                p => p.Id != currentVoicePreset.Id && p.EnabledBackend == TTSBackend.Azure);
-            this.config.SetCurrentVoicePreset(otherPreset?.Id ?? 0);
-
-            voiceConfig.UngenderedVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
-            voiceConfig.MaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
-            voiceConfig.FemaleVoicePresets[TTSBackend.Azure].Remove(currentVoicePreset.Id);
-
-            voiceConfig.VoicePresets.Remove(currentVoicePreset);
-        }
+        BackendUI.DeletePresetButton(
+            $"Delete preset##{MemoizedId.Create()}",
+            currentVoicePreset,
+            TTSBackend.Azure,
+            this.config);
 
         var presetName = currentVoicePreset.Name;
         if (ImGui.InputText($"Preset name##{MemoizedId.Create()}", ref presetName, 64))

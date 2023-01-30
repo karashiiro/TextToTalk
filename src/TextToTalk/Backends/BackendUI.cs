@@ -20,6 +20,24 @@ public static class BackendUI
         }
     }
 
+    public static void DeletePresetButton(string label, VoicePreset preset, TTSBackend backend,
+        PluginConfiguration config)
+    {
+        if (ImGui.Button(label))
+        {
+            var voiceConfig = config.GetVoiceConfig();
+
+            var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != preset.Id);
+            config.SetCurrentVoicePreset(otherPreset.Id);
+
+            voiceConfig.UngenderedVoicePresets[backend].Remove(preset.Id);
+            voiceConfig.MaleVoicePresets[backend].Remove(preset.Id);
+            voiceConfig.FemaleVoicePresets[backend].Remove(preset.Id);
+
+            voiceConfig.VoicePresets.Remove(preset);
+        }
+    }
+
     public static void ImGuiVoiceNotSupported()
     {
         ImGui.TextColored(Red, "Voice not supported on this engine");
