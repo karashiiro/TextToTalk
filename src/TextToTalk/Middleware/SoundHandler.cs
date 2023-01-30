@@ -38,10 +38,13 @@ public class SoundHandler : IDisposable
     private readonly HashSet<nint> knownVoiceLinePtrs = new();
 
     private readonly TalkAddonHandler talkAddonHandler;
+    private readonly BattleTalkAddonHandler battleTalkAddonHandler;
 
-    public SoundHandler(TalkAddonHandler talkAddonHandler, SigScanner sigScanner)
+    public SoundHandler(TalkAddonHandler talkAddonHandler, BattleTalkAddonHandler battleTalkAddonHandler,
+        SigScanner sigScanner)
     {
         this.talkAddonHandler = talkAddonHandler;
+        this.battleTalkAddonHandler = battleTalkAddonHandler;
 
         if (sigScanner.TryScanText(LoadSoundFileSig, out var loadSoundFilePtr))
         {
@@ -140,7 +143,8 @@ public class SoundHandler : IDisposable
             if (this.knownVoiceLinePtrs.Remove(soundDataPtr))
             {
                 PluginLog.Log($"Caught playback of known voice line at address {soundDataPtr:x}");
-                talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.VoiceLinePlayback);
+                this.talkAddonHandler.PollAddon(PollSource.VoiceLinePlayback);
+                this.battleTalkAddonHandler.PollAddon(PollSource.VoiceLinePlayback);
             }
         }
         catch (Exception exc)

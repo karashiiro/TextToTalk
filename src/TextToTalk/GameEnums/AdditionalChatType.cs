@@ -3,13 +3,13 @@
     // These should be added to Dalamud proper
     public enum AdditionalChatType
     {
-        NPCDialogue = 61,
+        //NPCDialogue = 61,
         LootMessage = 62,
         CharacterProgress = 64,
         Loot = 65,
         Crafting = 66,
         Gathering = 67,
-        NPCAnnouncement = 68,
+        //NPCAnnouncement = 68,
         FCAnnouncement = 69,
         FCLogin = 70,
         RetainerSale = 71,

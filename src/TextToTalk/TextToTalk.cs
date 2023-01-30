@@ -53,6 +53,7 @@ namespace TextToTalk
 
         private readonly PluginConfiguration config;
         private readonly VoiceBackendManager backendManager;
+        private readonly BattleTalkAddonHandler battleTalkAddonHandler;
         private readonly TalkAddonHandler talkAddonHandler;
         private readonly ChatMessageHandler chatMessageHandler;
         private readonly SoundHandler soundHandler;
@@ -122,13 +123,14 @@ namespace TextToTalk
             this.windows.AddWindow(channelPresetModificationWindow);
 
             var filters = new MessageHandlerFilters(this.sharedState, config, this.clientState);
+            this.battleTalkAddonHandler = new BattleTalkAddonHandler(clientState, gui, data, filters, objects,
+                condition, this.config, this.sharedState, this.backendManager);
             this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, condition,
-                this.config,
-                this.sharedState, this.backendManager);
+                this.config, this.sharedState, this.backendManager);
 
             this.chatMessageHandler = new ChatMessageHandler(filters, objects, config, this.sharedState);
 
-            this.soundHandler = new SoundHandler(this.talkAddonHandler, sigScanner);
+            this.soundHandler = new SoundHandler(this.talkAddonHandler, this.battleTalkAddonHandler, sigScanner);
 
             this.rateLimiter = new RateLimiter(() =>
             {
@@ -143,7 +145,7 @@ namespace TextToTalk
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
             this.commandModule = new MainCommandModule(this.chat, commandManager, this.config, this.backendManager,
-                this.configurationWindow);
+                this.configurationWindow, this.battleTalkAddonHandler);
 
             RegisterCallbacks();
         }
@@ -199,7 +201,8 @@ namespace TextToTalk
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.FrameworkUpdate);
+            talkAddonHandler.PollAddon(PollSource.FrameworkUpdate);
+            battleTalkAddonHandler.PollAddon(PollSource.FrameworkUpdate);
         }
 
         private bool notifiedFailedToBindPort;
@@ -394,6 +397,7 @@ namespace TextToTalk
         {
             this.pluginInterface.UiBuilder.Draw += this.windows.Draw;
             this.talkAddonHandler.Say += Say;
+            //this.battleTalkAddonHandler.Say += Say;
             this.chatMessageHandler.Say += Say;
 
             this.pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
@@ -416,6 +420,7 @@ namespace TextToTalk
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 
             this.chatMessageHandler.Say -= Say;
+            //this.battleTalkAddonHandler.Say -= Say;
             this.talkAddonHandler.Say -= Say;
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;

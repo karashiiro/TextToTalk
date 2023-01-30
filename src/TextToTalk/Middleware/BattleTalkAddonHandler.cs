@@ -1,19 +1,19 @@
-﻿using Dalamud.Data;
+﻿using System;
+using System.Linq;
+using Dalamud.Data;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using System;
-using System.Linq;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Backends;
 using TextToTalk.Talk;
 
 namespace TextToTalk.Middleware;
 
-public class TalkAddonHandler
+public class BattleTalkAddonHandler
 {
     private readonly ClientState clientState;
     private readonly GameGui gui;
@@ -27,7 +27,7 @@ public class TalkAddonHandler
 
     public Action<GameObject, string, TextSource> Say { get; set; }
 
-    public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
+    public BattleTalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
         ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState,
         VoiceBackendManager backendManager)
     {
@@ -42,24 +42,30 @@ public class TalkAddonHandler
         this.backendManager = backendManager;
     }
 
+    public unsafe void ShowBattleTalk(string name, string text, float duration, byte style)
+    {
+        var ui = (UIModule*)this.gui.GetUIModule();
+        ui->ShowBattleTalk(name, text, duration, style);
+    }
+
     public unsafe void PollAddon(PollSource pollSource)
     {
         if (!this.clientState.IsLoggedIn || this.condition[ConditionFlag.CreatingCharacter])
         {
-            this.sharedState.TalkAddon = nint.Zero;
+            this.sharedState.BattleTalkAddon = nint.Zero;
             return;
         }
 
-        if (this.sharedState.TalkAddon == nint.Zero)
+        if (this.sharedState.BattleTalkAddon == nint.Zero)
         {
-            this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk");
-            if (this.sharedState.TalkAddon == nint.Zero) return;
+            this.sharedState.BattleTalkAddon = this.gui.GetAddonByName("_BattleTalk");
+            if (this.sharedState.BattleTalkAddon == nint.Zero) return;
         }
 
-        var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
-        if (talkAddon == null) return;
-        
-        if (!TalkUtils.IsVisible(talkAddon))
+        var battleTalkAddon = (AddonBattleTalk*)this.sharedState.BattleTalkAddon.ToPointer();
+        if (battleTalkAddon == null) return;
+
+        if (!TalkUtils.IsVisible(battleTalkAddon))
         {
             // Cancel TTS when the dialogue window is closed, if configured
             if (this.config.CancelSpeechOnTextAdvance)
@@ -67,14 +73,14 @@ public class TalkAddonHandler
                 this.backendManager.CancelSay(TextSource.TalkAddon);
             }
 
-            this.filters.SetLastQuestText("");
+            this.filters.SetLastBattleText("");
             return;
         }
 
         TalkAddonText talkAddonText;
         try
         {
-            talkAddonText = TalkUtils.ReadTalkAddon(this.data, talkAddon);
+            talkAddonText = TalkUtils.ReadTalkAddon(this.data, battleTalkAddon);
         }
         catch (NullReferenceException)
         {
@@ -83,9 +89,9 @@ public class TalkAddonHandler
         }
 
         var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
-        if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
-        this.filters.SetLastQuestText(text);
-        PluginLog.LogDebug($"AddonTalk: \"{text}\"");
+        if (text == "" || this.filters.IsDuplicateBattleText(text)) return;
+        this.filters.SetLastBattleText(text);
+        PluginLog.LogDebug($"AddonBattleTalk: \"{text}\"");
 
         if (pollSource == PollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
         {
@@ -115,7 +121,7 @@ public class TalkAddonHandler
             return;
         }
 
-        // Cancel TTS if it's currently Talk addon text, if configured
+        // Cancel TTS if it's currently BattleTalk addon text, if configured
         if (this.config.CancelSpeechOnTextAdvance &&
             this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
         {

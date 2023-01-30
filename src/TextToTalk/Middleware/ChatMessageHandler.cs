@@ -67,6 +67,7 @@ public class ChatMessageHandler
 
         textValue = TalkUtils.NormalizePunctuation(textValue);
         if (this.filters.IsDuplicateQuestText(textValue)) return;
+        if (this.filters.IsDuplicateBattleText(textValue)) return;
         PluginLog.LogDebug($"Chat ({type}): \"{textValue}\"");
 
         // This section controls speaker-related functions.
@@ -78,7 +79,7 @@ public class ChatMessageHandler
                 // or the speaker has actually changed.
                 if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(sender.TextValue))
                 {
-                    if ((int)type == (int)AdditionalChatType.NPCDialogue)
+                    if (type == XivChatType.NPCDialogue)
                     {
                         // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
                         var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
@@ -88,6 +89,16 @@ public class ChatMessageHandler
                         }
 
                         this.filters.SetLastQuestText(textValue);
+                    }
+                    else if (type == XivChatType.NPCDialogueAnnouncements)
+                    {
+                        var talkAddon = (AddonBattleTalk*)this.sharedState.BattleTalkAddon.ToPointer();
+                        if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
+                        {
+                            return;
+                        }
+
+                        this.filters.SetLastBattleText(textValue);
                     }
 
                     var speakerNameToSay = sender.TextValue;
