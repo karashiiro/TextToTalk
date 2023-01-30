@@ -38,7 +38,7 @@ public static class MemoizedId
             return id;
         }
 
-        id = xxHash128.ComputeHash($"{memberName}{sourceFilePath}{sourceLineNumber}{uniq}").ToGuid().ToString();
+        id = xxHash64.ComputeHash($"{memberName}{sourceFilePath}{sourceLineNumber}{uniq}").ToString("X");
         UsedIds[key] = id;
         return id;
     }
