@@ -130,6 +130,6 @@ public class ChatMessageHandler
             return;
         }
 
-        Say?.Invoke(speaker, textValue, TextSource.Chat);
+        Say.Invoke(speaker, textValue, TextSource.Chat);
     }
 }

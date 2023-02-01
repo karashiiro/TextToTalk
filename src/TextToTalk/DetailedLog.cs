@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Dalamud.Logging;
@@ -20,6 +21,7 @@ public static class DetailedLog
             WrapParameters(memberName, sourceFilePath, sourceLineNumber, values));
     }
 
+    [Conditional("DEBUG")]
     public static void Debug(
         string messageTemplate,
         [CallerMemberName] string memberName = "",
