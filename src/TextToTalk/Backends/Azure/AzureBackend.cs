@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using Dalamud.Logging;
 using ImGuiNET;
 
 namespace TextToTalk.Backends.Azure;
@@ -8,9 +9,9 @@ namespace TextToTalk.Backends.Azure;
 public class AzureBackend : VoiceBackend
 {
     private readonly AzureBackendUI ui;
-    
+
     private AzureClient client;
-    
+
     public AzureBackend(PluginConfiguration config, HttpClient http)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFF96800);
@@ -22,12 +23,18 @@ public class AzureBackend : VoiceBackend
         this.ui = new AzureBackendUI(config, lexiconManager, http,
             () => this.client, p => this.client = p, () => voices, v => voices = v);
     }
-    
+
     public override void Say(TextSource source, VoicePreset preset, string text)
     {
         if (preset is not AzureVoicePreset azureVoicePreset)
         {
             throw new InvalidOperationException("Invalid voice preset provided.");
+        }
+
+        if (this.client == null)
+        {
+            PluginLog.LogWarning("Azure client has not yet been initialized");
+            return;
         }
 
         _ = this.client.Say(azureVoicePreset.VoiceName,
@@ -36,11 +43,23 @@ public class AzureBackend : VoiceBackend
 
     public override void CancelAllSpeech()
     {
+        if (this.client == null)
+        {
+            PluginLog.LogWarning("Azure client has not yet been initialized");
+            return;
+        }
+
         _ = this.client.CancelAllSounds();
     }
 
     public override void CancelSay(TextSource source)
     {
+        if (this.client == null)
+        {
+            PluginLog.LogWarning("Azure client has not yet been initialized");
+            return;
+        }
+
         _ = this.client.CancelFromSource(source);
     }
 
@@ -51,6 +70,12 @@ public class AzureBackend : VoiceBackend
 
     public override TextSource GetCurrentlySpokenTextSource()
     {
+        if (this.client == null)
+        {
+            PluginLog.LogWarning("Azure client has not yet been initialized");
+            return TextSource.None;
+        }
+
         return this.client.GetCurrentlySpokenTextSource();
     }
 

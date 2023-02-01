@@ -30,6 +30,12 @@ public class UberduckBackend : VoiceBackend
             throw new InvalidOperationException("Invalid voice preset provided.");
         }
 
+        if (this.uberduck == null)
+        {
+            PluginLog.LogWarning("Uberduck client has not yet been initialized");
+            return;
+        }
+
         _ = Task.Run(async () =>
         {
             try

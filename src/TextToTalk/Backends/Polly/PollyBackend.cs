@@ -3,6 +3,7 @@ using Amazon.Polly.Model;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.Net.Http;
+using Dalamud.Logging;
 
 namespace TextToTalk.Backends.Polly
 {
@@ -31,17 +32,35 @@ namespace TextToTalk.Backends.Polly
                 throw new InvalidOperationException("Invalid voice preset provided.");
             }
 
+            if (this.polly == null)
+            {
+                PluginLog.LogWarning("Polly client has not yet been initialized");
+                return;
+            }
+
             _ = this.polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName, pollyVoicePreset.SampleRate,
                 pollyVoicePreset.PlaybackRate, pollyVoicePreset.Volume, source, text);
         }
 
         public override void CancelAllSpeech()
         {
+            if (this.polly == null)
+            {
+                PluginLog.LogWarning("Polly client has not yet been initialized");
+                return;
+            }
+
             _ = this.polly.CancelAllSounds();
         }
 
         public override void CancelSay(TextSource source)
         {
+            if (this.polly == null)
+            {
+                PluginLog.LogWarning("Polly client has not yet been initialized");
+                return;
+            }
+
             _ = this.polly.CancelFromSource(source);
         }
 
@@ -52,6 +71,12 @@ namespace TextToTalk.Backends.Polly
 
         public override TextSource GetCurrentlySpokenTextSource()
         {
+            if (this.polly == null)
+            {
+                PluginLog.LogWarning("Polly client has not yet been initialized");
+                return TextSource.None;
+            }
+
             return this.polly.GetCurrentlySpokenTextSource();
         }
 
