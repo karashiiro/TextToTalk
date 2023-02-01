@@ -68,13 +68,13 @@ namespace TextToTalk
 
         [Obsolete] public int PollyPlaybackRate { get; set; } = 100;
 
-        [Obsolete] public string UberduckVoice { get; set; } = "zwf";
+        [Obsolete] public string? UberduckVoice { get; set; } = "zwf";
 
-        [Obsolete] public string UberduckVoiceUngendered { get; set; } = "zwf";
+        [Obsolete] public string? UberduckVoiceUngendered { get; set; } = "zwf";
 
-        [Obsolete] public string UberduckVoiceMale { get; set; } = "zwf";
+        [Obsolete] public string? UberduckVoiceMale { get; set; } = "zwf";
 
-        [Obsolete] public string UberduckVoiceFemale { get; set; } = "zwf";
+        [Obsolete] public string? UberduckVoiceFemale { get; set; } = "zwf";
 
         [Obsolete] public float UberduckVolume { get; set; } = 1.0f;
 

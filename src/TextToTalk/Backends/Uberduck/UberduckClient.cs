@@ -38,7 +38,7 @@ public class UberduckClient
                 g => (IList<UberduckVoice>)g.OrderByDescending(v => v.DisplayName).ToList());
     }
 
-    public async Task Say(string voice, int playbackRate, float volume, TextSource source, string text)
+    public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text)
     {
         if (!IsAuthorizationSet())
         {
@@ -149,7 +149,7 @@ public class UberduckClient
     {
         [JsonProperty("speech")] public string Speech { get; init; }
 
-        [JsonProperty("voice")] public string Voice { get; init; }
+        [JsonProperty("voice")] public string? Voice { get; init; }
     }
 
     private class UberduckSpeechResponse

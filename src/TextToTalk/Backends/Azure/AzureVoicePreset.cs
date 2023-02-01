@@ -8,7 +8,7 @@ public class AzureVoicePreset : VoicePreset
 
     public int PlaybackRate { get; set; }
 
-    [JsonProperty("AzureVoiceName")] public string VoiceName { get; set; }
+    [JsonProperty("AzureVoiceName")] public string? VoiceName { get; set; }
 
     public override bool TrySetDefaultValues()
     {

@@ -8,7 +8,7 @@ public class UberduckVoice
     public string DisplayName { get; init; }
 
     [JsonProperty("name")]
-    public string Name { get; init; }
+    public string? Name { get; init; }
     
     [JsonProperty("category")]
     public string Category { get; init; }

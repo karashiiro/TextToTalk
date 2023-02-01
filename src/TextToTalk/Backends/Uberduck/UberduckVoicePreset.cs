@@ -8,7 +8,7 @@ public class UberduckVoicePreset : VoicePreset
 
     public int PlaybackRate { get; set; }
 
-    [JsonProperty("UberduckVoiceName")] public string VoiceName { get; set; }
+    [JsonProperty("UberduckVoiceName")] public string? VoiceName { get; set; }
 
     public override bool TrySetDefaultValues()
     {

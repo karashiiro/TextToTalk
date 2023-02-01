@@ -18,7 +18,7 @@ public class AzureBackendUI
     private readonly LexiconComponent lexiconComponent;
     private readonly LexiconManager lexiconManager;
 
-    private readonly Func<AzureClient> getAzure;
+    private readonly Func<AzureClient?> getAzure;
     private readonly Action<AzureClient> setAzure;
     private readonly Func<IList<string>> getVoices;
     private readonly Action<IList<string>> setVoices;
@@ -27,7 +27,7 @@ public class AzureBackendUI
     private string subscriptionKey = string.Empty;
 
     public AzureBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http,
-        Func<AzureClient> getAzure, Action<AzureClient> setAzure, Func<IList<string>> getVoices,
+        Func<AzureClient?> getAzure, Action<AzureClient> setAzure, Func<IList<string>> getVoices,
         Action<IList<string>> setVoices)
     {
         this.getAzure = getAzure;
@@ -126,7 +126,7 @@ public class AzureBackendUI
 
         {
             var voices = this.getVoices.Invoke();
-            var voiceArray = voices.ToArray();
+            string?[] voiceArray = voices.ToArray();
             var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
             if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))
             {
