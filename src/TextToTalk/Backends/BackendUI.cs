@@ -15,23 +15,38 @@ public static class BackendUI
         List<VoicePreset> presets)
     {
         var voiceConfig = config.GetVoiceConfig();
+        var ungenderedVoices = voiceConfig.GetUngenderedPresets(backend);
+        var maleVoices = voiceConfig.GetMalePresets(backend);
+        var femaleVoices = voiceConfig.GetFemalePresets(backend);
 
-        if (ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create(uniq: uniq)}",
-                voiceConfig.GetUngenderedPresets(TTSBackend.Azure), presets))
+        if (ImGuiPresetCombo($"Ungendered preset(s)##{MemoizedId.Create(uniq: uniq)}", ungenderedVoices, presets))
         {
             config.Save();
         }
 
-        if (ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create(uniq: uniq)}",
-                voiceConfig.GetMalePresets(TTSBackend.Azure), presets))
+        if (!ungenderedVoices.Any())
+        {
+            ImGui.TextColored(Red, "No ungendered voice preset(s) are selected.");
+        }
+
+        if (ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create(uniq: uniq)}", maleVoices, presets))
         {
             config.Save();
         }
 
-        if (ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create(uniq: uniq)}",
-                voiceConfig.GetFemalePresets(TTSBackend.Azure), presets))
+        if (!maleVoices.Any())
+        {
+            ImGui.TextColored(Red, "No male voice preset(s) are selected.");
+        }
+
+        if (ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create(uniq: uniq)}", femaleVoices, presets))
         {
             config.Save();
+        }
+
+        if (!femaleVoices.Any())
+        {
+            ImGui.TextColored(Red, "No female voice preset(s) are selected.");
         }
 
         ImGuiMultiVoiceHint();
