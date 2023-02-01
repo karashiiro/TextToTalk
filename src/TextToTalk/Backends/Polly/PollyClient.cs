@@ -2,7 +2,6 @@
 using Amazon.Polly;
 using Amazon.Polly.Model;
 using Amazon.Runtime;
-using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,7 +52,7 @@ namespace TextToTalk.Backends.Polly
         public async Task Say(Engine engine, VoiceId voice, int sampleRate, int playbackRate, float volume, TextSource source, string text)
         {
             var ssml = this.lexiconManager.MakeSsml(text, playbackRate: playbackRate, includeSpeakAttributes: false);
-            PluginLog.Log(ssml);
+            DetailedLog.Info(ssml);
 
             var req = new SynthesizeSpeechRequest
             {
@@ -72,7 +71,7 @@ namespace TextToTalk.Backends.Polly
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Synthesis request failed in {0}.", nameof(PollyClient));
+                DetailedLog.Error(e, "Synthesis request failed in {0}.", nameof(PollyClient));
                 return;
             }
 

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 using ImGuiNET;
 using TextToTalk.Backends;
 using TextToTalk.Lexicons;
@@ -63,7 +62,7 @@ public class LexiconRepositorySubwindow
         if (!this.remotePackagesLoaded && !this.remotePackagesLoading)
         {
             // Fetch the list of lexicon packages
-            PluginLog.Log("Fetching lexicon package list...");
+            DetailedLog.Info("Fetching lexicon package list...");
             _ = LoadPackageList();
         }
         else if (ImGui.BeginTable("##TTTLexiconRepoList", 3, ImGuiTableFlags.Borders))
@@ -208,7 +207,7 @@ public class LexiconRepositorySubwindow
                                     }
                                     catch (Exception e)
                                     {
-                                        PluginLog.LogError(e, "Failed to load lexicon.");
+                                        DetailedLog.Error(e, "Failed to load lexicon.");
                                     }
                                 }
                                 else if (currentEnabledBefore && !currentEnabled)
@@ -219,7 +218,7 @@ public class LexiconRepositorySubwindow
                                     }
                                     catch (Exception e)
                                     {
-                                        PluginLog.LogError(e, "Failed to unload lexicon.");
+                                        DetailedLog.Error(e, "Failed to unload lexicon.");
                                     }
                                 }
                             }
@@ -304,7 +303,7 @@ public class LexiconRepositorySubwindow
                 var lexiconData = package.GetPackageFileLocal(file);
                 if (lexiconData == null)
                 {
-                    PluginLog.Error($"Local data for lexicon file \"{file}\" of lexicon \"{package.PackageName}\" not found! Please reinstall this lexicon.");
+                    DetailedLog.Error($"Local data for lexicon file \"{file}\" of lexicon \"{package.PackageName}\" not found! Please reinstall this lexicon.");
                     continue;
                 }
 
@@ -315,7 +314,7 @@ public class LexiconRepositorySubwindow
                 }
                 catch (Exception e)
                 {
-                    PluginLog.LogError(e, "Failed to load lexicon.");
+                    DetailedLog.Error(e, "Failed to load lexicon.");
                 }
             }
         }
@@ -348,7 +347,7 @@ public class LexiconRepositorySubwindow
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Failed to load lexicon.");
+                DetailedLog.Error(e, "Failed to load lexicon.");
             }
         }
     }
@@ -408,7 +407,7 @@ public class LexiconRepositorySubwindow
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Failed to remove lexicon file.");
+                DetailedLog.Error(e, "Failed to remove lexicon file.");
             }
         }
 
@@ -418,7 +417,7 @@ public class LexiconRepositorySubwindow
         }
         catch (Exception e)
         {
-            PluginLog.LogError(e, "Failed to uninstall lexicon.");
+            DetailedLog.Error(e, "Failed to uninstall lexicon.");
         }
     }
 

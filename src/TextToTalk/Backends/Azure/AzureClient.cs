@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using TextToTalk.Lexicons;
@@ -46,7 +45,7 @@ public class AzureClient : IDisposable
             langCode: "en-US",
             playbackRate: playbackRate,
             includeSpeakAttributes: true);
-        PluginLog.Log(ssml);
+        DetailedLog.Info(ssml);
 
         var res = await this.synthesizer.SpeakSsmlAsync(ssml);
 
@@ -74,7 +73,7 @@ public class AzureClient : IDisposable
     {
         if (!string.IsNullOrEmpty(res.ErrorDetails))
         {
-            PluginLog.LogError($"Azure request error: ({res.Reason}) \"{res.ErrorDetails}\"");
+            DetailedLog.Error($"Azure request error: ({res.Reason}) \"{res.ErrorDetails}\"");
         }
     }
 
@@ -85,11 +84,11 @@ public class AzureClient : IDisposable
             var cancellation = SpeechSynthesisCancellationDetails.FromResult(res);
             if (cancellation.Reason == CancellationReason.Error)
             {
-                PluginLog.LogError($"Azure request error: ({cancellation.ErrorCode}) \"{cancellation.ErrorDetails}\"");
+                DetailedLog.Error($"Azure request error: ({cancellation.ErrorCode}) \"{cancellation.ErrorDetails}\"");
             }
             else
             {
-                PluginLog.LogWarning($"Azure request failed in state \"{cancellation.Reason}\"");
+                DetailedLog.Warn($"Azure request failed in state \"{cancellation.Reason}\"");
             }
 
             return;
@@ -97,7 +96,7 @@ public class AzureClient : IDisposable
 
         if (res.Reason != ResultReason.SynthesizingAudioCompleted)
         {
-            PluginLog.LogWarning($"Speech synthesis request completed in incomplete state \"{res.Reason}\"");
+            DetailedLog.Warn($"Speech synthesis request completed in incomplete state \"{res.Reason}\"");
         }
     }
 

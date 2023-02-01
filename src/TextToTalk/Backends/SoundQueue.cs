@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Dalamud.Logging;
 
 namespace TextToTalk.Backends
 {
@@ -42,7 +41,7 @@ namespace TextToTalk.Backends
                 }
                 catch (Exception e)
                 {
-                    PluginLog.LogError(e, "Error occurred during sound loop.");
+                    DetailedLog.Error(e, "Error occurred during sound loop.");
                 }
 
                 this.currentItem.Dispose();

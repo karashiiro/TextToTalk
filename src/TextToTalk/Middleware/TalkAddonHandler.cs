@@ -7,7 +7,6 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.Talk;
 
@@ -92,11 +91,11 @@ public class TalkAddonHandler
         var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
         if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
-        PluginLog.LogDebug($"AddonTalk: \"{text}\"");
+        DetailedLog.Debug($"AddonTalk: \"{text}\"");
 
         if (pollSource == PollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
         {
-            PluginLog.Log($"Skipping voice-acted line: {text}");
+            DetailedLog.Info($"Skipping voice-acted line: {text}");
             return;
         }
 

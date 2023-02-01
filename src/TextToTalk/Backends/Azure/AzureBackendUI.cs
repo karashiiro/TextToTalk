@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using Dalamud.Logging;
 using ImGuiNET;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
@@ -187,7 +186,7 @@ public class AzureBackendUI
         azure?.Dispose();
         try
         {
-            PluginLog.Log($"Logging into Azure region {region}.");
+            DetailedLog.Info($"Logging into Azure region {region}.");
             azure = new AzureClient(this.subscriptionKey, this.region, this.lexiconManager);
             var voices = azure.GetVoices();
             this.setAzure.Invoke(azure);
@@ -195,7 +194,7 @@ public class AzureBackendUI
         }
         catch (Exception e)
         {
-            PluginLog.LogError(e, "Failed to initialize Azure client.");
+            DetailedLog.Error(e, "Failed to initialize Azure client.");
             AzureCredentialManager.DeleteCredentials();
         }
     }

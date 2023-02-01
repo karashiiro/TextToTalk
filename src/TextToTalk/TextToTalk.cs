@@ -7,7 +7,6 @@ using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using System;
 using System.Linq;
@@ -172,7 +171,7 @@ namespace TextToTalk
                     this.keysDown = true;
                     this.config.SetCurrentEnabledChatTypesPreset(preset.Id);
                     this.chat.Print($"TextToTalk preset -> {preset.Name}");
-                    PluginLog.Log($"TextToTalk preset -> {preset.Name}");
+                    DetailedLog.Info($"TextToTalk preset -> {preset.Name}");
                     return true;
                 }
             }
@@ -251,7 +250,7 @@ namespace TextToTalk
             {
                 if (playerVoice.EnabledBackend != this.config.Backend)
                 {
-                    PluginLog.LogError(
+                    DetailedLog.Error(
                         $"Voice preset {playerVoice.Name} is not compatible with the {this.config.Backend} backend");
                 }
                 else
@@ -268,7 +267,7 @@ namespace TextToTalk
             {
                 if (npcVoice.EnabledBackend != this.config.Backend)
                 {
-                    PluginLog.LogError(
+                    DetailedLog.Error(
                         $"Voice preset {npcVoice.Name} is not compatible with the {this.config.Backend} backend");
                 }
                 else
@@ -289,7 +288,7 @@ namespace TextToTalk
                 }
                 else
                 {
-                    PluginLog.LogError("Attempted to speak with null voice preset");
+                    DetailedLog.Error("Attempted to speak with null voice preset");
                 }
             }
         }
@@ -343,7 +342,7 @@ namespace TextToTalk
         {
             if (gObj == null || gObj.Address == nint.Zero)
             {
-                PluginLog.Log("GameObject is null; cannot check gender.");
+                DetailedLog.Info("GameObject is null; cannot check gender.");
                 return Gender.None;
             }
 
@@ -373,12 +372,12 @@ namespace TextToTalk
             if (ungenderedOverrides.IsUngendered(modelId))
             {
                 actorGender = Gender.None;
-                PluginLog.Log(
+                DetailedLog.Info(
                     $"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender overriden to: {actorGender})");
             }
             else
             {
-                PluginLog.Log(
+                DetailedLog.Info(
                     $"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender read as: {actorGender})");
             }
 
@@ -433,7 +432,7 @@ namespace TextToTalk
                 }
                 catch (Exception e)
                 {
-                    PluginLog.LogError(e, "Failed to print chat message.");
+                    DetailedLog.Error(e, "Failed to print chat message.");
                 }
             }
         }

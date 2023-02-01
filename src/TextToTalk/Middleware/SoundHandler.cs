@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dalamud.Game;
 using Dalamud.Hooking;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 
 namespace TextToTalk.Middleware;
@@ -47,11 +46,11 @@ public class SoundHandler : IDisposable
         {
             this.loadSoundFileHook = Hook<LoadSoundFileDelegate>.FromAddress(loadSoundFilePtr, LoadSoundFileDetour);
             this.loadSoundFileHook.Enable();
-            PluginLog.Log("Hooked into LoadSoundFile");
+            DetailedLog.Info("Hooked into LoadSoundFile");
         }
         else
         {
-            PluginLog.LogError("Failed to hook into LoadSoundFile");
+            DetailedLog.Error("Failed to hook into LoadSoundFile");
         }
 
         if (sigScanner.TryScanText(PlaySpecificSoundSig, out var playSpecificSoundPtr))
@@ -59,11 +58,11 @@ public class SoundHandler : IDisposable
             this.playSpecificSoundHook =
                 Hook<PlaySpecificSoundDelegate>.FromAddress(playSpecificSoundPtr, PlaySpecificSoundDetour);
             this.playSpecificSoundHook.Enable();
-            PluginLog.Log("Hooked into PlaySpecificSound");
+            DetailedLog.Info("Hooked into PlaySpecificSound");
         }
         else
         {
-            PluginLog.LogError("Failed to hook into PlaySpecificSound");
+            DetailedLog.Error("Failed to hook into PlaySpecificSound");
         }
     }
 
@@ -94,7 +93,7 @@ public class SoundHandler : IDisposable
 
                     if (!IgnoredSoundFileNameRegex.IsMatch(fileName))
                     {
-                        PluginLog.Log($"Loaded sound: {fileName}");
+                        DetailedLog.Info($"Loaded sound: {fileName}");
 
                         if (VoiceLineFileNameRegex.IsMatch(fileName))
                         {
@@ -104,7 +103,7 @@ public class SoundHandler : IDisposable
 
                     if (isVoiceLine)
                     {
-                        PluginLog.Log($"Discovered voice line at address {resourceDataPtr:x}");
+                        DetailedLog.Info($"Discovered voice line at address {resourceDataPtr:x}");
                         this.knownVoiceLinePtrs.Add(resourceDataPtr);
                     }
                     else
@@ -113,7 +112,7 @@ public class SoundHandler : IDisposable
                         // occupied by a voice line.
                         if (this.knownVoiceLinePtrs.Remove(resourceDataPtr))
                         {
-                            PluginLog.Log(
+                            DetailedLog.Info(
                                 $"Cleared voice line from address {resourceDataPtr:x} (address reused by: {fileName})");
                         }
                     }
@@ -122,7 +121,7 @@ public class SoundHandler : IDisposable
         }
         catch (Exception exc)
         {
-            PluginLog.LogError(exc, "Error in LoadSoundFile detour");
+            DetailedLog.Error(exc, "Error in LoadSoundFile detour");
         }
 
         return result;
@@ -139,13 +138,13 @@ public class SoundHandler : IDisposable
             // lines are played.
             if (this.knownVoiceLinePtrs.Remove(soundDataPtr))
             {
-                PluginLog.Log($"Caught playback of known voice line at address {soundDataPtr:x}");
+                DetailedLog.Info($"Caught playback of known voice line at address {soundDataPtr:x}");
                 talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.VoiceLinePlayback);
             }
         }
         catch (Exception exc)
         {
-            PluginLog.LogError(exc, "Error in PlaySpecificSound detour");
+            DetailedLog.Error(exc, "Error in PlaySpecificSound detour");
         }
 
         return result;

@@ -1,5 +1,4 @@
-﻿using Dalamud.Logging;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -30,7 +29,7 @@ namespace TextToTalk
             }
             catch (Exception e)
             {
-                PluginLog.Error(e, "VoiceUnlocker failed to start.");
+                DetailedLog.Error(e, "VoiceUnlocker failed to start.");
                 return false;
             }
 

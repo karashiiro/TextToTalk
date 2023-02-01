@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Dalamud.Logging;
 using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends;
@@ -31,21 +30,21 @@ public class DalamudLexiconManager : LexiconManager
 
     private static void LogPreAdd(string lexiconId)
     {
-        PluginLog.Log($"Adding lexicon \"{lexiconId}\"");
+        DetailedLog.Info($"Adding lexicon \"{lexiconId}\"");
     }
 
     private static void LogPostAdd(string lexiconId, int newEntries, int totalEntries)
     {
-        PluginLog.Log($"Lexicon \"{lexiconId}\" added; {newEntries} new lexicon entries ({totalEntries} total).");
+        DetailedLog.Info($"Lexicon \"{lexiconId}\" added; {newEntries} new lexicon entries ({totalEntries} total).");
     }
 
     private static void LogPreRemove(string lexiconId)
     {
-        PluginLog.Log($"Removing lexicon \"{lexiconId}\"");
+        DetailedLog.Info($"Removing lexicon \"{lexiconId}\"");
     }
 
     private static void LogPostRemove(string lexiconId, int totalEntries)
     {
-        PluginLog.Log($"Lexicon \"{lexiconId}\" removed; {totalEntries} lexicon entries remaining.");
+        DetailedLog.Info($"Lexicon \"{lexiconId}\" removed; {totalEntries} lexicon entries remaining.");
     }
 }

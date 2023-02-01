@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using Dalamud.Logging;
 using ImGuiNET;
 
 namespace TextToTalk.Backends.Azure;
@@ -33,7 +32,7 @@ public class AzureBackend : VoiceBackend
 
         if (this.client == null)
         {
-            PluginLog.LogWarning("Azure client has not yet been initialized");
+            DetailedLog.Warn("Azure client has not yet been initialized");
             return;
         }
 
@@ -45,7 +44,7 @@ public class AzureBackend : VoiceBackend
     {
         if (this.client == null)
         {
-            PluginLog.LogWarning("Azure client has not yet been initialized");
+            DetailedLog.Warn("Azure client has not yet been initialized");
             return;
         }
 
@@ -56,7 +55,7 @@ public class AzureBackend : VoiceBackend
     {
         if (this.client == null)
         {
-            PluginLog.LogWarning("Azure client has not yet been initialized");
+            DetailedLog.Warn("Azure client has not yet been initialized");
             return;
         }
 
@@ -72,7 +71,7 @@ public class AzureBackend : VoiceBackend
     {
         if (this.client == null)
         {
-            PluginLog.LogWarning("Azure client has not yet been initialized");
+            DetailedLog.Warn("Azure client has not yet been initialized");
             return TextSource.None;
         }
 

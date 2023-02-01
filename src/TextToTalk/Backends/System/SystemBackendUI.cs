@@ -7,7 +7,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Speech.Synthesis;
 using System.Text;
-using Dalamud.Logging;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
@@ -25,7 +24,7 @@ public class SystemBackendUI
         }
         catch (Exception e)
         {
-            PluginLog.LogError(e, "Failed to create speech synthesizer.");
+            DetailedLog.Error(e, "Failed to create speech synthesizer.");
             return null;
         }
     });

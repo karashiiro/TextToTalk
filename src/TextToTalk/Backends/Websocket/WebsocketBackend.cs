@@ -1,5 +1,4 @@
-﻿using Dalamud.Logging;
-using ImGuiNET;
+﻿using ImGuiNET;
 using System;
 using System.Net.Sockets;
 using System.Numerics;
@@ -38,12 +37,12 @@ namespace TextToTalk.Backends.Websocket
             {
                 this.wsServer.Broadcast(source, voice, text);
 #if DEBUG
-                PluginLog.Log("Sent message {0} on WebSocket server.", text);
+                DetailedLog.Info("Sent message {0} on WebSocket server.", text);
 #endif
             }
             catch (Exception e)
             {
-                PluginLog.Error(e, "Failed to send message over Websocket.");
+                DetailedLog.Error(e, "Failed to send message over Websocket.");
             }
         }
 
@@ -86,7 +85,7 @@ namespace TextToTalk.Backends.Websocket
                 }
                 else
                 {
-                    PluginLog.LogError("Failed to parse port!");
+                    DetailedLog.Error("Failed to parse port!");
                 }
             }
 

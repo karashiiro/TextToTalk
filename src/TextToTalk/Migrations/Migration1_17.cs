@@ -31,7 +31,7 @@ public class Migration1_17 : IConfigurationMigration
                 // than one of its inheritors.
                 if (preset.GetType() == typeof(VoicePreset))
                 {
-                    PluginLog.Log($"Migrating preset {preset.Name}");
+                    DetailedLog.Info($"Migrating preset {preset.Name}");
                     config.GetVoiceConfig().VoicePresets.Add(new SystemVoicePreset
                     {
                         Id = preset.Id,

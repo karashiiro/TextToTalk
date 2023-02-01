@@ -1,7 +1,6 @@
 ﻿using Amazon;
 using Amazon.Polly;
 using Amazon.Polly.Model;
-using Dalamud.Logging;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -238,7 +237,7 @@ public class PollyBackendUI
         polly?.Dispose();
         try
         {
-            PluginLog.Log($"Logging into AWS region {regionEndpoint}.");
+            DetailedLog.Info($"Logging into AWS region {regionEndpoint}.");
             polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint, this.lexiconManager);
             var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
             var voices = polly.GetVoicesForEngine(currentVoicePreset?.VoiceEngine ?? Engine.Neural);
@@ -247,7 +246,7 @@ public class PollyBackendUI
         }
         catch (Exception e)
         {
-            PluginLog.LogError(e, "Failed to initialize AWS client.");
+            DetailedLog.Error(e, "Failed to initialize AWS client.");
             PollyCredentialManager.DeleteCredentials();
         }
     }

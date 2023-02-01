@@ -1,5 +1,4 @@
-﻿using Dalamud.Logging;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Speech.Synthesis;
 using System.Threading;
@@ -52,13 +51,13 @@ namespace TextToTalk.Backends.System
             }
             catch (SelectVoiceFailedException e)
             {
-                PluginLog.LogError(e, "Failed to select voice {0}", systemVoicePreset.VoiceName);
+                DetailedLog.Error(e, "Failed to select voice {0}", systemVoicePreset.VoiceName);
                 this.selectVoiceFailures.Enqueue(e);
             }
 
             var ssml = this.lexiconManager.MakeSsml(nextItem.Text,
                 langCode: this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
-            PluginLog.Log(ssml);
+            DetailedLog.Info(ssml);
 
             this.speechSynthesizer.SpeakSsmlAsync(ssml);
 

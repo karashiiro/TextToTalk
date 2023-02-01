@@ -1,5 +1,4 @@
-﻿using Dalamud.Logging;
-using System;
+﻿using System;
 using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends;
@@ -18,7 +17,7 @@ public static class LexiconUtils
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Failed to add lexicon - removing from configuration.");
+                DetailedLog.Error(e, "Failed to add lexicon - removing from configuration.");
                 config.Lexicons.RemoveAt(i);
                 config.Save();
                 i--;
@@ -38,7 +37,7 @@ public static class LexiconUtils
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Failed to add lexicon - removing from configuration.");
+                DetailedLog.Error(e, "Failed to add lexicon - removing from configuration.");
                 config.PollyLexiconFiles.RemoveAt(i);
                 config.Save();
                 i--;
@@ -58,7 +57,7 @@ public static class LexiconUtils
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Failed to add lexicon - removing from configuration.");
+                DetailedLog.Error(e, "Failed to add lexicon - removing from configuration.");
                 config.AzureLexiconFiles.RemoveAt(i);
                 config.Save();
                 i--;

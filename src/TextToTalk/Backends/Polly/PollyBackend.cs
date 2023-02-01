@@ -3,7 +3,6 @@ using Amazon.Polly.Model;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.Net.Http;
-using Dalamud.Logging;
 
 namespace TextToTalk.Backends.Polly
 {
@@ -34,7 +33,7 @@ namespace TextToTalk.Backends.Polly
 
             if (this.polly == null)
             {
-                PluginLog.LogWarning("Polly client has not yet been initialized");
+                DetailedLog.Warn("Polly client has not yet been initialized");
                 return;
             }
 
@@ -46,7 +45,7 @@ namespace TextToTalk.Backends.Polly
         {
             if (this.polly == null)
             {
-                PluginLog.LogWarning("Polly client has not yet been initialized");
+                DetailedLog.Warn("Polly client has not yet been initialized");
                 return;
             }
 
@@ -57,7 +56,7 @@ namespace TextToTalk.Backends.Polly
         {
             if (this.polly == null)
             {
-                PluginLog.LogWarning("Polly client has not yet been initialized");
+                DetailedLog.Warn("Polly client has not yet been initialized");
                 return;
             }
 
@@ -73,7 +72,7 @@ namespace TextToTalk.Backends.Polly
         {
             if (this.polly == null)
             {
-                PluginLog.LogWarning("Polly client has not yet been initialized");
+                DetailedLog.Warn("Polly client has not yet been initialized");
                 return TextSource.None;
             }
 

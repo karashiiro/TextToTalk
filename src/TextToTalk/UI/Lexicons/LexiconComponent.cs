@@ -5,7 +5,6 @@ using System.Numerics;
 using System.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
-using Dalamud.Logging;
 using ImGuiNET;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
@@ -74,7 +73,7 @@ public class LexiconComponent
                 }
                 catch (Exception e)
                 {
-                    PluginLog.LogError(e, "Failed to load lexicon.");
+                    DetailedLog.Error(e, "Failed to load lexicon.");
                     this.lexiconAddException = e;
                 }
 
@@ -176,7 +175,7 @@ public class LexiconComponent
             }
             catch (Exception e)
             {
-                PluginLog.LogError(e, "Failed to remove lexicon.");
+                DetailedLog.Error(e, "Failed to remove lexicon.");
                 this.lexiconRemoveExceptions[i] = e;
             }
 

@@ -2,7 +2,6 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 using System.Linq;
@@ -67,7 +66,7 @@ public class ChatMessageHandler
 
         textValue = TalkUtils.NormalizePunctuation(textValue);
         if (this.filters.IsDuplicateQuestText(textValue)) return;
-        PluginLog.LogDebug($"Chat ({type}): \"{textValue}\"");
+        DetailedLog.Debug($"Chat ({type}): \"{textValue}\"");
 
         // This section controls speaker-related functions.
         if (sender != null && sender.TextValue != string.Empty)

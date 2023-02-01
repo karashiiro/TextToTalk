@@ -7,7 +7,6 @@ using Dalamud.Data;
 using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
-using Dalamud.Logging;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using TextToTalk.Backends;
@@ -351,7 +350,7 @@ namespace TextToTalk.UI
                     {
                         playerInfo.Name = name;
                         this.config.Save();
-                        PluginLog.LogDebug($"Updated player name: {playerInfo.Name}@{worldName ?? ""}");
+                        DetailedLog.Debug($"Updated player name: {playerInfo.Name}@{worldName ?? ""}");
                     }
                 },
                 row =>
@@ -373,7 +372,7 @@ namespace TextToTalk.UI
                             this.playerWorldValid[id] = true;
                             playerInfo.WorldId = worldPending.RowId;
                             this.config.Save();
-                            PluginLog.LogDebug($"Updated player world: {playerInfo.Name}@{worldPending.Name}");
+                            DetailedLog.Debug($"Updated player world: {playerInfo.Name}@{worldPending.Name}");
                         }
                         else
                         {
@@ -410,7 +409,7 @@ namespace TextToTalk.UI
                     {
                         this.players.SetPlayerVoice(playerInfo, presets[presetIndex]);
                         this.config.Save();
-                        PluginLog.LogDebug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
+                        DetailedLog.Debug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
                     }
                 });
 
@@ -438,17 +437,17 @@ namespace TextToTalk.UI
                 if (world != null && this.players.AddPlayer(this.playerName, world.RowId))
                 {
                     this.config.Save();
-                    PluginLog.Log($"Added player: {this.playerName}@{world.Name}");
+                    DetailedLog.Info($"Added player: {this.playerName}@{world.Name}");
                 }
                 else if (world == null)
                 {
                     this.playerWorldError = "Unknown world.";
-                    PluginLog.LogError("The provided world name was invalid");
+                    DetailedLog.Error("The provided world name was invalid");
                 }
                 else
                 {
                     this.playerWorldError = "Failed to add player - is this a duplicate?";
-                    PluginLog.LogError("Failed to add player; this might be a duplicate entry");
+                    DetailedLog.Error("Failed to add player; this might be a duplicate entry");
                 }
             }
         }
@@ -513,7 +512,7 @@ namespace TextToTalk.UI
                     {
                         npcInfo.Name = name;
                         this.config.Save();
-                        PluginLog.LogDebug($"Updated NPC name: {npcInfo.Name}");
+                        DetailedLog.Debug($"Updated NPC name: {npcInfo.Name}");
                     }
                 },
                 row =>
@@ -528,7 +527,7 @@ namespace TextToTalk.UI
                     {
                         this.npc.SetNpcVoice(npcInfo, presets[presetIndex]);
                         this.config.Save();
-                        PluginLog.LogDebug($"Updated voice for {name}: {presets[presetIndex].Name}");
+                        DetailedLog.Debug($"Updated voice for {name}: {presets[presetIndex].Name}");
                     }
                 });
 
@@ -554,12 +553,12 @@ namespace TextToTalk.UI
                 if (this.npc.AddNpc(this.npcName))
                 {
                     this.config.Save();
-                    PluginLog.Log($"Added NPC: {this.npcName}");
+                    DetailedLog.Info($"Added NPC: {this.npcName}");
                 }
                 else
                 {
                     this.npcError = "Failed to add NPC - is this a duplicate?";
-                    PluginLog.LogError("Failed to add NPC; this might be a duplicate entry");
+                    DetailedLog.Error("Failed to add NPC; this might be a duplicate entry");
                 }
             }
         }

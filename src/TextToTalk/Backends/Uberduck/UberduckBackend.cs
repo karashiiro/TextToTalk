@@ -2,7 +2,6 @@
 using ImGuiNET;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
 namespace TextToTalk.Backends.Uberduck;
 
@@ -32,7 +31,7 @@ public class UberduckBackend : VoiceBackend
 
         if (this.uberduck == null)
         {
-            PluginLog.LogWarning("Uberduck client has not yet been initialized");
+            DetailedLog.Warn("Uberduck client has not yet been initialized");
             return;
         }
 
@@ -45,15 +44,15 @@ public class UberduckBackend : VoiceBackend
             }
             catch (UberduckFailedException e)
             {
-                PluginLog.LogError(e, $"Failed to make Uberduck TTS request ({e.StatusCode}).");
+                DetailedLog.Error(e, $"Failed to make Uberduck TTS request ({e.StatusCode}).");
             }
             catch (UberduckMissingCredentialsException e)
             {
-                PluginLog.LogWarning(e.Message);
+                DetailedLog.Warn(e.Message);
             }
             catch (UberduckUnauthorizedException e)
             {
-                PluginLog.LogError(e, "Uberduck API keys are incorrect or invalid.");
+                DetailedLog.Error(e, "Uberduck API keys are incorrect or invalid.");
             }
         });
     }

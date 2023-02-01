@@ -8,7 +8,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
 namespace TextToTalk.Backends.Uberduck;
 
@@ -56,7 +55,7 @@ public class UberduckClient
         using var content = new StringContent(JsonConvert.SerializeObject(args));
         var res = await SendRequest<UberduckSpeechResponse>("/speak", reqContent: content);
         var uuid = res.Uuid;
-        PluginLog.LogDebug($"Got request UUID {uuid} from Uberduck.");
+        DetailedLog.Debug($"Got request UUID {uuid} from Uberduck");
 
         // Poll for the TTS result
         await Task.Delay(20);
@@ -69,7 +68,7 @@ public class UberduckClient
                 var status = await GetSpeechStatus(uuid);
                 if (status.FailedAt != null)
                 {
-                    PluginLog.LogWarning($"TTS request {uuid} failed for an unknown reason.");
+                    DetailedLog.Warn($"TTS request {uuid} failed for an unknown reason");
                     return;
                 }
 
@@ -83,7 +82,7 @@ public class UberduckClient
             await Task.Delay(100);
         } while (string.IsNullOrEmpty(path));
 
-        PluginLog.LogDebug($"Got response for TTS request {uuid}.");
+        DetailedLog.Debug($"Got response for TTS request {uuid}");
 
         // Copy the sound to a new buffer and enqueue it
         var responseStream = await this.http.GetStreamAsync(new Uri(path));

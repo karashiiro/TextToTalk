@@ -7,10 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
-using TextToTalk.GameEnums;
 using TextToTalk.Migrations;
 
 // ReSharper disable InconsistentNaming
@@ -234,7 +232,7 @@ namespace TextToTalk
                 }
                 catch (Exception e)
                 {
-                    PluginLog.LogError(e, "Failed to create default voice preset.");
+                    DetailedLog.Error(e, "Failed to create default voice preset.");
                 }
 
                 InitializedEver = true;

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
-using Dalamud.Logging;
 using TextToTalk.Backends;
 using TextToTalk.UI;
 
@@ -58,14 +57,14 @@ namespace TextToTalk.Modules
             this.config.Enabled = false;
             CancelTts();
             this.chat.Print("TTS disabled.");
-            PluginLog.Log("TTS disabled.");
+            DetailedLog.Info("TTS disabled.");
         }
 
         public void EnableTts(string command = "", string args = "")
         {
             this.config.Enabled = true;
             this.chat.Print("TTS enabled.");
-            PluginLog.Log("TTS enabled.");
+            DetailedLog.Info("TTS enabled.");
         }
 
         public void ToggleConfig(string command = "", string args = "")
