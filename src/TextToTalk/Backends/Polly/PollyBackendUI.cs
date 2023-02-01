@@ -213,6 +213,20 @@ public class PollyBackendUI
             this.config.Save();
         }
 
+        if (engine == Engine.Neural && (currentVoicePreset.VoiceName == VoiceId.Matthew ||
+                                        currentVoicePreset.VoiceName == VoiceId.Joanna ||
+                                        currentVoicePreset.VoiceName == VoiceId.Lupe ||
+                                        currentVoicePreset.VoiceName == VoiceId.Amy))
+        {
+            var domain = currentVoicePreset.AmazonDomainName;
+            var newscaster = domain == "news";
+            if (ImGui.Checkbox($"Newscaster style (select voices only)##{MemoizedId.Create()}", ref newscaster))
+            {
+                currentVoicePreset.AmazonDomainName = newscaster ? "news" : "";
+                this.config.Save();
+            }
+        }
+
         this.lexiconComponent.Draw();
         ImGui.Spacing();
 

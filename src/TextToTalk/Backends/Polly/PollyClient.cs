@@ -39,7 +39,7 @@ namespace TextToTalk.Backends.Polly
                 voices.AddRange(voicesRes.Voices);
                 nextToken = voicesRes.NextToken;
             } while (!string.IsNullOrEmpty(nextToken));
-            
+
             return voices;
         }
 
@@ -49,8 +49,14 @@ namespace TextToTalk.Backends.Polly
             return this.soundQueue.GetCurrentlySpokenTextSource();
         }
 
-        public async Task Say(Engine engine, VoiceId voice, int sampleRate, int playbackRate, float volume, TextSource source, string text)
+        public async Task Say(Engine engine, VoiceId voice, string? amazonDomainName, int sampleRate, int playbackRate,
+            float volume, TextSource source, string text)
         {
+            if (!string.IsNullOrEmpty(amazonDomainName))
+            {
+                text = $"<amazon:domain name=\"{amazonDomainName}\">{text}</amazon:domain>";
+            }
+
             var ssml = this.lexiconManager.MakeSsml(text, playbackRate: playbackRate, includeSpeakAttributes: false);
             DetailedLog.Info(ssml);
 

@@ -169,7 +169,7 @@ public class VoicePresetConfiguration
 
     private static VoicePreset RepairPreset(IDictionary<string, object?> corrupted)
     {
-        var backendCorrupt = (TTSBackend)corrupted["EnabledBackend"];
+        var backendCorrupt = (TTSBackend?)GetNullableValue<long?>(corrupted, "EnabledBackend");
         return backendCorrupt switch
         {
             TTSBackend.System => new SystemVoicePreset
@@ -177,49 +177,55 @@ public class VoicePresetConfiguration
                 // These get read as Int64 objects, so they need to be
                 // cast to Int64 and then converted to Int32. Similar thing
                 // for Double objects.
-                Id = Convert.ToInt32((long)corrupted["Id"]),
-                Name = (string)corrupted["Name"],
-                Rate = Convert.ToInt32((long)corrupted["Rate"]),
-                Volume = Convert.ToInt32((long)corrupted["Volume"]),
-                VoiceName = (string)corrupted["VoiceName"],
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                Rate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Rate")),
+                Volume = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Volume")),
+                VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
                 EnabledBackend = TTSBackend.System,
             },
             TTSBackend.AmazonPolly => new PollyVoicePreset
             {
-                Id = Convert.ToInt32((long)corrupted["Id"]),
-                Name = (string)corrupted["Name"],
-                SampleRate = Convert.ToInt32((long)corrupted["SampleRate"]),
-                PlaybackRate = Convert.ToInt32((long)corrupted["PlaybackRate"]),
-                Volume = Convert.ToSingle((double)corrupted["Volume"]),
-                VoiceName = (string)corrupted["VoiceName"],
-                VoiceEngine = (string)corrupted["VoiceEngine"],
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                SampleRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "SampleRate")),
+                PlaybackRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "PlaybackRate")),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
+                VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
+                VoiceEngine = GetNullableValue<string?>(corrupted, "VoiceEngine"),
+                AmazonDomainName = GetNullableValue<string?>(corrupted, "AmazonDomainName"),
                 EnabledBackend = TTSBackend.AmazonPolly,
             },
             TTSBackend.Uberduck => new UberduckVoicePreset
             {
-                Id = Convert.ToInt32((long)corrupted["Id"]),
-                Name = (string)corrupted["Name"],
-                PlaybackRate = Convert.ToInt32((long)corrupted["PlaybackRate"]),
-                Volume = Convert.ToSingle((double)corrupted["Volume"]),
-                VoiceName = (string)corrupted["VoiceName"],
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                PlaybackRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "PlaybackRate")),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
+                VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
                 EnabledBackend = TTSBackend.Uberduck,
             },
             TTSBackend.Websocket => new WebsocketVoicePreset
             {
-                Id = Convert.ToInt32((long)corrupted["Id"]),
-                Name = (string)corrupted["Name"],
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
                 EnabledBackend = TTSBackend.Websocket,
             },
             TTSBackend.Azure => new AzureVoicePreset
             {
-                Id = Convert.ToInt32((long)corrupted["Id"]),
-                Name = (string)corrupted["Name"],
-                PlaybackRate = Convert.ToInt32((long)corrupted["PlaybackRate"]),
-                Volume = Convert.ToSingle((double)corrupted["Volume"]),
-                VoiceName = (string)corrupted["VoiceName"],
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                PlaybackRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "PlaybackRate")),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
+                VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
                 EnabledBackend = TTSBackend.Azure,
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),
         };
+    }
+
+    private static T? GetNullableValue<T>(IDictionary<string, object?> dict, string key)
+    {
+        return dict.TryGetValue(key, out var value) ? (T?)value : default;
     }
 }

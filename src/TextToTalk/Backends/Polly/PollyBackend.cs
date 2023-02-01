@@ -37,8 +37,9 @@ namespace TextToTalk.Backends.Polly
                 return;
             }
 
-            _ = this.polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName, pollyVoicePreset.SampleRate,
-                pollyVoicePreset.PlaybackRate, pollyVoicePreset.Volume, source, text);
+            _ = this.polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName,
+                pollyVoicePreset.AmazonDomainName, pollyVoicePreset.SampleRate, pollyVoicePreset.PlaybackRate,
+                pollyVoicePreset.Volume, source, text);
         }
 
         public override void CancelAllSpeech()

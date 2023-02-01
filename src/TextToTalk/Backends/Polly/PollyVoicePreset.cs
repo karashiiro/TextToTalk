@@ -14,6 +14,8 @@ public class PollyVoicePreset : VoicePreset
     [JsonProperty("PollyVoiceName")] public string? VoiceName { get; set; }
 
     public string? VoiceEngine { get; set; }
+    
+    public string? AmazonDomainName { get; set; }
 
     public override bool TrySetDefaultValues()
     {
