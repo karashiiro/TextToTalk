@@ -14,7 +14,7 @@ namespace TextToTalk
             Text = "";
         }
 
-        public bool Match(string test)
+        public bool Match(string? test)
         {
             if (!IsRegex) return test.Contains(Text);
 

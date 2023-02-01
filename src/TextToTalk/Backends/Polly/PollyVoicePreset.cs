@@ -11,9 +11,9 @@ public class PollyVoicePreset : VoicePreset
 
     public int PlaybackRate { get; set; }
 
-    [JsonProperty("PollyVoiceName")] public string VoiceName { get; set; }
+    [JsonProperty("PollyVoiceName")] public string? VoiceName { get; set; }
 
-    public string VoiceEngine { get; set; }
+    public string? VoiceEngine { get; set; }
 
     public override bool TrySetDefaultValues()
     {

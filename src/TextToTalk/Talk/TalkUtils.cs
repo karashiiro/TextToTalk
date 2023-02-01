@@ -56,13 +56,14 @@ namespace TextToTalk.Talk
             return text.Replace("&", "and");
         }
 
-        public static string NormalizePunctuation(string text)
+        public static string NormalizePunctuation(string? text)
         {
-            return text
-                // TextToTalk#29 emdashes and dashes and whatever else
-                .Replace("─", " - ") // These are not the same character
-                .Replace("—", " - ")
-                .Replace("–", "-"); // Hopefully, this one is only in Kan-E-Senna's name? Otherwise, I'm not sure how to parse this correctly.
+            return text?
+                       // TextToTalk#29 emdashes and dashes and whatever else
+                       .Replace("─", " - ") // These are not the same character
+                       .Replace("—", " - ")
+                       .Replace("–", "-") ??
+                   ""; // Hopefully, this one is only in Kan-E-Senna's name? Otherwise, I'm not sure how to parse this correctly.
         }
 
         /// <summary>
@@ -85,10 +86,14 @@ namespace TextToTalk.Talk
             return Speakable.Match(text).Success;
         }
 
-        public static string GetPartialName(string name, FirstOrLastName part)
+        public static string? GetPartialName(string? name, FirstOrLastName part)
         {
-            var names = name.Split(' ');
+            if (name == null)
+            {
+                return null;
+            }
 
+            var names = name.Split(' ');
             switch (part)
             {
                 case FirstOrLastName.First:

@@ -7,7 +7,7 @@ public static class PollyCredentialManager
 {
     private const string CredentialsTarget = "TextToTalk_AccessKeys_AmazonPolly";
 
-    public static NetworkCredential LoadCredentials()
+    public static NetworkCredential? LoadCredentials()
     {
         var credentials = CredentialManager.GetCredentials(CredentialsTarget);
         return credentials;

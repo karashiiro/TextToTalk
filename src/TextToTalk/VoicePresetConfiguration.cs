@@ -18,19 +18,19 @@ public class VoicePresetConfiguration
 {
     #region Obsolete Members
 
-    [Obsolete("Use CurrentVoicePreset.")] public IDictionary<TTSBackend, int> CurrentVoicePresets { get; set; }
+    [Obsolete("Use CurrentVoicePreset.")] public IDictionary<TTSBackend, int>? CurrentVoicePresets { get; set; }
 
     [Obsolete("Use UngenderedVoicePresets.")]
     [JsonProperty("UngenderedVoicePresets")]
-    public IDictionary<TTSBackend, object> UngenderedVoicePresetsBroken { get; init; }
+    public IDictionary<TTSBackend, object>? UngenderedVoicePresetsBroken { get; init; }
 
     [Obsolete("Use MaleVoicePresets.")]
     [JsonProperty("MaleVoicePresets")]
-    public IDictionary<TTSBackend, object> MaleVoicePresetsBroken { get; init; }
+    public IDictionary<TTSBackend, object>? MaleVoicePresetsBroken { get; init; }
 
     [Obsolete("Use FemaleVoicePresets.")]
     [JsonProperty("FemaleVoicePresets")]
-    public IDictionary<TTSBackend, object> FemaleVoicePresetsBroken { get; init; }
+    public IDictionary<TTSBackend, object>? FemaleVoicePresetsBroken { get; init; }
 
     #endregion
 
@@ -39,7 +39,7 @@ public class VoicePresetConfiguration
     // Newtonsoft.Json doesn't like handling inheritance. This should probably go into LiteDB or something instead.
     // Saving VoicePreset objects correctly saves type information, but that gets completely ignored on load. It
     // also can't be loaded from within the plugin because of restrictions on collectable assemblies.
-    [JsonProperty] private IList<IDictionary<string, object>> VoicePresetsRaw { get; set; }
+    [JsonProperty] private IList<IDictionary<string, object?>>? VoicePresetsRaw { get; set; }
 
     public IDictionary<TTSBackend, int> CurrentVoicePreset { get; init; }
 
@@ -148,17 +148,17 @@ public class VoicePresetConfiguration
             throw new InvalidOperationException("Voice preset config was null.");
         }
 
-        config.VoicePresets = config.VoicePresetsRaw.Select(RepairPreset).ToList();
+        config.VoicePresets = config.VoicePresetsRaw?.Select(RepairPreset).ToList() ?? new List<VoicePreset>();
         return config;
     }
 
-    private static IDictionary<string, object> CorruptPreset(VoicePreset p)
+    private static IDictionary<string, object?> CorruptPreset(VoicePreset p)
     {
-        var o = new Dictionary<string, object>();
+        var o = new Dictionary<string, object?>();
         var properties = p.GetType().GetProperties()
             .Where(prop => prop.SetMethod != null && prop.GetMethod != null)
             .Select(prop =>
-                new KeyValuePair<string, object>(prop.Name, prop.GetMethod!.Invoke(p, Array.Empty<object>())));
+                new KeyValuePair<string, object?>(prop.Name, prop.GetMethod!.Invoke(p, Array.Empty<object>())));
         foreach (var (k, v) in properties)
         {
             o[k] = v;
@@ -167,7 +167,7 @@ public class VoicePresetConfiguration
         return o;
     }
 
-    private static VoicePreset RepairPreset(IDictionary<string, object> corrupted)
+    private static VoicePreset RepairPreset(IDictionary<string, object?> corrupted)
     {
         var backendCorrupt = (TTSBackend)corrupted["EnabledBackend"];
         return backendCorrupt switch

@@ -10,7 +10,7 @@ public class SystemVoicePreset : VoicePreset
 
     [JsonProperty("SystemVolume")] public int Volume { get; set; }
 
-    [JsonProperty("SystemVoiceName")] public string VoiceName { get; set; }
+    [JsonProperty("SystemVoiceName")] public string? VoiceName { get; set; }
 
     public override bool TrySetDefaultValues()
     {

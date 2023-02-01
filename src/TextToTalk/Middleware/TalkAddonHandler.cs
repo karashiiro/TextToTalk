@@ -24,7 +24,7 @@ public class TalkAddonHandler
     private readonly SharedState sharedState;
     private readonly VoiceBackendManager backendManager;
 
-    public Action<GameObject, string, TextSource> Say { get; set; }
+    public Action<GameObject?, string?, TextSource> Say { get; set; }
 
     public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
         ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState,
@@ -39,6 +39,8 @@ public class TalkAddonHandler
         this.config = config;
         this.sharedState = sharedState;
         this.backendManager = backendManager;
+
+        Say = (_, _, _) => { };
     }
 
     public enum PollSource
@@ -57,7 +59,7 @@ public class TalkAddonHandler
 
         if (this.sharedState.TalkAddon == nint.Zero)
         {
-            this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk", 1);
+            this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk");
             if (this.sharedState.TalkAddon == nint.Zero) return;
         }
 
@@ -128,6 +130,6 @@ public class TalkAddonHandler
             this.backendManager.CancelSay(TextSource.TalkAddon);
         }
 
-        Say?.Invoke(speaker, text, TextSource.TalkAddon);
+        Say(speaker, text, TextSource.TalkAddon);
     }
 }

@@ -33,7 +33,7 @@ namespace TextToTalk.UI
         private string playerName = string.Empty;
         private string playerWorld = string.Empty;
         private string playerWorldError = string.Empty;
-        private string npcName = string.Empty;
+        private string? npcName = string.Empty;
         private string npcError = string.Empty;
 
         public ConfigurationWindow(PluginConfiguration config, DataManager data, VoiceBackendManager backendManager,
@@ -452,7 +452,7 @@ namespace TextToTalk.UI
             }
         }
 
-        private World GetWorldForUserInput(string worldName)
+        private World? GetWorldForUserInput(string worldName)
         {
             return data.GetExcelSheet<World>()?
                 .Where(w => w.IsPublic)

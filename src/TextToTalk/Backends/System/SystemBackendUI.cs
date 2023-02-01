@@ -47,7 +47,7 @@ public class SystemBackendUI
         this.selectVoiceFailures = selectVoiceFailures;
     }
 
-    private readonly IDictionary<string, Exception> voiceExceptions = new Dictionary<string, Exception>();
+    private readonly IDictionary<string?, Exception> voiceExceptions = new Dictionary<string?, Exception>();
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {

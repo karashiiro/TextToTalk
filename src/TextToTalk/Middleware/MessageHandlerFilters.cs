@@ -17,22 +17,22 @@ public class MessageHandlerFilters
         this.clientState = clientState;
     }
 
-    public bool IsDuplicateQuestText(string text)
+    public bool IsDuplicateQuestText(string? text)
     {
         return this.sharedState.LastQuestText == text;
     }
 
-    public void SetLastQuestText(string text)
+    public void SetLastQuestText(string? text)
     {
         this.sharedState.LastQuestText = text;
     }
 
-    public bool IsSameSpeaker(string speaker)
+    public bool IsSameSpeaker(string? speaker)
     {
         return this.sharedState.LastSpeaker == speaker;
     }
 
-    public void SetLastSpeaker(string speaker)
+    public void SetLastSpeaker(string? speaker)
     {
         this.sharedState.LastSpeaker = speaker;
     }
@@ -48,7 +48,7 @@ public class MessageHandlerFilters
                (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
     }
 
-    public bool ShouldSayFromYou(string speaker)
+    public bool ShouldSayFromYou(string? speaker)
     {
         if (string.IsNullOrEmpty(speaker))
         {

@@ -6,7 +6,7 @@ namespace TextToTalk.UI
 {
     public class UnlockerResultWindow : Window
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
 
         public UnlockerResultWindow() : base("VoiceUnlocker Result")
         {
@@ -16,7 +16,7 @@ namespace TextToTalk.UI
 
         public override void Draw()
         {
-            ImGui.TextWrapped(Text);
+            ImGui.TextWrapped(Text ?? "");
         }
     }
 }

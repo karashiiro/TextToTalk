@@ -18,7 +18,7 @@ public class ChatMessageHandler
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
 
-    public Action<GameObject, string, TextSource> Say { get; set; }
+    public Action<GameObject?, string?, TextSource> Say { get; set; }
 
     public ChatMessageHandler(MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config,
         SharedState sharedState)
@@ -27,9 +27,11 @@ public class ChatMessageHandler
         this.objects = objects;
         this.config = config;
         this.sharedState = sharedState;
+
+        Say = (_, _, _) => { };
     }
 
-    public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
+    public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString? sender, ref SeString message,
         ref bool handled)
     {
         var textValue = message.TextValue;

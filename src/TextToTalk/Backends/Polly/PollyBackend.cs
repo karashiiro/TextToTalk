@@ -10,7 +10,7 @@ namespace TextToTalk.Backends.Polly
     {
         private readonly PollyBackendUI ui;
 
-        private PollyClient polly;
+        private PollyClient? polly;
 
         public PollyBackend(PluginConfiguration config, HttpClient http)
         {

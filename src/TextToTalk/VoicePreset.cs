@@ -9,7 +9,7 @@ public class VoicePreset
 {
     public int Id { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     [JsonProperty("Rate")]
     [Obsolete("This class used to be used for System voice presets. Use SystemVoicePreset instead.")]
@@ -21,7 +21,7 @@ public class VoicePreset
 
     [JsonProperty("VoiceName")]
     [Obsolete("This class used to be used for System voice presets. Use SystemVoicePreset instead.")]
-    public string ObsoleteVoiceName { get; set; }
+    public string? ObsoleteVoiceName { get; set; }
 
     public TTSBackend EnabledBackend { get; set; }
 

@@ -24,8 +24,8 @@ public class PollyBackendUI
     private readonly LexiconComponent lexiconComponent;
     private readonly LexiconManager lexiconManager;
 
-    private readonly Func<PollyClient> getPolly;
-    private readonly Action<PollyClient> setPolly;
+    private readonly Func<PollyClient?> getPolly;
+    private readonly Action<PollyClient?> setPolly;
     private readonly Func<IList<Voice>> getVoices;
     private readonly Action<IList<Voice>> setVoices;
 
@@ -33,7 +33,7 @@ public class PollyBackendUI
     private string secretKey = string.Empty;
 
     public PollyBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http,
-        Func<PollyClient> getPolly, Action<PollyClient> setPolly, Func<IList<Voice>> getVoices,
+        Func<PollyClient?> getPolly, Action<PollyClient?> setPolly, Func<IList<Voice>> getVoices,
         Action<IList<Voice>> setVoices)
     {
         this.getPolly = getPolly;
@@ -114,7 +114,7 @@ public class PollyBackendUI
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.AmazonPolly).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
 
-        if (presets.Any())
+        if (presets.Any() && currentVoicePreset != null)
         {
             var presetIndex = presets.IndexOf(currentVoicePreset);
             if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),

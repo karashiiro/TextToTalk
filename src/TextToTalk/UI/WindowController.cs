@@ -11,7 +11,7 @@ public class WindowController
         this.channelPresetModificationWindow = channelPresetModificationWindow;
     }
 
-    public void SetUnlockerResult(string result)
+    public void SetUnlockerResult(string? result)
     {
         this.unlockerResultWindow.Text = result;
     }

@@ -6,18 +6,18 @@ public class PlayerInfo : IEquatable<PlayerInfo>
 {
     public Guid LocalId { get; init; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public uint WorldId { get; set; }
 
-    public bool Equals(PlayerInfo other)
+    public bool Equals(PlayerInfo? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
         return LocalId == other.LocalId;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;

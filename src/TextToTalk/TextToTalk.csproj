@@ -9,6 +9,7 @@
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<PlatformTarget>x64</PlatformTarget>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">

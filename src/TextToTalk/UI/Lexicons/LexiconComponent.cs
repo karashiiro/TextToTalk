@@ -16,8 +16,8 @@ public class LexiconComponent
     private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
     private static readonly Vector4 Red = new(1.0f, 0.0f, 0.0f, 1.0f);
 
-    private readonly List<Exception> lexiconRemoveExceptions = new();
-    private Exception lexiconAddException;
+    private readonly List<Exception?> lexiconRemoveExceptions = new();
+    private Exception? lexiconAddException;
     private bool lexiconAddSucceeded;
 
     private readonly PluginConfiguration config;
@@ -27,7 +27,7 @@ public class LexiconComponent
     private readonly Func<IList<string>> getLexiconList;
 
     private bool lexiconRepoSubwindowVisible;
-    private FileDialog fileDialog;
+    private FileDialog? fileDialog;
 
     public LexiconComponent(LexiconManager lm, LexiconRepository lr, PluginConfiguration config,
         Func<IList<string>> getLexiconList)
@@ -71,7 +71,7 @@ public class LexiconComponent
                     this.config.Save();
                     this.lexiconAddSucceeded = true;
                 }
-                catch (Exception e)
+                catch (Exception? e)
                 {
                     DetailedLog.Error(e, "Failed to load lexicon.");
                     this.lexiconAddException = e;
@@ -112,7 +112,7 @@ public class LexiconComponent
 
                 if (this.lexiconRemoveExceptions[i] != null)
                 {
-                    ImGui.TextColored(Red, this.lexiconRemoveExceptions[i].Message);
+                    ImGui.TextColored(Red, this.lexiconRemoveExceptions[i]?.Message ?? "");
                 }
 
                 deferred?.Invoke();
@@ -145,7 +145,7 @@ public class LexiconComponent
     /// Draws the remove lexicon button. Returns an action that should be called after all other operations
     /// on the provided index are done.
     /// </summary>
-    private Action LexiconRemoveButton(int i, string lexiconPath)
+    private Action? LexiconRemoveButton(int i, string lexiconPath)
     {
         var lexicons = this.getLexiconList.Invoke();
 
@@ -154,7 +154,7 @@ public class LexiconComponent
             this.lexiconRemoveExceptions.Add(null);
         }
 
-        Action deferred = null;
+        Action? deferred = null;
 
         ImGui.PushFont(UiBuilder.IconFont);
         if (ImGui.Button($"{FontAwesomeIcon.TimesCircle.ToIconString()}##{MemoizedId.Create(uniq: $"{i}")}"))

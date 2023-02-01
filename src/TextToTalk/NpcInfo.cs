@@ -6,16 +6,16 @@ public class NpcInfo : IEquatable<NpcInfo>
 {
     public Guid LocalId { get; init; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
-    public bool Equals(NpcInfo other)
+    public bool Equals(NpcInfo? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
         return LocalId.Equals(other.LocalId) && Name == other.Name;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;

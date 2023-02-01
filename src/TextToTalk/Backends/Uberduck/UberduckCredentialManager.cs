@@ -7,7 +7,7 @@ public static class UberduckCredentialManager
 {
     private const string CredentialsTarget = "TextToTalk_AccessKeys_Uberduck";
 
-    public static NetworkCredential LoadCredentials()
+    public static NetworkCredential? LoadCredentials()
     {
         var credentials = CredentialManager.GetCredentials(CredentialsTarget);
         return credentials;

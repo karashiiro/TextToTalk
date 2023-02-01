@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Dalamud.Game;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.ClientState.Objects.Enums;
@@ -213,7 +212,7 @@ namespace TextToTalk
             this.notifiedFailedToBindPort = true;
         }
 
-        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
+        private void OnChatMessage(XivChatType type, uint id, ref SeString? sender, ref SeString message,
             ref bool handled)
         {
             if (!this.config.Enabled) return;

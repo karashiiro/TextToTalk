@@ -18,7 +18,7 @@ public class NpcService
         this.voices = voices;
     }
 
-    public bool AddNpc(string name)
+    public bool AddNpc(string? name)
     {
         if (TryGetNpcByInfo(name, out _)) return false;
         var localId = Guid.NewGuid();
@@ -33,7 +33,7 @@ public class NpcService
         this.npcVoices.Remove(info.LocalId);
     }
 
-    public bool TryGetNpcByInfo(string name, out NpcInfo info)
+    public bool TryGetNpcByInfo(string? name, out NpcInfo info)
     {
         info = this.npc.Values.FirstOrDefault(info =>
             string.Equals(info.Name, name, StringComparison.InvariantCultureIgnoreCase));

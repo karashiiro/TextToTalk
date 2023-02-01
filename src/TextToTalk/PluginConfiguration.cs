@@ -315,7 +315,7 @@ namespace TextToTalk
             CurrentPresetId = presetId;
         }
 
-        public TPreset GetCurrentVoicePreset<TPreset>() where TPreset : VoicePreset
+        public TPreset? GetCurrentVoicePreset<TPreset>() where TPreset : VoicePreset
         {
             var voiceConfig = GetVoiceConfig();
             return voiceConfig.VoicePresets.FirstOrDefault(p =>
@@ -323,7 +323,7 @@ namespace TextToTalk
                 p.EnabledBackend == Backend) as TPreset;
         }
 
-        public TPreset[] GetCurrentUngenderedVoicePresets<TPreset>() where TPreset : VoicePreset
+        public TPreset[]? GetCurrentUngenderedVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             var voiceConfig = GetVoiceConfig();
             var presets = voiceConfig.GetUngenderedPresets(Backend);
@@ -332,7 +332,7 @@ namespace TextToTalk
                 .Cast<TPreset>().ToArray();
         }
 
-        public TPreset[] GetCurrentMaleVoicePresets<TPreset>() where TPreset : VoicePreset
+        public TPreset[]? GetCurrentMaleVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             var voiceConfig = GetVoiceConfig();
             var presets = voiceConfig.GetMalePresets(Backend);
@@ -341,7 +341,7 @@ namespace TextToTalk
                 .Cast<TPreset>().ToArray();
         }
 
-        public TPreset[] GetCurrentFemaleVoicePresets<TPreset>() where TPreset : VoicePreset
+        public TPreset[]? GetCurrentFemaleVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             var voiceConfig = GetVoiceConfig();
             var presets = voiceConfig.GetFemalePresets(Backend);

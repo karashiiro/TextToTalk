@@ -20,10 +20,10 @@ public class LexiconRepositorySubwindow
     private readonly LexiconRepository lexiconRepository;
     private readonly PluginConfiguration config;
 
-    private (LexiconPackageInfo, LexiconPackageInstallationStatus) selectedPackage;
+    private (LexiconPackageInfo?, LexiconPackageInstallationStatus?) selectedPackage;
 
     private readonly object rpLock;
-    private IList<(LexiconPackageInfo, LexiconPackageInstallationStatus)> remotePackages;
+    private IList<(LexiconPackageInfo?, LexiconPackageInstallationStatus)>? remotePackages;
     private bool remotePackagesLoading;
     private bool remotePackagesLoaded;
 
@@ -451,7 +451,7 @@ public class LexiconRepositorySubwindow
     /// <summary>
     /// Sets the table row's background color based on the provided package status object.
     /// </summary>
-    private static unsafe void SetTableRowBg(LexiconPackageInstallationStatus status)
+    private static unsafe void SetTableRowBg(LexiconPackageInstallationStatus? status)
     {
         var rowBg0Default = ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.TableRowBg));
         var rowBg1Default = ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.TableRowBgAlt));
