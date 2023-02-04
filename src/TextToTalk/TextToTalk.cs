@@ -299,7 +299,12 @@ namespace TextToTalk
                 SystemBackend => GetVoiceForSpeaker<SystemVoicePreset>(name, gender),
                 PollyBackend => GetVoiceForSpeaker<PollyVoicePreset>(name, gender),
                 UberduckBackend => GetVoiceForSpeaker<UberduckVoicePreset>(name, gender),
-                WebsocketBackend => GetVoiceForSpeaker<WebsocketVoicePreset>(name, gender),
+                WebsocketBackend => new WebsocketVoicePreset
+                {
+                    EnabledBackend = TTSBackend.Websocket,
+                    Id = -1,
+                    Name = gender.ToString(),
+                },
                 AzureBackend => GetVoiceForSpeaker<AzureVoicePreset>(name, gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };

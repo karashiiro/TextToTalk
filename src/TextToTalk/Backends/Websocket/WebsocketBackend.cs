@@ -90,7 +90,7 @@ namespace TextToTalk.Backends.Websocket
             }
 
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f),
-                $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}");
+                $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}/Messages");
 
             ImGui.Spacing();
 

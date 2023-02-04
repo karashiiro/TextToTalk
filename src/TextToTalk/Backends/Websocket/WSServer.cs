@@ -9,7 +9,7 @@ namespace TextToTalk.Backends.Websocket
 {
     public class WSServer
     {
-        private ServerBehavior behavior;
+        private ServerBehavior? behavior;
         private WebSocketServer server;
 
         private int port;
@@ -131,16 +131,16 @@ namespace TextToTalk.Backends.Websocket
             /// <summary>
             /// Speaker voice ID.
             /// </summary>
-            public VoicePreset Voice { get; set; }
+            public VoicePreset? Voice { get; set; }
 
             /// <summary>
             /// Text source; refer to <see cref="TextSource"/> for options.
             /// </summary>
             public string Source { get; set; }
 
-            public IpcMessage(IpcMessageType type, string payload, VoicePreset preset, TextSource source)
+            public IpcMessage(IpcMessageType type, string payload, VoicePreset? preset, TextSource source)
             {
-                if (preset is not WebsocketVoicePreset)
+                if (preset is not null or WebsocketVoicePreset)
                 {
                     throw new InvalidOperationException("Invalid voice preset provided.");
                 }
