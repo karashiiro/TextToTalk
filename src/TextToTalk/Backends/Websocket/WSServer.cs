@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using WebSocketSharp;
 using WebSocketSharp.Server;
 
 namespace TextToTalk.Backends.Websocket
@@ -101,7 +102,10 @@ namespace TextToTalk.Backends.Websocket
         {
             public void SendMessage(string message)
             {
-                Send(message);
+                if (ConnectionState == WebSocketState.Open)
+                {
+                    Send(message);
+                }
             }
 
             // Enable re-use of a websocket if the client disconnects
