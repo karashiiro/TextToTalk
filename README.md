@@ -30,7 +30,9 @@ TTS prompt:
 {
 	"Type": "Say",
 	"Payload": "Firstname Lastname says something",
-	"SpeakerGender": 1,
+	"Voice": {
+		"Name": "Gender"
+	},
 	"Source": "Chat"
 }
 ```
@@ -40,12 +42,10 @@ TTS cancel:
 {
 	"Type": "Cancel",
 	"Payload": "",
-	"SpeakerGender": -1,
+	"Voice": null,
 	"Source": "None"
 }
 ```
-
-The WebSocket address is shown under the configuration checkbox. Gender codes can be found in [`Gender.cs`](https://github.com/karashiiro/TextToTalk/blob/master/TextToTalk/GameEnums/Gender.cs).
 
 ## Screenshots
 ![image](https://user-images.githubusercontent.com/49822414/126075774-a97d7a11-98c6-40e4-9937-711a8da96926.png)
