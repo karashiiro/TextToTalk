@@ -109,7 +109,7 @@ namespace TextToTalk.Backends.Websocket
             }
 
             // Enable re-use of a websocket if the client disconnects
-            protected override void OnClose(WebSocketSharp.CloseEventArgs e)
+            protected override void OnClose(CloseEventArgs e)
             {
                 base.OnClose(e);
 
@@ -144,11 +144,6 @@ namespace TextToTalk.Backends.Websocket
 
             public IpcMessage(IpcMessageType type, string payload, VoicePreset? preset, TextSource source)
             {
-                if (preset is not null or WebsocketVoicePreset)
-                {
-                    throw new InvalidOperationException("Invalid voice preset provided.");
-                }
-
                 Type = type.ToString();
                 Payload = payload;
                 Voice = preset;

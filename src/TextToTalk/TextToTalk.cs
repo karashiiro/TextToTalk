@@ -197,7 +197,7 @@ namespace TextToTalk
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.FrameworkUpdate);
+            this.talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.FrameworkUpdate);
         }
 
         private bool notifiedFailedToBindPort;
@@ -205,10 +205,10 @@ namespace TextToTalk
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message,
             ref bool handled)
         {
-            if (!clientState.IsLoggedIn || !sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
-            chat.Print($"TextToTalk failed to bind to port {config.WebsocketPort}. " +
-                       "Please close the owner of that port and reload the Websocket server, " +
-                       "or select a different port.");
+            if (!this.clientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
+            this.chat.Print($"TextToTalk failed to bind to port {this.config.WebsocketPort}. " +
+                            "Please close the owner of that port and reload the Websocket server, " +
+                            "or select a different port.");
             this.notifiedFailedToBindPort = true;
         }
 
@@ -244,8 +244,8 @@ namespace TextToTalk
 
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is PlayerCharacter pc &&
-                playerService.TryGetPlayerByInfo(pc.Name.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
-                playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
+                this.playerService.TryGetPlayerByInfo(pc.Name.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
+                this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
             {
                 if (playerVoice.EnabledBackend != this.config.Backend)
                 {
@@ -254,24 +254,24 @@ namespace TextToTalk
                 }
                 else
                 {
-                    backendManager.Say(source, playerVoice, cleanText);
+                    this.backendManager.Say(source, playerVoice, cleanText);
                 }
             }
             else if (speaker is not null &&
                      // Some characters have emdashes in their names, which should be treated
                      // as hyphens for the sake of the plugin.
-                     npcService.TryGetNpcByInfo(TalkUtils.NormalizePunctuation(speaker.Name.TextValue),
+                     this.npcService.TryGetNpcByInfo(TalkUtils.NormalizePunctuation(speaker.Name.TextValue),
                          out var npcInfo) &&
-                     npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
+                     this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
             {
-                if (npcVoice.EnabledBackend != this.config.Backend)
+                if (this.config.Backend != TTSBackend.Websocket && npcVoice.EnabledBackend != this.config.Backend)
                 {
                     DetailedLog.Error(
                         $"Voice preset {npcVoice.Name} is not compatible with the {this.config.Backend} backend");
                 }
                 else
                 {
-                    backendManager.Say(source, npcVoice, cleanText);
+                    this.backendManager.Say(source, npcVoice, cleanText);
                 }
             }
             else
@@ -283,7 +283,7 @@ namespace TextToTalk
                 var preset = GetVoiceForSpeaker(speaker?.Name.TextValue, gender);
                 if (preset != null)
                 {
-                    backendManager.Say(source, preset, cleanText);
+                    this.backendManager.Say(source, preset, cleanText);
                 }
                 else
                 {
@@ -294,7 +294,7 @@ namespace TextToTalk
 
         private VoicePreset? GetVoiceForSpeaker(string? name, Gender gender)
         {
-            return backendManager.Backend switch
+            return this.backendManager.Backend switch
             {
                 SystemBackend => GetVoiceForSpeaker<SystemVoicePreset>(name, gender),
                 PollyBackend => GetVoiceForSpeaker<PollyVoicePreset>(name, gender),
@@ -339,7 +339,7 @@ namespace TextToTalk
         {
             return this.config.UsePlayerRateLimiter &&
                    speaker.ObjectKind is ObjectKind.Player &&
-                   rateLimiter.TryRateLimit(speaker.Name.TextValue);
+                   this.rateLimiter.TryRateLimit(speaker.Name.TextValue);
         }
 
         private unsafe Gender GetCharacterGender(GameObject? gObj)
@@ -373,7 +373,7 @@ namespace TextToTalk
             }
 
             // Get the override state and log the model ID so that we can add it to our overrides file if needed.
-            if (ungenderedOverrides.IsUngendered(modelId))
+            if (this.ungenderedOverrides.IsUngendered(modelId))
             {
                 actorGender = Gender.None;
                 DetailedLog.Info(
