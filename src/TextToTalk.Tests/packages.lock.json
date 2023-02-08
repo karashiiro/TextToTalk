@@ -42,15 +42,15 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "3.7.101",
-        "contentHash": "VArrp8MkHFe45d6NlPn+3CCZN4kBsmRVDv8FtbGMt6QdVQ4iEPYLY7f0hMJgXY8siUYEIsBoMNU/Tw9YI3SJCg=="
+        "resolved": "3.7.104.4",
+        "contentHash": "b8WRZuKUftl8JwWsjzkAXPZ7KOEERLwOY+MExyTWPVUMkEcuZxpjAupK2tSWQlmvEgjkGdNZWvFZZhEIXd07Sg=="
       },
       "AWSSDK.Polly": {
         "type": "Transitive",
-        "resolved": "3.7.103",
-        "contentHash": "r1xEZ6UZnkbc5bXL7ZaBKQR/lR55KuqhQS4YKXr0aqfifCQbYZfH5/DYEo6uPB/A3EVpSihKP3J8m8NItzc8nw==",
+        "resolved": "3.7.105.6",
+        "contentHash": "0cJpGinubryMvUF6+a/soM7YYfHQXqdHOkT+Ma37IiXxxLZYfjlF17YoNVEx8cC+//tNHy8WrHGyKI8N2+Ub/g==",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.101, 4.0.0)"
+          "AWSSDK.Core": "[3.7.104.4, 4.0.0)"
         }
       },
       "DalamudPackager": {
@@ -73,8 +73,8 @@
       },
       "Microsoft.CognitiveServices.Speech": {
         "type": "Transitive",
-        "resolved": "1.24.2",
-        "contentHash": "q29BbE0UNdwt89oU+HkFDwOq4Qvu1puZLdKuUNlRtLHlN3iFZcTGEnW2sUmZWE6mL92OJMxZ7KpvvUu0gCRcVw=="
+        "resolved": "1.25.0",
+        "contentHash": "d+65nUUDTQ/JHB8F3qaAAvV9pbvkAcdRIUmBdv/c4ScpmLqDZRFBrcs5Agae3nBefI1U41NZ0AA95sEASeM8GA=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -1257,11 +1257,11 @@
       "texttotalk": {
         "type": "Project",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.101, )",
-          "AWSSDK.Polly": "[3.7.103, )",
+          "AWSSDK.Core": "[3.7.104.4, )",
+          "AWSSDK.Polly": "[3.7.105.6, )",
           "AdysTech.CredentialManager": "[2.6.0, )",
           "DalamudPackager": "[2.1.10, )",
-          "Microsoft.CognitiveServices.Speech": "[1.24.2, )",
+          "Microsoft.CognitiveServices.Speech": "[1.25.0, )",
           "NAudio": "[2.1.0, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
           "System.Drawing.Common": "[7.0.0, )",
