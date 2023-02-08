@@ -46,7 +46,7 @@ public class SoundHandler : IDisposable
         {
             this.loadSoundFileHook = Hook<LoadSoundFileDelegate>.FromAddress(loadSoundFilePtr, LoadSoundFileDetour);
             this.loadSoundFileHook.Enable();
-            DetailedLog.Info("Hooked into LoadSoundFile");
+            DetailedLog.Debug("Hooked into LoadSoundFile");
         }
         else
         {
@@ -58,7 +58,7 @@ public class SoundHandler : IDisposable
             this.playSpecificSoundHook =
                 Hook<PlaySpecificSoundDelegate>.FromAddress(playSpecificSoundPtr, PlaySpecificSoundDetour);
             this.playSpecificSoundHook.Enable();
-            DetailedLog.Info("Hooked into PlaySpecificSound");
+            DetailedLog.Debug("Hooked into PlaySpecificSound");
         }
         else
         {
@@ -93,7 +93,7 @@ public class SoundHandler : IDisposable
 
                     if (!IgnoredSoundFileNameRegex.IsMatch(fileName))
                     {
-                        DetailedLog.Info($"Loaded sound: {fileName}");
+                        DetailedLog.Debug($"Loaded sound: {fileName}");
 
                         if (VoiceLineFileNameRegex.IsMatch(fileName))
                         {
@@ -103,7 +103,7 @@ public class SoundHandler : IDisposable
 
                     if (isVoiceLine)
                     {
-                        DetailedLog.Info($"Discovered voice line at address {resourceDataPtr:x}");
+                        DetailedLog.Debug($"Discovered voice line at address {resourceDataPtr:x}");
                         this.knownVoiceLinePtrs.Add(resourceDataPtr);
                     }
                     else
@@ -112,7 +112,7 @@ public class SoundHandler : IDisposable
                         // occupied by a voice line.
                         if (this.knownVoiceLinePtrs.Remove(resourceDataPtr))
                         {
-                            DetailedLog.Info(
+                            DetailedLog.Debug(
                                 $"Cleared voice line from address {resourceDataPtr:x} (address reused by: {fileName})");
                         }
                     }
@@ -138,7 +138,7 @@ public class SoundHandler : IDisposable
             // lines are played.
             if (this.knownVoiceLinePtrs.Remove(soundDataPtr))
             {
-                DetailedLog.Info($"Caught playback of known voice line at address {soundDataPtr:x}");
+                DetailedLog.Debug($"Caught playback of known voice line at address {soundDataPtr:x}");
                 talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.VoiceLinePlayback);
             }
         }
