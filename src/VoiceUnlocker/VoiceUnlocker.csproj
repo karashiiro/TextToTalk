@@ -8,6 +8,7 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<StartupObject>VoiceUnlocker.Program</StartupObject>
+		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
