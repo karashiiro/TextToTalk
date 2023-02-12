@@ -39,7 +39,7 @@ public class MessageHandlerFilters
 
     public bool ShouldSaySender()
     {
-        return this.config.EnableNameWithSay && this.config.NameNpcWithSay;
+        return this.config is { EnableNameWithSay: true, NameNpcWithSay: true };
     }
 
     public bool ShouldSaySender(XivChatType type)

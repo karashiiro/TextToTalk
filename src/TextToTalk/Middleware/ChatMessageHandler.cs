@@ -59,7 +59,7 @@ public class ChatMessageHandler
         ref bool handled)
     {
         var textValue = message.TextValue;
-        if (!config.SayPlayerWorldName)
+        if (!this.config.SayPlayerWorldName)
         {
             textValue = StripWorldFromNames(message);
         }
@@ -69,43 +69,40 @@ public class ChatMessageHandler
         DetailedLog.Debug($"Chat ({type}): \"{textValue}\"");
 
         // This section controls speaker-related functions.
-        if (sender != null && sender.TextValue != string.Empty)
+        if (!string.IsNullOrEmpty(sender?.TextValue) && this.filters.ShouldSaySender(type))
         {
-            if (this.filters.ShouldSaySender(type))
+            // If we allow the speaker's name to be repeated each time the speak,
+            // or the speaker has actually changed.
+            if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(sender.TextValue))
             {
-                // If we allow the speaker's name to be repeated each time the speak,
-                // or the speaker has actually changed.
-                if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(sender.TextValue))
+                if ((int)type == (int)AdditionalChatType.NPCDialogue)
                 {
-                    if ((int)type == (int)AdditionalChatType.NPCDialogue)
+                    // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
+                    var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
+                    if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
                     {
-                        // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
-                        var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
-                        if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
-                        {
-                            return;
-                        }
-
-                        this.filters.SetLastQuestText(textValue);
+                        return;
                     }
 
-                    var speakerNameToSay = sender.TextValue;
-
-                    if (!config.SayPlayerWorldName &&
-                        sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
-                    {
-                        // Remove world from spoken name
-                        speakerNameToSay = player.PlayerName;
-                    }
-
-                    if (this.config.SayPartialName)
-                    {
-                        speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, config.OnlySayFirstOrLastName);
-                    }
-
-                    textValue = $"{speakerNameToSay} says {textValue}";
-                    this.filters.SetLastSpeaker(sender.TextValue);
+                    this.filters.SetLastQuestText(textValue);
                 }
+
+                var speakerNameToSay = sender.TextValue;
+
+                if (!this.config.SayPlayerWorldName &&
+                    sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
+                {
+                    // Remove world from spoken name
+                    speakerNameToSay = player.PlayerName;
+                }
+
+                if (this.config.SayPartialName)
+                {
+                    speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, this.config.OnlySayFirstOrLastName);
+                }
+
+                textValue = $"{speakerNameToSay} says {textValue}";
+                this.filters.SetLastSpeaker(sender.TextValue);
             }
         }
 
@@ -114,7 +111,7 @@ public class ChatMessageHandler
         var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
 
         var typeAccepted = chatTypes.EnabledChatTypes.Contains((int)type);
-        if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !IsTextGood(textValue)) return;
+        if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Any() && !IsTextGood(textValue)) return;
 
         var senderText = sender?.TextValue; // Can't access in lambda
         var speaker = string.IsNullOrEmpty(senderText)
