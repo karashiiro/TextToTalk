@@ -31,39 +31,37 @@ public class ChatMessageHandler
         Say = (_, _, _) => { };
     }
 
+    private static string StripWorldFromNames(SeString message)
+    {
+        // Remove world from all names in message body
+        var world = "";
+        var cleanString = new SeStringBuilder();
+        foreach (var p in message.Payloads)
+        {
+            switch (p)
+            {
+                case PlayerPayload pp:
+                    world = pp.World.Name;
+                    break;
+                case TextPayload tp when world != "" && tp.Text != null && tp.Text.Contains(world):
+                    cleanString.AddText(tp.Text.Replace(world, ""));
+                    break;
+                default:
+                    cleanString.Add(p);
+                    break;
+            }
+        }
+
+        return cleanString.Build().TextValue;
+    }
+
     public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString? sender, ref SeString message,
         ref bool handled)
     {
         var textValue = message.TextValue;
         if (!config.SayPlayerWorldName)
         {
-            // Remove world from all names in message body
-            var world = "";
-            var cleanString = new SeStringBuilder();
-            foreach (var p in message.Payloads)
-            {
-                if (p is PlayerPayload pp)
-                {
-                    world = pp.World.Name;
-                }
-                else if (p is TextPayload tp)
-                {
-                    if (world != "" && tp.Text?.Contains(world) == true)
-                    {
-                        cleanString.AddText(tp.Text.Replace(world, ""));
-                    }
-                    else
-                    {
-                        cleanString.Add(p);
-                    }
-                }
-                else
-                {
-                    cleanString.Add(p);
-                }
-            }
-
-            textValue = cleanString.Build().TextValue;
+            textValue = StripWorldFromNames(message);
         }
 
         textValue = TalkUtils.NormalizePunctuation(textValue);
@@ -100,7 +98,7 @@ public class ChatMessageHandler
                         speakerNameToSay = player.PlayerName;
                     }
 
-                    if (config.SayPartialName)
+                    if (this.config.SayPartialName)
                     {
                         speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, config.OnlySayFirstOrLastName);
                     }
@@ -111,25 +109,33 @@ public class ChatMessageHandler
             }
         }
 
-        if (this.config.Bad.Where(t => t.Text != "").Any(t => t.Match(textValue))) return;
+        if (IsTextBad(textValue)) return;
 
         var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
 
         var typeAccepted = chatTypes.EnabledChatTypes.Contains((int)type);
-        var goodMatch = this.config.Good
-            .Where(t => t.Text != "")
-            .Any(t => t.Match(textValue));
-        if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !goodMatch) return;
+        if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Count > 0 && !IsTextGood(textValue)) return;
 
         var senderText = sender?.TextValue; // Can't access in lambda
         var speaker = string.IsNullOrEmpty(senderText)
             ? null
             : this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == senderText);
-        if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue))
-        {
-            return;
-        }
+        if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue)) return;
 
         Say.Invoke(speaker, textValue, TextSource.Chat);
+    }
+
+    private bool IsTextGood(string text)
+    {
+        return this.config.Good
+            .Where(t => t.Text != "")
+            .Any(t => t.Match(text));
+    } 
+
+    private bool IsTextBad(string text)
+    {
+        return this.config.Bad
+            .Where(t => t.Text != "")
+            .Any(t => t.Match(text));
     }
 }
