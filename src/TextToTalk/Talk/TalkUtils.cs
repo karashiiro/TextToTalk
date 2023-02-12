@@ -5,6 +5,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 
 namespace TextToTalk.Talk
 {
@@ -64,6 +65,30 @@ namespace TextToTalk.Talk
                        .Replace("—", " - ")
                        .Replace("–", "-") ??
                    ""; // Hopefully, this one is only in Kan-E-Senna's name? Otherwise, I'm not sure how to parse this correctly.
+        }
+
+        public static string StripWorldFromNames(SeString message)
+        {
+            // Remove world from all names in message body
+            var world = "";
+            var cleanString = new SeStringBuilder();
+            foreach (var p in message.Payloads)
+            {
+                switch (p)
+                {
+                    case PlayerPayload pp:
+                        world = pp.World.Name;
+                        break;
+                    case TextPayload tp when world != "" && tp.Text != null && tp.Text.Contains(world):
+                        cleanString.AddText(tp.Text.Replace(world, ""));
+                        break;
+                    default:
+                        cleanString.Add(p);
+                        break;
+                }
+            }
+
+            return cleanString.Build().TextValue;
         }
 
         /// <summary>

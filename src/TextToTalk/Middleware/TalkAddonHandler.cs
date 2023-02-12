@@ -93,9 +93,9 @@ public class TalkAddonHandler
             if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(speaker))
             {
                 var speakerNameToSay = speaker;
-                if (config.SayPartialName)
+                if (this.config.SayPartialName)
                 {
-                    speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, config.OnlySayFirstOrLastName);
+                    speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, this.config.OnlySayFirstOrLastName);
                 }
 
                 text = $"{speakerNameToSay} says {text}";

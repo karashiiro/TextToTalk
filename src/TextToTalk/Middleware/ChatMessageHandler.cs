@@ -31,37 +31,13 @@ public class ChatMessageHandler
         Say = (_, _, _) => { };
     }
 
-    private static string StripWorldFromNames(SeString message)
-    {
-        // Remove world from all names in message body
-        var world = "";
-        var cleanString = new SeStringBuilder();
-        foreach (var p in message.Payloads)
-        {
-            switch (p)
-            {
-                case PlayerPayload pp:
-                    world = pp.World.Name;
-                    break;
-                case TextPayload tp when world != "" && tp.Text != null && tp.Text.Contains(world):
-                    cleanString.AddText(tp.Text.Replace(world, ""));
-                    break;
-                default:
-                    cleanString.Add(p);
-                    break;
-            }
-        }
-
-        return cleanString.Build().TextValue;
-    }
-
     public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString? sender, ref SeString message,
         ref bool handled)
     {
         var textValue = message.TextValue;
         if (!this.config.SayPlayerWorldName)
         {
-            textValue = StripWorldFromNames(message);
+            textValue = TalkUtils.StripWorldFromNames(message);
         }
 
         textValue = TalkUtils.NormalizePunctuation(textValue);
@@ -88,7 +64,6 @@ public class ChatMessageHandler
                 }
 
                 var speakerNameToSay = sender.TextValue;
-
                 if (!this.config.SayPlayerWorldName &&
                     sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
                 {
