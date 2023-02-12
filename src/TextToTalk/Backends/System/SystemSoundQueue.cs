@@ -19,6 +19,7 @@ namespace TextToTalk.Backends.System
             this.speechCompleted = new AutoResetEvent(false);
             this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
+            this.speechSynthesizer.SetOutputToDefaultAudioDevice();
             this.selectVoiceFailures = selectVoiceFailures;
 
             this.speechSynthesizer.SpeakCompleted += (_, _) =>
