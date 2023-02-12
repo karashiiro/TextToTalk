@@ -24,6 +24,18 @@
 		</Content>
 	</ItemGroup>
 
+
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<Content Include="..\VoiceUnlocker\bin\Release\net7.0\VoiceUnlocker.exe" Link="VoiceUnlocker.exe">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
+		<Content Include="..\VoiceUnlocker\bin\Debug\net7.0\VoiceUnlocker.exe" Link="VoiceUnlocker.exe">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
 		<PackageReference Include="AWSSDK.Core" Version="3.7.104.4" />
