@@ -23,6 +23,10 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
+	
+	<ItemGroup>
+		<KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WindowsForms" IsWindowsOnly="false" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
