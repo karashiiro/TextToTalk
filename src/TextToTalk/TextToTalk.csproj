@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<LangVersion>11.0</LangVersion>
 		<Version>1.21.6.0</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -20,18 +20,6 @@
 
 	<ItemGroup>
 		<Content Include="..\..\images\icon.png" Link="images\icon.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
-
-	<ItemGroup Condition="'$(Configuration)'=='Release'">
-		<Content Include="..\VoiceUnlocker\bin\Release\net7.0\VoiceUnlocker.exe" Link="VoiceUnlocker.exe">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-	<ItemGroup Condition="'$(Configuration)'=='Debug'">
-		<Content Include="..\VoiceUnlocker\bin\Debug\net7.0\VoiceUnlocker.exe" Link="VoiceUnlocker.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
