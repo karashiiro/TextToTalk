@@ -10,17 +10,17 @@
       },
       "AWSSDK.Core": {
         "type": "Direct",
-        "requested": "[3.7.104.4, )",
-        "resolved": "3.7.104.4",
-        "contentHash": "b8WRZuKUftl8JwWsjzkAXPZ7KOEERLwOY+MExyTWPVUMkEcuZxpjAupK2tSWQlmvEgjkGdNZWvFZZhEIXd07Sg=="
+        "requested": "[3.7.105.1, )",
+        "resolved": "3.7.105.1",
+        "contentHash": "r1SPXBG6G1vWWuor8FohTR0XewxE1M/vrlA3sfrrMR61dWAsV8MdDq6KWnI201SfY/nvXFCo+7ZlsW5oqACQmA=="
       },
       "AWSSDK.Polly": {
         "type": "Direct",
-        "requested": "[3.7.105.6, )",
-        "resolved": "3.7.105.6",
-        "contentHash": "0cJpGinubryMvUF6+a/soM7YYfHQXqdHOkT+Ma37IiXxxLZYfjlF17YoNVEx8cC+//tNHy8WrHGyKI8N2+Ub/g==",
+        "requested": "[3.7.106, )",
+        "resolved": "3.7.106",
+        "contentHash": "L+fV+OPC3dHrnKfYv0gwU2WUnDwNFPGDQQrYEQaevNpDazE5F9rpjUr4yxLNs2msOAofuwXY1jj6nz6UB7LUSQ==",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.104.4, 4.0.0)"
+          "AWSSDK.Core": "[3.7.105.1, 4.0.0)"
         }
       },
       "DalamudPackager": {
