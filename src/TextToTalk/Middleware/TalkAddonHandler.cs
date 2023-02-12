@@ -14,6 +14,8 @@ namespace TextToTalk.Middleware;
 
 public class TalkAddonHandler
 {
+    private record struct TalkAddonState(string? Speaker, string? Text, PollSource PollSource);
+
     private readonly ClientState clientState;
     private readonly GameGui gui;
     private readonly DataManager data;
@@ -23,6 +25,7 @@ public class TalkAddonHandler
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
     private readonly VoiceBackendManager backendManager;
+    private readonly ComponentUpdateState<TalkAddonState> updateState;
 
     public Action<GameObject?, string?, TextSource> Say { get; set; }
 
@@ -39,86 +42,69 @@ public class TalkAddonHandler
         this.config = config;
         this.sharedState = sharedState;
         this.backendManager = backendManager;
+        this.updateState = new ComponentUpdateState<TalkAddonState>();
+        this.updateState.OnUpdate += HandleChange;
 
         Say = (_, _, _) => { };
     }
 
     public enum PollSource
     {
+        None,
         FrameworkUpdate,
         VoiceLinePlayback,
     }
 
-    public unsafe void PollAddon(PollSource pollSource)
+    public void PollAddon(PollSource pollSource)
     {
-        if (!this.clientState.IsLoggedIn || this.condition[ConditionFlag.CreatingCharacter])
+        var state = GetTalkAddonState(pollSource);
+        this.updateState.Mutate(state);
+    }
+
+    private void HandleChange(TalkAddonState state)
+    {
+        var (speaker, text, pollSource) = state;
+
+        // Cancel TTS when the dialogue window is closed, if configured
+        if (this.config.CancelSpeechOnTextAdvance)
         {
-            this.sharedState.TalkAddon = nint.Zero;
-            return;
+            this.backendManager.CancelSay(TextSource.TalkAddon);
         }
 
-        if (this.sharedState.TalkAddon == nint.Zero)
+        // Return early if there's nothing to say
+        if (state == default)
         {
-            this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk");
-            if (this.sharedState.TalkAddon == nint.Zero) return;
-        }
-
-        var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
-        if (talkAddon == null) return;
-
-        // Clear the last text if the window isn't visible.
-        if (!TalkUtils.IsVisible(talkAddon))
-        {
-            // Cancel TTS when the dialogue window is closed, if configured
-            if (this.config.CancelSpeechOnTextAdvance)
-            {
-                this.backendManager.CancelSay(TextSource.TalkAddon);
-            }
-
             this.filters.SetLastQuestText("");
             return;
         }
 
-        TalkAddonText talkAddonText;
-        try
-        {
-            talkAddonText = TalkUtils.ReadTalkAddon(this.data, talkAddon);
-        }
-        catch (NullReferenceException)
-        {
-            // Just swallow the NRE, I have no clue what causes this but it only happens when relogging in rare cases
-            return;
-        }
-
-        var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
-        if (text == "" || this.filters.IsDuplicateQuestText(text)) return;
+        if (this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
         DetailedLog.Debug($"AddonTalk: \"{text}\"");
 
         if (pollSource == PollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
         {
-            DetailedLog.Info($"Skipping voice-acted line: {text}");
+            DetailedLog.Debug($"Skipping voice-acted line: {text}");
             return;
         }
 
-        if (talkAddonText.Speaker != "" && this.filters.ShouldSaySender())
+        if (!string.IsNullOrEmpty(speaker) && this.filters.ShouldSaySender())
         {
-            if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(talkAddonText.Speaker))
+            if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(speaker))
             {
-                var speakerNameToSay = talkAddonText.Speaker;
-
+                var speakerNameToSay = speaker;
                 if (config.SayPartialName)
                 {
                     speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, config.OnlySayFirstOrLastName);
                 }
 
                 text = $"{speakerNameToSay} says {text}";
-                this.filters.SetLastSpeaker(talkAddonText.Speaker);
+                this.filters.SetLastSpeaker(speaker);
             }
         }
 
-        var speaker = this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == talkAddonText.Speaker);
-        if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue))
+        var speakerObj = this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == speaker);
+        if (!this.filters.ShouldSayFromYou(speaker))
         {
             return;
         }
@@ -130,6 +116,44 @@ public class TalkAddonHandler
             this.backendManager.CancelSay(TextSource.TalkAddon);
         }
 
-        Say(speaker, text, TextSource.TalkAddon);
+        Say(speakerObj, text, TextSource.TalkAddon);
+    }
+
+    private unsafe TalkAddonState GetTalkAddonState(PollSource pollSource)
+    {
+        if (!this.clientState.IsLoggedIn || this.condition[ConditionFlag.CreatingCharacter])
+        {
+            this.sharedState.TalkAddon = nint.Zero;
+            return default;
+        }
+
+        if (this.sharedState.TalkAddon == nint.Zero)
+        {
+            this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk");
+            if (this.sharedState.TalkAddon == nint.Zero) return default;
+        }
+
+        var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
+        if (talkAddon == null) return default;
+
+        if (!TalkUtils.IsVisible(talkAddon))
+        {
+            return default;
+        }
+
+        TalkAddonText talkAddonText;
+        try
+        {
+            talkAddonText = TalkUtils.ReadTalkAddon(this.data, talkAddon);
+        }
+        catch (NullReferenceException)
+        {
+            // Just swallow the NRE, I have no clue what causes this but it only happens when relogging in rare cases
+            return default;
+        }
+
+        var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
+        var speaker = TalkUtils.NormalizePunctuation(talkAddonText.Speaker);
+        return new TalkAddonState(speaker, text, pollSource);
     }
 }
