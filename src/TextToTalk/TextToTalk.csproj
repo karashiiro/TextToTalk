@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>11.0</LangVersion>
 		<Version>1.21.6.0</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
