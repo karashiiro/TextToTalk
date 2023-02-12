@@ -88,19 +88,16 @@ public class TalkAddonHandler
             return;
         }
 
-        if (!string.IsNullOrEmpty(speaker) && this.filters.ShouldSaySender())
+        if (this.filters.ShouldProcessSpeaker(speaker))
         {
-            if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(speaker))
+            var speakerNameToSay = speaker;
+            if (this.config.SayPartialName)
             {
-                var speakerNameToSay = speaker;
-                if (this.config.SayPartialName)
-                {
-                    speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, this.config.OnlySayFirstOrLastName);
-                }
-
-                text = $"{speakerNameToSay} says {text}";
-                this.filters.SetLastSpeaker(speaker);
+                speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, this.config.OnlySayFirstOrLastName);
             }
+
+            text = $"{speakerNameToSay} says {text}";
+            this.filters.SetLastSpeaker(speaker);
         }
 
         var speakerObj = this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == speaker);

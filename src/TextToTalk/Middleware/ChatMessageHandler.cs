@@ -44,41 +44,35 @@ public class ChatMessageHandler
         if (this.filters.IsDuplicateQuestText(textValue)) return;
         DetailedLog.Debug($"Chat ({type}): \"{textValue}\"");
 
-        // This section controls speaker-related functions.
-        if (!string.IsNullOrEmpty(sender?.TextValue) && this.filters.ShouldSaySender(type))
+        if (this.filters.ShouldProcessSpeaker(sender?.TextValue))
         {
-            // If we allow the speaker's name to be repeated each time the speak,
-            // or the speaker has actually changed.
-            if (!this.config.DisallowMultipleSay || !this.filters.IsSameSpeaker(sender.TextValue))
+            if ((int)type == (int)AdditionalChatType.NPCDialogue)
             {
-                if ((int)type == (int)AdditionalChatType.NPCDialogue)
+                // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
+                var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
+                if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
                 {
-                    // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
-                    var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
-                    if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
-                    {
-                        return;
-                    }
-
-                    this.filters.SetLastQuestText(textValue);
+                    return;
                 }
 
-                var speakerNameToSay = sender.TextValue;
-                if (!this.config.SayPlayerWorldName &&
-                    sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
-                {
-                    // Remove world from spoken name
-                    speakerNameToSay = player.PlayerName;
-                }
-
-                if (this.config.SayPartialName)
-                {
-                    speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, this.config.OnlySayFirstOrLastName);
-                }
-
-                textValue = $"{speakerNameToSay} says {textValue}";
-                this.filters.SetLastSpeaker(sender.TextValue);
+                this.filters.SetLastQuestText(textValue);
             }
+
+            var speakerNameToSay = sender!.TextValue;
+            if (!this.config.SayPlayerWorldName &&
+                sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
+            {
+                // Remove world from spoken name
+                speakerNameToSay = player.PlayerName;
+            }
+
+            if (this.config.SayPartialName)
+            {
+                speakerNameToSay = TalkUtils.GetPartialName(speakerNameToSay, this.config.OnlySayFirstOrLastName);
+            }
+
+            textValue = $"{speakerNameToSay} says {textValue}";
+            this.filters.SetLastSpeaker(sender.TextValue);
         }
 
         if (IsTextBad(textValue)) return;

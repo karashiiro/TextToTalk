@@ -42,6 +42,21 @@ public class MessageHandlerFilters
         return this.config is { EnableNameWithSay: true, NameNpcWithSay: true };
     }
 
+    public bool ShouldProcessSpeaker(string? speaker)
+    {
+        if (!string.IsNullOrEmpty(speaker) && ShouldSaySender())
+        {
+            // Only if we allow the speaker's name to be repeated each time they speak,
+            // or the speaker has actually changed.
+            if (!this.config.DisallowMultipleSay || !IsSameSpeaker(speaker))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public bool ShouldSaySender(XivChatType type)
     {
         return this.config.EnableNameWithSay &&
