@@ -16,7 +16,7 @@ namespace TextToTalk.Backends
         private readonly PluginConfiguration config;
         private readonly SharedState sharedState;
 
-        public VoiceBackend Backend { get; private set; }
+        public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
         public VoiceBackendManager(PluginConfiguration config, HttpClient http, SharedState sharedState)
@@ -28,9 +28,9 @@ namespace TextToTalk.Backends
             SetBackend(this.config.Backend);
         }
 
-        public override void Say(TextSource source, VoicePreset voice, string text)
+        public override void Say(TextSource source, VoicePreset voice, string speaker, string text)
         {
-            Backend?.Say(source, voice, text);
+            Backend?.Say(source, voice, speaker, text);
         }
 
         public override void CancelAllSpeech()

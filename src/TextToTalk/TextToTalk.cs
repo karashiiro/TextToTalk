@@ -255,7 +255,7 @@ namespace TextToTalk
                 }
                 else
                 {
-                    this.backendManager.Say(source, playerVoice, cleanText);
+                    this.backendManager.Say(source, playerVoice, pc.Name.TextValue, cleanText);
                 }
             }
             else if (speaker is not null &&
@@ -272,7 +272,7 @@ namespace TextToTalk
                 }
                 else
                 {
-                    this.backendManager.Say(source, npcVoice, cleanText);
+                    this.backendManager.Say(source, npcVoice, speaker.Name.TextValue, cleanText);
                 }
             }
             else
@@ -284,7 +284,7 @@ namespace TextToTalk
                 var preset = GetVoiceForSpeaker(speaker?.Name.TextValue, gender);
                 if (preset != null)
                 {
-                    this.backendManager.Say(source, preset, cleanText);
+                    this.backendManager.Say(source, preset, speaker?.Name.TextValue ?? "", cleanText);
                 }
                 else
                 {

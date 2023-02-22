@@ -22,7 +22,7 @@ public class UberduckBackend : VoiceBackend
         this.ui = new UberduckBackendUI(config, this.uberduck, () => voices);
     }
 
-    public override void Say(TextSource source, VoicePreset preset, string text)
+    public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
     {
         if (preset is not UberduckVoicePreset uberduckVoicePreset)
         {

@@ -42,11 +42,11 @@ namespace TextToTalk.Backends.Websocket
             this.server.AddWebSocketService<ServerBehavior>("/Messages", b => { this.behavior = b; });
         }
 
-        public void Broadcast(TextSource source, VoicePreset voice, string message)
+        public void Broadcast(string speaker, TextSource source, VoicePreset voice, string message)
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(IpcMessageType.Say, message, voice, source);
+            var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source);
             this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -54,7 +54,7 @@ namespace TextToTalk.Backends.Websocket
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, null, TextSource.None);
+            var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, TextSource.None);
             this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -62,7 +62,7 @@ namespace TextToTalk.Backends.Websocket
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(IpcMessageType.Cancel, string.Empty, null, source);
+            var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, source);
             this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -123,6 +123,11 @@ namespace TextToTalk.Backends.Websocket
         private class IpcMessage
         {
             /// <summary>
+            /// The speaker name.
+            /// </summary>
+            public string Speaker { get; set; }
+
+            /// <summary>
             /// The message type; refer tp <see cref="IpcMessageType"/> for options.
             /// </summary>
             public string Type { get; set; }
@@ -142,8 +147,9 @@ namespace TextToTalk.Backends.Websocket
             /// </summary>
             public string Source { get; set; }
 
-            public IpcMessage(IpcMessageType type, string payload, VoicePreset? preset, TextSource source)
+            public IpcMessage(string speaker, IpcMessageType type, string payload, VoicePreset? preset, TextSource source)
             {
+                Speaker = speaker;
                 Type = type.ToString();
                 Payload = payload;
                 Voice = preset;

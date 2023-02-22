@@ -22,7 +22,7 @@ namespace TextToTalk.Backends.System
             this.soundQueue = new SystemSoundQueue(lexiconManager, selectVoiceFailures);
         }
 
-        public override void Say(TextSource source, VoicePreset voice, string text)
+        public override void Say(TextSource source, VoicePreset voice, string speaker, string text)
         {
             this.soundQueue.EnqueueSound(voice, source, text);
         }

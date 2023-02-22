@@ -24,7 +24,7 @@ namespace TextToTalk.Backends.Polly
                 () => this.polly, p => this.polly = p, () => voices, v => voices = v);
         }
 
-        public override void Say(TextSource source, VoicePreset preset, string text)
+        public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
         {
             if (preset is not PollyVoicePreset pollyVoicePreset)
             {

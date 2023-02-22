@@ -23,7 +23,7 @@ public class AzureBackend : VoiceBackend
             () => this.client, p => this.client = p, () => voices, v => voices = v);
     }
 
-    public override void Say(TextSource source, VoicePreset preset, string text)
+    public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
     {
         if (preset is not AzureVoicePreset azureVoicePreset)
         {
