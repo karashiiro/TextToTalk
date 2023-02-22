@@ -1,16 +1,17 @@
-﻿using Dalamud.Data;
+﻿using System;
+using System.Linq;
+using Dalamud.Data;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using System;
-using System.Linq;
-using Dalamud.Game.ClientState.Conditions;
 using TextToTalk.Backends;
+using TextToTalk.Middleware;
 using TextToTalk.Talk;
 
-namespace TextToTalk.Middleware;
+namespace TextToTalk.TextProviders;
 
 public class TalkAddonHandler
 {

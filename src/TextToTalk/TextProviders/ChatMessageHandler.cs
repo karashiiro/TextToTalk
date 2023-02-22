@@ -1,15 +1,16 @@
-﻿using Dalamud.Game.ClientState.Objects;
+﻿using System;
+using System.Linq;
+using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using System;
-using System.Linq;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.GameEnums;
+using TextToTalk.Middleware;
 using TextToTalk.Talk;
 
-namespace TextToTalk.Middleware;
+namespace TextToTalk.TextProviders;
 
 public class ChatMessageHandler
 {

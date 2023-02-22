@@ -28,6 +28,7 @@ using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Modules;
 using TextToTalk.Talk;
+using TextToTalk.TextProviders;
 using TextToTalk.UI;
 using TextToTalk.UngenderedOverrides;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;

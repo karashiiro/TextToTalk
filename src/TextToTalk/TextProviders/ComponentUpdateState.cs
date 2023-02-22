@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TextToTalk.Middleware;
+namespace TextToTalk.TextProviders;
 
 public class ComponentUpdateState<T> where T : struct, IEquatable<T>
 {

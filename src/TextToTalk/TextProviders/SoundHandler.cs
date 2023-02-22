@@ -7,7 +7,7 @@ using Dalamud.Game;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 
-namespace TextToTalk.Middleware;
+namespace TextToTalk.TextProviders;
 
 public class SoundHandler : IDisposable
 {
