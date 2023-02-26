@@ -1,6 +1,8 @@
 ﻿using Dalamud.Game.ClientState;
 using Dalamud.Game.Text;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.GameEnums;
+using TextToTalk.Talk;
 
 namespace TextToTalk.Middleware;
 
@@ -15,6 +17,12 @@ public class MessageHandlerFilters
         this.sharedState = sharedState;
         this.config = config;
         this.clientState = clientState;
+    }
+
+    public unsafe bool IsTalkAddonActive()
+    {
+        var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
+        return this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon);
     }
 
     public bool IsDuplicateQuestText(string? text)

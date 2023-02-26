@@ -1,12 +1,8 @@
 ﻿namespace TextToTalk.Events;
 
-public class TalkAddonAdvanceEvent : TextEvent
+public class TalkAddonAdvanceEvent : SourcedTextEvent
 {
-    public TextSource Source { get; }
-
-    public TalkAddonAdvanceEvent()
+    public TalkAddonAdvanceEvent() : base(TextSource.TalkAddon)
     {
-        // This will only be emitted by the TalkAddon handler
-        Source = TextSource.TalkAddon;
     }
 }

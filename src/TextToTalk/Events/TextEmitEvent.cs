@@ -1,16 +1,19 @@
-﻿namespace TextToTalk.Events;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.Text.SeStringHandling;
 
-public class TextEmitEvent : TextEvent
+namespace TextToTalk.Events;
+
+public class TextEmitEvent : SourcedTextEvent
 {
-    public TextSource Source { get; }
+    public SeString SpeakerName { get; }
 
-    public string SpeakerName { get; }
+    public SeString Text { get; }
+    
+    public GameObject? Speaker { get; }
 
-    public string Text { get; }
-
-    protected TextEmitEvent(TextSource source, string speaker, string text)
+    public TextEmitEvent(TextSource source, SeString speaker, SeString text, GameObject? speakerObj) : base(source)
     {
-        Source = source;
+        Speaker = speakerObj;
         SpeakerName = speaker;
         Text = text;
     }

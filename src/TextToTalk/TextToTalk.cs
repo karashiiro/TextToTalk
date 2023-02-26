@@ -10,6 +10,8 @@ using Dalamud.Plugin;
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using Dalamud.Data;
 using Dalamud.Game.ClientState.Conditions;
@@ -24,6 +26,7 @@ using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
+using TextToTalk.Events;
 using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Modules;
@@ -65,6 +68,9 @@ namespace TextToTalk
         private readonly ConfigurationWindow configurationWindow;
 
         private readonly HttpClient http;
+
+        private readonly IDisposable handleTextCancel;
+        private readonly IDisposable handleTextEmit;
 
         public string Name => "TextToTalk";
 
@@ -122,10 +128,9 @@ namespace TextToTalk
 
             var filters = new MessageHandlerFilters(this.sharedState, config, this.clientState);
             this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, condition,
-                this.config,
-                this.sharedState, this.backendManager);
+                this.config, this.sharedState);
 
-            this.chatMessageHandler = new ChatMessageHandler(filters, objects, config, this.sharedState);
+            this.chatMessageHandler = new ChatMessageHandler(filters, objects, config);
 
             this.soundHandler = new SoundHandler(this.talkAddonHandler, sigScanner);
 
@@ -145,6 +150,67 @@ namespace TextToTalk
                 this.configurationWindow);
 
             RegisterCallbacks();
+
+            this.handleTextCancel = HandleTextCancel();
+            this.handleTextEmit = HandleTextEmit();
+        }
+
+        private IObservable<ChatTextEmitEvent> OnChatTextEmit()
+        {
+            return Observable.FromEvent<ChatTextEmitEvent>(
+                h => this.chatMessageHandler.OnTextEmit += h,
+                h => this.chatMessageHandler.OnTextEmit -= h);
+        }
+
+        private IObservable<TextEmitEvent> OnTalkAddonTextEmit()
+        {
+            return Observable.FromEvent<TextEmitEvent>(
+                h => this.talkAddonHandler.OnTextEmit += h,
+                h => this.talkAddonHandler.OnTextEmit -= h);
+        }
+
+        private IObservable<TalkAddonAdvanceEvent> OnTalkAddonAdvance()
+        {
+            return Observable.FromEvent<TalkAddonAdvanceEvent>(
+                h => this.talkAddonHandler.OnAdvance += h,
+                h => this.talkAddonHandler.OnAdvance -= h);
+        }
+
+        private IObservable<TalkAddonCloseEvent> OnTalkAddonClose()
+        {
+            return Observable.FromEvent<TalkAddonCloseEvent>(
+                h => this.talkAddonHandler.OnClose += h,
+                h => this.talkAddonHandler.OnClose -= h);
+        }
+
+        private IObservable<SourcedTextEvent> OnTextSourceCancel()
+        {
+            return OnTalkAddonAdvance().Merge<SourcedTextEvent>(OnTalkAddonClose());
+        }
+        
+        private IObservable<TextEmitEvent> OnTextEmit()
+        {
+            return OnTalkAddonTextEmit().Merge(OnChatTextEmit());
+        }
+
+        private IDisposable HandleTextCancel()
+        {
+            return OnTextSourceCancel()
+                .Where(_ => this.config is { Enabled: true, CancelSpeechOnTextAdvance: true })
+                .SubscribeOn(TaskPoolScheduler.Default)
+                .Subscribe(
+                    ev => this.backendManager.CancelSay(ev.Source),
+                    ex => DetailedLog.Error(ex, "Failed to handle text cancel event"));
+        }
+
+        private IDisposable HandleTextEmit()
+        {
+            return OnTextEmit()
+                .Where(_ => this.config.Enabled)
+                .SubscribeOn(TaskPoolScheduler.Default)
+                .Subscribe(
+                    ev => Say(ev.Speaker, ev.Text.TextValue, ev.Source),
+                    ex => DetailedLog.Error(ex, "Failed to handle text emit event"));
         }
 
         private bool keysDown = false;
@@ -206,7 +272,8 @@ namespace TextToTalk
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message,
             ref bool handled)
         {
-            if (!this.clientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort || this.notifiedFailedToBindPort) return;
+            if (!this.clientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort ||
+                this.notifiedFailedToBindPort) return;
             this.chat.Print($"TextToTalk failed to bind to port {this.config.WebsocketPort}. " +
                             "Please close the owner of that port and reload the Websocket server, " +
                             "or select a different port.");
@@ -397,8 +464,6 @@ namespace TextToTalk
         private void RegisterCallbacks()
         {
             this.pluginInterface.UiBuilder.Draw += this.windows.Draw;
-            this.talkAddonHandler.Say += Say;
-            this.chatMessageHandler.Say += Say;
 
             this.pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 
@@ -418,9 +483,6 @@ namespace TextToTalk
             this.chat.ChatMessage -= OnChatMessage;
 
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
-
-            this.chatMessageHandler.Say -= Say;
-            this.talkAddonHandler.Say -= Say;
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
         }
@@ -452,6 +514,9 @@ namespace TextToTalk
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
+            
+            this.handleTextEmit.Dispose();
+            this.handleTextCancel.Dispose();
 
             UnregisterCallbacks();
 
