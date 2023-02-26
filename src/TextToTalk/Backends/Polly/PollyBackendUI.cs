@@ -1,13 +1,9 @@
-﻿using Amazon;
-using Amazon.Polly;
-using Amazon.Polly.Model;
+﻿using Amazon.Polly;
 using ImGuiNET;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
@@ -17,29 +13,13 @@ namespace TextToTalk.Backends.Polly;
 
 public class PollyBackendUI
 {
-    private static readonly string[] Regions = RegionEndpoint.EnumerableAllRegions.Select(r => r.SystemName).ToArray();
-    private static readonly string[] Engines = { Engine.Neural, Engine.Standard };
-
     private readonly PluginConfiguration config;
     private readonly LexiconComponent lexiconComponent;
-    private readonly LexiconManager lexiconManager;
+    private readonly PollyBackendUIModel model;
 
-    private readonly Func<PollyClient?> getPolly;
-    private readonly Action<PollyClient?> setPolly;
-    private readonly Func<IList<Voice>> getVoices;
-    private readonly Action<IList<Voice>> setVoices;
-
-    private string accessKey = string.Empty;
-    private string secretKey = string.Empty;
-
-    public PollyBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http,
-        Func<PollyClient?> getPolly, Action<PollyClient?> setPolly, Func<IList<Voice>> getVoices,
-        Action<IList<Voice>> setVoices)
+    public PollyBackendUI(PollyBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager, HttpClient http)
     {
-        this.getPolly = getPolly;
-        this.setPolly = setPolly;
-        this.getVoices = getVoices;
-        this.setVoices = setVoices;
+        this.model = model;
 
         // TODO: Make this configurable
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -49,54 +29,32 @@ public class PollyBackendUI
         this.config = config;
         this.lexiconComponent =
             new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.PollyLexiconFiles);
-        this.lexiconManager = lexiconManager;
-
-        var credentials = PollyCredentialManager.LoadCredentials();
-        if (credentials != null)
-        {
-            this.accessKey = credentials.UserName;
-            this.secretKey = credentials.Password;
-
-            var regionEndpoint =
-                RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion)
-                ?? RegionEndpoint.EUWest1;
-            PollyLogin(regionEndpoint);
-        }
     }
-
-    private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        var region = this.config.PollyRegion;
-        var regionIndex = Array.IndexOf(Regions, region);
-        if (ImGui.Combo($"Region##{MemoizedId.Create()}", ref regionIndex, Regions, Regions.Length))
+        var region = this.model.GetCurrentRegion();
+        var regionIndex = Array.IndexOf(this.model.Regions, region);
+        if (ImGui.Combo($"Region##{MemoizedId.Create()}", ref regionIndex, this.model.Regions, this.model.Regions.Length))
         {
-            this.config.PollyRegion = Regions[regionIndex];
-            this.config.Save();
+            this.model.SetCurrentRegion(this.model.Regions[regionIndex]);
         }
 
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Access key", ref this.accessKey, 100,
+        var (accessKey, secretKey) = this.model.GetKeyPair();
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Access key", ref accessKey, 100,
             ImGuiInputTextFlags.Password);
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Secret key", ref this.secretKey, 100,
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Secret key", ref secretKey, 100,
             ImGuiInputTextFlags.Password);
 
         if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
-            var username = Whitespace.Replace(this.accessKey, "");
-            var password = Whitespace.Replace(this.secretKey, "");
-            PollyCredentialManager.SaveCredentials(username, password);
+            this.model.LoginWith(accessKey, secretKey);
+        }
 
-            var regionEndpoint =
-                RegionEndpoint.EnumerableAllRegions.FirstOrDefault(r => r.SystemName == this.config.PollyRegion);
-            if (regionEndpoint == null)
-            {
-                ImGui.TextColored(BackendUI.Red, "Invalid region!");
-            }
-            else
-            {
-                PollyLogin(regionEndpoint);
-            }
+        var loginError = this.model.PollyLoginException?.Message;
+        if (loginError != null)
+        {
+            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
         }
 
         ImGui.SameLine();
@@ -109,7 +67,7 @@ public class PollyBackendUI
 
         ImGui.Spacing();
 
-        var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
+        var currentVoicePreset = this.model.GetCurrentVoicePreset();
 
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.AmazonPolly).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
@@ -120,8 +78,7 @@ public class PollyBackendUI
             if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
                     presets.Count))
             {
-                this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
-                this.config.Save();
+                this.model.SetCurrentVoicePreset(presets[presetIndex].Id);
             }
         }
         else
@@ -150,22 +107,15 @@ public class PollyBackendUI
             this.config.Save();
         }
 
-        var engine = currentVoicePreset.VoiceEngine;
-        var engineIndex = Array.IndexOf(Engines, engine);
-        if (ImGui.Combo($"Engine##{MemoizedId.Create()}", ref engineIndex, Engines, Engines.Length))
+        var engine = this.model.GetCurrentEngine();
+        var engineIndex = Array.IndexOf(this.model.Engines, engine);
+        if (ImGui.Combo($"Engine##{MemoizedId.Create()}", ref engineIndex, this.model.Engines, this.model.Engines.Length))
         {
-            currentVoicePreset.VoiceEngine = Engines[engineIndex];
-            this.config.Save();
-
-            {
-                var polly = this.getPolly.Invoke();
-                var voices = polly?.GetVoicesForEngine(currentVoicePreset.VoiceEngine) ?? new List<Voice>();
-                this.setVoices.Invoke(voices);
-            }
+            this.model.SetCurrentEngine(this.model.Engines[engineIndex]);
         }
 
         {
-            var voices = this.getVoices.Invoke();
+            var voices = this.model.CurrentEngineVoices;
             var voiceArray = voices.Select(v => v.Name).ToArray();
             var voiceIdArray = voices.Select(v => v.Id).ToArray();
             var voiceIndex = Array.IndexOf(voiceIdArray, currentVoicePreset.VoiceName);
@@ -242,26 +192,6 @@ public class PollyBackendUI
             {
                 BackendUI.GenderedPresetConfig("Polly", TTSBackend.AmazonPolly, this.config, presets);
             }
-        }
-    }
-
-    private void PollyLogin(RegionEndpoint regionEndpoint)
-    {
-        var polly = this.getPolly.Invoke();
-        polly?.Dispose();
-        try
-        {
-            DetailedLog.Info($"Logging into AWS region {regionEndpoint}.");
-            polly = new PollyClient(this.accessKey, this.secretKey, regionEndpoint, this.lexiconManager);
-            var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
-            var voices = polly.GetVoicesForEngine(currentVoicePreset?.VoiceEngine ?? Engine.Neural);
-            this.setPolly.Invoke(polly);
-            this.setVoices.Invoke(voices);
-        }
-        catch (Exception e)
-        {
-            DetailedLog.Error(e, "Failed to initialize AWS client.");
-            PollyCredentialManager.DeleteCredentials();
         }
     }
 }

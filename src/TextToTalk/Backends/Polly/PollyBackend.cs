@@ -1,27 +1,24 @@
 ﻿using System;
-using Amazon.Polly.Model;
-using ImGuiNET;
-using System.Collections.Generic;
 using System.Net.Http;
+using ImGuiNET;
 
 namespace TextToTalk.Backends.Polly
 {
     public class PollyBackend : VoiceBackend
     {
         private readonly PollyBackendUI ui;
-
-        private PollyClient? polly;
+        private readonly PollyBackendUIModel uiModel;
 
         public PollyBackend(PluginConfiguration config, HttpClient http)
         {
             TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
             var lexiconManager = new DalamudLexiconManager();
+            this.uiModel = new PollyBackendUIModel(config, lexiconManager);
+
             LexiconUtils.LoadFromConfigPolly(lexiconManager, config);
 
-            IList<Voice> voices = new List<Voice>();
-            this.ui = new PollyBackendUI(config, lexiconManager, http,
-                () => this.polly, p => this.polly = p, () => voices, v => voices = v);
+            this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http);
         }
 
         public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
@@ -31,37 +28,37 @@ namespace TextToTalk.Backends.Polly
                 throw new InvalidOperationException("Invalid voice preset provided.");
             }
 
-            if (this.polly == null)
+            if (this.uiModel.Polly == null)
             {
                 DetailedLog.Warn("Polly client has not yet been initialized");
                 return;
             }
 
-            _ = this.polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName,
+            _ = this.uiModel.Polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName,
                 pollyVoicePreset.AmazonDomainName, pollyVoicePreset.SampleRate, pollyVoicePreset.PlaybackRate,
                 pollyVoicePreset.Volume, source, text);
         }
 
         public override void CancelAllSpeech()
         {
-            if (this.polly == null)
+            if (this.uiModel.Polly == null)
             {
                 DetailedLog.Warn("Polly client has not yet been initialized");
                 return;
             }
 
-            _ = this.polly.CancelAllSounds();
+            _ = this.uiModel.Polly.CancelAllSounds();
         }
 
         public override void CancelSay(TextSource source)
         {
-            if (this.polly == null)
+            if (this.uiModel.Polly == null)
             {
                 DetailedLog.Warn("Polly client has not yet been initialized");
                 return;
             }
 
-            _ = this.polly.CancelFromSource(source);
+            _ = this.uiModel.Polly.CancelFromSource(source);
         }
 
         public override void DrawSettings(IConfigUIDelegates helpers)
@@ -71,20 +68,20 @@ namespace TextToTalk.Backends.Polly
 
         public override TextSource GetCurrentlySpokenTextSource()
         {
-            if (this.polly == null)
+            if (this.uiModel.Polly == null)
             {
                 DetailedLog.Warn("Polly client has not yet been initialized");
                 return TextSource.None;
             }
 
-            return this.polly.GetCurrentlySpokenTextSource();
+            return this.uiModel.Polly.GetCurrentlySpokenTextSource();
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                this.polly?.Dispose();
+                this.uiModel.Dispose();
             }
         }
     }
