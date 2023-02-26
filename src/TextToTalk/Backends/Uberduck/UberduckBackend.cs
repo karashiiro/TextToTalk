@@ -5,11 +5,15 @@ using System.Threading.Tasks;
 
 namespace TextToTalk.Backends.Uberduck;
 
+/// <summary>
+/// The logic for the Uberduck backend. Uberduck changed its offerings to not include a
+/// free option, so this likely won't see many updates going forward.
+/// </summary>
 public class UberduckBackend : VoiceBackend
 {
     private readonly StreamSoundQueue soundQueue;
     private readonly UberduckBackendUI ui;
-    private readonly UberduckClient uberduck;
+    private readonly UberduckClient? uberduck;
 
     public UberduckBackend(PluginConfiguration config, HttpClient http)
     {
@@ -81,7 +85,7 @@ public class UberduckBackend : VoiceBackend
     {
         if (disposing)
         {
-            this.soundQueue?.Dispose();
+            this.soundQueue.Dispose();
         }
     }
 }
