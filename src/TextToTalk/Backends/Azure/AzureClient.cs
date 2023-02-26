@@ -30,7 +30,7 @@ public class AzureClient : IDisposable
         return this.soundQueue.GetCurrentlySpokenTextSource();
     }
 
-    public IList<string> GetVoices()
+    public List<string> GetVoices()
     {
         var res = this.synthesizer.GetVoicesAsync().GetAwaiter().GetResult();
         HandleResult(res);
