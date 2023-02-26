@@ -8,8 +8,7 @@ namespace TextToTalk.Backends.Azure;
 public class AzureBackend : VoiceBackend
 {
     private readonly AzureBackendUI ui;
-
-    private AzureClient client;
+    private readonly AzureBackendUIModel uiModel;
 
     public AzureBackend(PluginConfiguration config, HttpClient http)
     {
@@ -18,9 +17,8 @@ public class AzureBackend : VoiceBackend
         var lexiconManager = new DalamudLexiconManager();
         LexiconUtils.LoadFromConfigAzure(lexiconManager, config);
 
-        IList<string> voices = new List<string>();
-        this.ui = new AzureBackendUI(config, lexiconManager, http,
-            () => this.client, p => this.client = p, () => voices, v => voices = v);
+        this.uiModel = new AzureBackendUIModel(config, lexiconManager);
+        this.ui = new AzureBackendUI(this.uiModel, config, lexiconManager, http);
     }
 
     public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
@@ -30,36 +28,36 @@ public class AzureBackend : VoiceBackend
             throw new InvalidOperationException("Invalid voice preset provided.");
         }
 
-        if (this.client == null)
+        if (this.uiModel.Azure == null)
         {
             DetailedLog.Warn("Azure client has not yet been initialized");
             return;
         }
 
-        _ = this.client.Say(azureVoicePreset.VoiceName,
+        _ = this.uiModel.Azure.Say(azureVoicePreset.VoiceName,
             azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, source, text);
     }
 
     public override void CancelAllSpeech()
     {
-        if (this.client == null)
+        if (this.uiModel.Azure == null)
         {
             DetailedLog.Warn("Azure client has not yet been initialized");
             return;
         }
 
-        _ = this.client.CancelAllSounds();
+        _ = this.uiModel.Azure.CancelAllSounds();
     }
 
     public override void CancelSay(TextSource source)
     {
-        if (this.client == null)
+        if (this.uiModel.Azure == null)
         {
             DetailedLog.Warn("Azure client has not yet been initialized");
             return;
         }
 
-        _ = this.client.CancelFromSource(source);
+        _ = this.uiModel.Azure.CancelFromSource(source);
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)
@@ -69,20 +67,20 @@ public class AzureBackend : VoiceBackend
 
     public override TextSource GetCurrentlySpokenTextSource()
     {
-        if (this.client == null)
+        if (this.uiModel.Azure == null)
         {
             DetailedLog.Warn("Azure client has not yet been initialized");
             return TextSource.None;
         }
 
-        return this.client.GetCurrentlySpokenTextSource();
+        return this.uiModel.Azure.GetCurrentlySpokenTextSource();
     }
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
-            this.client.Dispose();
+            this.uiModel.Azure?.Dispose();
         }
     }
 }

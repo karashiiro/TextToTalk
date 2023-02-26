@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using ImGuiNET;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
@@ -16,24 +14,12 @@ public class AzureBackendUI
 {
     private readonly PluginConfiguration config;
     private readonly LexiconComponent lexiconComponent;
-    private readonly LexiconManager lexiconManager;
+    private readonly AzureBackendUIModel model;
 
-    private readonly Func<AzureClient?> getAzure;
-    private readonly Action<AzureClient> setAzure;
-    private readonly Func<IList<string>> getVoices;
-    private readonly Action<IList<string>> setVoices;
-
-    private string region = string.Empty;
-    private string subscriptionKey = string.Empty;
-
-    public AzureBackendUI(PluginConfiguration config, LexiconManager lexiconManager, HttpClient http,
-        Func<AzureClient?> getAzure, Action<AzureClient> setAzure, Func<IList<string>> getVoices,
-        Action<IList<string>> setVoices)
+    public AzureBackendUI(AzureBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
+        HttpClient http)
     {
-        this.getAzure = getAzure;
-        this.setAzure = setAzure;
-        this.getVoices = getVoices;
-        this.setVoices = setVoices;
+        this.model = model;
 
         // TODO: Make this configurable
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -43,33 +29,24 @@ public class AzureBackendUI
         this.config = config;
         this.lexiconComponent =
             new LexiconComponent(lexiconManager, lexiconRepository, config, Array.Empty<string>);
-        this.lexiconManager = lexiconManager;
-
-        var credentials = AzureCredentialManager.LoadCredentials();
-        if (credentials != null)
-        {
-            this.region = credentials.UserName;
-            this.subscriptionKey = credentials.Password;
-
-            AzureLogin();
-        }
     }
-
-    private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Region", ref this.region, 100);
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Subscription key", ref this.subscriptionKey, 100,
+        var (region, subscriptionKey) = this.model.GetLoginInfo();
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Region", ref region, 100);
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Subscription key", ref subscriptionKey, 100,
             ImGuiInputTextFlags.Password);
 
         if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
-            this.region = Whitespace.Replace(this.region, "");
-            this.subscriptionKey = Whitespace.Replace(this.subscriptionKey, "");
-            AzureCredentialManager.SaveCredentials(this.region, this.subscriptionKey);
+            this.model.LoginWith(region, subscriptionKey);
+        }
 
-            AzureLogin();
+        var loginError = this.model.AzureLoginException?.Message;
+        if (loginError != null)
+        {
+            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
         }
 
         ImGui.SameLine();
@@ -83,19 +60,18 @@ public class AzureBackendUI
 
         ImGui.Spacing();
 
-        var currentVoicePreset = this.config.GetCurrentVoicePreset<AzureVoicePreset>();
+        var currentVoicePreset = this.model.GetCurrentVoicePreset();
 
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.Azure).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
 
-        if (presets.Any())
+        if (presets.Any() && currentVoicePreset != null)
         {
             var presetIndex = presets.IndexOf(currentVoicePreset);
             if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
                     presets.Count))
             {
-                this.config.SetCurrentVoicePreset(presets[presetIndex].Id);
-                this.config.Save();
+                this.model.SetCurrentVoicePreset(presets[presetIndex].Id);
             }
         }
         else
@@ -125,7 +101,7 @@ public class AzureBackendUI
         }
 
         {
-            var voices = this.getVoices.Invoke();
+            var voices = this.model.Voices;
             string?[] voiceArray = voices.ToArray();
             var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
             if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))
@@ -177,25 +153,6 @@ public class AzureBackendUI
             {
                 BackendUI.GenderedPresetConfig("Azure", TTSBackend.Azure, this.config, presets);
             }
-        }
-    }
-
-    private void AzureLogin()
-    {
-        var azure = this.getAzure.Invoke();
-        azure?.Dispose();
-        try
-        {
-            DetailedLog.Info($"Logging into Azure region {region}.");
-            azure = new AzureClient(this.subscriptionKey, this.region, this.lexiconManager);
-            var voices = azure.GetVoices();
-            this.setAzure.Invoke(azure);
-            this.setVoices.Invoke(voices);
-        }
-        catch (Exception e)
-        {
-            DetailedLog.Error(e, "Failed to initialize Azure client.");
-            AzureCredentialManager.DeleteCredentials();
         }
     }
 }
