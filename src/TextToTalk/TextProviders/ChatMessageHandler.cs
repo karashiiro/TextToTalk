@@ -6,6 +6,7 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using TextToTalk.Events;
 using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -21,6 +22,8 @@ public class ChatMessageHandler
 
     public Action<GameObject?, string?, TextSource> Say { get; set; }
 
+    public Action<ChatTextEmitEvent> OnTextEmit { get; set; }
+
     public ChatMessageHandler(MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config,
         SharedState sharedState)
     {
@@ -30,9 +33,10 @@ public class ChatMessageHandler
         this.sharedState = sharedState;
 
         Say = (_, _, _) => { };
+        OnTextEmit = _ => { };
     }
 
-    public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString? sender, ref SeString message,
+    public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
         ref bool handled)
     {
         var textValue = message.TextValue;
@@ -45,7 +49,7 @@ public class ChatMessageHandler
         if (this.filters.IsDuplicateQuestText(textValue)) return;
         DetailedLog.Debug($"Chat ({type}): \"{textValue}\"");
 
-        if (this.filters.ShouldProcessSpeaker(sender?.TextValue))
+        if (this.filters.ShouldProcessSpeaker(sender.TextValue))
         {
             if ((int)type == (int)AdditionalChatType.NPCDialogue)
             {
@@ -59,7 +63,7 @@ public class ChatMessageHandler
                 this.filters.SetLastQuestText(textValue);
             }
 
-            var speakerNameToSay = sender!.TextValue;
+            var speakerNameToSay = sender.TextValue;
             if (!this.config.SayPlayerWorldName &&
                 sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
             {
@@ -83,13 +87,14 @@ public class ChatMessageHandler
         var typeAccepted = chatTypes.EnabledChatTypes.Contains((int)type);
         if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Any() && !IsTextGood(textValue)) return;
 
-        var senderText = sender?.TextValue; // Can't access in lambda
+        var senderText = sender.TextValue; // Can't access ref in lambda
         var speaker = string.IsNullOrEmpty(senderText)
             ? null
             : this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == senderText);
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue)) return;
 
         Say.Invoke(speaker, textValue, TextSource.Chat);
+        OnTextEmit.Invoke(new ChatTextEmitEvent(TextSource.Chat, sender, message, type));
     }
 
     private bool IsTextGood(string text)
@@ -97,7 +102,7 @@ public class ChatMessageHandler
         return this.config.Good
             .Where(t => t.Text != "")
             .Any(t => t.Match(text));
-    } 
+    }
 
     private bool IsTextBad(string text)
     {

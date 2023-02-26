@@ -213,11 +213,11 @@ namespace TextToTalk
             this.notifiedFailedToBindPort = true;
         }
 
-        private void OnChatMessage(XivChatType type, uint id, ref SeString? sender, ref SeString message,
+        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
             ref bool handled)
         {
             if (!this.config.Enabled) return;
-            chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
+            this.chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
         }
 
         private void Say(GameObject? speaker, string textValue, TextSource source)
