@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Reactive.Subjects;
 using System.Speech.Synthesis;
 using System.Threading;
 using TextToTalk.Lexicons;
@@ -11,16 +11,18 @@ namespace TextToTalk.Backends.System
         private readonly SpeechSynthesizer speechSynthesizer;
         private readonly LexiconManager lexiconManager;
         private readonly AutoResetEvent speechCompleted;
-        private readonly ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures;
 
-        public SystemSoundQueue(LexiconManager lexiconManager,
-            ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures)
+        public IObservable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
+        private readonly Subject<SelectVoiceFailedException> selectVoiceFailed;
+
+        public SystemSoundQueue(LexiconManager lexiconManager)
         {
             this.speechCompleted = new AutoResetEvent(false);
             this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
             this.speechSynthesizer.SetOutputToDefaultAudioDevice();
-            this.selectVoiceFailures = selectVoiceFailures;
+
+            this.selectVoiceFailed = new Subject<SelectVoiceFailedException>();
 
             this.speechSynthesizer.SpeakCompleted += (_, _) =>
             {
@@ -52,8 +54,8 @@ namespace TextToTalk.Backends.System
             }
             catch (SelectVoiceFailedException e)
             {
-                DetailedLog.Error(e, "Failed to select voice {0}", systemVoicePreset.VoiceName);
-                this.selectVoiceFailures.Enqueue(e);
+                DetailedLog.Error(e, "Failed to select voice {0}", systemVoicePreset.VoiceName ?? "");
+                this.selectVoiceFailed.OnNext(e);
             }
 
             var ssml = this.lexiconManager.MakeSsml(nextItem.Text,
