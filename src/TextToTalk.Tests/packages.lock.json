@@ -674,6 +674,11 @@
           "System.Threading": "4.3.0"
         }
       },
+      "System.Reactive": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "erBZjkQHWL9jpasCE/0qKAryzVBJFxGHVBAvgRN1bzM0q2s1S4oYREEEL0Vb+1kA/6BKb5FjUZMp5VXmy+gzkQ=="
+      },
       "System.Reflection": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1165,6 +1170,7 @@
           "NAudio": "[2.1.0, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
           "System.Drawing.Common": "[7.0.0, )",
+          "System.Reactive": "[5.0.0, )",
           "System.Speech": "[7.0.0, )",
           "TextToTalk.Lexicons": "[1.0.0, )",
           "TextToTalk.Lexicons.Updater": "[1.0.0, )",

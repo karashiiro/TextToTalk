@@ -1,7 +1,5 @@
 ﻿using ImGuiNET;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -16,25 +14,12 @@ namespace TextToTalk.Backends.System;
 
 public class SystemBackendUI
 {
-    private static readonly Lazy<SpeechSynthesizer> DummySynthesizer = new(() =>
-    {
-        try
-        {
-            return new SpeechSynthesizer();
-        }
-        catch (Exception e)
-        {
-            DetailedLog.Error(e, "Failed to create speech synthesizer.");
-            return null;
-        }
-    });
-
+    private readonly SystemBackendUIModel model;
     private readonly PluginConfiguration config;
     private readonly LexiconComponent lexiconComponent;
-    private readonly ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures;
 
-    public SystemBackendUI(PluginConfiguration config, LexiconManager lexiconManager,
-        ConcurrentQueue<SelectVoiceFailedException> selectVoiceFailures, HttpClient http)
+    public SystemBackendUI(SystemBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
+        HttpClient http)
     {
         // TODO: Make this configurable
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -42,21 +27,14 @@ public class SystemBackendUI
 
         var lexiconRepository = new LexiconRepository(http, downloadPath);
 
+        this.model = model;
         this.config = config;
         this.lexiconComponent = new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.Lexicons);
-        this.selectVoiceFailures = selectVoiceFailures;
     }
-
-    private readonly IDictionary<string?, Exception> voiceExceptions = new Dictionary<string?, Exception>();
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
         ImGui.TextColored(BackendUI.HintColor, "This TTS provider is only supported on Windows.");
-
-        if (this.selectVoiceFailures.TryDequeue(out var e1))
-        {
-            this.voiceExceptions[e1.VoiceId] = e1;
-        }
 
         var currentVoicePreset = this.config.GetCurrentVoicePreset<SystemVoicePreset>();
 
@@ -114,21 +92,19 @@ public class SystemBackendUI
         }
 
         var voiceName = currentVoicePreset.VoiceName;
-        var voices = DummySynthesizer.Value != null
-            ? DummySynthesizer.Value.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList()
-            : new List<InstalledVoice>();
+        var voices = this.model.GetInstalledVoices();
         if (voices.Any())
         {
             var voicesUi = voices.Select(FormatVoiceInfo).ToArray();
             var voiceIndex = voices.FindIndex(iv => iv.VoiceInfo?.Name == voiceName);
             if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voicesUi, voices.Count))
             {
-                this.voiceExceptions.Remove(voices[voiceIndex].VoiceInfo.Name);
+                this.model.DismissVoiceException(voices[voiceIndex].VoiceInfo.Name);
                 currentVoicePreset.VoiceName = voices[voiceIndex].VoiceInfo.Name;
                 this.config.Save();
             }
 
-            if (this.voiceExceptions.TryGetValue(voiceName, out var e2))
+            if (this.model.VoiceExceptions.TryGetValue(voiceName ?? "", out var e2))
             {
                 PrintVoiceExceptions(e2);
             }
@@ -168,12 +144,18 @@ public class SystemBackendUI
         }
     }
 
-    private static void PrintVoiceExceptionsR(Exception e)
+    private static void PrintVoiceExceptionsR(Exception? e)
     {
+        if (e == null)
+        {
+            return;
+        }
+
         do
         {
             ImGui.TextColored(BackendUI.Red, $"  {e.Message}");
-        } while (e.InnerException != null);
+            e = e.InnerException;
+        } while (e?.InnerException != null);
     }
 
     private static string FormatVoiceInfo(InstalledVoice iv)
@@ -183,7 +165,7 @@ public class SystemBackendUI
             .Append(iv.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language")
             .Append(")");
 
-        if (iv.VoiceInfo?.Name.Contains("Zira") ?? false)
+        if (iv.VoiceInfo?.Name?.Contains("Zira") ?? false)
         {
             line.Append(" [UNSTABLE]");
         }

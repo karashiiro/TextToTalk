@@ -1,25 +1,26 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
 using System.Net.Http;
 
 namespace TextToTalk.Backends.System
 {
     public class SystemBackend : VoiceBackend
     {
-        private readonly PluginConfiguration config;
+        private readonly SystemBackendUIModel uiModel;
         private readonly SystemBackendUI ui;
         private readonly SystemSoundQueue soundQueue;
+
+        private readonly IDisposable voiceExceptions;
 
         public SystemBackend(PluginConfiguration config, HttpClient http)
         {
             var lexiconManager = new DalamudLexiconManager();
             LexiconUtils.LoadFromConfigSystem(lexiconManager, config);
 
-            var selectVoiceFailures = new ConcurrentQueue<SelectVoiceFailedException>();
+            this.uiModel = new SystemBackendUIModel();
+            this.ui = new SystemBackendUI(this.uiModel, config, lexiconManager, http);
 
-            this.ui = new SystemBackendUI(config, lexiconManager, selectVoiceFailures, http);
-
-            this.config = config;
-            this.soundQueue = new SystemSoundQueue(lexiconManager, selectVoiceFailures);
+            this.soundQueue = new SystemSoundQueue(lexiconManager);
+            this.voiceExceptions = this.uiModel.SubscribeToVoiceExceptions(this.soundQueue.SelectVoiceFailed);
         }
 
         public override void Say(TextSource source, VoicePreset voice, string speaker, string text)
@@ -51,6 +52,7 @@ namespace TextToTalk.Backends.System
         {
             if (disposing)
             {
+                this.voiceExceptions.Dispose();
                 this.soundQueue.Dispose();
             }
         }
