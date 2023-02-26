@@ -24,7 +24,7 @@ namespace TextToTalk.Backends.Polly
             this.lexiconManager = lexiconManager;
         }
 
-        public IList<Voice> GetVoicesForEngine(Engine engine)
+        public List<Voice> GetVoicesForEngine(Engine engine)
         {
             var voicesReq = new DescribeVoicesRequest
             {
