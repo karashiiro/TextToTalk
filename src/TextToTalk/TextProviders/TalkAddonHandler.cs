@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Linq;
 using Dalamud.Data;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using TextToTalk.Backends;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -26,18 +23,14 @@ public class TalkAddonHandler
     private readonly Condition condition;
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
-    private readonly VoiceBackendManager backendManager;
     private readonly ComponentUpdateState<TalkAddonState> updateState;
 
-    public Action<GameObject?, string?, TextSource> Say { get; set; }
-
-    public Action<TalkAddonTextEmitEvent> OnTextEmit { get; set; }
-
-    public Action<TalkAddonAdvanceEvent> OnTextAdvance { get; set; }
+    public Action<TextEmitEvent> OnTextEmit { get; set; }
+    public Action<TalkAddonAdvanceEvent> OnAdvance { get; set; }
+    public Action<TalkAddonCloseEvent> OnClose { get; set; }
 
     public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
-        ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState,
-        VoiceBackendManager backendManager)
+        ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState)
     {
         this.clientState = clientState;
         this.gui = gui;
@@ -47,13 +40,12 @@ public class TalkAddonHandler
         this.condition = condition;
         this.config = config;
         this.sharedState = sharedState;
-        this.backendManager = backendManager;
         this.updateState = new ComponentUpdateState<TalkAddonState>();
         this.updateState.OnUpdate += HandleChange;
 
-        Say = (_, _, _) => { };
         OnTextEmit = _ => { };
-        OnTextAdvance = _ => { };
+        OnAdvance = _ => { };
+        OnClose = _ => { };
     }
 
     public enum PollSource
@@ -72,24 +64,24 @@ public class TalkAddonHandler
     private void HandleChange(TalkAddonState state)
     {
         var (speaker, text, pollSource) = state;
-        
-        OnTextAdvance.Invoke(new TalkAddonAdvanceEvent());
 
-        // Cancel TTS when the dialogue window is closed, if configured
-        if (this.config.CancelSpeechOnTextAdvance)
-        {
-            this.backendManager.CancelSay(TextSource.TalkAddon);
-        }
-
-        // Return early if there's nothing to say
         if (state == default)
         {
+            // The addon was closed
             this.filters.SetLastQuestText("");
+            OnClose.Invoke(new TalkAddonCloseEvent());
             return;
         }
 
+        // Notify observers that the addon state was advanced
+        OnAdvance.Invoke(new TalkAddonAdvanceEvent());
+
+        text = TalkUtils.NormalizePunctuation(text);
+
+        // Check the quest text (NPCDialogue) state to see if this has already been handled
         if (this.filters.IsDuplicateQuestText(text)) return;
         this.filters.SetLastQuestText(text);
+
         DetailedLog.Debug($"AddonTalk: \"{text}\"");
 
         if (pollSource == PollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
@@ -98,8 +90,11 @@ public class TalkAddonHandler
             return;
         }
 
+        // Do postprocessing on the speaker name
         if (this.filters.ShouldProcessSpeaker(speaker))
         {
+            this.filters.SetLastSpeaker(speaker);
+
             var speakerNameToSay = speaker;
             if (this.config.SayPartialName)
             {
@@ -107,24 +102,13 @@ public class TalkAddonHandler
             }
 
             text = $"{speakerNameToSay} says {text}";
-            this.filters.SetLastSpeaker(speaker);
         }
 
-        var speakerObj = this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == speaker);
-        if (!this.filters.ShouldSayFromYou(speaker))
-        {
-            return;
-        }
+        // Find the game object this speaker is representing
+        var speakerObj = ObjectTableUtils.GetGameObjectByName(this.objects, speaker);
+        if (!this.filters.ShouldSayFromYou(speaker)) return;
 
-        // Cancel TTS if it's currently Talk addon text, if configured
-        if (this.config.CancelSpeechOnTextAdvance &&
-            this.backendManager.GetCurrentlySpokenTextSource() == TextSource.TalkAddon)
-        {
-            this.backendManager.CancelSay(TextSource.TalkAddon);
-        }
-
-        Say.Invoke(speakerObj, text, TextSource.TalkAddon);
-        OnTextEmit.Invoke(new TalkAddonTextEmitEvent(TextSource.TalkAddon, state.Speaker, state.Text, speakerObj));
+        OnTextEmit.Invoke(new TextEmitEvent(TextSource.TalkAddon, state.Speaker ?? "", text, speakerObj));
     }
 
     private unsafe TalkAddonState GetTalkAddonState(PollSource pollSource)
@@ -160,8 +144,6 @@ public class TalkAddonHandler
             return default;
         }
 
-        var text = TalkUtils.NormalizePunctuation(talkAddonText.Text);
-        var speaker = TalkUtils.NormalizePunctuation(talkAddonText.Speaker);
-        return new TalkAddonState(speaker, text, pollSource);
+        return new TalkAddonState(talkAddonText.Speaker, talkAddonText.Text, pollSource);
     }
 }

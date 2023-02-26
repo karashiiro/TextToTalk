@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Linq;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Events;
-using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
 
@@ -18,57 +14,55 @@ public class ChatMessageHandler
     private readonly MessageHandlerFilters filters;
     private readonly ObjectTable objects;
     private readonly PluginConfiguration config;
-    private readonly SharedState sharedState;
-
-    public Action<GameObject?, string?, TextSource> Say { get; set; }
 
     public Action<ChatTextEmitEvent> OnTextEmit { get; set; }
 
-    public ChatMessageHandler(MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config,
-        SharedState sharedState)
+    public ChatMessageHandler(MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
     {
         this.filters = filters;
         this.objects = objects;
         this.config = config;
-        this.sharedState = sharedState;
 
-        Say = (_, _, _) => { };
         OnTextEmit = _ => { };
     }
 
-    public unsafe void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
-        ref bool handled)
+    public void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
     {
         var textValue = message.TextValue;
+
         if (!this.config.SayPlayerWorldName)
         {
+            // Strip worlds from any player names
             textValue = TalkUtils.StripWorldFromNames(message);
         }
 
         textValue = TalkUtils.NormalizePunctuation(textValue);
-        if (this.filters.IsDuplicateQuestText(textValue)) return;
+
         DetailedLog.Debug($"Chat ({type}): \"{textValue}\"");
 
-        if (this.filters.ShouldProcessSpeaker(sender.TextValue))
+        if (type == XivChatType.NPCDialogue)
         {
-            if ((int)type == (int)AdditionalChatType.NPCDialogue)
+            // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
+            if (this.filters.IsTalkAddonActive())
             {
-                // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
-                var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
-                if (this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon))
-                {
-                    return;
-                }
-
-                this.filters.SetLastQuestText(textValue);
+                return;
             }
 
+            // Check the quest text (NPCDialogue) state to see if this has already been handled
+            // TODO: Is this redundant with the above check in place?
+            if (this.filters.IsDuplicateQuestText(textValue)) return;
+            this.filters.SetLastQuestText(textValue);
+        }
+
+        // Do postprocessing on the speaker name
+        if (this.filters.ShouldProcessSpeaker(sender.TextValue))
+        {
+            this.filters.SetLastSpeaker(sender.TextValue);
+
             var speakerNameToSay = sender.TextValue;
-            if (!this.config.SayPlayerWorldName &&
-                sender.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
+            if (!this.config.SayPlayerWorldName)
             {
-                // Remove world from spoken name
-                speakerNameToSay = player.PlayerName;
+                speakerNameToSay = TalkUtils.GetPlayerNameWithoutWorld(sender);
             }
 
             if (this.config.SayPartialName)
@@ -77,28 +71,27 @@ public class ChatMessageHandler
             }
 
             textValue = $"{speakerNameToSay} says {textValue}";
-            this.filters.SetLastSpeaker(sender.TextValue);
         }
 
-        if (IsTextBad(textValue)) return;
-
+        // Check all of the other filters to see if this should be dropped
         var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
+        var typeAccepted = chatTypes.EnableAllChatTypes || chatTypes.EnabledChatTypes.Contains((int)type);
+        if (!typeAccepted || IsTextBad(textValue) || !IsTextGood(textValue)) return;
 
-        var typeAccepted = chatTypes.EnabledChatTypes.Contains((int)type);
-        if (!(chatTypes.EnableAllChatTypes || typeAccepted) || this.config.Good.Any() && !IsTextGood(textValue)) return;
+        // Find the game object this speaker is representing
+        var speaker = ObjectTableUtils.GetGameObjectByName(this.objects, sender.TextValue);
+        if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
-        var senderText = sender.TextValue; // Can't access ref in lambda
-        var speaker = string.IsNullOrEmpty(senderText)
-            ? null
-            : this.objects.FirstOrDefault(gObj => gObj.Name.TextValue == senderText);
-        if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue)) return;
-
-        Say.Invoke(speaker, textValue, TextSource.Chat);
-        OnTextEmit.Invoke(new ChatTextEmitEvent(TextSource.Chat, sender, message, type));
+        OnTextEmit.Invoke(new ChatTextEmitEvent(TextSource.Chat, sender, textValue, speaker, type));
     }
 
     private bool IsTextGood(string text)
     {
+        if (!this.config.Good.Any())
+        {
+            return true;
+        }
+
         return this.config.Good
             .Where(t => t.Text != "")
             .Any(t => t.Match(text));

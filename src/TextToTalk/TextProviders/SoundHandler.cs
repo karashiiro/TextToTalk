@@ -139,7 +139,7 @@ public class SoundHandler : IDisposable
             if (this.knownVoiceLinePtrs.Remove(soundDataPtr))
             {
                 DetailedLog.Debug($"Caught playback of known voice line at address {soundDataPtr:x}");
-                talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.VoiceLinePlayback);
+                this.talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.VoiceLinePlayback);
             }
         }
         catch (Exception exc)

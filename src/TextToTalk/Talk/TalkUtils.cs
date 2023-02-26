@@ -3,6 +3,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -111,6 +112,16 @@ namespace TextToTalk.Talk
             return Speakable.Match(text).Success;
         }
 
+        public static string GetPlayerNameWithoutWorld(SeString playerName)
+        {
+            if (playerName.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
+            {
+                return player.PlayerName;
+            }
+
+            return playerName.TextValue;
+        }
+
         public static string? GetPartialName(string? name, FirstOrLastName part)
         {
             if (name == null)
@@ -119,17 +130,12 @@ namespace TextToTalk.Talk
             }
 
             var names = name.Split(' ');
-            switch (part)
+            return part switch
             {
-                case FirstOrLastName.First:
-                    return names[0];
-                case FirstOrLastName.Last:
-                    if (names.Length == 1)
-                        return names[0]; // Some NPCs only have one name.
-                    return names[1];
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(part), part, "Enumeration value is out of range.");
-            }
+                FirstOrLastName.First => names[0],
+                FirstOrLastName.Last => names.Length == 1 ? names[0] : names[1], // Some NPCs only have one name.
+                _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Enumeration value is out of range."),
+            };
         }
     }
 }
