@@ -8,6 +8,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Backends;
+using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
 
@@ -30,6 +31,10 @@ public class TalkAddonHandler
 
     public Action<GameObject?, string?, TextSource> Say { get; set; }
 
+    public Action<TalkAddonTextEmitEvent> OnTextEmit { get; set; }
+
+    public Action<TalkAddonAdvanceEvent> OnTextAdvance { get; set; }
+
     public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
         ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState,
         VoiceBackendManager backendManager)
@@ -47,6 +52,8 @@ public class TalkAddonHandler
         this.updateState.OnUpdate += HandleChange;
 
         Say = (_, _, _) => { };
+        OnTextEmit = _ => { };
+        OnTextAdvance = _ => { };
     }
 
     public enum PollSource
@@ -65,6 +72,8 @@ public class TalkAddonHandler
     private void HandleChange(TalkAddonState state)
     {
         var (speaker, text, pollSource) = state;
+        
+        OnTextAdvance.Invoke(new TalkAddonAdvanceEvent());
 
         // Cancel TTS when the dialogue window is closed, if configured
         if (this.config.CancelSpeechOnTextAdvance)
@@ -114,7 +123,8 @@ public class TalkAddonHandler
             this.backendManager.CancelSay(TextSource.TalkAddon);
         }
 
-        Say(speakerObj, text, TextSource.TalkAddon);
+        Say.Invoke(speakerObj, text, TextSource.TalkAddon);
+        OnTextEmit.Invoke(new TalkAddonTextEmitEvent(TextSource.TalkAddon, state.Speaker, state.Text, speakerObj));
     }
 
     private unsafe TalkAddonState GetTalkAddonState(PollSource pollSource)
