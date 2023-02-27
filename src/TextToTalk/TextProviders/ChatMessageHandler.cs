@@ -41,6 +41,7 @@ public class ChatMessageHandler : IDisposable
         {
             void HandleMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
             {
+                if (!this.config.Enabled) return;
                 observer.OnNext(new ChatMessage(type, sender, message));
             }
 

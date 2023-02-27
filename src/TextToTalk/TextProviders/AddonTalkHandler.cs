@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reactive.Linq;
 using Dalamud.Data;
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
@@ -11,7 +13,7 @@ using TextToTalk.Talk;
 
 namespace TextToTalk.TextProviders;
 
-public class AddonTalkHandler
+public class AddonTalkHandler : IDisposable
 {
     private record struct AddonTalkState(string? Speaker, string? Text, PollSource PollSource);
 
@@ -23,15 +25,19 @@ public class AddonTalkHandler
     private readonly Condition condition;
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
+    private readonly Framework framework;
     private readonly ComponentUpdateState<AddonTalkState> updateState;
+    private readonly IDisposable subscription;
 
     public Action<TextEmitEvent> OnTextEmit { get; set; }
     public Action<AddonTalkAdvanceEvent> OnAdvance { get; set; }
     public Action<AddonTalkCloseEvent> OnClose { get; set; }
 
-    public AddonTalkHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
-        ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState)
+    public AddonTalkHandler(Framework framework, ClientState clientState, GameGui gui, DataManager data,
+        MessageHandlerFilters filters, ObjectTable objects, Condition condition, PluginConfiguration config,
+        SharedState sharedState)
     {
+        this.framework = framework;
         this.clientState = clientState;
         this.gui = gui;
         this.data = data;
@@ -42,6 +48,7 @@ public class AddonTalkHandler
         this.sharedState = sharedState;
         this.updateState = new ComponentUpdateState<AddonTalkState>();
         this.updateState.OnUpdate += HandleChange;
+        this.subscription = HandleFrameworkUpdate();
 
         OnTextEmit = _ => { };
         OnAdvance = _ => { };
@@ -53,6 +60,28 @@ public class AddonTalkHandler
         None,
         FrameworkUpdate,
         VoiceLinePlayback,
+    }
+
+    private IObservable<PollSource> OnFrameworkUpdate()
+    {
+        return Observable.Create((IObserver<PollSource> observer) =>
+        {
+            void Handle(Framework _)
+            {
+                if (!this.config.Enabled) return;
+                if (!this.config.ReadFromQuestTalkAddon) return;
+                observer.OnNext(PollSource.FrameworkUpdate);
+            }
+
+            this.framework.Update += Handle;
+            return () => { this.framework.Update -= Handle; };
+        });
+    }
+
+    private IDisposable HandleFrameworkUpdate()
+    {
+        return OnFrameworkUpdate()
+            .Subscribe(PollAddon);
     }
 
     public void PollAddon(PollSource pollSource)
@@ -145,5 +174,10 @@ public class AddonTalkHandler
         }
 
         return new AddonTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource);
+    }
+
+    public void Dispose()
+    {
+        subscription.Dispose();
     }
 }
