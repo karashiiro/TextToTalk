@@ -133,7 +133,7 @@ namespace TextToTalk
             this.windows.AddWindow(channelPresetModificationWindow);
 
             var filters = new MessageHandlerFilters(this.sharedState, this.config, this.clientState);
-            this.addonTalkHandler = new AddonTalkHandler(clientState, gui, data, filters, objects, condition,
+            this.addonTalkHandler = new AddonTalkHandler(framework, clientState, gui, data, filters, objects, condition,
                 this.config, this.sharedState);
 
             this.chatMessageHandler = new ChatMessageHandler(chat, filters, objects, this.config);
@@ -179,13 +179,6 @@ namespace TextToTalk
                 .Subscribe(
                     ev => Say(ev.Speaker, ev.Text.TextValue, ev.Source),
                     ex => DetailedLog.Error(ex, "Failed to handle text emit event"));
-        }
-
-        private void PollTalkAddon(Framework f)
-        {
-            if (!this.config.Enabled) return;
-            if (!this.config.ReadFromQuestTalkAddon) return;
-            this.addonTalkHandler.PollAddon(AddonTalkHandler.PollSource.FrameworkUpdate);
         }
 
         private bool keysDown = false;
@@ -412,14 +405,12 @@ namespace TextToTalk
             this.chat.ChatMessage += CheckFailedToBindPort;
             this.chat.ChatMessage += WarnIfNoPresetsConfiguredForBackend;
 
-            this.framework.Update += PollTalkAddon;
             this.framework.Update += CheckKeybindPressed;
         }
 
         private void UnregisterCallbacks()
         {
             this.framework.Update -= CheckKeybindPressed;
-            this.framework.Update -= PollTalkAddon;
 
             this.chat.ChatMessage -= WarnIfNoPresetsConfiguredForBackend;
             this.chat.ChatMessage -= CheckFailedToBindPort;
@@ -486,6 +477,7 @@ namespace TextToTalk
             this.handleTextCancel.Dispose();
             
             this.chatMessageHandler.Dispose();
+            this.addonTalkHandler.Dispose();
 
             UnregisterCallbacks();
 
