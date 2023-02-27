@@ -7,7 +7,7 @@ using TextToTalk.UI;
 
 // ReSharper disable UnusedMember.Global
 
-namespace TextToTalk.Modules
+namespace TextToTalk.CommandModules
 {
     public class MainCommandModule : IDisposable
     {
