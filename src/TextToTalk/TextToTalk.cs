@@ -98,8 +98,6 @@ namespace TextToTalk
             this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            WarnIfNoPresetsConfiguredForBackend(this.config.Backend);
-
             this.sharedState = new SharedState();
 
             this.http = new HttpClient();
@@ -278,6 +276,29 @@ namespace TextToTalk
                             "Please close the owner of that port and reload the Websocket server, " +
                             "or select a different port.");
             this.notifiedFailedToBindPort = true;
+        }
+
+        private bool notifiedNoPresetsConfigured;
+
+        private void WarnIfNoPresetsConfiguredForBackend(XivChatType type, uint id, ref SeString sender,
+            ref SeString message, ref bool handled)
+        {
+            if (!this.clientState.IsLoggedIn || this.notifiedNoPresetsConfigured) return;
+            if (this.config.Enabled &&
+                this.config.GetVoiceConfig().VoicePresets.All(vp => vp.EnabledBackend != this.config.Backend))
+            {
+                try
+                {
+                    this.chat.Print(
+                        "You have no voice presets configured. Please create a voice preset in the TextToTalk configuration.");
+                }
+                catch (Exception e)
+                {
+                    DetailedLog.Error(e, "Failed to print chat message.");
+                }
+            }
+
+            this.notifiedNoPresetsConfigured = true;
         }
 
         private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
@@ -469,6 +490,7 @@ namespace TextToTalk
 
             this.chat.ChatMessage += OnChatMessage;
             this.chat.ChatMessage += CheckFailedToBindPort;
+            this.chat.ChatMessage += WarnIfNoPresetsConfiguredForBackend;
 
             this.framework.Update += PollTalkAddon;
             this.framework.Update += CheckKeybindPressed;
@@ -479,29 +501,13 @@ namespace TextToTalk
             this.framework.Update -= CheckKeybindPressed;
             this.framework.Update -= PollTalkAddon;
 
+            this.chat.ChatMessage -= WarnIfNoPresetsConfiguredForBackend;
             this.chat.ChatMessage -= CheckFailedToBindPort;
             this.chat.ChatMessage -= OnChatMessage;
 
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
-        }
-
-        private void WarnIfNoPresetsConfiguredForBackend(TTSBackend backend)
-        {
-            if (this.config.Enabled &&
-                this.config.GetVoiceConfig().VoicePresets.All(vp => vp.EnabledBackend != backend))
-            {
-                try
-                {
-                    this.chat.Print(
-                        "You have no voice presets configured. Please create a voice preset in the TextToTalk configuration.");
-                }
-                catch (Exception e)
-                {
-                    DetailedLog.Error(e, "Failed to print chat message.");
-                }
-            }
         }
 
         private static T Pipe<T>(T input, params Func<T, T>[] transforms)
@@ -514,7 +520,7 @@ namespace TextToTalk
         protected virtual void Dispose(bool disposing)
         {
             if (!disposing) return;
-            
+
             this.handleTextEmit.Dispose();
             this.handleTextCancel.Dispose();
 
