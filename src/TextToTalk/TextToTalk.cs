@@ -65,11 +65,14 @@ namespace TextToTalk
         private readonly WindowSystem windows;
 
         private readonly ConfigurationWindow configurationWindow;
+        private readonly VoiceUnlockerWindow voiceUnlockerWindow;
 
         private readonly HttpClient http;
 
         private readonly IDisposable handleTextCancel;
         private readonly IDisposable handleTextEmit;
+        private readonly IDisposable handleUnlockerResult;
+        private readonly IDisposable handlePresetOpenRequested;
 
         public string Name => "TextToTalk";
 
@@ -109,17 +112,23 @@ namespace TextToTalk
 
             var unlockerResultWindow = new UnlockerResultWindow();
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
-            var windowController =
-                new WindowController(unlockerResultWindow, channelPresetModificationWindow);
-            var voiceUnlockerWindow = new VoiceUnlockerWindow(windowController);
+            this.voiceUnlockerWindow = new VoiceUnlockerWindow();
+            this.handleUnlockerResult = this.voiceUnlockerWindow.OnResult()
+                .Subscribe(result =>
+                {
+                    unlockerResultWindow.Text = result;
+                    unlockerResultWindow.IsOpen = true;
+                });
             this.configurationWindow = new ConfigurationWindow(this.config, data, this.backendManager,
-                this.playerService, this.npcService, windowController, voiceUnlockerWindow)
+                this.playerService, this.npcService, this.voiceUnlockerWindow)
             {
                 IsOpen = InitiallyVisible,
             };
+            this.handlePresetOpenRequested = this.configurationWindow.OnPresetOpenRequested()
+                .Subscribe(_ => channelPresetModificationWindow.IsOpen = true);
 
             this.windows.AddWindow(unlockerResultWindow);
-            this.windows.AddWindow(voiceUnlockerWindow);
+            this.windows.AddWindow(this.voiceUnlockerWindow);
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
 
@@ -490,6 +499,12 @@ namespace TextToTalk
             this.commandModule.Dispose();
 
             this.soundHandler.Dispose();
+
+            this.handlePresetOpenRequested.Dispose();
+            this.configurationWindow.Dispose();
+
+            this.handleUnlockerResult.Dispose();
+            this.voiceUnlockerWindow.Dispose();
 
             this.pluginInterface.SavePluginConfig(this.config);
 
