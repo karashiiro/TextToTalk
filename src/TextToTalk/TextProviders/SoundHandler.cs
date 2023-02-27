@@ -36,11 +36,11 @@ public class SoundHandler : IDisposable
     private static readonly Regex VoiceLineFileNameRegex = new(@"^cut/.*/(vo_|voice)");
     private readonly HashSet<nint> knownVoiceLinePtrs = new();
 
-    private readonly TalkAddonHandler talkAddonHandler;
+    private readonly AddonTalkHandler _addonTalkHandler;
 
-    public SoundHandler(TalkAddonHandler talkAddonHandler, SigScanner sigScanner)
+    public SoundHandler(AddonTalkHandler addonTalkHandler, SigScanner sigScanner)
     {
-        this.talkAddonHandler = talkAddonHandler;
+        this._addonTalkHandler = addonTalkHandler;
 
         if (sigScanner.TryScanText(LoadSoundFileSig, out var loadSoundFilePtr))
         {
@@ -139,7 +139,7 @@ public class SoundHandler : IDisposable
             if (this.knownVoiceLinePtrs.Remove(soundDataPtr))
             {
                 DetailedLog.Debug($"Caught playback of known voice line at address {soundDataPtr:x}");
-                this.talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.VoiceLinePlayback);
+                this._addonTalkHandler.PollAddon(AddonTalkHandler.PollSource.VoiceLinePlayback);
             }
         }
         catch (Exception exc)

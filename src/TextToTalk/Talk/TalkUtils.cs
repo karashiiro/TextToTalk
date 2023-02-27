@@ -16,9 +16,9 @@ namespace TextToTalk.Talk
         private static readonly Regex Stutter = new(@"(?<=\s|^)\p{L}{1,2}-", RegexOptions.Compiled);
         private static readonly Regex Bracketed = new(@"<[^<]*>", RegexOptions.Compiled);
 
-        public static unsafe TalkAddonText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
+        public static unsafe AddonTalkText ReadTalkAddon(DataManager data, AddonTalk* talkAddon)
         {
-            return new TalkAddonText
+            return new AddonTalkText
             {
                 Speaker = ReadTextNode(talkAddon->AtkTextNode220),
                 Text = ReadTextNode(talkAddon->AtkTextNode228),

@@ -11,9 +11,9 @@ using TextToTalk.Talk;
 
 namespace TextToTalk.TextProviders;
 
-public class TalkAddonHandler
+public class AddonTalkHandler
 {
-    private record struct TalkAddonState(string? Speaker, string? Text, PollSource PollSource);
+    private record struct AddonTalkState(string? Speaker, string? Text, PollSource PollSource);
 
     private readonly ClientState clientState;
     private readonly GameGui gui;
@@ -23,13 +23,13 @@ public class TalkAddonHandler
     private readonly Condition condition;
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
-    private readonly ComponentUpdateState<TalkAddonState> updateState;
+    private readonly ComponentUpdateState<AddonTalkState> updateState;
 
     public Action<TextEmitEvent> OnTextEmit { get; set; }
-    public Action<TalkAddonAdvanceEvent> OnAdvance { get; set; }
-    public Action<TalkAddonCloseEvent> OnClose { get; set; }
+    public Action<AddonTalkAdvanceEvent> OnAdvance { get; set; }
+    public Action<AddonTalkCloseEvent> OnClose { get; set; }
 
-    public TalkAddonHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
+    public AddonTalkHandler(ClientState clientState, GameGui gui, DataManager data, MessageHandlerFilters filters,
         ObjectTable objects, Condition condition, PluginConfiguration config, SharedState sharedState)
     {
         this.clientState = clientState;
@@ -40,7 +40,7 @@ public class TalkAddonHandler
         this.condition = condition;
         this.config = config;
         this.sharedState = sharedState;
-        this.updateState = new ComponentUpdateState<TalkAddonState>();
+        this.updateState = new ComponentUpdateState<AddonTalkState>();
         this.updateState.OnUpdate += HandleChange;
 
         OnTextEmit = _ => { };
@@ -61,7 +61,7 @@ public class TalkAddonHandler
         this.updateState.Mutate(state);
     }
 
-    private void HandleChange(TalkAddonState state)
+    private void HandleChange(AddonTalkState state)
     {
         var (speaker, text, pollSource) = state;
 
@@ -69,12 +69,12 @@ public class TalkAddonHandler
         {
             // The addon was closed
             this.filters.SetLastQuestText("");
-            OnClose.Invoke(new TalkAddonCloseEvent());
+            OnClose.Invoke(new AddonTalkCloseEvent());
             return;
         }
 
         // Notify observers that the addon state was advanced
-        OnAdvance.Invoke(new TalkAddonAdvanceEvent());
+        OnAdvance.Invoke(new AddonTalkAdvanceEvent());
 
         text = TalkUtils.NormalizePunctuation(text);
 
@@ -108,10 +108,10 @@ public class TalkAddonHandler
         var speakerObj = ObjectTableUtils.GetGameObjectByName(this.objects, speaker);
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
-        OnTextEmit.Invoke(new TextEmitEvent(TextSource.TalkAddon, state.Speaker ?? "", text, speakerObj));
+        OnTextEmit.Invoke(new TextEmitEvent(TextSource.AddonTalk, state.Speaker ?? "", text, speakerObj));
     }
 
-    private unsafe TalkAddonState GetTalkAddonState(PollSource pollSource)
+    private unsafe AddonTalkState GetTalkAddonState(PollSource pollSource)
     {
         if (!this.clientState.IsLoggedIn || this.condition[ConditionFlag.CreatingCharacter])
         {
@@ -133,10 +133,10 @@ public class TalkAddonHandler
             return default;
         }
 
-        TalkAddonText talkAddonText;
+        AddonTalkText addonTalkText;
         try
         {
-            talkAddonText = TalkUtils.ReadTalkAddon(this.data, talkAddon);
+            addonTalkText = TalkUtils.ReadTalkAddon(this.data, talkAddon);
         }
         catch (NullReferenceException)
         {
@@ -144,6 +144,6 @@ public class TalkAddonHandler
             return default;
         }
 
-        return new TalkAddonState(talkAddonText.Speaker, talkAddonText.Text, pollSource);
+        return new AddonTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource);
     }
 }
