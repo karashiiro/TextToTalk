@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
-using Dalamud.Data;
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.Gui;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -17,14 +12,10 @@ public class AddonTalkHandler : IDisposable
 {
     private record struct AddonTalkState(string? Speaker, string? Text, PollSource PollSource);
 
-    private readonly ClientState clientState;
-    private readonly GameGui gui;
-    private readonly DataManager data;
+    private readonly AddonTalkManager addonTalkManager;
     private readonly MessageHandlerFilters filters;
     private readonly ObjectTable objects;
-    private readonly Condition condition;
     private readonly PluginConfiguration config;
-    private readonly SharedState sharedState;
     private readonly Framework framework;
     private readonly ComponentUpdateState<AddonTalkState> updateState;
     private readonly IDisposable subscription;
@@ -33,19 +24,14 @@ public class AddonTalkHandler : IDisposable
     public Action<AddonTalkAdvanceEvent> OnAdvance { get; set; }
     public Action<AddonTalkCloseEvent> OnClose { get; set; }
 
-    public AddonTalkHandler(Framework framework, ClientState clientState, GameGui gui, DataManager data,
-        MessageHandlerFilters filters, ObjectTable objects, Condition condition, PluginConfiguration config,
-        SharedState sharedState)
+    public AddonTalkHandler(AddonTalkManager addonTalkManager, Framework framework,
+        MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
     {
+        this.addonTalkManager = addonTalkManager;
         this.framework = framework;
-        this.clientState = clientState;
-        this.gui = gui;
-        this.data = data;
         this.filters = filters;
         this.objects = objects;
-        this.condition = condition;
         this.config = config;
-        this.sharedState = sharedState;
         this.updateState = new ComponentUpdateState<AddonTalkState>();
         this.updateState.OnUpdate += HandleChange;
         this.subscription = HandleFrameworkUpdate();
@@ -140,40 +126,17 @@ public class AddonTalkHandler : IDisposable
         OnTextEmit.Invoke(new TextEmitEvent(TextSource.AddonTalk, state.Speaker ?? "", text, speakerObj));
     }
 
-    private unsafe AddonTalkState GetTalkAddonState(PollSource pollSource)
+    private AddonTalkState GetTalkAddonState(PollSource pollSource)
     {
-        if (!this.clientState.IsLoggedIn || this.condition[ConditionFlag.CreatingCharacter])
-        {
-            this.sharedState.TalkAddon = nint.Zero;
-            return default;
-        }
-
-        if (this.sharedState.TalkAddon == nint.Zero)
-        {
-            this.sharedState.TalkAddon = this.gui.GetAddonByName("Talk");
-            if (this.sharedState.TalkAddon == nint.Zero) return default;
-        }
-
-        var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
-        if (talkAddon == null) return default;
-
-        if (!TalkUtils.IsVisible(talkAddon))
+        if (!this.addonTalkManager.IsVisible())
         {
             return default;
         }
 
-        AddonTalkText addonTalkText;
-        try
-        {
-            addonTalkText = TalkUtils.ReadTalkAddon(this.data, talkAddon);
-        }
-        catch (NullReferenceException)
-        {
-            // Just swallow the NRE, I have no clue what causes this but it only happens when relogging in rare cases
-            return default;
-        }
-
-        return new AddonTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource);
+        var addonTalkText = this.addonTalkManager.ReadText();
+        return addonTalkText != null
+            ? new AddonTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource)
+            : default;
     }
 
     public void Dispose()

@@ -42,11 +42,6 @@ namespace TextToTalk.Talk
                 .Replace("\r", "");
         }
 
-        public static unsafe bool IsVisible(AddonTalk* talkAddon)
-        {
-            return talkAddon->AtkUnitBase.IsVisible;
-        }
-
         public static string StripAngleBracketedText(string text)
         {
             // TextToTalk#17 "<sigh>"

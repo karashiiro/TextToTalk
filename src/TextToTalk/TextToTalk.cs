@@ -53,6 +53,7 @@ namespace TextToTalk
         private readonly ClientState clientState;
 
         private readonly PluginConfiguration config;
+        private readonly AddonTalkManager addonTalkManager;
         private readonly VoiceBackendManager backendManager;
         private readonly AddonTalkHandler addonTalkHandler;
         private readonly ChatMessageHandler chatMessageHandler;
@@ -104,6 +105,8 @@ namespace TextToTalk
             this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
+            this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, data, gui);
+
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
@@ -138,11 +141,10 @@ namespace TextToTalk
             this.windows.AddWindow(channelPresetModificationWindow);
 
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
-            this.addonTalkHandler = new AddonTalkHandler(framework, clientState, gui, data, filters, objects, condition,
-                this.config, sharedState);
-
-            this.chatMessageHandler = new ChatMessageHandler(chat, filters, objects, this.config);
-
+            this.addonTalkHandler =
+                new AddonTalkHandler(this.addonTalkManager, framework, filters, objects, this.config);
+            this.chatMessageHandler =
+                new ChatMessageHandler(this.addonTalkManager, chat, filters, objects, this.config);
             this.soundHandler = new SoundHandler(this.addonTalkHandler, sigScanner);
 
             this.rateLimiter = new RateLimiter(() =>
@@ -508,6 +510,8 @@ namespace TextToTalk
 
             this.backendManager.Dispose();
             this.http.Dispose();
+            
+            this.addonTalkManager.Dispose();
         }
 
         public void Dispose()
