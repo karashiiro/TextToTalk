@@ -1,8 +1,6 @@
 ﻿using Dalamud.Game.ClientState;
 using Dalamud.Game.Text;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.GameEnums;
-using TextToTalk.Talk;
 
 namespace TextToTalk.Middleware;
 
