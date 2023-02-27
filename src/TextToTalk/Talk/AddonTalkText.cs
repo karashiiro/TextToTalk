@@ -1,6 +1,6 @@
 ﻿namespace TextToTalk.Talk
 {
-    public class TalkAddonText
+    public class AddonTalkText
     {
         public string? Speaker { get; init; }
 

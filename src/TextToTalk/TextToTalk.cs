@@ -55,7 +55,7 @@ namespace TextToTalk
 
         private readonly PluginConfiguration config;
         private readonly VoiceBackendManager backendManager;
-        private readonly TalkAddonHandler talkAddonHandler;
+        private readonly AddonTalkHandler addonTalkHandler;
         private readonly ChatMessageHandler chatMessageHandler;
         private readonly SoundHandler soundHandler;
         private readonly RateLimiter rateLimiter;
@@ -127,12 +127,12 @@ namespace TextToTalk
             this.windows.AddWindow(channelPresetModificationWindow);
 
             var filters = new MessageHandlerFilters(this.sharedState, config, this.clientState);
-            this.talkAddonHandler = new TalkAddonHandler(clientState, gui, data, filters, objects, condition,
+            this.addonTalkHandler = new AddonTalkHandler(clientState, gui, data, filters, objects, condition,
                 this.config, this.sharedState);
 
             this.chatMessageHandler = new ChatMessageHandler(filters, objects, config);
 
-            this.soundHandler = new SoundHandler(this.talkAddonHandler, sigScanner);
+            this.soundHandler = new SoundHandler(this.addonTalkHandler, sigScanner);
 
             this.rateLimiter = new RateLimiter(() =>
             {
@@ -165,22 +165,22 @@ namespace TextToTalk
         private IObservable<TextEmitEvent> OnTalkAddonTextEmit()
         {
             return Observable.FromEvent<TextEmitEvent>(
-                h => this.talkAddonHandler.OnTextEmit += h,
-                h => this.talkAddonHandler.OnTextEmit -= h);
+                h => this.addonTalkHandler.OnTextEmit += h,
+                h => this.addonTalkHandler.OnTextEmit -= h);
         }
 
-        private IObservable<TalkAddonAdvanceEvent> OnTalkAddonAdvance()
+        private IObservable<AddonTalkAdvanceEvent> OnTalkAddonAdvance()
         {
-            return Observable.FromEvent<TalkAddonAdvanceEvent>(
-                h => this.talkAddonHandler.OnAdvance += h,
-                h => this.talkAddonHandler.OnAdvance -= h);
+            return Observable.FromEvent<AddonTalkAdvanceEvent>(
+                h => this.addonTalkHandler.OnAdvance += h,
+                h => this.addonTalkHandler.OnAdvance -= h);
         }
 
-        private IObservable<TalkAddonCloseEvent> OnTalkAddonClose()
+        private IObservable<AddonTalkCloseEvent> OnTalkAddonClose()
         {
-            return Observable.FromEvent<TalkAddonCloseEvent>(
-                h => this.talkAddonHandler.OnClose += h,
-                h => this.talkAddonHandler.OnClose -= h);
+            return Observable.FromEvent<AddonTalkCloseEvent>(
+                h => this.addonTalkHandler.OnClose += h,
+                h => this.addonTalkHandler.OnClose -= h);
         }
 
         private IObservable<SourcedTextEvent> OnTextSourceCancel()
@@ -264,7 +264,7 @@ namespace TextToTalk
         {
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
-            this.talkAddonHandler.PollAddon(TalkAddonHandler.PollSource.FrameworkUpdate);
+            this.addonTalkHandler.PollAddon(AddonTalkHandler.PollSource.FrameworkUpdate);
         }
 
         private bool notifiedFailedToBindPort;

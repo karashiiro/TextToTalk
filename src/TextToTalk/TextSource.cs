@@ -4,6 +4,6 @@
     {
         None,
         Chat,
-        TalkAddon,
+        AddonTalk,
     }
 }
