@@ -12,7 +12,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Runtime.InteropServices;
 using Dalamud.Data;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects;
@@ -185,7 +184,7 @@ namespace TextToTalk
         {
             return OnTalkAddonAdvance().Merge<SourcedTextEvent>(OnTalkAddonClose());
         }
-        
+
         private IObservable<TextEmitEvent> OnTextEmit()
         {
             return OnTalkAddonTextEmit().Merge(OnChatTextEmit());
@@ -368,7 +367,9 @@ namespace TextToTalk
             else
             {
                 // Get the speaker's gender, if possible
-                var gender = this.config.UseGenderedVoicePresets ? GetCharacterGender(speaker) : Gender.None;
+                var gender = this.config.UseGenderedVoicePresets
+                    ? CharacterGenderUtils.GetCharacterGender(speaker, this.ungenderedOverrides)
+                    : Gender.None;
 
                 // Say the thing
                 var preset = GetVoiceForSpeaker(speaker?.Name.TextValue, gender);
@@ -431,52 +432,6 @@ namespace TextToTalk
             return this.config.UsePlayerRateLimiter &&
                    speaker.ObjectKind is ObjectKind.Player &&
                    this.rateLimiter.TryRateLimit(speaker.Name.TextValue);
-        }
-
-        private unsafe Gender GetCharacterGender(GameObject? gObj)
-        {
-            if (gObj == null || gObj.Address == nint.Zero)
-            {
-                DetailedLog.Info("GameObject is null; cannot check gender.");
-                return Gender.None;
-            }
-
-            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)gObj.Address;
-
-            // Get actor gender as defined by its struct.
-            var actorGender = (Gender)charaStruct->CustomizeData[1];
-
-            // Player gender overrides will be handled by a different system.
-            if (gObj.ObjectKind is ObjectKind.Player)
-            {
-                return actorGender;
-            }
-
-            // Get the actor's model ID to see if we have an ungendered override for it.
-            // Actors only have 0/1 genders regardless of their canonical genders, so this
-            // needs to be specified by us. If an actor is canonically ungendered, their
-            // gender seems to always be left at 0 (male).
-            var modelId = Marshal.ReadInt32((nint)charaStruct, 0x1BC);
-            if (modelId == -1)
-            {
-                // https://github.com/aers/FFXIVClientStructs/blob/5e6b8ca2959f396b4d8c88253e4bc82fa6af54b7/FFXIVClientStructs/FFXIV/Client/Game/Character/Character.cs#L23
-                modelId = Marshal.ReadInt32((nint)charaStruct, 0x1B4);
-            }
-
-            // Get the override state and log the model ID so that we can add it to our overrides file if needed.
-            if (this.ungenderedOverrides.IsUngendered(modelId))
-            {
-                actorGender = Gender.None;
-                DetailedLog.Info(
-                    $"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender overriden to: {actorGender})");
-            }
-            else
-            {
-                DetailedLog.Info(
-                    $"Got model ID {modelId} for {gObj.ObjectKind} \"{gObj.Name}\" (gender read as: {actorGender})");
-            }
-
-            return actorGender;
         }
 
         private void OpenConfigUi()
