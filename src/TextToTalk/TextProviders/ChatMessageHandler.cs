@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using TextToTalk.Events;
@@ -9,25 +11,53 @@ using TextToTalk.Talk;
 
 namespace TextToTalk.TextProviders;
 
-public class ChatMessageHandler
+public class ChatMessageHandler : IDisposable
 {
+    private record struct ChatMessage(XivChatType Type, SeString Sender, SeString Message);
+
     private readonly MessageHandlerFilters filters;
     private readonly ObjectTable objects;
     private readonly PluginConfiguration config;
+    private readonly ChatGui chat;
+    private readonly IDisposable subscription;
 
     public Action<ChatTextEmitEvent> OnTextEmit { get; set; }
 
-    public ChatMessageHandler(MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
+    public ChatMessageHandler(ChatGui chat, MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
     {
         this.filters = filters;
         this.objects = objects;
         this.config = config;
+        this.chat = chat;
+
+        this.subscription = HandleChatMessage();
 
         OnTextEmit = _ => { };
     }
 
-    public void ProcessMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+    private IObservable<ChatMessage> OnChatMessage()
     {
+        return Observable.Create((IObserver<ChatMessage> observer) =>
+        {
+            void HandleMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+            {
+                observer.OnNext(new ChatMessage(type, sender, message));
+            }
+
+            this.chat.ChatMessage += HandleMessage;
+            return () => { this.chat.ChatMessage -= HandleMessage; };
+        });
+    }
+
+    private IDisposable HandleChatMessage()
+    {
+        return OnChatMessage()
+            .Subscribe(ProcessChatMessage);
+    }
+
+    private void ProcessChatMessage(ChatMessage chatMessage)
+    {
+        var (type, sender, message) = chatMessage;
         var textValue = message.TextValue;
 
         if (!this.config.SayPlayerWorldName)
@@ -102,5 +132,10 @@ public class ChatMessageHandler
         return this.config.Bad
             .Where(t => t.Text != "")
             .Any(t => t.Match(text));
+    }
+
+    public void Dispose()
+    {
+        this.subscription.Dispose();
     }
 }
