@@ -103,7 +103,7 @@ namespace TextToTalk
             this.sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager = new VoiceBackendManager(config, this.http, this.sharedState);
+            this.backendManager = new VoiceBackendManager(this.config, this.http, this.sharedState);
 
             this.playerService = new PlayerService(this.config.Players, this.config.PlayerVoicePresets,
                 this.config.GetVoiceConfig().VoicePresets);
@@ -132,22 +132,22 @@ namespace TextToTalk
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
 
-            var filters = new MessageHandlerFilters(this.sharedState, config, this.clientState);
+            var filters = new MessageHandlerFilters(this.sharedState, this.config, this.clientState);
             this.addonTalkHandler = new AddonTalkHandler(clientState, gui, data, filters, objects, condition,
                 this.config, this.sharedState);
 
-            this.chatMessageHandler = new ChatMessageHandler(filters, objects, config);
+            this.chatMessageHandler = new ChatMessageHandler(chat, filters, objects, this.config);
 
             this.soundHandler = new SoundHandler(this.addonTalkHandler, sigScanner);
 
             this.rateLimiter = new RateLimiter(() =>
             {
-                if (config.MessagesPerSecond == 0)
+                if (this.config.MessagesPerSecond == 0)
                 {
                     return long.MaxValue;
                 }
 
-                return (long)(1000f / config.MessagesPerSecond);
+                return (long)(1000f / this.config.MessagesPerSecond);
             });
 
             this.ungenderedOverrides = new UngenderedOverrideManager();
@@ -186,13 +186,6 @@ namespace TextToTalk
             if (!this.config.Enabled) return;
             if (!this.config.ReadFromQuestTalkAddon) return;
             this.addonTalkHandler.PollAddon(AddonTalkHandler.PollSource.FrameworkUpdate);
-        }
-
-        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
-            ref bool handled)
-        {
-            if (!this.config.Enabled) return;
-            this.chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
         }
 
         private bool keysDown = false;
@@ -416,7 +409,6 @@ namespace TextToTalk
 
             this.pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 
-            this.chat.ChatMessage += OnChatMessage;
             this.chat.ChatMessage += CheckFailedToBindPort;
             this.chat.ChatMessage += WarnIfNoPresetsConfiguredForBackend;
 
@@ -431,7 +423,6 @@ namespace TextToTalk
 
             this.chat.ChatMessage -= WarnIfNoPresetsConfiguredForBackend;
             this.chat.ChatMessage -= CheckFailedToBindPort;
-            this.chat.ChatMessage -= OnChatMessage;
 
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 
@@ -493,6 +484,8 @@ namespace TextToTalk
 
             this.handleTextEmit.Dispose();
             this.handleTextCancel.Dispose();
+            
+            this.chatMessageHandler.Dispose();
 
             UnregisterCallbacks();
 
