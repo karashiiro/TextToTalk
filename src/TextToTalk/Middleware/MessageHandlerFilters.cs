@@ -19,12 +19,6 @@ public class MessageHandlerFilters
         this.clientState = clientState;
     }
 
-    public unsafe bool IsTalkAddonActive()
-    {
-        var talkAddon = (AddonTalk*)this.sharedState.TalkAddon.ToPointer();
-        return this.config.ReadFromQuestTalkAddon && talkAddon != null && TalkUtils.IsVisible(talkAddon);
-    }
-
     public bool IsDuplicateQuestText(string? text)
     {
         return this.sharedState.LastQuestText == text;
