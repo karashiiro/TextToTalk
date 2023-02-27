@@ -152,44 +152,6 @@ namespace TextToTalk
             this.handleTextEmit = HandleTextEmit();
         }
 
-        private IObservable<ChatTextEmitEvent> OnChatTextEmit()
-        {
-            return Observable.FromEvent<ChatTextEmitEvent>(
-                h => this.chatMessageHandler.OnTextEmit += h,
-                h => this.chatMessageHandler.OnTextEmit -= h);
-        }
-
-        private IObservable<TextEmitEvent> OnTalkAddonTextEmit()
-        {
-            return Observable.FromEvent<TextEmitEvent>(
-                h => this.addonTalkHandler.OnTextEmit += h,
-                h => this.addonTalkHandler.OnTextEmit -= h);
-        }
-
-        private IObservable<AddonTalkAdvanceEvent> OnTalkAddonAdvance()
-        {
-            return Observable.FromEvent<AddonTalkAdvanceEvent>(
-                h => this.addonTalkHandler.OnAdvance += h,
-                h => this.addonTalkHandler.OnAdvance -= h);
-        }
-
-        private IObservable<AddonTalkCloseEvent> OnTalkAddonClose()
-        {
-            return Observable.FromEvent<AddonTalkCloseEvent>(
-                h => this.addonTalkHandler.OnClose += h,
-                h => this.addonTalkHandler.OnClose -= h);
-        }
-
-        private IObservable<SourcedTextEvent> OnTextSourceCancel()
-        {
-            return OnTalkAddonAdvance().Merge<SourcedTextEvent>(OnTalkAddonClose());
-        }
-
-        private IObservable<TextEmitEvent> OnTextEmit()
-        {
-            return OnTalkAddonTextEmit().Merge(OnChatTextEmit());
-        }
-
         private IDisposable HandleTextCancel()
         {
             return OnTextSourceCancel()
@@ -208,6 +170,20 @@ namespace TextToTalk
                 .Subscribe(
                     ev => Say(ev.Speaker, ev.Text.TextValue, ev.Source),
                     ex => DetailedLog.Error(ex, "Failed to handle text emit event"));
+        }
+
+        private void PollTalkAddon(Framework f)
+        {
+            if (!this.config.Enabled) return;
+            if (!this.config.ReadFromQuestTalkAddon) return;
+            this.addonTalkHandler.PollAddon(AddonTalkHandler.PollSource.FrameworkUpdate);
+        }
+
+        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
+            ref bool handled)
+        {
+            if (!this.config.Enabled) return;
+            this.chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
         }
 
         private bool keysDown = false;
@@ -259,13 +235,6 @@ namespace TextToTalk
             return false;
         }
 
-        private void PollTalkAddon(Framework f)
-        {
-            if (!this.config.Enabled) return;
-            if (!this.config.ReadFromQuestTalkAddon) return;
-            this.addonTalkHandler.PollAddon(AddonTalkHandler.PollSource.FrameworkUpdate);
-        }
-
         private bool notifiedFailedToBindPort;
 
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message,
@@ -300,13 +269,6 @@ namespace TextToTalk
             }
 
             this.notifiedNoPresetsConfigured = true;
-        }
-
-        private void OnChatMessage(XivChatType type, uint id, ref SeString sender, ref SeString message,
-            ref bool handled)
-        {
-            if (!this.config.Enabled) return;
-            this.chatMessageHandler.ProcessMessage(type, id, ref sender, ref message, ref handled);
         }
 
         private void Say(GameObject? speaker, string textValue, TextSource source)
@@ -471,6 +433,48 @@ namespace TextToTalk
         {
             return transforms.Aggregate(input, (agg, next) => next(agg));
         }
+
+        #region IObservable Event Wrappers
+
+        private IObservable<ChatTextEmitEvent> OnChatTextEmit()
+        {
+            return Observable.FromEvent<ChatTextEmitEvent>(
+                h => this.chatMessageHandler.OnTextEmit += h,
+                h => this.chatMessageHandler.OnTextEmit -= h);
+        }
+
+        private IObservable<TextEmitEvent> OnTalkAddonTextEmit()
+        {
+            return Observable.FromEvent<TextEmitEvent>(
+                h => this.addonTalkHandler.OnTextEmit += h,
+                h => this.addonTalkHandler.OnTextEmit -= h);
+        }
+
+        private IObservable<AddonTalkAdvanceEvent> OnTalkAddonAdvance()
+        {
+            return Observable.FromEvent<AddonTalkAdvanceEvent>(
+                h => this.addonTalkHandler.OnAdvance += h,
+                h => this.addonTalkHandler.OnAdvance -= h);
+        }
+
+        private IObservable<AddonTalkCloseEvent> OnTalkAddonClose()
+        {
+            return Observable.FromEvent<AddonTalkCloseEvent>(
+                h => this.addonTalkHandler.OnClose += h,
+                h => this.addonTalkHandler.OnClose -= h);
+        }
+
+        private IObservable<SourcedTextEvent> OnTextSourceCancel()
+        {
+            return OnTalkAddonAdvance().Merge<SourcedTextEvent>(OnTalkAddonClose());
+        }
+
+        private IObservable<TextEmitEvent> OnTextEmit()
+        {
+            return OnTalkAddonTextEmit().Merge(OnChatTextEmit());
+        }
+
+        #endregion
 
         #region IDisposable Support
 
