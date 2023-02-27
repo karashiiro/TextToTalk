@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reactive.Subjects;
 using System.Text;
 using Dalamud.Data;
 using Dalamud.Game.Text;
@@ -14,7 +15,7 @@ using TextToTalk.GameEnums;
 
 namespace TextToTalk.UI
 {
-    public class ConfigurationWindow : Window
+    public class ConfigurationWindow : Window, IDisposable
     {
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
         private static readonly Vector4 Green = new(0.0f, 1.0f, 0.0f, 1.0f);
@@ -25,8 +26,8 @@ namespace TextToTalk.UI
         private readonly VoiceBackendManager backendManager;
         private readonly PlayerService players;
         private readonly NpcService npc;
-        private readonly WindowController controller;
         private readonly IConfigUIDelegates helpers;
+        private readonly Subject<bool> onPresetOpenRequested; 
 
         private IDictionary<Guid, string> playerWorldEditing = new Dictionary<Guid, string>();
         private IDictionary<Guid, bool> playerWorldValid = new Dictionary<Guid, bool>();
@@ -37,8 +38,7 @@ namespace TextToTalk.UI
         private string npcError = string.Empty;
 
         public ConfigurationWindow(PluginConfiguration config, DataManager data, VoiceBackendManager backendManager,
-            PlayerService players, NpcService npc, WindowController windowController,
-            Window voiceUnlockerWindow) : base(
+            PlayerService players, NpcService npc, Window voiceUnlockerWindow) : base(
             "TextToTalk Configuration###TextToTalkConfig")
         {
             this.config = config;
@@ -46,11 +46,16 @@ namespace TextToTalk.UI
             this.backendManager = backendManager;
             this.players = players;
             this.npc = npc;
-            this.controller = windowController;
             this.helpers = new ConfigUIDelegates { OpenVoiceUnlockerAction = () => voiceUnlockerWindow.IsOpen = true };
+            this.onPresetOpenRequested = new Subject<bool>();
 
             Size = new Vector2(540, 480);
             SizeCondition = ImGuiCond.FirstUseEver;
+        }
+
+        public IObservable<bool> OnPresetOpenRequested()
+        {
+            return this.onPresetOpenRequested;
         }
 
         public override void PreDraw()
@@ -581,14 +586,14 @@ namespace TextToTalk.UI
             {
                 var newPreset = this.config.NewChatTypesPreset();
                 this.config.SetCurrentEnabledChatTypesPreset(newPreset.Id);
-                this.controller.OpenChannelPresetModificationWindow();
+                this.onPresetOpenRequested.OnNext(true);
             }
 
             ImGui.SameLine();
 
             if (ImGui.Button($"Edit##{MemoizedId.Create()}"))
             {
-                this.controller.OpenChannelPresetModificationWindow();
+                this.onPresetOpenRequested.OnNext(true);
             }
 
             if (this.config.EnabledChatTypesPresets.Count > 1)
@@ -725,6 +730,11 @@ namespace TextToTalk.UI
             {
                 listItems.Add(new Trigger());
             }
+        }
+
+        public void Dispose()
+        {
+            onPresetOpenRequested.Dispose();
         }
     }
 }

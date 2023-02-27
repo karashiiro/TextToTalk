@@ -1,10 +1,12 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
+using System.Reactive.Subjects;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
 namespace TextToTalk.UI
 {
-    public class VoiceUnlockerWindow : Window
+    public class VoiceUnlockerWindow : Window, IDisposable
     {
         private const string ManualTutorialText = "Manual tutorial";
         private const string EnableAllText = "Enable all system voices";
@@ -14,14 +16,19 @@ namespace TextToTalk.UI
         private static readonly Vector4 DarkRed = ImGui.ColorConvertU32ToFloat4(0xFF00007D);
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
-        private readonly WindowController controller;
+        private readonly Subject<string> onResult;
 
-        public VoiceUnlockerWindow(WindowController controller) : base("VoiceUnlocker")
+        public VoiceUnlockerWindow() : base("VoiceUnlocker")
         {
-            this.controller = controller;
+            this.onResult = new Subject<string>();
 
             Size = new Vector2(480, 320);
             SizeCondition = ImGuiCond.FirstUseEver;
+        }
+
+        public IObservable<string> OnResult()
+        {
+            return this.onResult;
         }
 
         public override void PreDraw()
@@ -63,8 +70,7 @@ namespace TextToTalk.UI
                     : "VoiceUnlocker failed to start. No registry modifications were made.";
 
                 IsOpen = false;
-                this.controller.SetUnlockerResult(resultText);
-                this.controller.OpenUnlockerResultWindow();
+                this.onResult.OnNext(resultText);
             }
 
             ImGui.TextColored(HintColor, "Administrative privileges will be requested");
@@ -73,6 +79,11 @@ namespace TextToTalk.UI
         public override void PostDraw()
         {
             ImGui.PopStyleColor(4);
+        }
+
+        public void Dispose()
+        {
+            onResult.Dispose();
         }
     }
 }
