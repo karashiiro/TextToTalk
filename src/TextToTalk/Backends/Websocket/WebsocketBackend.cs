@@ -2,6 +2,7 @@
 using System;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Reactive.Subjects;
 using System.Text;
 using TextToTalk.UI;
 
@@ -14,9 +15,12 @@ namespace TextToTalk.Backends.Websocket
         private readonly WSServer wsServer;
         private readonly PluginConfiguration config;
 
-        public WebsocketBackend(PluginConfiguration config, SharedState sharedState)
+        private readonly ReplaySubject<int> failedToBindPort;
+
+        public WebsocketBackend(PluginConfiguration config)
         {
             this.config = config;
+            this.failedToBindPort = new ReplaySubject<int>(1);
 
             try
             {
@@ -25,10 +29,15 @@ namespace TextToTalk.Backends.Websocket
             catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
             {
                 this.wsServer = new WSServer(0);
-                sharedState.WSFailedToBindPort = true;
+                this.failedToBindPort.OnNext(this.config.WebsocketPort);
             }
 
             this.wsServer.Start();
+        }
+
+        public IObservable<int> OnFailedToBindPort()
+        {
+            return this.failedToBindPort;
         }
 
         public override void Say(TextSource source, VoicePreset voice, string speaker, string text)
@@ -111,6 +120,7 @@ namespace TextToTalk.Backends.Websocket
             if (disposing)
             {
                 this.wsServer.Stop();
+                this.failedToBindPort.Dispose();
             }
         }
     }

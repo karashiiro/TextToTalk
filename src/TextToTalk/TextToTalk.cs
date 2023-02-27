@@ -61,7 +61,6 @@ namespace TextToTalk
         private readonly UngenderedOverrideManager ungenderedOverrides;
         private readonly PlayerService playerService;
         private readonly NpcService npcService;
-        private readonly SharedState sharedState;
         private readonly WindowSystem windows;
 
         private readonly ConfigurationWindow configurationWindow;
@@ -73,6 +72,11 @@ namespace TextToTalk
         private readonly IDisposable handleTextEmit;
         private readonly IDisposable handleUnlockerResult;
         private readonly IDisposable handlePresetOpenRequested;
+        private readonly IDisposable handleFailedToBindWsPort;
+
+        private bool failedToBindWsPort;
+        private bool notifiedFailedToBindPort;
+        private bool notifiedNoPresetsConfigured;
 
         public string Name => "TextToTalk";
 
@@ -100,10 +104,11 @@ namespace TextToTalk
             this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            this.sharedState = new SharedState();
+            var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager = new VoiceBackendManager(this.config, this.http, this.sharedState);
+            this.backendManager = new VoiceBackendManager(this.config, this.http);
+            this.handleFailedToBindWsPort = HandleFailedToBindWSPort();
 
             this.playerService = new PlayerService(this.config.Players, this.config.PlayerVoicePresets,
                 this.config.GetVoiceConfig().VoicePresets);
@@ -132,9 +137,9 @@ namespace TextToTalk
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
 
-            var filters = new MessageHandlerFilters(this.sharedState, this.config, this.clientState);
+            var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler = new AddonTalkHandler(framework, clientState, gui, data, filters, objects, condition,
-                this.config, this.sharedState);
+                this.config, sharedState);
 
             this.chatMessageHandler = new ChatMessageHandler(chat, filters, objects, this.config);
 
@@ -179,6 +184,16 @@ namespace TextToTalk
                 .Subscribe(
                     ev => Say(ev.Speaker, ev.Text.TextValue, ev.Source),
                     ex => DetailedLog.Error(ex, "Failed to handle text emit event"));
+        }
+
+        private IDisposable HandleFailedToBindWSPort()
+        {
+            return this.backendManager.OnFailedToBindWSPort()
+                .Subscribe(_ =>
+                {
+                    this.failedToBindWsPort = true;
+                    this.notifiedFailedToBindPort = false;
+                });
         }
 
         private bool keysDown = false;
@@ -230,20 +245,16 @@ namespace TextToTalk
             return false;
         }
 
-        private bool notifiedFailedToBindPort;
-
         private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message,
             ref bool handled)
         {
-            if (!this.clientState.IsLoggedIn || !this.sharedState.WSFailedToBindPort ||
+            if (!this.clientState.IsLoggedIn || !this.failedToBindWsPort ||
                 this.notifiedFailedToBindPort) return;
             this.chat.Print($"TextToTalk failed to bind to port {this.config.WebsocketPort}. " +
                             "Please close the owner of that port and reload the Websocket server, " +
                             "or select a different port.");
             this.notifiedFailedToBindPort = true;
         }
-
-        private bool notifiedNoPresetsConfigured;
 
         private void WarnIfNoPresetsConfiguredForBackend(XivChatType type, uint id, ref SeString sender,
             ref SeString message, ref bool handled)
@@ -473,9 +484,11 @@ namespace TextToTalk
         {
             if (!disposing) return;
 
+            this.handleFailedToBindWsPort.Dispose();
+
             this.handleTextEmit.Dispose();
             this.handleTextCancel.Dispose();
-            
+
             this.chatMessageHandler.Dispose();
             this.addonTalkHandler.Dispose();
 

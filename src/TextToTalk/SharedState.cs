@@ -6,7 +6,5 @@ public class SharedState
 
     public string? LastSpeaker { get; set; }
 
-    public bool WSFailedToBindPort { get; set; }
-
     public nint TalkAddon { get; set; }
 }

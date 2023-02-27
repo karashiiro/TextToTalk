@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Numerics;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.Polly;
@@ -14,16 +15,18 @@ namespace TextToTalk.Backends
     {
         private readonly HttpClient http;
         private readonly PluginConfiguration config;
-        private readonly SharedState sharedState;
+        private readonly Subject<int> onFailedToBindWsPort;
+
+        private IDisposable? handleFailedToBindWsPort;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
-        public VoiceBackendManager(PluginConfiguration config, HttpClient http, SharedState sharedState)
+        public VoiceBackendManager(PluginConfiguration config, HttpClient http)
         {
             this.config = config;
             this.http = http;
-            this.sharedState = sharedState;
+            this.onFailedToBindWsPort = new Subject<int>();
 
             SetBackend(this.config.Backend);
         }
@@ -53,6 +56,11 @@ namespace TextToTalk.Backends
             return Backend?.GetCurrentlySpokenTextSource() ?? TextSource.None;
         }
 
+        public IObservable<int> OnFailedToBindWSPort()
+        {
+            return this.onFailedToBindWsPort;
+        }
+
         public void SetBackend(TTSBackend backendKind)
         {
             _ = Task.Run(() =>
@@ -61,6 +69,13 @@ namespace TextToTalk.Backends
                 var newBackend = CreateBackendFor(backendKind);
                 var oldBackend = Backend;
                 Backend = newBackend;
+                if (backendKind == TTSBackend.Websocket)
+                {
+                    var wsBackend = newBackend as WebsocketBackend;
+                    this.handleFailedToBindWsPort =
+                        wsBackend?.OnFailedToBindPort().Subscribe(this.onFailedToBindWsPort);
+                }
+
                 BackendLoading = false;
                 oldBackend?.Dispose();
             });
@@ -76,7 +91,7 @@ namespace TextToTalk.Backends
             return backendKind switch
             {
                 TTSBackend.System => new SystemBackend(this.config, this.http),
-                TTSBackend.Websocket => new WebsocketBackend(this.config, this.sharedState),
+                TTSBackend.Websocket => new WebsocketBackend(this.config),
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
                 TTSBackend.Azure => new AzureBackend(this.config, this.http),
@@ -88,6 +103,7 @@ namespace TextToTalk.Backends
         {
             if (disposing)
             {
+                this.handleFailedToBindWsPort?.Dispose();
                 Backend?.Dispose();
             }
         }
