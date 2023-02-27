@@ -215,11 +215,8 @@ namespace TextToTalk
 
         private void CheckKeybindPressed(Framework f)
         {
-            if (!this.config.UseKeybind) return;
-
             if (this.CheckTTSToggleKeybind()) return;
             if (this.CheckPresetKeybind()) return;
-
             this.keysDown = false;
         }
 
@@ -245,6 +242,11 @@ namespace TextToTalk
 
         private bool CheckTTSToggleKeybind()
         {
+            if (!this.config.UseKeybind)
+            {
+                return false;
+            }
+
             if (this.keys[(byte)this.config.ModifierKey] &&
                 this.keys[(byte)this.config.MajorKey])
             {
