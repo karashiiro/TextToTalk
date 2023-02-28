@@ -81,11 +81,6 @@ public class ChatMessageHandler : IDisposable
             {
                 return;
             }
-
-            // Check the quest text (NPCDialogue) state to see if this has already been handled
-            // TODO: Is this redundant with the above check in place?
-            if (this.filters.IsDuplicateQuestText(textValue)) return;
-            this.filters.SetLastQuestText(textValue);
         }
 
         // Do postprocessing on the speaker name

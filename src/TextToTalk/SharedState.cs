@@ -2,7 +2,5 @@
 
 public class SharedState
 {
-    public string? LastQuestText { get; set; }
-
     public string? LastSpeaker { get; set; }
 }

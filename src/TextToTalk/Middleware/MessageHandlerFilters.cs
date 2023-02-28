@@ -17,16 +17,6 @@ public class MessageHandlerFilters
         this.clientState = clientState;
     }
 
-    public bool IsDuplicateQuestText(string? text)
-    {
-        return this.sharedState.LastQuestText == text;
-    }
-
-    public void SetLastQuestText(string? text)
-    {
-        this.sharedState.LastQuestText = text;
-    }
-
     public bool IsSameSpeaker(string? speaker)
     {
         return this.sharedState.LastSpeaker == speaker;
