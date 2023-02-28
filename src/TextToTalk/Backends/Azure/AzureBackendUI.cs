@@ -74,7 +74,7 @@ public class AzureBackendUI
                 this.model.SetCurrentVoicePreset(presets[presetIndex].Id);
             }
         }
-        else
+        else if (currentVoicePreset != null)
         {
             ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }

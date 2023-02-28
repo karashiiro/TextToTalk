@@ -34,7 +34,7 @@ public class PollyBackendUI
     public void DrawSettings(IConfigUIDelegates helpers)
     {
         var region = this.model.GetCurrentRegion();
-        var regionIndex = Array.IndexOf(this.model.Regions, region);
+        var regionIndex = Array.IndexOf(this.model.Regions, region.SystemName);
         if (ImGui.Combo($"Region##{MemoizedId.Create()}", ref regionIndex, this.model.Regions, this.model.Regions.Length))
         {
             this.model.SetCurrentRegion(this.model.Regions[regionIndex]);
@@ -81,7 +81,7 @@ public class PollyBackendUI
                 this.model.SetCurrentVoicePreset(presets[presetIndex].Id);
             }
         }
-        else
+        else if (currentVoicePreset != null)
         {
             ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
@@ -108,7 +108,7 @@ public class PollyBackendUI
         }
 
         var engine = this.model.GetCurrentEngine();
-        var engineIndex = Array.IndexOf(this.model.Engines, engine);
+        var engineIndex = Array.IndexOf(this.model.Engines, engine.Value);
         if (ImGui.Combo($"Engine##{MemoizedId.Create()}", ref engineIndex, this.model.Engines, this.model.Engines.Length))
         {
             this.model.SetCurrentEngine(this.model.Engines[engineIndex]);
