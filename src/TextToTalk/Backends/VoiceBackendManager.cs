@@ -68,7 +68,6 @@ namespace TextToTalk.Backends
                 BackendLoading = true;
                 var newBackend = CreateBackendFor(backendKind);
                 var oldBackend = Backend;
-                Backend = newBackend;
                 if (backendKind == TTSBackend.Websocket)
                 {
                     var wsBackend = newBackend as WebsocketBackend;
@@ -76,6 +75,7 @@ namespace TextToTalk.Backends
                         wsBackend?.OnFailedToBindPort().Subscribe(this.onFailedToBindWsPort);
                 }
 
+                Backend = newBackend;
                 BackendLoading = false;
                 oldBackend?.Dispose();
             });
