@@ -38,6 +38,7 @@ public static class MemoizedId
             return id;
         }
 
+        // Hash the ID to avoid control characters accidentally being used
         id = xxHash64.ComputeHash($"{memberName}{sourceFilePath}{sourceLineNumber}{uniq}").ToString("X");
         UsedIds[key] = id;
         return id;
