@@ -83,7 +83,6 @@ public class AddonTalkHandler : IDisposable
         if (state == default)
         {
             // The addon was closed
-            this.filters.SetLastQuestText("");
             OnClose.Invoke(new AddonTalkCloseEvent());
             return;
         }
@@ -92,10 +91,6 @@ public class AddonTalkHandler : IDisposable
         OnAdvance.Invoke(new AddonTalkAdvanceEvent());
 
         text = TalkUtils.NormalizePunctuation(text);
-
-        // Check the quest text (NPCDialogue) state to see if this has already been handled
-        if (this.filters.IsDuplicateQuestText(text)) return;
-        this.filters.SetLastQuestText(text);
 
         DetailedLog.Debug($"AddonTalk: \"{text}\"");
 
