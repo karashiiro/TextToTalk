@@ -27,7 +27,7 @@ namespace TextToTalk.UI
         private readonly PlayerService players;
         private readonly NpcService npc;
         private readonly IConfigUIDelegates helpers;
-        private readonly Subject<bool> onPresetOpenRequested; 
+        private readonly Subject<bool> onPresetOpenRequested;
 
         private IDictionary<Guid, string> playerWorldEditing = new Dictionary<Guid, string>();
         private IDictionary<Guid, bool> playerWorldValid = new Dictionary<Guid, bool>();
@@ -131,8 +131,7 @@ namespace TextToTalk.UI
         {
             if (ImGui.CollapsingHeader($"Keybinds##{MemoizedId.Create()}"))
             {
-                Components.Toggle($"Enable Keybind##{MemoizedId.Create()}", this.config, cfg => cfg.UseKeybind)
-                    .AndThen(this.config.Save);
+                ConfigComponents.ToggleUseKeybind($"Enable Keybind##{MemoizedId.Create()}", this.config);
 
                 ImGui.PushItemWidth(100f);
                 var kItem1 = VirtualKey.EnumToIndex(this.config.ModifierKey);
@@ -156,61 +155,42 @@ namespace TextToTalk.UI
 
             if (ImGui.CollapsingHeader("General"))
             {
-                Components.Toggle(
-                        "Read NPC dialogue from the dialogue window",
-                        this.config,
-                        cfg => cfg.ReadFromQuestTalkAddon)
-                    .AndThen(this.config.Save);
+                ConfigComponents.ToggleReadFromQuestTalkAddon(
+                    "Read NPC dialogue from the dialogue window",
+                    this.config);
 
                 if (this.config.ReadFromQuestTalkAddon)
                 {
                     ImGui.Spacing();
                     ImGui.Indent();
 
-                    Components.Toggle(
-                            "Cancel the current NPC speech when new text is available or text is advanced",
-                            this.config,
-                            cfg => cfg.CancelSpeechOnTextAdvance)
-                        .AndThen(this.config.Save);
-                    Components.Toggle(
-                            "Skip reading voice-acted NPC dialogue",
-                            this.config,
-                            cfg => cfg.SkipVoicedQuestText)
-                        .AndThen(this.config.Save);
+                    ConfigComponents.ToggleCancelSpeechOnTextAdvance(
+                        "Cancel the current NPC speech when new text is available or text is advanced",
+                        this.config);
+                    ConfigComponents.ToggleSkipVoicedQuestText(
+                        "Skip reading voice-acted NPC dialogue",
+                        this.config);
 
                     ImGui.Unindent();
                 }
 
                 ImGui.Spacing();
-                Components.Toggle("Skip messages from you", this.config, cfg => cfg.SkipMessagesFromYou)
-                    .AndThen(this.config.Save);
+                ConfigComponents.ToggleSkipMessagesFromYou("Skip messages from you", this.config);
 
                 ImGui.Spacing();
-                Components.Toggle(
-                        "Enable \"X says:\" when people speak",
-                        this.config,
-                        cfg => cfg.EnableNameWithSay)
-                    .AndThen(this.config.Save);
+                ConfigComponents.ToggleEnableNameWithSay("Enable \"X says:\" when people speak", this.config);
 
                 if (this.config.EnableNameWithSay)
                 {
                     ImGui.Spacing();
                     ImGui.Indent();
 
-                    Components.Toggle(
-                            "Also say \"NPC Name says:\" in NPC dialogue",
-                            this.config,
-                            cfg => cfg.NameNpcWithSay)
-                        .AndThen(this.config.Save);
-                    Components.Toggle("Say player world name", this.config, cfg => cfg.SayPlayerWorldName)
-                        .AndThen(this.config.Save);
-                    Components.Toggle(
-                            "Only say \"Character Name says:\" the first time a character speaks",
-                            this.config,
-                            cfg => cfg.DisallowMultipleSay)
-                        .AndThen(this.config.Save);
-                    Components.Toggle("Only say forename or surname", this.config, cfg => cfg.SayPartialName)
-                        .AndThen(this.config.Save);
+                    ConfigComponents.ToggleNameNpcWithSay("Also say \"NPC Name says:\" in NPC dialogue", this.config);
+                    ConfigComponents.ToggleSayPlayerWorldName("Say player world name", this.config);
+                    ConfigComponents.ToggleDisallowMultipleSay(
+                        "Only say \"Character Name says:\" the first time a character speaks",
+                        this.config);
+                    ConfigComponents.ToggleSayPartialName("Only say forename or surname", this.config);
 
                     if (this.config.SayPartialName)
                     {
@@ -239,8 +219,7 @@ namespace TextToTalk.UI
                     ImGui.Unindent();
                 }
 
-                Components.Toggle("Limit player TTS frequency", this.config, cfg => cfg.UsePlayerRateLimiter)
-                    .AndThen(this.config.Save);
+                ConfigComponents.ToggleUsePlayerRateLimiter("Limit player TTS frequency", this.config);
 
                 var messagesPerSecond = this.config.MessagesPerSecond;
                 if (this.config.UsePlayerRateLimiter)
@@ -283,11 +262,9 @@ namespace TextToTalk.UI
 
             if (ImGui.CollapsingHeader("Experimental", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                Components.Toggle(
-                        "Attempt to remove stutter from NPC dialogue (default: On)",
-                        this.config,
-                        cfg => cfg.RemoveStutterEnabled)
-                    .AndThen(this.config.Save);
+                ConfigComponents.ToggleRemoveStutterEnabled(
+                    "Attempt to remove stutter from NPC dialogue (default: On)",
+                    this.config);
             }
         }
 
@@ -611,11 +588,9 @@ namespace TextToTalk.UI
             ImGui.Spacing();
 
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
-            Components.Toggle(
-                    "Enable all (including undocumented)",
-                    currentEnabledChatTypesPreset,
-                    cfg => cfg.EnableAllChatTypes)
-                .AndThen(this.config.Save);
+            EnabledChatTypesPresetComponents.ToggleEnableAllChatTypes(
+                "Enable all (including undocumented)",
+                currentEnabledChatTypesPreset);
 
             if (currentEnabledChatTypesPreset.EnableAllChatTypes) return;
             ImGui.Spacing();
@@ -633,17 +608,17 @@ namespace TextToTalk.UI
                     enumValue = (XivChatType)(int)Enum.Parse(typeof(AdditionalChatType), channel);
                 }
 
-                var selected = currentEnabledChatTypesPreset.EnabledChatTypes.Contains((int)enumValue);
+                var selected = currentEnabledChatTypesPreset.EnabledChatTypes?.Contains((int)enumValue) ?? false;
                 if (!ImGui.Checkbox(channel == "PvPTeam" ? "PvP Team" : SplitWords(channel), ref selected)) continue;
-                var inEnabled = currentEnabledChatTypesPreset.EnabledChatTypes.Contains((int)enumValue);
-                if (inEnabled)
+                var isEnabled = currentEnabledChatTypesPreset.EnabledChatTypes?.Contains((int)enumValue) ?? false;
+                if (isEnabled)
                 {
-                    currentEnabledChatTypesPreset.EnabledChatTypes.Remove((int)enumValue);
+                    currentEnabledChatTypesPreset.EnabledChatTypes?.Remove((int)enumValue);
                     this.config.Save();
                 }
                 else
                 {
-                    currentEnabledChatTypesPreset.EnabledChatTypes.Add((int)enumValue);
+                    currentEnabledChatTypesPreset.EnabledChatTypes?.Add((int)enumValue);
                     this.config.Save();
                 }
             }
@@ -655,7 +630,7 @@ namespace TextToTalk.UI
                 .Select(c => c)
                 .Skip(1)
                 .Aggregate("" + oneWord[0],
-                    (acc, c) => acc + (c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' ? " " + c : "" + c))
+                    (acc, c) => acc + (c is >= 'A' and <= 'Z' or >= '0' and <= '9' ? " " + c : "" + c))
                 .Split(' ');
 
             var finalWords = new StringBuilder(oneWord.Length + 3);
@@ -676,11 +651,9 @@ namespace TextToTalk.UI
         private void DrawTriggersExclusions()
         {
             var currentConfiguration = this.config.GetCurrentEnabledChatTypesPreset();
-            Components.Toggle(
-                    "Enable all chat types (including undocumented)",
-                    currentConfiguration,
-                    cfg => cfg.EnableAllChatTypes)
-                .AndThen(this.config.Save);
+            EnabledChatTypesPresetComponents.ToggleEnableAllChatTypes(
+                "Enable all chat types (including undocumented)",
+                currentConfiguration);
 
             ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f), "Recommended for trigger use");
             ImGui.Dummy(new Vector2(0, 5));
@@ -704,11 +677,9 @@ namespace TextToTalk.UI
                 }
 
                 ImGui.SameLine();
-                Components.Toggle(
-                        $"Regex###{MemoizedId.Create(uniq: $"{kind}{i}")}",
-                        listItems[i],
-                        cfg => cfg.IsRegex)
-                    .AndThen(this.config.Save);
+                TriggerComponents.ToggleIsRegex(
+                    $"Regex###{MemoizedId.Create(uniq: $"{kind}{i}")}",
+                    listItems[i]);
 
                 ImGui.SameLine();
                 if (ImGui.Button($"Remove###{MemoizedId.Create(uniq: $"{kind}{i}")}"))
@@ -728,7 +699,7 @@ namespace TextToTalk.UI
 
             if (ImGui.Button($"Add {kind}###{MemoizedId.Create(uniq: kind)}"))
             {
-                listItems.Add(new Trigger());
+                listItems.Add(new Trigger(this.config));
             }
         }
 

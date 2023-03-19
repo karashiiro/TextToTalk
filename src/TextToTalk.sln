@@ -45,6 +45,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextToTalk.Lexicons.Updater
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "websocket-sharp", "websocket-sharp\websocket-sharp\websocket-sharp.csproj", "{B357BAC7-529E-4D81-A0D2-71041B19C8DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToTalk.UI.SourceGeneration", "TextToTalk.UI.SourceGeneration\TextToTalk.UI.SourceGeneration.csproj", "{A8699D32-A86A-43A2-99F0-91ED09F11417}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToTalk.UI.Core", "TextToTalk.UI.Core\TextToTalk.UI.Core.csproj", "{D677D116-0553-437B-AC66-5C0CBF5B97E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToTalk.UI.SourceGeneration.Tests", "TextToTalk.UI.SourceGeneration.Tests\TextToTalk.UI.SourceGeneration.Tests.csproj", "{651C8C36-8A66-4A95-9366-8EFF58FD2025}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +101,18 @@ Global
 		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B357BAC7-529E-4D81-A0D2-71041B19C8DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8699D32-A86A-43A2-99F0-91ED09F11417}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8699D32-A86A-43A2-99F0-91ED09F11417}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8699D32-A86A-43A2-99F0-91ED09F11417}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8699D32-A86A-43A2-99F0-91ED09F11417}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D677D116-0553-437B-AC66-5C0CBF5B97E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D677D116-0553-437B-AC66-5C0CBF5B97E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D677D116-0553-437B-AC66-5C0CBF5B97E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D677D116-0553-437B-AC66-5C0CBF5B97E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{651C8C36-8A66-4A95-9366-8EFF58FD2025}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{651C8C36-8A66-4A95-9366-8EFF58FD2025}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{651C8C36-8A66-4A95-9366-8EFF58FD2025}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{651C8C36-8A66-4A95-9366-8EFF58FD2025}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

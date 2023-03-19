@@ -181,11 +181,9 @@ public class PollyBackendUI
         ImGui.Spacing();
 
         {
-            Components.Toggle(
+            ConfigComponents.ToggleUseGenderedVoicePresets(
                     $"Use gendered voices##{MemoizedId.Create()}",
-                    this.config,
-                    cfg => cfg.UseGenderedVoicePresets)
-                .AndThen(this.config.Save);
+                    this.config);
 
             ImGui.Spacing();
             if (this.config.UseGenderedVoicePresets)

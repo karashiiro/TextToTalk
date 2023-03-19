@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<LangVersion>11.0</LangVersion>
-		<Version>1.23.0.0</Version>
+		<Version>1.23.1.0</Version>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -11,6 +11,10 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<WarningsAsErrors>CS8785</WarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -33,7 +37,6 @@
 		<PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
 		<PackageReference Include="AWSSDK.Polly" Version="3.7.106.22" />
 		<PackageReference Include="DalamudPackager" Version="2.1.11" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
 		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.26.0" />
 		<PackageReference Include="NAudio" Version="2.1.0" />
 		<PackageReference Include="Standart.Hash.xxHash" Version="4.0.5" />
@@ -45,6 +48,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\TextToTalk.Lexicons.Updater\TextToTalk.Lexicons.Updater.csproj" />
 		<ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
+		<ProjectReference Include="..\TextToTalk.UI.SourceGeneration\TextToTalk.UI.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\TextToTalk.UI.Core\TextToTalk.UI.Core.csproj" />
 		<ProjectReference Include="..\TextToTalk.UngenderedOverrides\TextToTalk.UngenderedOverrides.csproj" />
 		<ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" />
 		<ProjectReference Include="..\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />

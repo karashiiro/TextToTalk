@@ -1,31 +1,40 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using TextToTalk.UI.Core;
 
-namespace TextToTalk
+namespace TextToTalk;
+
+public class Trigger : ISaveable
 {
-    public class Trigger
+    public string Text { get; set; }
+    public bool IsRegex { get; set; }
+    public bool ShouldRemove { get; set; }
+
+    private readonly PluginConfiguration config;
+
+    public Trigger(PluginConfiguration config)
     {
-        public string Text { get; set; }
-        public bool IsRegex { get; set; }
-        public bool ShouldRemove { get; set; }
+        this.config = config;
 
-        public Trigger()
+        Text = "";
+    }
+
+    public bool Match(string? test)
+    {
+        if (!IsRegex) return test.Contains(Text);
+
+        try
         {
-            Text = "";
+            return Regex.Match(test, Text).Success;
         }
-
-        public bool Match(string? test)
+        catch (ArgumentException)
         {
-            if (!IsRegex) return test.Contains(Text);
-
-            try
-            {
-                return Regex.Match(test, Text).Success;
-            }
-            catch (ArgumentException)
-            {
-                return false;
-            }
+            return false;
         }
+    }
+
+    public void Save()
+    {
+        this.config.Save();
     }
 }

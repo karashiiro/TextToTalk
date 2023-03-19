@@ -13,7 +13,7 @@ namespace TextToTalk.Migrations
 
         public void Migrate(PluginConfiguration config)
         {
-            config.EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
+            config.EnabledChatTypesPresets.Add(new EnabledChatTypesPreset(config)
             {
                 Id = 0,
 #pragma warning disable CS1062 // The best overloaded Add method for the collection initializer element is obsolete

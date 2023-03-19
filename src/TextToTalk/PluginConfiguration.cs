@@ -10,6 +10,7 @@ using System.Linq;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 using TextToTalk.Migrations;
+using TextToTalk.UI.Core;
 
 // ReSharper disable InconsistentNaming
 
@@ -21,7 +22,7 @@ namespace TextToTalk
         Last,
     }
 
-    public class PluginConfiguration : IPluginConfiguration
+    public class PluginConfiguration : IPluginConfiguration, ISaveable
     {
         private const string DefaultPreset = "Default";
 
@@ -195,7 +196,7 @@ namespace TextToTalk
 
             if (!InitializedEver)
             {
-                EnabledChatTypesPresets.Add(new EnabledChatTypesPreset
+                EnabledChatTypesPresets.Add(new EnabledChatTypesPreset(this)
                 {
                     Id = 0,
                     EnabledChatTypes = new List<int>
@@ -290,7 +291,7 @@ namespace TextToTalk
         public EnabledChatTypesPreset NewChatTypesPreset()
         {
             var highestId = EnabledChatTypesPresets.Select(p => p.Id).Max();
-            var preset = new EnabledChatTypesPreset
+            var preset = new EnabledChatTypesPreset(this)
             {
                 Id = highestId + 1,
                 EnabledChatTypes = new List<int>(),

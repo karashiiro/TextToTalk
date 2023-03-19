@@ -119,11 +119,9 @@ public class SystemBackendUI
 
         ImGui.Spacing();
 
-        Components.Toggle(
+        ConfigComponents.ToggleUseGenderedVoicePresets(
                 $"Use gendered voice presets##{MemoizedId.Create()}",
-                this.config,
-                cfg => cfg.UseGenderedVoicePresets)
-            .AndThen(this.config.Save);
+                this.config);
 
         if (this.config.UseGenderedVoicePresets)
         {

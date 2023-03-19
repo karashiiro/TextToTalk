@@ -1,21 +1,33 @@
 ﻿using System.Collections.Generic;
+using TextToTalk.UI.Core;
 
-namespace TextToTalk
+namespace TextToTalk;
+
+public class EnabledChatTypesPreset : ISaveable
 {
-    public class EnabledChatTypesPreset
+    public int Id { get; set; }
+
+    public bool EnableAllChatTypes { get; set; }
+
+    public IList<int>? EnabledChatTypes { get; set; }
+
+    public string? Name { get; set; }
+
+    public bool UseKeybind { get; set; }
+
+    public VirtualKey.Enum ModifierKey { get; set; }
+
+    public VirtualKey.Enum MajorKey { get; set; }
+
+    private readonly PluginConfiguration config;
+
+    public EnabledChatTypesPreset(PluginConfiguration config)
     {
-        public int Id { get; set; }
+        this.config = config;
+    }
 
-        public bool EnableAllChatTypes { get; set; }
-
-        public IList<int> EnabledChatTypes { get; set; }
-
-        public string Name { get; set; }
-
-        public bool UseKeybind { get; set; }
-
-        public VirtualKey.Enum ModifierKey { get; set; }
-
-        public VirtualKey.Enum MajorKey { get; set; }
+    public void Save()
+    {
+        this.config.Save();
     }
 }
