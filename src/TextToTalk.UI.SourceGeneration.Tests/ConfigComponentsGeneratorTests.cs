@@ -1,5 +1,4 @@
 using System.Text;
-using ImGuiNET;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
@@ -107,6 +106,24 @@ namespace TextToTalk.UI;
 ";
     }
 
+    /// <summary>
+    /// Gets the path to the ImGui.NET DLL.
+    ///
+    /// Importing ImGui.NET directly and using typeof(ImGui).Assembly.Location would
+    /// be ideal for portability, but that requires that ImGui is present in the build
+    /// output for the test runner to load that type.
+    ///
+    /// Copying ImGui.NET to the build output of this project would be fine for this
+    /// since it's not part of the plugin's build output, but the D17 build system
+    /// will flag that and fail the build.
+    /// </summary>
+    /// <returns></returns>
+    private static string ImGuiNetPath()
+    {
+        var appData = Environment.GetEnvironmentVariable("AppData");
+        return Path.Combine(appData!, "XIVLauncher", "addon", "Hooks", "dev", "ImGui.NET.dll");
+    }
+
     [Fact]
     public async Task Generates_Expected_Code_When_Public()
     {
@@ -118,7 +135,7 @@ namespace TextToTalk.UI;
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(ImGui).Assembly.Location),
+                    MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
                 {
@@ -145,7 +162,7 @@ namespace TextToTalk.UI;
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(ImGui).Assembly.Location),
+                    MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
                 {
@@ -172,7 +189,7 @@ namespace TextToTalk.UI;
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(ImGui).Assembly.Location),
+                    MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
                 {
@@ -199,7 +216,7 @@ namespace TextToTalk.UI;
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(ImGui).Assembly.Location),
+                    MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
                 {

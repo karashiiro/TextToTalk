@@ -49,7 +49,10 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
         // Reuse the same modifiers; previous checks ensure this is partial and non-static
         var modifiers = string.Join(' ', data.Modifiers.Select(mod => mod.Text));
 
-        var methods = string.Join("\r\n\r\n    ", data.ConfigOptions.Select(option =>
+        // Note that the strings below must be LF, not CRLF. Git will auto-convert these,
+        // which can cause unexpected test failures.
+        // TODO: Autodetect this
+        var methods = string.Join("\n\n    ", data.ConfigOptions.Select(option =>
         {
             // ReSharper disable once ConvertToLambdaExpression
             //lang=c#
