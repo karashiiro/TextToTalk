@@ -198,7 +198,7 @@ namespace TextToTalk
                 });
         }
 
-        private bool keysDown = false;
+        private bool keysDown;
 
         private void CheckKeybindPressed(Framework f)
         {
