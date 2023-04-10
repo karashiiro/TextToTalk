@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive.Linq;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Gui;
@@ -102,35 +101,11 @@ public class ChatMessageHandler : IDisposable
             textValue = $"{speakerNameToSay} says {textValue}";
         }
 
-        // Check all of the other filters to see if this should be dropped
-        var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
-        var typeAccepted = chatTypes.EnableAllChatTypes || chatTypes.EnabledChatTypes.Contains((int)type);
-        if (!typeAccepted || IsTextBad(textValue) || !IsTextGood(textValue)) return;
-
         // Find the game object this speaker is representing
         var speaker = ObjectTableUtils.GetGameObjectByName(this.objects, sender.TextValue);
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
         OnTextEmit.Invoke(new ChatTextEmitEvent(TextSource.Chat, sender, textValue, speaker, type));
-    }
-
-    private bool IsTextGood(string text)
-    {
-        if (!this.config.Good.Any())
-        {
-            return true;
-        }
-
-        return this.config.Good
-            .Where(t => t.Text != "")
-            .Any(t => t.Match(text));
-    }
-
-    private bool IsTextBad(string text)
-    {
-        return this.config.Bad
-            .Where(t => t.Text != "")
-            .Any(t => t.Match(text));
     }
 
     public void Dispose()

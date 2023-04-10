@@ -443,8 +443,18 @@ namespace TextToTalk
         private IObservable<ChatTextEmitEvent> OnChatTextEmit()
         {
             return Observable.FromEvent<ChatTextEmitEvent>(
-                h => this.chatMessageHandler.OnTextEmit += h,
-                h => this.chatMessageHandler.OnTextEmit -= h);
+                    h => this.chatMessageHandler.OnTextEmit += h,
+                    h => this.chatMessageHandler.OnTextEmit -= h)
+                .Where(ev =>
+                {
+                    // Check all of the other filters to see if this should be dropped
+                    var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
+                    var typeEnabled = chatTypes.EnabledChatTypes is not null &&
+                                      chatTypes.EnabledChatTypes.Contains((int)ev.ChatType);
+                    return chatTypes.EnableAllChatTypes || typeEnabled;
+                })
+                .Where(ev => !IsTextBad(ev.Text.TextValue))
+                .Where(ev => IsTextGood(ev.Text.TextValue));
         }
 
         private IObservable<TextEmitEvent> OnTalkAddonTextEmit()
@@ -476,6 +486,25 @@ namespace TextToTalk
         private IObservable<TextEmitEvent> OnTextEmit()
         {
             return OnTalkAddonTextEmit().Merge(OnChatTextEmit());
+        }
+
+        private bool IsTextGood(string text)
+        {
+            if (!this.config.Good.Any())
+            {
+                return true;
+            }
+
+            return this.config.Good
+                .Where(t => t.Text != "")
+                .Any(t => t.Match(text));
+        }
+
+        private bool IsTextBad(string text)
+        {
+            return this.config.Bad
+                .Where(t => t.Text != "")
+                .Any(t => t.Match(text));
         }
 
         #endregion
@@ -510,7 +539,7 @@ namespace TextToTalk
 
             this.backendManager.Dispose();
             this.http.Dispose();
-            
+
             this.addonTalkManager.Dispose();
         }
 
