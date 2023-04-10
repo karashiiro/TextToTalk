@@ -35,7 +35,9 @@ namespace TextToTalk.CommandModules
             
             this.commandNames = new List<string>();
 
+#if DEBUG
             AddCommand("/showbattletalk", ShowBattleTalk, "");
+#endif
             AddCommand("/canceltts", CancelTts, "Cancel all queued TTS messages.");
             AddCommand("/toggletts", ToggleTts, "Toggle TextToTalk's text-to-speech.");
             AddCommand("/disabletts", DisableTts, "Disable TextToTalk's text-to-speech.");
