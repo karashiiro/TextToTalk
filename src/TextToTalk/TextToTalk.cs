@@ -18,6 +18,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
+using Microsoft.VisualBasic.Logging;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
@@ -304,7 +305,8 @@ namespace TextToTalk
 
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is PlayerCharacter pc &&
-                this.playerService.TryGetPlayerByInfo(pc.Name.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
+                this.playerService.TryGetPlayerByInfo(TalkUtils.StripWorldFromNames(pc.Name.TextValue), pc.HomeWorld.Id,
+                    out var playerInfo) &&
                 this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
             {
                 if (playerVoice.EnabledBackend != this.config.Backend)
