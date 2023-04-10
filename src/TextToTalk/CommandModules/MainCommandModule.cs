@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Backends;
 using TextToTalk.UI;
 
@@ -12,6 +13,7 @@ namespace TextToTalk.CommandModules
     public class MainCommandModule : IDisposable
     {
         private readonly ChatGui chat;
+        private readonly GameGui gui;
         private readonly CommandManager commandManager;
 
         private readonly PluginConfiguration config;
@@ -21,22 +23,32 @@ namespace TextToTalk.CommandModules
         private readonly IList<string> commandNames;
 
         public MainCommandModule(ChatGui chat, CommandManager commandManager, PluginConfiguration config,
-            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow)
+            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow, GameGui gui)
         {
             this.chat = chat;
+            this.gui = gui;
             this.commandManager = commandManager;
 
             this.config = config;
             this.backendManager = backendManager;
             this.configurationWindow = configurationWindow;
-
+            
             this.commandNames = new List<string>();
 
+#if DEBUG
+            AddCommand("/showbattletalk", ShowBattleTalk, "");
+#endif
             AddCommand("/canceltts", CancelTts, "Cancel all queued TTS messages.");
             AddCommand("/toggletts", ToggleTts, "Toggle TextToTalk's text-to-speech.");
             AddCommand("/disabletts", DisableTts, "Disable TextToTalk's text-to-speech.");
             AddCommand("/enabletts", EnableTts, "Enable TextToTalk's text-to-speech.");
             AddCommand("/tttconfig", ToggleConfig, "Toggle TextToTalk's configuration window.");
+        }
+
+        public unsafe void ShowBattleTalk(string command = "", string args = "")
+        {
+            var ui = (UIModule*)this.gui.GetUIModule();
+            ui->ShowBattleTalk("Test", "Test Text", 60f, 0);
         }
 
         public void CancelTts(string command = "", string args = "")

@@ -175,6 +175,23 @@ namespace TextToTalk.UI
                 }
 
                 ImGui.Spacing();
+                ConfigComponents.ToggleReadFromBattleTalkAddon(
+                    "Read NPC dialogue from the battle dialogue window",
+                    this.config);
+
+                if (this.config.ReadFromBattleTalkAddon)
+                {
+                    ImGui.Spacing();
+                    ImGui.Indent();
+
+                    ConfigComponents.ToggleSkipVoicedBattleText(
+                        "Skip reading voice-acted NPC dialogue",
+                        this.config);
+
+                    ImGui.Unindent();
+                }
+
+                ImGui.Spacing();
                 ConfigComponents.ToggleSkipMessagesFromYou("Skip messages from you", this.config);
 
                 ImGui.Spacing();

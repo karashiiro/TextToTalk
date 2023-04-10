@@ -54,8 +54,10 @@ namespace TextToTalk
 
         private readonly PluginConfiguration config;
         private readonly AddonTalkManager addonTalkManager;
+        private readonly AddonBattleTalkManager addonBattleTalkManager;
         private readonly VoiceBackendManager backendManager;
         private readonly AddonTalkHandler addonTalkHandler;
+        private readonly AddonBattleTalkHandler addonBattleTalkHandler;
         private readonly ChatMessageHandler chatMessageHandler;
         private readonly SoundHandler soundHandler;
         private readonly RateLimiter rateLimiter;
@@ -105,7 +107,8 @@ namespace TextToTalk
             this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
             this.config.Initialize(this.pluginInterface);
 
-            this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, data, gui);
+            this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, gui);
+            this.addonBattleTalkManager = new AddonBattleTalkManager(framework, clientState, condition, gui);
 
             var sharedState = new SharedState();
 
@@ -143,9 +146,12 @@ namespace TextToTalk
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler =
                 new AddonTalkHandler(this.addonTalkManager, framework, filters, objects, this.config);
+            this.addonBattleTalkHandler =
+                new AddonBattleTalkHandler(this.addonBattleTalkManager, framework, filters, objects, this.config);
             this.chatMessageHandler =
-                new ChatMessageHandler(this.addonTalkManager, chat, filters, objects, this.config);
-            this.soundHandler = new SoundHandler(this.addonTalkHandler, sigScanner);
+                new ChatMessageHandler(this.addonTalkManager, this.addonBattleTalkManager, chat, filters, objects,
+                    this.config);
+            this.soundHandler = new SoundHandler(this.addonTalkHandler, this.addonBattleTalkHandler, sigScanner);
 
             this.rateLimiter = new RateLimiter(() =>
             {
@@ -160,7 +166,7 @@ namespace TextToTalk
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
             this.commandModule = new MainCommandModule(this.chat, commandManager, this.config, this.backendManager,
-                this.configurationWindow);
+                this.configurationWindow, gui);
 
             RegisterCallbacks();
 
@@ -465,6 +471,13 @@ namespace TextToTalk
                 h => this.addonTalkHandler.OnTextEmit -= h);
         }
 
+        private IObservable<TextEmitEvent> OnBattleTalkAddonTextEmit()
+        {
+            return Observable.FromEvent<TextEmitEvent>(
+                h => this.addonBattleTalkHandler.OnTextEmit += h,
+                h => this.addonBattleTalkHandler.OnTextEmit -= h);
+        }
+
         private IObservable<AddonTalkAdvanceEvent> OnTalkAddonAdvance()
         {
             return Observable.FromEvent<AddonTalkAdvanceEvent>(
@@ -486,7 +499,7 @@ namespace TextToTalk
 
         private IObservable<TextEmitEvent> OnTextEmit()
         {
-            return OnTalkAddonTextEmit().Merge(OnChatTextEmit());
+            return OnTalkAddonTextEmit().Merge(OnChatTextEmit()).Merge(OnBattleTalkAddonTextEmit());
         }
 
         private bool IsTextGood(string text)

@@ -8,23 +8,22 @@ using TextToTalk.Talk;
 
 namespace TextToTalk.TextProviders;
 
-public class AddonTalkHandler : IDisposable
+// This might be almost exactly the same as AddonTalkHandler, but it's too early to pull out a common base class.
+public class AddonBattleTalkHandler : IDisposable
 {
-    private record struct AddonTalkState(string? Speaker, string? Text, AddonPollSource PollSource);
+    private record struct AddonBattleTalkState(string? Speaker, string? Text, AddonPollSource PollSource);
 
-    private readonly AddonTalkManager addonTalkManager;
+    private readonly AddonBattleTalkManager addonTalkManager;
     private readonly MessageHandlerFilters filters;
     private readonly ObjectTable objects;
     private readonly PluginConfiguration config;
     private readonly Framework framework;
-    private readonly ComponentUpdateState<AddonTalkState> updateState;
+    private readonly ComponentUpdateState<AddonBattleTalkState> updateState;
     private readonly IDisposable subscription;
 
     public Action<TextEmitEvent> OnTextEmit { get; set; }
-    public Action<AddonTalkAdvanceEvent> OnAdvance { get; set; }
-    public Action<AddonTalkCloseEvent> OnClose { get; set; }
 
-    public AddonTalkHandler(AddonTalkManager addonTalkManager, Framework framework,
+    public AddonBattleTalkHandler(AddonBattleTalkManager addonTalkManager, Framework framework,
         MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
     {
         this.addonTalkManager = addonTalkManager;
@@ -32,13 +31,11 @@ public class AddonTalkHandler : IDisposable
         this.filters = filters;
         this.objects = objects;
         this.config = config;
-        this.updateState = new ComponentUpdateState<AddonTalkState>();
+        this.updateState = new ComponentUpdateState<AddonBattleTalkState>();
         this.updateState.OnUpdate += HandleChange;
         this.subscription = HandleFrameworkUpdate();
 
         OnTextEmit = _ => { };
-        OnAdvance = _ => { };
-        OnClose = _ => { };
     }
 
     private IObservable<AddonPollSource> OnFrameworkUpdate()
@@ -69,25 +66,21 @@ public class AddonTalkHandler : IDisposable
         this.updateState.Mutate(state);
     }
 
-    private void HandleChange(AddonTalkState state)
+    private void HandleChange(AddonBattleTalkState state)
     {
         var (speaker, text, pollSource) = state;
 
         if (state == default)
         {
             // The addon was closed
-            OnClose.Invoke(new AddonTalkCloseEvent());
             return;
         }
 
-        // Notify observers that the addon state was advanced
-        OnAdvance.Invoke(new AddonTalkAdvanceEvent());
-
         text = TalkUtils.NormalizePunctuation(text);
 
-        DetailedLog.Debug($"AddonTalk: \"{text}\"");
+        DetailedLog.Debug($"AddonBattleTalk: \"{text}\"");
 
-        if (pollSource == AddonPollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
+        if (pollSource == AddonPollSource.VoiceLinePlayback && this.config.SkipVoicedBattleText)
         {
             DetailedLog.Debug($"Skipping voice-acted line: {text}");
             return;
@@ -111,10 +104,10 @@ public class AddonTalkHandler : IDisposable
         var speakerObj = ObjectTableUtils.GetGameObjectByName(this.objects, speaker);
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
-        OnTextEmit.Invoke(new TextEmitEvent(TextSource.AddonTalk, state.Speaker ?? "", text, speakerObj));
+        OnTextEmit.Invoke(new TextEmitEvent(TextSource.AddonBattleTalk, state.Speaker ?? "", text, speakerObj));
     }
 
-    private AddonTalkState GetTalkAddonState(AddonPollSource pollSource)
+    private AddonBattleTalkState GetTalkAddonState(AddonPollSource pollSource)
     {
         if (!this.addonTalkManager.IsVisible())
         {
@@ -123,7 +116,7 @@ public class AddonTalkHandler : IDisposable
 
         var addonTalkText = this.addonTalkManager.ReadText();
         return addonTalkText != null
-            ? new AddonTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource)
+            ? new AddonBattleTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource)
             : default;
     }
 
