@@ -2,14 +2,13 @@
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui;
-using FFXIVClientStructs.FFXIV.Client.UI;
 
 namespace TextToTalk.Talk;
 
-public class AddonTalkManager : AddonManager
+public class AddonBattleTalkManager : AddonManager
 {
-    public AddonTalkManager(Framework framework, ClientState clientState, Condition condition, GameGui gui) : base(
-        framework, clientState, condition, gui, "Talk")
+    public AddonBattleTalkManager(Framework framework, ClientState clientState, Condition condition, GameGui gui) :
+        base(framework, clientState, condition, gui, "_BattleTalk")
     {
     }
 
@@ -25,8 +24,8 @@ public class AddonTalkManager : AddonManager
         return addonTalk != null && addonTalk->AtkUnitBase.IsVisible;
     }
 
-    private unsafe AddonTalk* GetAddonTalk()
+    private unsafe AddonBattleTalk* GetAddonTalk()
     {
-        return (AddonTalk*)Address.ToPointer();
+        return (AddonBattleTalk*)Address.ToPointer();
     }
 }

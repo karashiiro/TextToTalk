@@ -15,6 +15,7 @@ public class ChatMessageHandler : IDisposable
     private record struct ChatMessage(XivChatType Type, SeString Sender, SeString Message);
 
     private readonly AddonTalkManager addonTalkManager;
+    private readonly AddonBattleTalkManager addonBattleTalkManager;
     private readonly MessageHandlerFilters filters;
     private readonly ObjectTable objects;
     private readonly PluginConfiguration config;
@@ -23,10 +24,11 @@ public class ChatMessageHandler : IDisposable
 
     public Action<ChatTextEmitEvent> OnTextEmit { get; set; }
 
-    public ChatMessageHandler(AddonTalkManager addonTalkManager, ChatGui chat, MessageHandlerFilters filters,
-        ObjectTable objects, PluginConfiguration config)
+    public ChatMessageHandler(AddonTalkManager addonTalkManager, AddonBattleTalkManager addonBattleTalkManager,
+        ChatGui chat, MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
     {
         this.addonTalkManager = addonTalkManager;
+        this.addonBattleTalkManager = addonBattleTalkManager;
         this.filters = filters;
         this.objects = objects;
         this.config = config;
@@ -77,6 +79,13 @@ public class ChatMessageHandler : IDisposable
         {
             // (TextToTalk#40) If we're reading from the Talk addon when NPC dialogue shows up, just return from this.
             if (this.config.ReadFromQuestTalkAddon && this.addonTalkManager.IsVisible())
+            {
+                return;
+            }
+        }
+        else if (type == XivChatType.NPCDialogueAnnouncements)
+        {
+            if (this.config.ReadFromQuestTalkAddon && this.addonBattleTalkManager.IsVisible())
             {
                 return;
             }
