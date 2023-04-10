@@ -85,7 +85,7 @@ public class ChatMessageHandler : IDisposable
         }
         else if (type == XivChatType.NPCDialogueAnnouncements)
         {
-            if (this.config.ReadFromQuestTalkAddon && this.addonBattleTalkManager.IsVisible())
+            if (this.config.ReadFromBattleTalkAddon && this.addonBattleTalkManager.IsVisible())
             {
                 return;
             }

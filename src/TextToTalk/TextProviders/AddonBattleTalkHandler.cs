@@ -80,7 +80,7 @@ public class AddonBattleTalkHandler : IDisposable
 
         DetailedLog.Debug($"AddonBattleTalk: \"{text}\"");
 
-        if (pollSource == AddonPollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
+        if (pollSource == AddonPollSource.VoiceLinePlayback && this.config.SkipVoicedBattleText)
         {
             DetailedLog.Debug($"Skipping voice-acted line: {text}");
             return;

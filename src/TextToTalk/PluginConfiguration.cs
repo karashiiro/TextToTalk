@@ -121,6 +121,9 @@ namespace TextToTalk
         public bool CancelSpeechOnTextAdvance { get; set; }
         public bool SkipVoicedQuestText { get; set; } = true;
 
+        public bool ReadFromBattleTalkAddon { get; set; } = true;
+        public bool SkipVoicedBattleText { get; set; } = true;
+
         public bool UseGenderedVoicePresets { get; set; }
 
         public TTSBackend Backend { get; set; }
