@@ -13,7 +13,7 @@ public class ChatTextEmitEvent : TextEmitEvent
         SeString speaker,
         SeString text,
         GameObject? obj,
-        XivChatType chatType) : base(source, speaker.TextValue, text.TextValue, obj)
+        XivChatType chatType) : base(source, speaker, text, obj)
     {
         ChatType = chatType;
     }

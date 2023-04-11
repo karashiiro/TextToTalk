@@ -95,6 +95,26 @@ namespace TextToTalk.Talk
             return cleanString.Build().TextValue;
         }
 
+        public static bool TryGetPlayerName(SeString input, out string name)
+        {
+            name = string.Empty;
+            foreach (var p in input.Payloads)
+            {
+                DetailedLog.Info(p.ToString() ?? string.Empty);
+                switch (p)
+                {
+                    case PlayerPayload pp:
+                        name = pp.PlayerName;
+                        return true;
+                    case TextPayload tp:
+                        name = tp.Text ?? string.Empty;
+                        break;
+                }
+            }
+
+            return name != string.Empty;
+        }
+
         /// <summary>
         /// Removes single letters with a hyphen following them, since they aren't read as expected.
         /// </summary>
