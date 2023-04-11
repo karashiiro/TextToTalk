@@ -554,6 +554,7 @@ namespace TextToTalk
             this.backendManager.Dispose();
             this.http.Dispose();
 
+            this.addonBattleTalkManager.Dispose();
             this.addonTalkManager.Dispose();
         }
 
