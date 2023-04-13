@@ -36,6 +36,7 @@ namespace TextToTalk
         // ReSharper disable once CollectionNeverUpdated.Global
         public IList<int> EnabledChatTypes { get; set; }
 
+        // ReSharper disable once CollectionNeverUpdated.Global
         [Obsolete] public IList<VoicePreset> VoicePresets { get; set; }
 
         [Obsolete("Use VoicePresets.")] public int Rate { get; set; }
@@ -90,6 +91,9 @@ namespace TextToTalk
         // ReSharper disable once CollectionNeverUpdated.Global
         [Obsolete] public IDictionary<Guid, dynamic> Players { get; set; }
 
+        // ReSharper disable once CollectionNeverUpdated.Global
+        [Obsolete] public IDictionary<Guid, dynamic> Npcs { get; set; }
+
         #endregion
 
         public int Version { get; set; }
@@ -119,7 +123,7 @@ namespace TextToTalk
         public bool EnableNameWithSay { get; set; } = true;
         public bool DisallowMultipleSay { get; set; }
         public bool SayPlayerWorldName { get; set; } = true;
-        public bool SayPartialName { get; set; } = false;
+        public bool SayPartialName { get; set; }
         public FirstOrLastName OnlySayFirstOrLastName { get; set; } = FirstOrLastName.First;
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;
@@ -150,8 +154,6 @@ namespace TextToTalk
         public bool SkipMessagesFromYou { get; set; }
 
         public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
-
-        public IDictionary<Guid, NpcInfo> Npcs { get; set; }
         public IDictionary<Guid, int> NpcVoicePresets { get; set; }
 
         [JsonIgnore]
@@ -180,7 +182,10 @@ namespace TextToTalk
             MajorKey = VirtualKey.Enum.VkN;
         }
 
-        public void Initialize(DalamudPluginInterface pi, PlayerCollection playerCollection)
+        public void Initialize(
+            DalamudPluginInterface pi,
+            PlayerCollection playerCollection,
+            NpcCollection npcCollection)
         {
             this.pluginInterface = pi;
             this.cfgLock = true;
@@ -197,7 +202,7 @@ namespace TextToTalk
 
             PlayerVoicePresets ??= new Dictionary<Guid, int>();
 
-            Npcs ??= new Dictionary<Guid, NpcInfo>();
+            Npcs ??= new Dictionary<Guid, dynamic>();
             NpcVoicePresets ??= new Dictionary<Guid, int>();
 
             if (!InitializedEver)
@@ -256,7 +261,7 @@ namespace TextToTalk
                 var migrations = new IConfigurationMigration[]
                 {
                     new Migration1_5(), new Migration1_6(), new Migration1_17(), new Migration1_18_2(),
-                    new Migration1_18_3(), new Migration1_25_0(playerCollection),
+                    new Migration1_18_3(), new Migration1_25_0(playerCollection, npcCollection),
                 };
                 foreach (var migration in migrations)
                 {

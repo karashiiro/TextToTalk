@@ -65,7 +65,7 @@ namespace TextToTalk
         private readonly SoundHandler soundHandler;
         private readonly RateLimiter rateLimiter;
         private readonly UngenderedOverrideManager ungenderedOverrides;
-        private readonly ILiteDatabase playerDb;
+        private readonly ILiteDatabase database;
         private readonly PlayerService playerService;
         private readonly NpcService npcService;
         private readonly WindowSystem windows;
@@ -107,13 +107,14 @@ namespace TextToTalk
             this.framework = framework;
 
             CreateDatabasePath();
-            this.playerDb = new LiteDatabase(GetDatabasePath("Player.db"));
-            var playerCollection = new PlayerCollection(this.playerDb);
+            this.database = new LiteDatabase(GetDatabasePath("TextToTalk.db"));
+            var playerCollection = new PlayerCollection(this.database);
+            var npcCollection = new NpcCollection(this.database);
 
             this.windows = new WindowSystem("TextToTalk");
 
             this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
-            this.config.Initialize(this.pluginInterface, playerCollection);
+            this.config.Initialize(this.pluginInterface, playerCollection, npcCollection);
 
             this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, gui);
             this.addonBattleTalkManager = new AddonBattleTalkManager(framework, clientState, condition, gui);
@@ -126,7 +127,7 @@ namespace TextToTalk
 
             this.playerService = new PlayerService(playerCollection, this.config.PlayerVoicePresets,
                 this.config.GetVoiceConfig().VoicePresets);
-            this.npcService = new NpcService(this.config.Npcs, this.config.NpcVoicePresets,
+            this.npcService = new NpcService(npcCollection, this.config.NpcVoicePresets,
                 this.config.GetVoiceConfig().VoicePresets);
 
             var unlockerResultWindow = new UnlockerResultWindow();
@@ -184,13 +185,12 @@ namespace TextToTalk
 
         private void CreateDatabasePath()
         {
-            var path = Path.Combine(this.pluginInterface.GetPluginConfigDirectory(), "db");
-            Directory.CreateDirectory(path);
+            Directory.CreateDirectory(this.pluginInterface.GetPluginConfigDirectory());
         }
 
         private string GetDatabasePath(string fileName)
         {
-            return Path.Combine(this.pluginInterface.GetPluginConfigDirectory(), "db", fileName);
+            return Path.Combine(this.pluginInterface.GetPluginConfigDirectory(), fileName);
         }
 
         private IDisposable HandleTextCancel()
@@ -339,24 +339,24 @@ namespace TextToTalk
                 }
                 else
                 {
-                    this.backendManager.Say(source, playerVoice, pc.Name.TextValue, cleanText);
+                    this.backendManager.Say(source, playerVoice, speakerName.TextValue, cleanText);
                 }
             }
             else if (speaker is not null &&
                      // Some characters have emdashes in their names, which should be treated
                      // as hyphens for the sake of the plugin.
-                     this.npcService.TryGetNpcByInfo(TalkUtils.NormalizePunctuation(speakerName.TextValue),
+                     this.npcService.TryGetNpc(TalkUtils.NormalizePunctuation(speakerName.TextValue),
                          out var npcInfo) &&
                      this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
             {
-                if (this.config.Backend != TTSBackend.Websocket && npcVoice.EnabledBackend != this.config.Backend)
+                if (npcVoice?.EnabledBackend != this.config.Backend)
                 {
                     DetailedLog.Error(
-                        $"Voice preset {npcVoice.Name} is not compatible with the {this.config.Backend} backend");
+                        $"Voice preset {npcVoice?.Name} is not compatible with the {this.config.Backend} backend");
                 }
                 else
                 {
-                    this.backendManager.Say(source, npcVoice, speaker.Name.TextValue, cleanText);
+                    this.backendManager.Say(source, npcVoice, speakerName.TextValue, cleanText);
                 }
             }
             else
@@ -370,7 +370,7 @@ namespace TextToTalk
                 var preset = GetVoiceForSpeaker(speakerName.TextValue, gender);
                 if (preset != null)
                 {
-                    this.backendManager.Say(source, preset, speakerName.TextValue ?? "", cleanText);
+                    this.backendManager.Say(source, preset, speakerName.TextValue, cleanText);
                 }
                 else
                 {
@@ -572,7 +572,7 @@ namespace TextToTalk
             this.backendManager.Dispose();
             this.http.Dispose();
 
-            this.playerDb.Dispose();
+            this.database.Dispose();
 
             this.addonBattleTalkManager.Dispose();
             this.addonTalkManager.Dispose();
