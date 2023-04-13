@@ -308,8 +308,6 @@ namespace TextToTalk
                 return;
             }
 
-            DetailedLog.Info($"\"{speaker?.Name.TextValue}\" - !\"{speakerName.TextValue}\"!");
-
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is PlayerCharacter pc &&
                 this.playerService.TryGetPlayerByInfo(speakerName.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
