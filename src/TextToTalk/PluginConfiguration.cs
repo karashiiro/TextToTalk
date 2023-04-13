@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
+using TextToTalk.Data.Service;
 using TextToTalk.Migrations;
 using TextToTalk.UI.Core;
 
@@ -86,6 +87,9 @@ namespace TextToTalk
         [Obsolete] public int MaleVoicePresetId { get; set; }
         [Obsolete] public int FemaleVoicePresetId { get; set; }
 
+        // ReSharper disable once CollectionNeverUpdated.Global
+        [Obsolete] public IDictionary<Guid, dynamic> Players { get; set; }
+
         #endregion
 
         public int Version { get; set; }
@@ -101,6 +105,7 @@ namespace TextToTalk
         public bool MigratedTo1_17 { get; set; }
         public bool MigratedTo1_18_2 { get; set; }
         public bool MigratedTo1_18_3 { get; set; }
+        public bool MigratedTo1_25_0 { get; set; }
 
         public IList<Trigger> Bad { get; set; }
         public IList<Trigger> Good { get; set; }
@@ -144,7 +149,6 @@ namespace TextToTalk
 
         public bool SkipMessagesFromYou { get; set; }
 
-        public IDictionary<Guid, PlayerInfo> Players { get; set; }
         public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
 
         public IDictionary<Guid, NpcInfo> Npcs { get; set; }
@@ -176,7 +180,7 @@ namespace TextToTalk
             MajorKey = VirtualKey.Enum.VkN;
         }
 
-        public void Initialize(DalamudPluginInterface pi)
+        public void Initialize(DalamudPluginInterface pi, PlayerCollection playerCollection)
         {
             this.pluginInterface = pi;
             this.cfgLock = true;
@@ -191,7 +195,6 @@ namespace TextToTalk
 
             RemoteLexiconEnabledBackends ??= new Dictionary<string, IDictionary<TTSBackend, bool>>();
 
-            Players ??= new Dictionary<Guid, PlayerInfo>();
             PlayerVoicePresets ??= new Dictionary<Guid, int>();
 
             Npcs ??= new Dictionary<Guid, NpcInfo>();
@@ -245,6 +248,7 @@ namespace TextToTalk
                 MigratedTo1_17 = true;
                 MigratedTo1_18_2 = true;
                 MigratedTo1_18_3 = true;
+                MigratedTo1_25_0 = true;
             }
 
             if (InitializedEver)
@@ -252,7 +256,7 @@ namespace TextToTalk
                 var migrations = new IConfigurationMigration[]
                 {
                     new Migration1_5(), new Migration1_6(), new Migration1_17(), new Migration1_18_2(),
-                    new Migration1_18_3()
+                    new Migration1_18_3(), new Migration1_25_0(playerCollection),
                 };
                 foreach (var migration in migrations)
                 {

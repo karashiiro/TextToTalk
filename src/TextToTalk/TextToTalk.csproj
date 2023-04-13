@@ -46,6 +46,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\TextToTalk.Data\TextToTalk.Data.csproj" />
 		<ProjectReference Include="..\TextToTalk.Lexicons.Updater\TextToTalk.Lexicons.Updater.csproj" />
 		<ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
 		<ProjectReference Include="..\TextToTalk.UI.SourceGeneration\TextToTalk.UI.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

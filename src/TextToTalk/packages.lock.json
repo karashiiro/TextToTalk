@@ -75,6 +75,11 @@
         "resolved": "3.7.106.1",
         "contentHash": "WVi66ESu06NFfkKE76uATNyISqnwg8ntYcEUCmZ4KFstZpPOlCXj7o9xO4glPGIvRSd8q6JvcWBnSAXjt+sTZw=="
       },
+      "LiteDB": {
+        "type": "Transitive",
+        "resolved": "5.0.16",
+        "contentHash": "DMUYdRlgNbrSlyWzdQ4GqW934ntNHBGWMTNQlOL4hWz8WnveY6V9ZGo2ntPrSATW7kat8v5VoCXGSzToPiwZWw=="
+      },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
         "resolved": "3.1.0",
@@ -159,6 +164,12 @@
         "type": "Transitive",
         "resolved": "13.0.2",
         "contentHash": "hRPqCt2bxTvHN6iT2JNG2KznDPFgD5B6j0bQ7woSpfGctmjgAYdKQ+LYHUaj/7q8sN1AbIcTNbaO75g8IFmTjw=="
+      },
+      "texttotalk.data": {
+        "type": "Project",
+        "dependencies": {
+          "LiteDB": "[5.0.16, )"
+        }
       },
       "texttotalk.lexicons": {
         "type": "Project"

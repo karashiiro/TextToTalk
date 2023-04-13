@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TextToTalk.Data.Model;
+using TextToTalk.Data.Service;
 
 namespace TextToTalk;
 
 public class PlayerService
 {
-    private readonly IDictionary<Guid, PlayerInfo> players;
+    private readonly PlayerCollection players;
     private readonly IDictionary<Guid, int> playerVoices;
     private readonly IList<VoicePreset> voices;
 
-    public PlayerService(IDictionary<Guid, PlayerInfo> players, IDictionary<Guid, int> playerVoices,
+    public PlayerService(
+        PlayerCollection players,
+        IDictionary<Guid, int> playerVoices,
         IList<VoicePreset> voices)
     {
         this.players = players;
@@ -18,39 +22,52 @@ public class PlayerService
         this.voices = voices;
     }
 
+    public IEnumerable<Player> GetAllPlayers()
+    {
+        return this.players.GetAllPlayers();
+    }
+
+    public void UpdatePlayer(Player player)
+    {
+        this.players.StorePlayer(player);
+    }
+
     public bool AddPlayer(string name, uint worldId)
     {
-        if (TryGetPlayerByInfo(name, worldId, out _)) return false;
+        if (TryGetPlayer(name, worldId, out _)) return false;
         var localId = Guid.NewGuid();
-        var info = new PlayerInfo { LocalId = localId, Name = name, WorldId = worldId };
-        this.players[localId] = info;
+        var info = new Player { Id = localId, Name = name, WorldId = worldId };
+        this.players.StorePlayer(info);
         return true;
     }
 
-    public void DeletePlayer(PlayerInfo info)
+    public void DeletePlayer(Player info)
     {
-        this.players.Remove(info.LocalId);
-        this.playerVoices.Remove(info.LocalId);
-    } 
+        this.players.DeletePlayerById(info.Id);
+        this.playerVoices.Remove(info.Id);
+    }
 
-    public bool TryGetPlayerByInfo(string name, uint worldId, out PlayerInfo info)
+    public bool TryGetPlayer(string name, uint worldId, out Player? info)
     {
-        info = this.players.Values.FirstOrDefault(info =>
-            string.Equals(info.Name, name, StringComparison.InvariantCultureIgnoreCase) && info.WorldId == worldId);
+        info = this.players.FetchPlayerByNameAndWorld(name, worldId);
         return info != null;
     }
 
-    public bool TryGetPlayerVoice(PlayerInfo info, out VoicePreset voice)
+    public bool TryGetPlayerVoice(Player? info, out VoicePreset? voice)
     {
-        voice = !this.playerVoices.TryGetValue(info.LocalId, out var voiceId)
-            ? null
-            : this.voices.FirstOrDefault(v => v.Id == voiceId);
+        voice = null;
+        if (info is null) return false;
+        if (this.playerVoices.TryGetValue(info.Id, out var voiceId))
+        {
+            voice = this.voices.FirstOrDefault(v => v.Id == voiceId);
+        }
+
         return voice != null;
     }
 
-    public bool SetPlayerVoice(PlayerInfo info, VoicePreset voice)
+    public bool SetPlayerVoice(Player info, VoicePreset voice)
     {
-        if (!this.players.ContainsKey(info.LocalId))
+        if (info.Name is null || !TryGetPlayer(info.Name, info.WorldId, out _))
         {
             return false;
         }
@@ -60,7 +77,7 @@ public class PlayerService
             return false;
         }
 
-        this.playerVoices[info.LocalId] = voice.Id;
+        this.playerVoices[info.Id] = voice.Id;
 
         return true;
     }
