@@ -94,6 +94,12 @@ namespace TextToTalk
         // ReSharper disable once CollectionNeverUpdated.Global
         [Obsolete] public IDictionary<Guid, dynamic> Npcs { get; set; }
 
+        // ReSharper disable once CollectionNeverUpdated.Global
+        [Obsolete] public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
+
+        // ReSharper disable once CollectionNeverUpdated.Global
+        [Obsolete] public IDictionary<Guid, int> NpcVoicePresets { get; set; }
+
         #endregion
 
         public int Version { get; set; }
@@ -152,9 +158,6 @@ namespace TextToTalk
         public float MessagesPerSecond { get; set; } = 5;
 
         public bool SkipMessagesFromYou { get; set; }
-
-        public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
-        public IDictionary<Guid, int> NpcVoicePresets { get; set; }
 
         [JsonIgnore]
         public bool InitializedEver

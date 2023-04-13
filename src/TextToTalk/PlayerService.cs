@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TextToTalk.Data.Model;
@@ -10,16 +9,11 @@ namespace TextToTalk;
 public class PlayerService
 {
     private readonly PlayerCollection players;
-    private readonly IDictionary<Guid, int> playerVoices;
     private readonly IList<VoicePreset> voices;
 
-    public PlayerService(
-        PlayerCollection players,
-        IDictionary<Guid, int> playerVoices,
-        IList<VoicePreset> voices)
+    public PlayerService(PlayerCollection players, IList<VoicePreset> voices)
     {
         this.players = players;
-        this.playerVoices = playerVoices;
         this.voices = voices;
     }
 
@@ -36,8 +30,7 @@ public class PlayerService
     public bool AddPlayer(string name, uint worldId)
     {
         if (TryGetPlayer(name, worldId, out _)) return false;
-        var localId = Guid.NewGuid();
-        var info = new Player { Id = localId, Name = name, WorldId = worldId };
+        var info = new Player { Name = name, WorldId = worldId };
         this.players.StorePlayer(info);
         return true;
     }
@@ -45,7 +38,7 @@ public class PlayerService
     public void DeletePlayer(Player info)
     {
         this.players.DeletePlayerById(info.Id);
-        this.playerVoices.Remove(info.Id);
+        this.players.DeletePlayerVoiceByPlayerId(info.Id);
     }
 
     public bool TryGetPlayer(string name, uint worldId, [NotNullWhen(true)] out Player? info)
@@ -57,9 +50,9 @@ public class PlayerService
     {
         voice = null;
         if (info is null) return false;
-        if (this.playerVoices.TryGetValue(info.Id, out var voiceId))
+        if (this.players.TryFetchPlayerVoiceByPlayerId(info.Id, out var voiceInfo))
         {
-            voice = this.voices.FirstOrDefault(v => v.Id == voiceId);
+            voice = this.voices.FirstOrDefault(v => v.Id == voiceInfo.VoicePresetId);
         }
 
         return voice != null;
@@ -77,7 +70,12 @@ public class PlayerService
             return false;
         }
 
-        this.playerVoices[info.Id] = voice.Id;
+        if (TryGetPlayerVoice(info, out _))
+        {
+            this.players.DeletePlayerVoiceByPlayerId(info.Id);
+        }
+
+        this.players.StorePlayerVoice(new PlayerVoice { PlayerId = info.Id, VoicePresetId = voice.Id });
 
         return true;
     }
