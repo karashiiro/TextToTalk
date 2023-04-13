@@ -101,10 +101,12 @@ public class AddonBattleTalkHandler : IDisposable
         }
 
         // Find the game object this speaker is representing
-        var speakerObj = ObjectTableUtils.GetGameObjectByName(this.objects, speaker);
+        var speakerObj = speaker != null ? ObjectTableUtils.GetGameObjectByName(this.objects, speaker) : null;
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
-        OnTextEmit.Invoke(new TextEmitEvent(TextSource.AddonBattleTalk, state.Speaker ?? "", text, speakerObj));
+        OnTextEmit.Invoke(speakerObj != null
+            ? new TextEmitEvent(TextSource.AddonTalk, speakerObj.Name, text, speakerObj)
+            : new TextEmitEvent(TextSource.AddonTalk, state.Speaker ?? "", text, null));
     }
 
     private AddonBattleTalkState GetTalkAddonState(AddonPollSource pollSource)

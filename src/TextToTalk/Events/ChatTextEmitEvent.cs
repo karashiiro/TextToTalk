@@ -6,6 +6,9 @@ namespace TextToTalk.Events;
 
 public class ChatTextEmitEvent : TextEmitEvent
 {
+    /// <summary>
+    /// The chat type of the message.
+    /// </summary>
     public XivChatType ChatType { get; }
 
     public ChatTextEmitEvent(

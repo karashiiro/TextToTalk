@@ -108,7 +108,7 @@ public class AddonTalkHandler : IDisposable
         }
 
         // Find the game object this speaker is representing
-        var speakerObj = ObjectTableUtils.GetGameObjectByName(this.objects, speaker);
+        var speakerObj = speaker != null ? ObjectTableUtils.GetGameObjectByName(this.objects, speaker) : null;
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
         OnTextEmit.Invoke(speakerObj != null

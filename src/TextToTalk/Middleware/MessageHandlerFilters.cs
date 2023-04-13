@@ -60,6 +60,7 @@ public class MessageHandlerFilters
             return true;
         }
 
-        return !this.config.SkipMessagesFromYou || this.clientState.LocalPlayer?.Name.TextValue != speaker;
+        return !this.config.SkipMessagesFromYou ||
+               !speaker.Contains(this.clientState.LocalPlayer?.Name.TextValue ?? "");
     }
 }

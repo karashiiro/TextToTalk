@@ -308,6 +308,8 @@ namespace TextToTalk
                 return;
             }
 
+            DetailedLog.Info($"\"{speaker?.Name.TextValue}\" - !\"{speakerName.TextValue}\"!");
+
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is PlayerCharacter pc &&
                 this.playerService.TryGetPlayerByInfo(speakerName.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
@@ -326,7 +328,7 @@ namespace TextToTalk
             else if (speaker is not null &&
                      // Some characters have emdashes in their names, which should be treated
                      // as hyphens for the sake of the plugin.
-                     this.npcService.TryGetNpcByInfo(TalkUtils.NormalizePunctuation(speaker.Name.TextValue),
+                     this.npcService.TryGetNpcByInfo(TalkUtils.NormalizePunctuation(speakerName.TextValue),
                          out var npcInfo) &&
                      this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
             {
@@ -348,10 +350,10 @@ namespace TextToTalk
                     : Gender.None;
 
                 // Say the thing
-                var preset = GetVoiceForSpeaker(speaker?.Name.TextValue, gender);
+                var preset = GetVoiceForSpeaker(speakerName.TextValue, gender);
                 if (preset != null)
                 {
-                    this.backendManager.Say(source, preset, speaker?.Name.TextValue ?? "", cleanText);
+                    this.backendManager.Say(source, preset, speakerName.TextValue ?? "", cleanText);
                 }
                 else
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -110,11 +111,28 @@ public class ChatMessageHandler : IDisposable
             textValue = $"{speakerNameToSay} says {textValue}";
         }
 
-        // Find the game object this speaker is representing
-        var speaker = ObjectTableUtils.GetGameObjectByName(this.objects, sender.TextValue);
+        // Find the game object this speaker represents
+        var speaker = ObjectTableUtils.GetGameObjectByName(this.objects, sender);
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
-        OnTextEmit.Invoke(new ChatTextEmitEvent(TextSource.Chat, sender, textValue, speaker, type));
+        OnTextEmit.Invoke(new ChatTextEmitEvent(
+            TextSource.Chat,
+            GetCleanSpeakerName(speaker, sender),
+            textValue,
+            speaker,
+            type));
+    }
+
+    private static SeString GetCleanSpeakerName(GameObject? speaker, SeString sender)
+    {
+        // Get the speaker name from their entity data, if possible
+        if (speaker != null)
+        {
+            return speaker.Name;
+        }
+
+        // Parse the speaker name from chat and hope it's right
+        return TalkUtils.TryGetEntityName(sender, out var senderName) ? senderName : sender;
     }
 
     public void Dispose()

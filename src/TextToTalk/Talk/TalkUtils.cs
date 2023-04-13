@@ -9,11 +9,20 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 
 namespace TextToTalk.Talk
 {
-    public static class TalkUtils
+    public static partial class TalkUtils
     {
-        private static readonly Regex Speakable = new(@"\p{L}+|\p{M}+|\p{N}+", RegexOptions.Compiled);
-        private static readonly Regex Stutter = new(@"(?<=\s|^)\p{L}{1,2}-", RegexOptions.Compiled);
-        private static readonly Regex Bracketed = new(@"<[^<]*>", RegexOptions.Compiled);
+        [GeneratedRegex(@"\p{L}+|\p{M}+|\p{N}+|\s+", RegexOptions.Compiled)]
+        private static partial Regex SpeakableRegex();
+
+        [GeneratedRegex(@"(?<=\s|^)\p{L}{1,2}-", RegexOptions.Compiled)]
+        private static partial Regex StutterRegex();
+
+        [GeneratedRegex(@"<[^<]*>", RegexOptions.Compiled)]
+        private static partial Regex BracketedRegex();
+
+        private static readonly Regex Speakable = SpeakableRegex();
+        private static readonly Regex Stutter = StutterRegex();
+        private static readonly Regex Bracketed = BracketedRegex();
 
         public static unsafe AddonTalkText ReadTalkAddon(AddonTalk* talkAddon)
         {
@@ -95,20 +104,16 @@ namespace TextToTalk.Talk
             return cleanString.Build().TextValue;
         }
 
-        public static bool TryGetPlayerName(SeString input, out string name)
+        public static bool TryGetEntityName(SeString input, out string name)
         {
-            name = string.Empty;
+            name = string.Join("", Speakable.Matches(input.TextValue));
             foreach (var p in input.Payloads)
             {
-                DetailedLog.Info(p.ToString() ?? string.Empty);
-                switch (p)
+                if (p is PlayerPayload pp)
                 {
-                    case PlayerPayload pp:
-                        name = pp.PlayerName;
-                        return true;
-                    case TextPayload tp:
-                        name = tp.Text ?? string.Empty;
-                        break;
+                    // Simplest case; the payload has the raw name
+                    name = pp.PlayerName;
+                    return true;
                 }
             }
 
