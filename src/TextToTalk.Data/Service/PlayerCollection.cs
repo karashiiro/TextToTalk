@@ -1,4 +1,5 @@
-﻿using LiteDB;
+﻿using System.Diagnostics.CodeAnalysis;
+using LiteDB;
 using TextToTalk.Data.Model;
 
 namespace TextToTalk.Data.Service;
@@ -19,12 +20,13 @@ public class PlayerCollection
         return GetCollection().FindAll();
     }
 
-    public Player? FetchPlayerByNameAndWorld(string name, uint worldId)
+    public bool TryFetchPlayerByNameAndWorld(string name, uint worldId, [NotNullWhen(true)] out Player? player)
     {
         var collection = GetCollection();
-        return collection.Query()
+        player = collection.Query()
             .Where(p => p.Name == name && p.WorldId == worldId)
             .FirstOrDefault();
+        return player != null;
     }
 
     public void StorePlayer(Player player)

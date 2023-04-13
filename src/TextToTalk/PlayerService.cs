@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TextToTalk.Data.Model;
 using TextToTalk.Data.Service;
@@ -47,10 +48,9 @@ public class PlayerService
         this.playerVoices.Remove(info.Id);
     }
 
-    public bool TryGetPlayer(string name, uint worldId, out Player? info)
+    public bool TryGetPlayer(string name, uint worldId, [NotNullWhen(true)] out Player? info)
     {
-        info = this.players.FetchPlayerByNameAndWorld(name, worldId);
-        return info != null;
+        return this.players.TryFetchPlayerByNameAndWorld(name, worldId, out info);
     }
 
     public bool TryGetPlayerVoice(Player? info, out VoicePreset? voice)
