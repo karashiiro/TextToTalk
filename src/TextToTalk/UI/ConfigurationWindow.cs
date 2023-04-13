@@ -11,6 +11,7 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using TextToTalk.Backends;
+using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.UI
@@ -295,7 +296,7 @@ namespace TextToTalk.UI
             var presets = this.config.GetVoicePresetsForBackend(this.config.Backend).ToList();
             presets.Sort((a, b) => a.Id - b.Id);
             var presetArray = presets.Select(p => p.Name).ToArray();
-            var toDelete = new List<PlayerInfo>();
+            var toDelete = new List<Player>();
             Components.Table($"##{MemoizedId.Create()}", tableSize, ImGuiTableFlags.Borders,
                 () =>
                 {
@@ -306,18 +307,17 @@ namespace TextToTalk.UI
                     ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
                     ImGui.TableHeadersRow();
                 },
-                () => this.config.Players
+                () => this.players
+                    .GetAllPlayers()
                     .Select(row =>
                     {
-                        var (id, playerInfo) = row;
-
-                        if (!this.playerWorldEditing.TryGetValue(id, out var worldName))
+                        if (!this.playerWorldEditing.TryGetValue(row.Id, out var worldName))
                         {
-                            var world = data.GetExcelSheet<World>()?.GetRow(playerInfo.WorldId);
-                            this.playerWorldEditing[id] = world?.Name.ToString() ?? "";
+                            var world = data.GetExcelSheet<World>()?.GetRow(row.WorldId);
+                            this.playerWorldEditing[row.Id] = world?.Name.ToString() ?? "";
                         }
 
-                        return (id, playerInfo, worldName);
+                        return (row.Id, row, worldName);
                     }),
                 row =>
                 {
@@ -348,7 +348,7 @@ namespace TextToTalk.UI
                     if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
                     {
                         playerInfo.Name = name;
-                        this.config.Save();
+                        this.players.UpdatePlayer(playerInfo);
                         DetailedLog.Debug($"Updated player name: {playerInfo.Name}@{worldName ?? ""}");
                     }
                 },
@@ -370,7 +370,7 @@ namespace TextToTalk.UI
                         {
                             this.playerWorldValid[id] = true;
                             playerInfo.WorldId = worldPending.RowId;
-                            this.config.Save();
+                            this.players.UpdatePlayer(playerInfo);
                             DetailedLog.Debug($"Updated player world: {playerInfo.Name}@{worldPending.Name}");
                         }
                         else
@@ -407,6 +407,7 @@ namespace TextToTalk.UI
                             presets.Count))
                     {
                         this.players.SetPlayerVoice(playerInfo, presets[presetIndex]);
+                        this.players.UpdatePlayer(playerInfo);
                         this.config.Save();
                         DetailedLog.Debug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
                     }
@@ -418,8 +419,6 @@ namespace TextToTalk.UI
                 {
                     this.players.DeletePlayer(playerInfo);
                 }
-
-                this.config.Save();
             }
 
             ImGui.InputText($"Player name##{MemoizedId.Create()}", ref this.playerName, 32);

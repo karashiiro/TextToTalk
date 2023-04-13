@@ -58,6 +58,11 @@
         "resolved": "2.1.11",
         "contentHash": "9qlAWoRRTiL/geAvuwR/g6Bcbrd/bJJgVnB/RurBiyKs6srsP0bvpoo8IK+Eg8EA6jWeM6/YJWs66w4FIAzqPw=="
       },
+      "LiteDB": {
+        "type": "Transitive",
+        "resolved": "5.0.16",
+        "contentHash": "DMUYdRlgNbrSlyWzdQ4GqW934ntNHBGWMTNQlOL4hWz8WnveY6V9ZGo2ntPrSATW7kat8v5VoCXGSzToPiwZWw=="
+      },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
         "resolved": "17.5.0",
@@ -1172,12 +1177,19 @@
           "System.Drawing.Common": "[7.0.0, )",
           "System.Reactive": "[5.0.0, )",
           "System.Speech": "[7.0.0, )",
+          "TextToTalk.Data": "[1.0.0, )",
           "TextToTalk.Lexicons": "[1.0.0, )",
           "TextToTalk.Lexicons.Updater": "[1.0.0, )",
           "TextToTalk.UI.Core": "[1.0.0, )",
           "TextToTalk.UngenderedOverrides": "[1.0.0, )",
           "VoiceUnlocker": "[1.0.0, )",
           "websocket-sharp": "[1.0.0, )"
+        }
+      },
+      "texttotalk.data": {
+        "type": "Project",
+        "dependencies": {
+          "LiteDB": "[5.0.16, )"
         }
       },
       "texttotalk.lexicons": {

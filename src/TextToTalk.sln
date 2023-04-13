@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToTalk.UI.Core", "TextT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToTalk.UI.SourceGeneration.Tests", "TextToTalk.UI.SourceGeneration.Tests\TextToTalk.UI.SourceGeneration.Tests.csproj", "{651C8C36-8A66-4A95-9366-8EFF58FD2025}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextToTalk.Data", "TextToTalk.Data\TextToTalk.Data.csproj", "{0A53F805-0068-4AD7-A851-77275665630F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,10 @@ Global
 		{651C8C36-8A66-4A95-9366-8EFF58FD2025}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{651C8C36-8A66-4A95-9366-8EFF58FD2025}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{651C8C36-8A66-4A95-9366-8EFF58FD2025}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A53F805-0068-4AD7-A851-77275665630F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A53F805-0068-4AD7-A851-77275665630F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A53F805-0068-4AD7-A851-77275665630F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A53F805-0068-4AD7-A851-77275665630F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
