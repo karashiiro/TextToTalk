@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TextToTalk.Data.Model;
 using TextToTalk.Data.Service;
@@ -40,10 +41,9 @@ public class NpcService
         this.npcVoices.Remove(info.Id);
     }
 
-    public bool TryGetNpc(string name, out Npc? info)
+    public bool TryGetNpc(string name, [NotNullWhen(true)] out Npc? info)
     {
-        info = this.npc.FetchNpcByName(name);
-        return info != null;
+        return this.npc.TryFetchNpcByName(name, out info);
     }
 
     public bool TryGetNpcVoice(Npc? info, out VoicePreset? voice)

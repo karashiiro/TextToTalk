@@ -1,4 +1,5 @@
-﻿using LiteDB;
+﻿using System.Diagnostics.CodeAnalysis;
+using LiteDB;
 using TextToTalk.Data.Model;
 
 namespace TextToTalk.Data.Service;
@@ -19,12 +20,13 @@ public class NpcCollection
         return GetCollection().FindAll();
     }
 
-    public Npc? FetchNpcByName(string name)
+    public bool TryFetchNpcByName(string name, [NotNullWhen(true)] out Npc? npc)
     {
         var collection = GetCollection();
-        return collection.Query()
+        npc = collection.Query()
             .Where(npc => npc.Name == name)
             .FirstOrDefault();
+        return npc != null;
     }
 
     public void StoreNpc(Npc npc)
