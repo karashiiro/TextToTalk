@@ -469,7 +469,7 @@ namespace TextToTalk.UI
             var presets = this.config.GetVoicePresetsForBackend(this.config.Backend).ToList();
             presets.Sort((a, b) => a.Id - b.Id);
             var presetArray = presets.Select(p => p.Name).ToArray();
-            var toDelete = new List<NpcInfo>();
+            var toDelete = new List<Npc>();
             Components.Table($"##{MemoizedId.Create()}", tableSize, ImGuiTableFlags.Borders,
                 () =>
                 {
@@ -479,7 +479,9 @@ namespace TextToTalk.UI
                     ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 300f);
                     ImGui.TableHeadersRow();
                 },
-                () => this.config.Npcs,
+                () => this.npc
+                    .GetAllNpcs()
+                    .Select(npc => { return (npc.Id, npc); }),
                 row =>
                 {
                     var (id, npcInfo) = row;
@@ -535,8 +537,6 @@ namespace TextToTalk.UI
                 {
                     this.npc.DeleteNpc(npcInfo);
                 }
-
-                this.config.Save();
             }
 
             ImGui.InputText($"NPC name##{MemoizedId.Create()}", ref this.npcName, 32);

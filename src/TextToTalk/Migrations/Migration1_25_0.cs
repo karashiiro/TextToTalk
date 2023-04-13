@@ -11,15 +11,17 @@ namespace TextToTalk.Migrations;
 public class Migration1_25_0 : IConfigurationMigration
 {
     private readonly PlayerCollection playerCollection;
+    private readonly NpcCollection npcCollection;
 
-    public Migration1_25_0(PlayerCollection playerCollection)
+    public Migration1_25_0(PlayerCollection playerCollection, NpcCollection npcCollection)
     {
         this.playerCollection = playerCollection;
+        this.npcCollection = npcCollection;
     }
     
     public bool ShouldMigrate(PluginConfiguration config)
     {
-        return config.Players?.Any() == true;
+        return !config.MigratedTo1_25_0;
     }
 
     public void Migrate(PluginConfiguration config)
@@ -33,7 +35,17 @@ public class Migration1_25_0 : IConfigurationMigration
                 WorldId = playerInfo.WorldId,
             });
         }
+        
+        foreach (var (_, npcInfo) in config.Npcs)
+        {
+            this.npcCollection.StoreNpc(new Npc
+            {
+                Id = npcInfo.LocalId,
+                Name = npcInfo.Name,
+            });
+        }
 
         config.Players = new Dictionary<Guid, dynamic>();
+        config.Npcs = new Dictionary<Guid, dynamic>();
     }
 }

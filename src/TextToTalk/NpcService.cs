@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TextToTalk.Data.Model;
+using TextToTalk.Data.Service;
 
 namespace TextToTalk;
 
 public class NpcService
 {
-    private readonly IDictionary<Guid, NpcInfo> npc;
+    private readonly NpcCollection npc;
     private readonly IDictionary<Guid, int> npcVoices;
     private readonly IList<VoicePreset> voices;
 
-    public NpcService(IDictionary<Guid, NpcInfo> npc, IDictionary<Guid, int> npcVoices,
+    public NpcService(NpcCollection npc, IDictionary<Guid, int> npcVoices,
         IList<VoicePreset> voices)
     {
         this.npc = npc;
@@ -18,39 +20,47 @@ public class NpcService
         this.voices = voices;
     }
 
-    public bool AddNpc(string? name)
+    public IEnumerable<Npc> GetAllNpcs()
     {
-        if (TryGetNpcByInfo(name, out _)) return false;
+        return this.npc.GetAllNpcs();
+    }
+
+    public bool AddNpc(string name)
+    {
+        if (TryGetNpc(name, out _)) return false;
         var localId = Guid.NewGuid();
-        var info = new NpcInfo { LocalId = localId, Name = name };
-        this.npc[localId] = info;
+        var info = new Npc { Id = localId, Name = name };
+        this.npc.StoreNpc(info);
         return true;
     }
 
-    public void DeleteNpc(NpcInfo info)
+    public void DeleteNpc(Npc info)
     {
-        this.npc.Remove(info.LocalId);
-        this.npcVoices.Remove(info.LocalId);
+        this.npc.DeleteNpcById(info.Id);
+        this.npcVoices.Remove(info.Id);
     }
 
-    public bool TryGetNpcByInfo(string? name, out NpcInfo info)
+    public bool TryGetNpc(string name, out Npc? info)
     {
-        info = this.npc.Values.FirstOrDefault(info =>
-            string.Equals(info.Name, name, StringComparison.InvariantCultureIgnoreCase));
+        info = this.npc.FetchNpcByName(name);
         return info != null;
     }
 
-    public bool TryGetNpcVoice(NpcInfo info, out VoicePreset voice)
+    public bool TryGetNpcVoice(Npc? info, out VoicePreset? voice)
     {
-        voice = !this.npcVoices.TryGetValue(info.LocalId, out var voiceId)
-            ? null
-            : this.voices.FirstOrDefault(v => v.Id == voiceId);
+        voice = null;
+        if (info is null) return false;
+        if (this.npcVoices.TryGetValue(info.Id, out var voiceId))
+        {
+            voice = this.voices.FirstOrDefault(v => v.Id == voiceId);
+        }
+
         return voice != null;
     }
 
-    public bool SetNpcVoice(NpcInfo info, VoicePreset voice)
+    public bool SetNpcVoice(Npc info, VoicePreset voice)
     {
-        if (!this.npc.ContainsKey(info.LocalId))
+        if (info.Name is null || !TryGetNpc(info.Name, out _))
         {
             return false;
         }
@@ -60,7 +70,7 @@ public class NpcService
             return false;
         }
 
-        this.npcVoices[info.LocalId] = voice.Id;
+        this.npcVoices[info.Id] = voice.Id;
 
         return true;
     }
