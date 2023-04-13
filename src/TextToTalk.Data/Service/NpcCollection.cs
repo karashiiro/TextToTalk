@@ -15,11 +15,21 @@ public class NpcCollection
         this.db = db;
     }
 
-    public IEnumerable<Npc> GetAllNpcs()
+    /// <summary>
+    /// Fetches all stored NPCs from the database.
+    /// </summary>
+    /// <returns>The stored NPCs.</returns>
+    public IEnumerable<Npc> FetchAllNpcs()
     {
         return GetCollection().FindAll();
     }
 
+    /// <summary>
+    /// Fetches an NPC from the database using their name and world.
+    /// </summary>
+    /// <param name="name">The NPC's name.</param>
+    /// <param name="npc">The NPC, or null if they couldn't be found.</param>
+    /// <returns>If the NPC could be found.</returns>
     public bool TryFetchNpcByName(string name, [NotNullWhen(true)] out Npc? npc)
     {
         var collection = GetCollection();
@@ -29,6 +39,10 @@ public class NpcCollection
         return npc != null;
     }
 
+    /// <summary>
+    /// Stores an NPC in the database.
+    /// </summary>
+    /// <param name="npc">The NPC to store.</param>
     public void StoreNpc(Npc npc)
     {
         var collection = GetCollection();
@@ -38,6 +52,10 @@ public class NpcCollection
         }
     }
 
+    /// <summary>
+    /// Deletes an NPC from the database using their local ID.
+    /// </summary>
+    /// <param name="id">The NPC's ID.</param>
     public void DeleteNpcById(Guid id)
     {
         var collection = GetCollection();

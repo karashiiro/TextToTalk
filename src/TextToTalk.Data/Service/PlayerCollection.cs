@@ -15,11 +15,22 @@ public class PlayerCollection
         this.db = db;
     }
 
-    public IEnumerable<Player> GetAllPlayers()
+    /// <summary>
+    /// Fetches all stored players from the database.
+    /// </summary>
+    /// <returns>The stored players.</returns>
+    public IEnumerable<Player> FetchAllPlayers()
     {
         return GetCollection().FindAll();
     }
 
+    /// <summary>
+    /// Fetches a player from the database using their name and world.
+    /// </summary>
+    /// <param name="name">The player's name.</param>
+    /// <param name="worldId">The player's world ID.</param>
+    /// <param name="player">The player, or null if they couldn't be found.</param>
+    /// <returns>If the player could be found.</returns>
     public bool TryFetchPlayerByNameAndWorld(string name, uint worldId, [NotNullWhen(true)] out Player? player)
     {
         var collection = GetCollection();
@@ -29,6 +40,10 @@ public class PlayerCollection
         return player != null;
     }
 
+    /// <summary>
+    /// Stores a player in the database.
+    /// </summary>
+    /// <param name="player">The player to store.</param>
     public void StorePlayer(Player player)
     {
         var collection = GetCollection();
@@ -38,6 +53,10 @@ public class PlayerCollection
         }
     }
 
+    /// <summary>
+    /// Deletes a player from the database using their local ID.
+    /// </summary>
+    /// <param name="id">The player's ID.</param>
     public void DeletePlayerById(Guid id)
     {
         var collection = GetCollection();

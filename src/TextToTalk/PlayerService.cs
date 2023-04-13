@@ -25,7 +25,7 @@ public class PlayerService
 
     public IEnumerable<Player> GetAllPlayers()
     {
-        return this.players.GetAllPlayers();
+        return this.players.FetchAllPlayers();
     }
 
     public void UpdatePlayer(Player player)

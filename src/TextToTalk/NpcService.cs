@@ -23,7 +23,7 @@ public class NpcService
 
     public IEnumerable<Npc> GetAllNpcs()
     {
-        return this.npc.GetAllNpcs();
+        return this.npc.FetchAllNpcs();
     }
 
     public bool AddNpc(string name)
