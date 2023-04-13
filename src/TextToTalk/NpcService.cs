@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TextToTalk.Data.Model;
@@ -10,14 +9,11 @@ namespace TextToTalk;
 public class NpcService
 {
     private readonly NpcCollection npc;
-    private readonly IDictionary<Guid, int> npcVoices;
     private readonly IList<VoicePreset> voices;
 
-    public NpcService(NpcCollection npc, IDictionary<Guid, int> npcVoices,
-        IList<VoicePreset> voices)
+    public NpcService(NpcCollection npc, IList<VoicePreset> voices)
     {
         this.npc = npc;
-        this.npcVoices = npcVoices;
         this.voices = voices;
     }
 
@@ -29,8 +25,7 @@ public class NpcService
     public bool AddNpc(string name)
     {
         if (TryGetNpc(name, out _)) return false;
-        var localId = Guid.NewGuid();
-        var info = new Npc { Id = localId, Name = name };
+        var info = new Npc { Name = name };
         this.npc.StoreNpc(info);
         return true;
     }
@@ -38,7 +33,7 @@ public class NpcService
     public void DeleteNpc(Npc info)
     {
         this.npc.DeleteNpcById(info.Id);
-        this.npcVoices.Remove(info.Id);
+        this.npc.DeleteNpcVoiceByNpcId(info.Id);
     }
 
     public bool TryGetNpc(string name, [NotNullWhen(true)] out Npc? info)
@@ -50,9 +45,9 @@ public class NpcService
     {
         voice = null;
         if (info is null) return false;
-        if (this.npcVoices.TryGetValue(info.Id, out var voiceId))
+        if (this.npc.TryFetchNpcVoiceByNpcId(info.Id, out var voiceInfo))
         {
-            voice = this.voices.FirstOrDefault(v => v.Id == voiceId);
+            voice = this.voices.FirstOrDefault(v => v.Id == voiceInfo.VoicePresetId);
         }
 
         return voice != null;
@@ -70,7 +65,12 @@ public class NpcService
             return false;
         }
 
-        this.npcVoices[info.Id] = voice.Id;
+        if (TryGetNpcVoice(info, out _))
+        {
+            this.npc.DeleteNpcVoiceByNpcId(info.Id);
+        }
+
+        this.npc.StoreNpcVoice(new NpcVoice { NpcId = info.Id, VoicePresetId = voice.Id });
 
         return true;
     }

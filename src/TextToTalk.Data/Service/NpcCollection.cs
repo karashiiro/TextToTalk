@@ -6,7 +6,8 @@ namespace TextToTalk.Data.Service;
 
 public class NpcCollection
 {
-    private const string CollectionName = "npc";
+    private const string NpcCollectionName = "npc";
+    private const string NpcVoiceCollectionName = "npc_voice";
 
     private readonly ILiteDatabase db;
 
@@ -21,7 +22,7 @@ public class NpcCollection
     /// <returns>The stored NPCs.</returns>
     public IEnumerable<Npc> FetchAllNpcs()
     {
-        return GetCollection().FindAll();
+        return GetNpcCollection().FindAll();
     }
 
     /// <summary>
@@ -32,11 +33,26 @@ public class NpcCollection
     /// <returns>If the NPC could be found.</returns>
     public bool TryFetchNpcByName(string name, [NotNullWhen(true)] out Npc? npc)
     {
-        var collection = GetCollection();
+        var collection = GetNpcCollection();
         npc = collection.Query()
             .Where(npc => npc.Name == name)
             .FirstOrDefault();
         return npc != null;
+    }
+
+    /// <summary>
+    /// Fetches an NPC voice from the database using their local ID.
+    /// </summary>
+    /// <param name="id">The NPC's local ID.</param>
+    /// <param name="voice">The voice info, or null if it couldn't be found.</param>
+    /// <returns>If the voice could be found.</returns>
+    public bool TryFetchNpcVoiceByNpcId(Guid id, [NotNullWhen(true)] out NpcVoice? voice)
+    {
+        var collection = GetNpcVoiceCollection();
+        voice = collection.Query()
+            .Where(v => v.NpcId == id)
+            .FirstOrDefault();
+        return voice != null;
     }
 
     /// <summary>
@@ -45,10 +61,23 @@ public class NpcCollection
     /// <param name="npc">The NPC to store.</param>
     public void StoreNpc(Npc npc)
     {
-        var collection = GetCollection();
+        var collection = GetNpcCollection();
         if (!collection.Update(npc.Id, npc))
         {
             collection.Insert(npc);
+        }
+    }
+
+    /// <summary>
+    /// Stores an NPC voice in the database.
+    /// </summary>
+    /// <param name="voice">The NPC voice to store.</param>
+    public void StoreNpcVoice(NpcVoice voice)
+    {
+        var collection = GetNpcVoiceCollection();
+        if (!collection.Update(voice.Id, voice))
+        {
+            collection.Insert(voice);
         }
     }
 
@@ -58,13 +87,30 @@ public class NpcCollection
     /// <param name="id">The NPC's ID.</param>
     public void DeleteNpcById(Guid id)
     {
-        var collection = GetCollection();
+        var collection = GetNpcCollection();
         collection.Delete(id);
     }
 
-    private ILiteCollection<Npc> GetCollection()
+    /// <summary>
+    /// Deletes an NPC voice from the database using their local ID.
+    /// </summary>
+    /// <param name="id">The NPC's ID.</param>
+    public void DeleteNpcVoiceByNpcId(Guid id)
     {
-        var collection = this.db.GetCollection<Npc>(CollectionName);
+        var collection = GetNpcVoiceCollection();
+        collection.DeleteMany(v => v.NpcId == id);
+    }
+
+    private ILiteCollection<Npc> GetNpcCollection()
+    {
+        var collection = this.db.GetCollection<Npc>(NpcCollectionName);
+        EnsureIndices(collection);
+        return collection;
+    }
+
+    private ILiteCollection<NpcVoice> GetNpcVoiceCollection()
+    {
+        var collection = this.db.GetCollection<NpcVoice>(NpcVoiceCollectionName);
         EnsureIndices(collection);
         return collection;
     }
@@ -73,6 +119,11 @@ public class NpcCollection
     {
         // "By default, an index over _id is created upon the first insertion."
         // https://www.litedb.org/docs/indexes/
-        collection.EnsureIndex(p => p.Name);
+        collection.EnsureIndex(npc => npc.Name);
+    }
+
+    private static void EnsureIndices(ILiteCollection<NpcVoice> collection)
+    {
+        collection.EnsureIndex(v => v.NpcId);
     }
 }

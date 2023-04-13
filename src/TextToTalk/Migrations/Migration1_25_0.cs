@@ -36,6 +36,15 @@ public class Migration1_25_0 : IConfigurationMigration
             });
         }
         
+        foreach (var (playerId, voiceId) in config.PlayerVoicePresets)
+        {
+            this.playerCollection.StorePlayerVoice(new PlayerVoice
+            {
+                PlayerId = playerId,
+                VoicePresetId = voiceId,
+            });
+        }
+        
         foreach (var (_, npcInfo) in config.Npcs)
         {
             this.npcCollection.StoreNpc(new Npc
@@ -44,8 +53,21 @@ public class Migration1_25_0 : IConfigurationMigration
                 Name = npcInfo.Name,
             });
         }
-
+        
+        foreach (var (npcId, voiceId) in config.NpcVoicePresets)
+        {
+            this.npcCollection.StoreNpcVoice(new NpcVoice
+            {
+                NpcId = npcId,
+                VoicePresetId = voiceId,
+            });
+        }
+        
         config.Players = new Dictionary<Guid, dynamic>();
+        config.PlayerVoicePresets = new Dictionary<Guid, int>();
         config.Npcs = new Dictionary<Guid, dynamic>();
+        config.NpcVoicePresets = new Dictionary<Guid, int>();
+
+        config.MigratedTo1_25_0 = true;
     }
 }

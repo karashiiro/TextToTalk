@@ -125,10 +125,8 @@ namespace TextToTalk
             this.backendManager = new VoiceBackendManager(this.config, this.http);
             this.handleFailedToBindWsPort = HandleFailedToBindWSPort();
 
-            this.playerService = new PlayerService(playerCollection, this.config.PlayerVoicePresets,
-                this.config.GetVoiceConfig().VoicePresets);
-            this.npcService = new NpcService(npcCollection, this.config.NpcVoicePresets,
-                this.config.GetVoiceConfig().VoicePresets);
+            this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
+            this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);
 
             var unlockerResultWindow = new UnlockerResultWindow();
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
