@@ -46,7 +46,7 @@ public class NpcService
         return this.npc.TryFetchNpcByName(name, out info);
     }
 
-    public bool TryGetNpcVoice(Npc? info, out VoicePreset? voice)
+    public bool TryGetNpcVoice(Npc? info, [NotNullWhen(true)] out VoicePreset? voice)
     {
         voice = null;
         if (info is null) return false;

@@ -327,37 +327,31 @@ namespace TextToTalk
                 return;
             }
 
+            // Some characters have emdashes in their names, which should be treated
+            // as hyphens for the sake of the plugin.
+            var cleanSpeakerName = TalkUtils.NormalizePunctuation(speakerName.TextValue);
+
+            // Get the speaker's voice preset
+            var preset = GetVoicePreset(speaker, cleanSpeakerName);
+
+            // Say the thing
+            BackendSay(source, preset, cleanSpeakerName, cleanText);
+        }
+
+        private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
+        {
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is PlayerCharacter pc &&
-                this.playerService.TryGetPlayer(speakerName.TextValue, pc.HomeWorld.Id, out var playerInfo) &&
+                this.playerService.TryGetPlayer(speakerName, pc.HomeWorld.Id, out var playerInfo) &&
                 this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
             {
-                if (playerVoice?.EnabledBackend != this.config.Backend)
-                {
-                    DetailedLog.Error(
-                        $"Voice preset {playerVoice?.Name} is not compatible with the {this.config.Backend} backend");
-                }
-                else
-                {
-                    this.backendManager.Say(source, playerVoice, speakerName.TextValue, cleanText);
-                }
+                return playerVoice;
             }
             else if (speaker is not null &&
-                     // Some characters have emdashes in their names, which should be treated
-                     // as hyphens for the sake of the plugin.
-                     this.npcService.TryGetNpc(TalkUtils.NormalizePunctuation(speakerName.TextValue),
-                         out var npcInfo) &&
+                     this.npcService.TryGetNpc(speakerName, out var npcInfo) &&
                      this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
             {
-                if (npcVoice?.EnabledBackend != this.config.Backend)
-                {
-                    DetailedLog.Error(
-                        $"Voice preset {npcVoice?.Name} is not compatible with the {this.config.Backend} backend");
-                }
-                else
-                {
-                    this.backendManager.Say(source, npcVoice, speakerName.TextValue, cleanText);
-                }
+                return npcVoice;
             }
             else
             {
@@ -366,16 +360,26 @@ namespace TextToTalk
                     ? CharacterGenderUtils.GetCharacterGender(speaker, this.ungenderedOverrides)
                     : Gender.None;
 
-                // Say the thing
-                var preset = GetVoiceForSpeaker(speakerName.TextValue, gender);
-                if (preset != null)
-                {
-                    this.backendManager.Say(source, preset, speakerName.TextValue, cleanText);
-                }
-                else
-                {
-                    DetailedLog.Error("Attempted to speak with null voice preset");
-                }
+                return GetVoiceForSpeaker(speakerName, gender);
+            }
+        }
+
+        private void BackendSay(TextSource source, VoicePreset? voicePreset, string speaker, string text)
+        {
+            if (voicePreset is null)
+            {
+                DetailedLog.Error("Attempted to speak with null voice preset");
+                return;
+            }
+
+            if (voicePreset.EnabledBackend != this.config.Backend)
+            {
+                DetailedLog.Error(
+                    $"Voice preset {voicePreset.Name} is not compatible with the {this.config.Backend} backend");
+            }
+            else
+            {
+                this.backendManager.Say(source, voicePreset, speaker, text);
             }
         }
 
