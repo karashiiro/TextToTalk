@@ -65,6 +65,7 @@ namespace TextToTalk
         private readonly SoundHandler soundHandler;
         private readonly RateLimiter rateLimiter;
         private readonly UngenderedOverrideManager ungenderedOverrides;
+        private readonly ILiteDatabase playerDb;
         private readonly PlayerService playerService;
         private readonly NpcService npcService;
         private readonly WindowSystem windows;
@@ -105,8 +106,9 @@ namespace TextToTalk
             this.chat = chat;
             this.framework = framework;
 
-            var playerDb = new LiteDatabase(GetDatabasePath("Player.db"));
-            var playerCollection = new PlayerCollection(playerDb);
+            CreateDatabasePath();
+            this.playerDb = new LiteDatabase(GetDatabasePath("Player.db"));
+            var playerCollection = new PlayerCollection(this.playerDb);
 
             this.windows = new WindowSystem("TextToTalk");
 
@@ -178,6 +180,12 @@ namespace TextToTalk
 
             this.handleTextCancel = HandleTextCancel();
             this.handleTextEmit = HandleTextEmit();
+        }
+
+        private void CreateDatabasePath()
+        {
+            var path = Path.Combine(this.pluginInterface.GetPluginConfigDirectory(), "db");
+            Directory.CreateDirectory(path);
         }
 
         private string GetDatabasePath(string fileName)
@@ -563,6 +571,8 @@ namespace TextToTalk
 
             this.backendManager.Dispose();
             this.http.Dispose();
+
+            this.playerDb.Dispose();
 
             this.addonBattleTalkManager.Dispose();
             this.addonTalkManager.Dispose();
