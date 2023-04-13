@@ -53,7 +53,7 @@ public class PlayerService
         return this.players.TryFetchPlayerByNameAndWorld(name, worldId, out info);
     }
 
-    public bool TryGetPlayerVoice(Player? info, out VoicePreset? voice)
+    public bool TryGetPlayerVoice(Player? info, [NotNullWhen(true)] out VoicePreset? voice)
     {
         voice = null;
         if (info is null) return false;
