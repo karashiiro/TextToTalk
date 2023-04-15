@@ -1,5 +1,6 @@
 ﻿namespace TextToTalk.Data.Model;
 
+// TODO: After moving voice presets into LiteDB, create a DbRef from player to voice preset and delete this
 public class PlayerVoice
 {
     public Guid Id { get; init; }
