@@ -45,7 +45,7 @@ public class AddonBattleTalkHandler : IDisposable
             void Handle(Framework _)
             {
                 if (!this.config.Enabled) return;
-                if (!this.config.ReadFromQuestTalkAddon) return;
+                if (!this.config.ReadFromBattleTalkAddon) return;
                 observer.OnNext(AddonPollSource.FrameworkUpdate);
             }
 
