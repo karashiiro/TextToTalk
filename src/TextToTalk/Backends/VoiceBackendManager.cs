@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using TextToTalk.Backends.Azure;
+using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -95,6 +96,7 @@ namespace TextToTalk.Backends
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
                 TTSBackend.Azure => new AzureBackend(this.config, this.http),
+                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http),
                 _ => throw new NotImplementedException(),
             };
         }

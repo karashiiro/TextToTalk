@@ -9,6 +9,7 @@ namespace TextToTalk.Backends
         AmazonPolly,
         Uberduck,
         Azure,
+        ElevenLabs,
     }
 
     public static class TTSBackendExtensions
@@ -22,6 +23,7 @@ namespace TextToTalk.Backends
                 TTSBackend.AmazonPolly => "Amazon Polly",
                 TTSBackend.Uberduck => "Uberduck",
                 TTSBackend.Azure => "Azure Cognitive Services",
+                TTSBackend.ElevenLabs => "ElevenLabs",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
@@ -35,6 +37,7 @@ namespace TextToTalk.Backends
                 TTSBackend.AmazonPolly => true,
                 TTSBackend.Uberduck => false,
                 TTSBackend.Azure => true,
+                TTSBackend.ElevenLabs => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
