@@ -43,12 +43,6 @@ public class AzureBackendUI
             this.model.LoginWith(region, subscriptionKey);
         }
 
-        var loginError = this.model.AzureLoginException?.Message;
-        if (loginError != null)
-        {
-            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
-        }
-
         ImGui.SameLine();
         if (ImGui.Button($"Register##{MemoizedId.Create()}"))
         {
@@ -57,6 +51,12 @@ public class AzureBackendUI
         }
 
         ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+
+        var loginError = this.model.AzureLoginException?.Message;
+        if (loginError != null)
+        {
+            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+        }
 
         ImGui.Spacing();
 

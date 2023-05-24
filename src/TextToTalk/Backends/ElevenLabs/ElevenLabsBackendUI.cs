@@ -10,27 +10,23 @@ public class ElevenLabsBackendUI
     private readonly ElevenLabsBackendUIModel model;
     private readonly PluginConfiguration config;
 
+    private string apiKey;
+
     public ElevenLabsBackendUI(ElevenLabsBackendUIModel model, PluginConfiguration config)
     {
         this.model = model;
         this.config = config;
+        this.apiKey = this.model.GetApiKey();
     }
 
     public void DrawSettings()
     {
-        var apiKey = this.model.GetApiKey();
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref apiKey, 100,
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref this.apiKey, 100,
             ImGuiInputTextFlags.Password);
 
         if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
-            this.model.LoginWith(apiKey);
-        }
-
-        var loginError = this.model.ElevenLabsLoginException?.Message;
-        if (loginError != null)
-        {
-            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+            this.model.LoginWith(this.apiKey);
         }
 
         ImGui.SameLine();
@@ -40,6 +36,12 @@ public class ElevenLabsBackendUI
         }
 
         ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+
+        var loginError = this.model.ElevenLabsLoginException?.Message;
+        if (loginError != null)
+        {
+            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+        }
 
         ImGui.Spacing();
 
