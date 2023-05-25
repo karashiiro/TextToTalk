@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using TextToTalk.UI;
 
@@ -44,6 +45,19 @@ public class ElevenLabsBackendUI
         }
 
         ImGui.Spacing();
+
+        // Show character quota
+        if (this.model.UserSubscriptionInfo != null)
+        {
+            var characterCount = this.model.UserSubscriptionInfo.CharacterCount;
+            var characterLimit = this.model.UserSubscriptionInfo.CharacterLimit;
+            var ratio = Convert.ToSingle(characterCount) / characterLimit;
+            var label = $"{characterCount}/{characterLimit}";
+            ImGui.ProgressBar(ratio, Vector2.Zero, label);
+            ImGui.SameLine(0, ImGui.GetStyle().ItemInnerSpacing.X);
+            ImGui.Text("Characters used");
+            ImGui.Spacing();
+        }
 
         var currentVoicePreset = this.model.GetCurrentVoicePreset();
 
