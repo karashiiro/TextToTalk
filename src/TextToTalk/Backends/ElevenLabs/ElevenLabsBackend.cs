@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Dalamud.Interface;
+using Dalamud.Interface.Internal.Notifications;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -8,11 +11,13 @@ public class ElevenLabsBackend : VoiceBackend
 {
     private readonly ElevenLabsBackendUI ui;
     private readonly ElevenLabsBackendUIModel uiModel;
+    private readonly UiBuilder uiBuilder;
 
-    public ElevenLabsBackend(PluginConfiguration config, HttpClient http)
+    public ElevenLabsBackend(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder)
     {
         this.uiModel = new ElevenLabsBackendUIModel(config, http);
         this.ui = new ElevenLabsBackendUI(uiModel, config);
+        this.uiBuilder = uiBuilder;
     }
 
     public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
@@ -33,6 +38,15 @@ public class ElevenLabsBackend : VoiceBackend
             catch (ElevenLabsUnauthorizedException e)
             {
                 DetailedLog.Error(e, "ElevenLabs API key is incorrect or invalid.");
+            }
+            catch (ElevenLabsFailedException e) when (e.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                DetailedLog.Error(e, $"Failed to make ElevenLabs TTS request ({e.StatusCode}).");
+                this.uiBuilder.AddNotification(
+                    "TTS is being rate-limited, please slow down.",
+                    title: null,
+                    NotificationType.Warning,
+                    10000);
             }
             catch (ElevenLabsFailedException e)
             {

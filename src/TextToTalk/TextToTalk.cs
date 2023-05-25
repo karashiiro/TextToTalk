@@ -123,7 +123,7 @@ namespace TextToTalk
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager = new VoiceBackendManager(this.config, this.http);
+            this.backendManager = new VoiceBackendManager(this.config, this.http, this.pluginInterface.UiBuilder);
             this.handleFailedToBindWsPort = HandleFailedToBindWSPort();
 
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);

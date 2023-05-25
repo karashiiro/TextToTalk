@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Numerics;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using Dalamud.Interface;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.Polly;
@@ -17,17 +18,19 @@ namespace TextToTalk.Backends
         private readonly HttpClient http;
         private readonly PluginConfiguration config;
         private readonly Subject<int> onFailedToBindWsPort;
+        private readonly UiBuilder uiBuilder;
 
         private IDisposable? handleFailedToBindWsPort;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
-        public VoiceBackendManager(PluginConfiguration config, HttpClient http)
+        public VoiceBackendManager(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder)
         {
             this.config = config;
             this.http = http;
             this.onFailedToBindWsPort = new Subject<int>();
+            this.uiBuilder = uiBuilder;
 
             SetBackend(this.config.Backend);
         }
@@ -96,8 +99,8 @@ namespace TextToTalk.Backends
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
                 TTSBackend.Azure => new AzureBackend(this.config, this.http),
-                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http),
-                _ => throw new NotImplementedException(),
+                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http, this.uiBuilder),
+                _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };
         }
 
