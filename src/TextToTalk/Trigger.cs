@@ -21,6 +21,7 @@ public class Trigger : ISaveable
 
     public bool Match(string? test)
     {
+        if (test is null) return false;
         if (!IsRegex) return test.Contains(Text);
 
         try

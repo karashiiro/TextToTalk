@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui;
 using FFXIVClientStructs.FFXIV.Client.UI;
+using TextToTalk.Utils;
 
 namespace TextToTalk.Talk;
 

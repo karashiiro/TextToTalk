@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui;
+using TextToTalk.Utils;
 
 namespace TextToTalk.Talk;
 

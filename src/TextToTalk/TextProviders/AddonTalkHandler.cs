@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Objects;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
+using TextToTalk.Utils;
 
 namespace TextToTalk.TextProviders;
 

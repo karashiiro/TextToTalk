@@ -102,6 +102,7 @@ public class ElevenLabsBackendUIModel : IDisposable
                 .Select(kvp =>
                     new KeyValuePair<string, IReadOnlyList<ElevenLabsVoice>>(kvp.Key, kvp.Value.AsReadOnly()))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            DetailedLog.Info("ElevenLabs authorization successful");
             return true;
         }
         catch (Exception e)
