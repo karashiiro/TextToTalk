@@ -61,6 +61,22 @@ public class ElevenLabsClient
         this.soundQueue.EnqueueSound(mp3Stream, source, StreamFormat.Mp3, volume);
     }
 
+    public async Task<ElevenLabsUserSubscriptionInfo> GetUserSubscriptionInfo()
+    {
+        if (!IsAuthorizationSet())
+        {
+            throw new ElevenLabsMissingCredentialsException("No ElevenLabs authorization keys have been configured.");
+        }
+
+        var res = await SendRequest<ElevenLabsUserSubscriptionInfo>("/v1/user/subscription");
+        if (res == null)
+        {
+            throw new InvalidOperationException("User subscription info endpoint returned null.");
+        }
+
+        return res;
+    }
+
     public async Task<IDictionary<string, IList<ElevenLabsVoice>>> GetVoices()
     {
         if (!IsAuthorizationSet())

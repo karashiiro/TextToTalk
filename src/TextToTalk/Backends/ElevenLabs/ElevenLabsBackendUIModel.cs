@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -28,6 +29,11 @@ public class ElevenLabsBackendUIModel : IDisposable
     /// Gets the exception thrown by the most recent login, or null if the login was successful.
     /// </summary>
     public Exception? ElevenLabsLoginException { get; private set; }
+    
+    /// <summary>
+    /// Gets the user's latest retrieved subscription info.
+    /// </summary>
+    public ElevenLabsUserSubscriptionInfo? UserSubscriptionInfo { get; private set; }
 
     /// <summary>
     /// Gets the valid voices for the current voice engine.
@@ -56,6 +62,11 @@ public class ElevenLabsBackendUIModel : IDisposable
     /// <returns>The client's current credentials.</returns>
     public string GetApiKey() => this.apiKey;
 
+    public async Task UpdateUserSubscriptionInfo()
+    {
+        UserSubscriptionInfo = await ElevenLabs.GetUserSubscriptionInfo();
+    }
+
     /// <summary>
     /// Logs in with the provided credentials.
     /// </summary>
@@ -69,6 +80,8 @@ public class ElevenLabsBackendUIModel : IDisposable
             ElevenLabsCredentialManager.SaveCredentials(apiKeyClean);
             this.apiKey = apiKeyClean;
         }
+
+        _ = UpdateUserSubscriptionInfo();
     }
 
     /// <summary>
