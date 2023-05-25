@@ -90,12 +90,20 @@ public static class DetailedLog
         int sourceLineNumber,
         IEnumerable<object> values)
     {
+#if DEBUG
         var debug = new object[] { memberName, sourceFilePath, sourceLineNumber };
         return values.Concat(debug).ToArray();
+#else
+        return values.ToArray();
+#endif
     }
 
     private static string WrapTemplate(string messageTemplate)
     {
+#if DEBUG
         return $"{messageTemplate}\nMember: {{CallerMemberName}}\nSource: {{CallerFilePath}}:line {{CallerLineNumber}}";
+#else
+        return $"{messageTemplate}";
+#endif
     }
 }
