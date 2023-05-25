@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -12,6 +14,8 @@ public class ElevenLabsBackendUIModel : IDisposable
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
 
     private readonly PluginConfiguration config;
+    private readonly ISubject<long> getUserSubscriptionInfoImmediately;
+    private readonly IDisposable observeUserSubscriptionInfo;
 
     private string apiKey;
 
@@ -29,7 +33,7 @@ public class ElevenLabsBackendUIModel : IDisposable
     /// Gets the exception thrown by the most recent login, or null if the login was successful.
     /// </summary>
     public Exception? ElevenLabsLoginException { get; private set; }
-    
+
     /// <summary>
     /// Gets the user's latest retrieved subscription info.
     /// </summary>
@@ -45,6 +49,8 @@ public class ElevenLabsBackendUIModel : IDisposable
         SoundQueue = new StreamSoundQueue();
         ElevenLabs = new ElevenLabsClient(SoundQueue, http);
         this.config = config;
+        this.getUserSubscriptionInfoImmediately = new BehaviorSubject<long>(0);
+        this.observeUserSubscriptionInfo = ObserveUserSubscriptionInfo();
         this.apiKey = "";
 
         this.Voices = new Dictionary<string, IReadOnlyList<ElevenLabsVoice>>();
@@ -56,15 +62,41 @@ public class ElevenLabsBackendUIModel : IDisposable
         }
     }
 
+    private IDisposable ObserveUserSubscriptionInfo()
+    {
+        return this.getUserSubscriptionInfoImmediately
+            .Throttle(TimeSpan.FromSeconds(3))
+            .SelectMany(_ => Observable.FromAsync(async () =>
+            {
+                try
+                {
+                    return await ElevenLabs.GetUserSubscriptionInfo();
+                }
+                catch (Exception ex)
+                {
+                    DetailedLog.Error(ex, "Failed to get user subscription info");
+                    return null;
+                }
+            }))
+            .Where(info => info is not null)
+            .SubscribeOn(TaskPoolScheduler.Default)
+            .Subscribe(
+                info => UserSubscriptionInfo = info,
+                ex => DetailedLog.Error(ex, "User subscription update stream has faulted"));
+    }
+
     /// <summary>
     /// Gets the client's current credentials.
     /// </summary>
     /// <returns>The client's current credentials.</returns>
     public string GetApiKey() => this.apiKey;
 
-    public async Task UpdateUserSubscriptionInfo()
+    /// <summary>
+    /// Dispatches a user subscription info update.
+    /// </summary>
+    public void UpdateUserSubscriptionInfo()
     {
-        UserSubscriptionInfo = await ElevenLabs.GetUserSubscriptionInfo();
+        this.getUserSubscriptionInfoImmediately.OnNext(0);
     }
 
     /// <summary>
@@ -81,7 +113,7 @@ public class ElevenLabsBackendUIModel : IDisposable
             this.apiKey = apiKeyClean;
         }
 
-        _ = UpdateUserSubscriptionInfo();
+        UpdateUserSubscriptionInfo();
     }
 
     /// <summary>
@@ -130,5 +162,6 @@ public class ElevenLabsBackendUIModel : IDisposable
     public void Dispose()
     {
         SoundQueue.Dispose();
+        this.observeUserSubscriptionInfo.Dispose();
     }
 }
