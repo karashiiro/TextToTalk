@@ -10,7 +10,7 @@ namespace TextToTalk.Backends
     {
         private readonly AutoResetEvent speechCompleted;
         private readonly object soundLock;
-        private DirectSoundOut soundOut;
+        private DirectSoundOut? soundOut;
 
         public StreamSoundQueue()
         {

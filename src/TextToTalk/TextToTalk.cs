@@ -23,24 +23,25 @@ using LiteDB;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
+using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.CommandModules;
 using TextToTalk.Data.Service;
-using TextToTalk.Events;
 using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
 using TextToTalk.TextProviders;
 using TextToTalk.UI;
 using TextToTalk.UngenderedOverrides;
+using TextToTalk.Utils;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace TextToTalk
 {
-    public class TextToTalk : IDalamudPlugin
+    public partial class TextToTalk : IDalamudPlugin
     {
 #if DEBUG
         private const bool InitiallyVisible = true;
@@ -197,8 +198,10 @@ namespace TextToTalk
                 .Where(_ => this.config is { Enabled: true, CancelSpeechOnTextAdvance: true })
                 .SubscribeOn(TaskPoolScheduler.Default)
                 .Subscribe(
-                    ev => this.backendManager.CancelSay(ev.Source),
-                    ex => DetailedLog.Error(ex, "Failed to handle text cancel event"));
+                    ev => FunctionalUtils.RunSafely(
+                        () => this.backendManager.CancelSay(ev.Source),
+                        ex => DetailedLog.Error(ex, "Failed to handle text cancel event")),
+                    ex => DetailedLog.Error(ex, "Text cancel event sequence has faulted"));
         }
 
         private IDisposable HandleTextEmit()
@@ -207,8 +210,10 @@ namespace TextToTalk
                 .Where(_ => this.config.Enabled)
                 .SubscribeOn(TaskPoolScheduler.Default)
                 .Subscribe(
-                    ev => Say(ev.Speaker, ev.SpeakerName, ev.Text.TextValue, ev.Source),
-                    ex => DetailedLog.Error(ex, "Failed to handle text emit event"));
+                    ev => FunctionalUtils.RunSafely(
+                        () => Say(ev.Speaker, ev.SpeakerName, ev.Text.TextValue, ev.Source),
+                        ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
+                    ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"));
         }
 
         private IDisposable HandleFailedToBindWSPort()
@@ -288,15 +293,10 @@ namespace TextToTalk
             if (this.config.Enabled &&
                 this.config.GetVoiceConfig().VoicePresets.All(vp => vp.EnabledBackend != this.config.Backend))
             {
-                try
-                {
-                    this.chat.Print(
-                        "You have no voice presets configured. Please create a voice preset in the TextToTalk configuration.");
-                }
-                catch (Exception e)
-                {
-                    DetailedLog.Error(e, "Failed to print chat message.");
-                }
+                FunctionalUtils.RunSafely(
+                    () => this.chat.Print(
+                        "You have no voice presets configured. Please create a voice preset in the TextToTalk configuration."),
+                    ex => DetailedLog.Error(ex, "Failed to print chat message."));
             }
 
             this.notifiedNoPresetsConfigured = true;
@@ -311,7 +311,7 @@ namespace TextToTalk
             }
 
             // Run a preprocessing pipeline to clean the text for the speech synthesizer
-            var cleanText = Pipe(
+            var cleanText = FunctionalUtils.Pipe(
                 textValue,
                 TalkUtils.StripAngleBracketedText,
                 TalkUtils.ReplaceSsmlTokens,
@@ -345,21 +345,20 @@ namespace TextToTalk
             {
                 return playerVoice;
             }
-            else if (speaker is not null &&
-                     this.npcService.TryGetNpc(speakerName, out var npcInfo) &&
-                     this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
+
+            if (speaker is not null &&
+                this.npcService.TryGetNpc(speakerName, out var npcInfo) &&
+                this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
             {
                 return npcVoice;
             }
-            else
-            {
-                // Get the speaker's gender, if possible
-                var gender = this.config.UseGenderedVoicePresets
-                    ? CharacterGenderUtils.GetCharacterGender(speaker, this.ungenderedOverrides)
-                    : Gender.None;
 
-                return GetVoiceForSpeaker(speakerName, gender);
-            }
+            // Get the speaker's gender, if possible
+            var gender = this.config.UseGenderedVoicePresets
+                ? CharacterGenderUtils.GetCharacterGender(speaker, this.ungenderedOverrides)
+                : Gender.None;
+
+            return GetVoiceForSpeaker(speakerName, gender);
         }
 
         private void BackendSay(TextSource source, VoicePreset? voicePreset, string speaker, string text)
@@ -374,11 +373,10 @@ namespace TextToTalk
             {
                 DetailedLog.Error(
                     $"Voice preset {voicePreset.Name} is not compatible with the {this.config.Backend} backend");
+                return;
             }
-            else
-            {
-                this.backendManager.Say(source, voicePreset, speaker, text);
-            }
+
+            this.backendManager.Say(source, voicePreset, speaker, text);
         }
 
         private VoicePreset? GetVoiceForSpeaker(string? name, Gender gender)
@@ -395,6 +393,7 @@ namespace TextToTalk
                     Name = gender.ToString(),
                 },
                 AzureBackend => GetVoiceForSpeaker<AzureVoicePreset>(name, gender),
+                ElevenLabsBackend => GetVoiceForSpeaker<ElevenLabsVoicePreset>(name, gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };
         }
@@ -459,89 +458,6 @@ namespace TextToTalk
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
         }
-
-        private static T Pipe<T>(T input, params Func<T, T>[] transforms)
-        {
-            return transforms.Aggregate(input, (agg, next) => next(agg));
-        }
-
-        #region IObservable Event Wrappers
-
-        private IObservable<ChatTextEmitEvent> OnChatTextEmit()
-        {
-            return Observable.FromEvent<ChatTextEmitEvent>(
-                    h => this.chatMessageHandler.OnTextEmit += h,
-                    h => this.chatMessageHandler.OnTextEmit -= h)
-                .Where(ev =>
-                {
-                    // Check all of the other filters to see if this should be dropped
-                    var chatTypes = this.config.GetCurrentEnabledChatTypesPreset();
-                    var typeEnabled = chatTypes.EnabledChatTypes is not null &&
-                                      chatTypes.EnabledChatTypes.Contains((int)ev.ChatType);
-                    return chatTypes.EnableAllChatTypes || typeEnabled;
-                })
-                .Where(ev => !IsTextBad(ev.Text.TextValue))
-                .Where(ev => IsTextGood(ev.Text.TextValue));
-        }
-
-        private IObservable<TextEmitEvent> OnTalkAddonTextEmit()
-        {
-            return Observable.FromEvent<TextEmitEvent>(
-                h => this.addonTalkHandler.OnTextEmit += h,
-                h => this.addonTalkHandler.OnTextEmit -= h);
-        }
-
-        private IObservable<TextEmitEvent> OnBattleTalkAddonTextEmit()
-        {
-            return Observable.FromEvent<TextEmitEvent>(
-                h => this.addonBattleTalkHandler.OnTextEmit += h,
-                h => this.addonBattleTalkHandler.OnTextEmit -= h);
-        }
-
-        private IObservable<AddonTalkAdvanceEvent> OnTalkAddonAdvance()
-        {
-            return Observable.FromEvent<AddonTalkAdvanceEvent>(
-                h => this.addonTalkHandler.OnAdvance += h,
-                h => this.addonTalkHandler.OnAdvance -= h);
-        }
-
-        private IObservable<AddonTalkCloseEvent> OnTalkAddonClose()
-        {
-            return Observable.FromEvent<AddonTalkCloseEvent>(
-                h => this.addonTalkHandler.OnClose += h,
-                h => this.addonTalkHandler.OnClose -= h);
-        }
-
-        private IObservable<SourcedTextEvent> OnTextSourceCancel()
-        {
-            return OnTalkAddonAdvance().Merge<SourcedTextEvent>(OnTalkAddonClose());
-        }
-
-        private IObservable<TextEmitEvent> OnTextEmit()
-        {
-            return OnTalkAddonTextEmit().Merge(OnChatTextEmit()).Merge(OnBattleTalkAddonTextEmit());
-        }
-
-        private bool IsTextGood(string text)
-        {
-            if (!this.config.Good.Any())
-            {
-                return true;
-            }
-
-            return this.config.Good
-                .Where(t => t.Text != "")
-                .Any(t => t.Match(text));
-        }
-
-        private bool IsTextBad(string text)
-        {
-            return this.config.Bad
-                .Where(t => t.Text != "")
-                .Any(t => t.Match(text));
-        }
-
-        #endregion
 
         #region IDisposable Support
 

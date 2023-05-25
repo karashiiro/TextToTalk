@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -43,9 +44,9 @@ public class ElevenLabsClient
         using var req = new HttpRequestMessage(HttpMethod.Post, uriBuilder.Uri);
         AddAuthorization(req);
         req.Headers.Add("accept", "audio/mpeg");
-        req.Headers.Add("Content-Type", "application/json");
 
         using var content = new StringContent(JsonConvert.SerializeObject(args));
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         req.Content = content;
 
         var res = await this.http.SendAsync(req);
@@ -53,11 +54,11 @@ public class ElevenLabsClient
 
         // Copy the sound to a new buffer and enqueue it
         var responseStream = await res.Content.ReadAsStreamAsync();
-        var waveStream = new MemoryStream();
-        await responseStream.CopyToAsync(waveStream);
-        waveStream.Seek(0, SeekOrigin.Begin);
+        var mp3Stream = new MemoryStream();
+        await responseStream.CopyToAsync(mp3Stream);
+        mp3Stream.Seek(0, SeekOrigin.Begin);
 
-        this.soundQueue.EnqueueSound(waveStream, source, StreamFormat.Wave, volume);
+        this.soundQueue.EnqueueSound(mp3Stream, source, StreamFormat.Mp3, volume);
     }
 
     public async Task<IDictionary<string, IList<ElevenLabsVoice>>> GetVoices()

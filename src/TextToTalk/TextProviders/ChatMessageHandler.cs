@@ -8,6 +8,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
+using TextToTalk.Utils;
 
 namespace TextToTalk.TextProviders;
 

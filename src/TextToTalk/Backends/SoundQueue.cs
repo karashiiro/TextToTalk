@@ -13,7 +13,7 @@ namespace TextToTalk.Backends
 
         private readonly Thread soundThread;
 
-        private TQueueItem currentItem;
+        private TQueueItem? currentItem;
         private bool active;
 
         protected SoundQueue()
@@ -105,9 +105,9 @@ namespace TextToTalk.Backends
         /// </summary>
         protected abstract void OnSoundCancelled();
 
-        private TQueueItem TryDequeue()
+        private TQueueItem? TryDequeue()
         {
-            TQueueItem nextItem;
+            TQueueItem? nextItem;
             lock (this.queuedSounds)
             {
                 nextItem = this.queuedSounds.FirstOrDefault();
