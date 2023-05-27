@@ -49,13 +49,16 @@ public class ElevenLabsBackendUI
         // Show character quota
         if (this.model.UserSubscriptionInfo != null)
         {
-            var characterCount = this.model.UserSubscriptionInfo.CharacterCount;
-            var characterLimit = this.model.UserSubscriptionInfo.CharacterLimit;
+            var subscription = this.model.UserSubscriptionInfo;
+            var characterCount = subscription.CharacterCount;
+            var characterLimit = subscription.CharacterLimit;
+            var quotaReset = DateTimeOffset.FromUnixTimeSeconds(subscription.NextCharacterCountResetUnix);
             var ratio = Convert.ToSingle(characterCount) / characterLimit;
             var label = $"{characterCount}/{characterLimit}";
             ImGui.ProgressBar(ratio, Vector2.Zero, label);
             ImGui.SameLine(0, ImGui.GetStyle().ItemInnerSpacing.X);
             ImGui.Text("Characters used");
+            ImGui.TextColored(BackendUI.HintColor, $"Next quota reset: {quotaReset.ToLocalTime()}");
             ImGui.Spacing();
         }
 
