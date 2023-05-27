@@ -32,7 +32,8 @@ public class ElevenLabsBackend : VoiceBackend
             try
             {
                 await this.uiModel.ElevenLabs.Say(elevenLabsVoicePreset.VoiceId, elevenLabsVoicePreset.PlaybackRate,
-                    elevenLabsVoicePreset.Volume, source, text);
+                    elevenLabsVoicePreset.Volume, elevenLabsVoicePreset.SimilarityBoost,
+                    elevenLabsVoicePreset.Stability, source, text);
                 this.uiModel.UpdateUserSubscriptionInfo();
             }
             catch (ElevenLabsUnauthorizedException e)
