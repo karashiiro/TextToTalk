@@ -26,7 +26,8 @@ public class ElevenLabsClient
         this.soundQueue = soundQueue;
     }
 
-    public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text)
+    public async Task Say(string? voice, int playbackRate, float volume, float similarityBoost, float stability,
+        TextSource source, string text)
     {
         if (!IsAuthorizationSet())
         {
@@ -37,6 +38,11 @@ public class ElevenLabsClient
         {
             Text = text,
             ModelId = "eleven_monolingual_v1",
+            VoiceSettings = new ElevenLabsVoiceSettings
+            {
+                SimilarityBoost = similarityBoost,
+                Stability = stability,
+            },
         };
 
         // Make the request
@@ -45,6 +51,7 @@ public class ElevenLabsClient
         AddAuthorization(req);
         req.Headers.Add("accept", "audio/mpeg");
 
+        DetailedLog.Info(JsonConvert.SerializeObject(args));
         using var content = new StringContent(JsonConvert.SerializeObject(args));
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         req.Content = content;
@@ -156,5 +163,14 @@ public class ElevenLabsClient
         [JsonProperty("text")] public string? Text { get; init; }
 
         [JsonProperty("model_id")] public string? ModelId { get; init; }
+
+        [JsonProperty("voice_settings")] public ElevenLabsVoiceSettings? VoiceSettings { get; init; }
+    }
+
+    private class ElevenLabsVoiceSettings
+    {
+        [JsonProperty("similarity_boost")] public float SimilarityBoost { get; init; }
+
+        [JsonProperty("stability")] public float Stability { get; init; }
     }
 }

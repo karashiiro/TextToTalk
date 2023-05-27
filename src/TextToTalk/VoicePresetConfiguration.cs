@@ -228,6 +228,8 @@ public class VoicePresetConfiguration
                 PlaybackRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "PlaybackRate")),
                 Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
                 VoiceId = GetNullableValue<string?>(corrupted, "VoiceId"),
+                SimilarityBoost = Convert.ToSingle(GetNullableValue<double?>(corrupted, "SimilarityBoost")),
+                Stability = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Stability")),
                 EnabledBackend = TTSBackend.ElevenLabs,
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),

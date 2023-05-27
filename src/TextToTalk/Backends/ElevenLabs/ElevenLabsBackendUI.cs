@@ -135,6 +135,22 @@ public class ElevenLabsBackendUI
             }
         }
 
+        var similarityBoost = currentVoicePreset.SimilarityBoost;
+        if (ImGui.SliderFloat($"Clarity/Similarity boost##{MemoizedId.Create()}", ref similarityBoost, 0, 1,
+                "%.2f", ImGuiSliderFlags.AlwaysClamp))
+        {
+            currentVoicePreset.SimilarityBoost = similarityBoost;
+            this.config.Save();
+        }
+
+        var stability = currentVoicePreset.Stability;
+        if (ImGui.SliderFloat($"Stability##{MemoizedId.Create()}", ref stability, 0, 1, "%.2f",
+                ImGuiSliderFlags.AlwaysClamp))
+        {
+            currentVoicePreset.Stability = stability;
+            this.config.Save();
+        }
+
         var playbackRate = currentVoicePreset.PlaybackRate;
         if (ImGui.SliderInt($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 20, 200, "%d%%",
                 ImGuiSliderFlags.AlwaysClamp))
