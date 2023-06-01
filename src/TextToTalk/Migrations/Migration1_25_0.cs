@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json.Linq;
 using TextToTalk.Data.Model;
 using TextToTalk.Data.Service;
@@ -28,12 +29,23 @@ public class Migration1_25_0 : IConfigurationMigration
     public void Migrate(PluginConfiguration config)
     {
         var players = config.Players ?? new Dictionary<Guid, dynamic>();
-        foreach (var (_, playerInfo) in players)
+        foreach (var (playerId, playerInfo) in players)
         {
             // Due to the old types being removed, this can degrade to JObject, which
             // needs to be handled accordingly.
-            if (playerInfo is JObject jsonPlayerInfo)
+            try
             {
+                this.playerCollection.StorePlayer(new Player
+                {
+                    Id = playerId,
+                    Name = playerInfo.Name,
+                    WorldId = playerInfo.WorldId,
+                });
+            }
+            catch (RuntimeBinderException)
+            {
+                var jsonPlayerInfo = (JObject)playerInfo;
+                
                 if (!jsonPlayerInfo.TryGetValue("Name", out var name))
                 {
                     continue;
@@ -41,18 +53,9 @@ public class Migration1_25_0 : IConfigurationMigration
             
                 this.playerCollection.StorePlayer(new Player
                 {
-                    Id = jsonPlayerInfo["LocalId"]?.Value<Guid>() ?? Guid.NewGuid(),
+                    Id = playerId,
                     Name = name.Value<string>() ?? "",
                     WorldId = jsonPlayerInfo["WorldId"]?.Value<uint>() ?? 81,
-                });
-            }
-            else
-            {
-                this.playerCollection.StorePlayer(new Player
-                {
-                    Id = playerInfo.LocalId,
-                    Name = playerInfo.Name,
-                    WorldId = playerInfo.WorldId,
                 });
             }
         }
@@ -67,10 +70,22 @@ public class Migration1_25_0 : IConfigurationMigration
         }
 
         var npcs = config.Npcs ?? new Dictionary<Guid, dynamic>();
-        foreach (var (_, npcInfo) in npcs)
+        foreach (var (npcId, npcInfo) in npcs)
         {
-            if (npcInfo is JObject jsonNpcInfo)
+            try
             {
+                this.npcCollection.StoreNpc(new Npc
+                {
+                    Id = npcId,
+                    Name = npcInfo.Name,
+                });
+            }
+            catch (RuntimeBinderException)
+            {
+                // This degraded to a JObject since the original type was deleted and
+                // the new field type is dynamic.
+                var jsonNpcInfo = (JObject)npcInfo;
+                
                 if (!jsonNpcInfo.TryGetValue("Name", out var name))
                 {
                     continue;
@@ -78,16 +93,8 @@ public class Migration1_25_0 : IConfigurationMigration
                 
                 this.npcCollection.StoreNpc(new Npc
                 {
-                    Id = jsonNpcInfo["LocalId"]?.Value<Guid>() ?? Guid.NewGuid(),
+                    Id = npcId,
                     Name = name.Value<string>() ?? "",
-                });
-            }
-            else
-            {
-                this.npcCollection.StoreNpc(new Npc
-                {
-                    Id = npcInfo.LocalId,
-                    Name = npcInfo.Name,
                 });
             }
         }
