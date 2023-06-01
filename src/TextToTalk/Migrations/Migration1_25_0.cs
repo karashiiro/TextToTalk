@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using TextToTalk.Data.Model;
 using TextToTalk.Data.Service;
 #pragma warning disable CS0612
@@ -26,17 +27,37 @@ public class Migration1_25_0 : IConfigurationMigration
 
     public void Migrate(PluginConfiguration config)
     {
-        foreach (var (_, playerInfo) in config.Players)
+        var players = config.Players ?? new Dictionary<Guid, dynamic>();
+        foreach (var (_, playerInfo) in players)
         {
-            this.playerCollection.StorePlayer(new Player
+            // Due to the old types being removed, this can degrade to JObject, which
+            // needs to be handled accordingly.
+            if (playerInfo is JObject jsonPlayerInfo)
             {
-                Id = playerInfo.LocalId,
-                Name = playerInfo.Name,
-                WorldId = playerInfo.WorldId,
-            });
+                if (!jsonPlayerInfo.TryGetValue("Name", out var name))
+                {
+                    continue;
+                }
+            
+                this.playerCollection.StorePlayer(new Player
+                {
+                    Id = jsonPlayerInfo["LocalId"]?.Value<Guid>() ?? Guid.NewGuid(),
+                    Name = name.Value<string>() ?? "",
+                    WorldId = jsonPlayerInfo["WorldId"]?.Value<uint>() ?? 81,
+                });
+            }
+            else
+            {
+                this.playerCollection.StorePlayer(new Player
+                {
+                    Id = playerInfo.LocalId,
+                    Name = playerInfo.Name,
+                    WorldId = playerInfo.WorldId,
+                });
+            }
         }
         
-        foreach (var (playerId, voiceId) in config.PlayerVoicePresets)
+        foreach (var (playerId, voiceId) in config.PlayerVoicePresets ?? new Dictionary<Guid, int>())
         {
             this.playerCollection.StorePlayerVoice(new PlayerVoice
             {
@@ -44,17 +65,34 @@ public class Migration1_25_0 : IConfigurationMigration
                 VoicePresetId = voiceId,
             });
         }
-        
-        foreach (var (_, npcInfo) in config.Npcs)
+
+        var npcs = config.Npcs ?? new Dictionary<Guid, dynamic>();
+        foreach (var (_, npcInfo) in npcs)
         {
-            this.npcCollection.StoreNpc(new Npc
+            if (npcInfo is JObject jsonNpcInfo)
             {
-                Id = npcInfo.LocalId,
-                Name = npcInfo.Name,
-            });
+                if (!jsonNpcInfo.TryGetValue("Name", out var name))
+                {
+                    continue;
+                }
+                
+                this.npcCollection.StoreNpc(new Npc
+                {
+                    Id = jsonNpcInfo["LocalId"]?.Value<Guid>() ?? Guid.NewGuid(),
+                    Name = name.Value<string>() ?? "",
+                });
+            }
+            else
+            {
+                this.npcCollection.StoreNpc(new Npc
+                {
+                    Id = npcInfo.LocalId,
+                    Name = npcInfo.Name,
+                });
+            }
         }
         
-        foreach (var (npcId, voiceId) in config.NpcVoicePresets)
+        foreach (var (npcId, voiceId) in config.NpcVoicePresets ?? new Dictionary<Guid, int>())
         {
             this.npcCollection.StoreNpcVoice(new NpcVoice
             {

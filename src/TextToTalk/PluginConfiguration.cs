@@ -34,10 +34,10 @@ namespace TextToTalk
 
         [Obsolete("Use EnabledChatTypesPresets.")]
         // ReSharper disable once CollectionNeverUpdated.Global
-        public IList<int> EnabledChatTypes { get; set; }
+        public IList<int>? EnabledChatTypes { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
-        [Obsolete] public IList<VoicePreset> VoicePresets { get; set; }
+        [Obsolete] public IList<VoicePreset>? VoicePresets { get; set; }
 
         [Obsolete("Use VoicePresets.")] public int Rate { get; set; }
 
@@ -47,7 +47,7 @@ namespace TextToTalk
 
         [Obsolete("Use Backend.")] public bool UseWebsocket { get; set; }
 
-        [Obsolete("Use PollyLexiconFiles.")] public List<string> PollyLexicons { get; set; }
+        [Obsolete("Use PollyLexiconFiles.")] public List<string>? PollyLexicons { get; set; }
 
         /// <summary>
         /// <c>true</c> if it is not the first time, <c>false</c> if the first time handler has not run before. This was named horribly.
@@ -89,16 +89,16 @@ namespace TextToTalk
         [Obsolete] public int FemaleVoicePresetId { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
-        [Obsolete] public IDictionary<Guid, dynamic> Players { get; set; }
+        [Obsolete] public IDictionary<Guid, dynamic>? Players { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
-        [Obsolete] public IDictionary<Guid, dynamic> Npcs { get; set; }
+        [Obsolete] public IDictionary<Guid, dynamic>? Npcs { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
-        [Obsolete] public IDictionary<Guid, int> PlayerVoicePresets { get; set; }
+        [Obsolete] public IDictionary<Guid, int>? PlayerVoicePresets { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
-        [Obsolete] public IDictionary<Guid, int> NpcVoicePresets { get; set; }
+        [Obsolete] public IDictionary<Guid, int>? NpcVoicePresets { get; set; }
 
         #endregion
 
@@ -152,7 +152,7 @@ namespace TextToTalk
 
         public bool RemoveStutterEnabled { get; set; } = true;
 
-        public IDictionary<string, IDictionary<TTSBackend, bool>> RemoteLexiconEnabledBackends { get; set; }
+        public IDictionary<string, IDictionary<TTSBackend, bool>>? RemoteLexiconEnabledBackends { get; set; }
 
         public bool UsePlayerRateLimiter { get; set; }
         public float MessagesPerSecond { get; set; } = 5;
@@ -202,11 +202,6 @@ namespace TextToTalk
             Lexicons ??= new List<string>();
 
             RemoteLexiconEnabledBackends ??= new Dictionary<string, IDictionary<TTSBackend, bool>>();
-
-            PlayerVoicePresets ??= new Dictionary<Guid, int>();
-
-            Npcs ??= new Dictionary<Guid, dynamic>();
-            NpcVoicePresets ??= new Dictionary<Guid, int>();
 
             if (!InitializedEver)
             {
