@@ -15,17 +15,19 @@ public class Migration1_18_2 : IConfigurationMigration
     public void Migrate(PluginConfiguration config)
     {
         // This can be null if the configuration file was created on v1.18.1
-        if (config.GetVoiceConfig().CurrentVoicePresets != null)
+        var currentVoicePresets = config.GetVoiceConfig().CurrentVoicePresets;
+        if (currentVoicePresets != null)
         {
-            foreach (var (backend, id) in config.GetVoiceConfig().CurrentVoicePresets)
+            foreach (var (backend, id) in currentVoicePresets)
             {
                 config.GetVoiceConfig().CurrentVoicePreset[backend] = id;
             }
         }
 
-        if (config.GetVoiceConfig().UngenderedVoicePresetsBroken != null)
+        var ungenderedVoicePresetsBroken = config.GetVoiceConfig().UngenderedVoicePresetsBroken;
+        if (ungenderedVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.GetVoiceConfig().UngenderedVoicePresetsBroken)
+            foreach (var (backend, o) in ungenderedVoicePresetsBroken)
             {
                 if (o is int id)
                 {
@@ -47,10 +49,11 @@ public class Migration1_18_2 : IConfigurationMigration
                 }
             }
         }
-        
-        if (config.GetVoiceConfig().MaleVoicePresetsBroken != null)
+
+        var maleVoicePresetsBroken = config.GetVoiceConfig().MaleVoicePresetsBroken;
+        if (maleVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.GetVoiceConfig().MaleVoicePresetsBroken)
+            foreach (var (backend, o) in maleVoicePresetsBroken)
             {
                 if (o is int id)
                 {
@@ -72,10 +75,11 @@ public class Migration1_18_2 : IConfigurationMigration
                 }
             }
         }
-        
-        if (config.GetVoiceConfig().FemaleVoicePresetsBroken != null)
+
+        var femaleVoicePresetsBroken = config.GetVoiceConfig().FemaleVoicePresetsBroken;
+        if (femaleVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.GetVoiceConfig().FemaleVoicePresetsBroken)
+            foreach (var (backend, o) in femaleVoicePresetsBroken)
             {
                 if (o is int id)
                 {

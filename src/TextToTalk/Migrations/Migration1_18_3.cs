@@ -14,9 +14,10 @@ public class Migration1_18_3 : IConfigurationMigration
 
     public void Migrate(PluginConfiguration config)
     {
-        if (config.GetVoiceConfig().UngenderedVoicePresetsBroken != null)
+        var ungenderedVoicePresetsBroken = config.GetVoiceConfig().UngenderedVoicePresetsBroken;
+        if (ungenderedVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.GetVoiceConfig().UngenderedVoicePresetsBroken)
+            foreach (var (backend, o) in ungenderedVoicePresetsBroken)
             {
                 if (o is int id)
                 {
@@ -38,10 +39,11 @@ public class Migration1_18_3 : IConfigurationMigration
                 }
             }
         }
-        
-        if (config.GetVoiceConfig().MaleVoicePresetsBroken != null)
+
+        var maleVoicePresetsBroken = config.GetVoiceConfig().MaleVoicePresetsBroken;
+        if (maleVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.GetVoiceConfig().MaleVoicePresetsBroken)
+            foreach (var (backend, o) in maleVoicePresetsBroken)
             {
                 if (o is int id)
                 {
@@ -63,10 +65,11 @@ public class Migration1_18_3 : IConfigurationMigration
                 }
             }
         }
-        
-        if (config.GetVoiceConfig().FemaleVoicePresetsBroken != null)
+
+        var femaleVoicePresetsBroken = config.GetVoiceConfig().FemaleVoicePresetsBroken;
+        if (femaleVoicePresetsBroken != null)
         {
-            foreach (var (backend, o) in config.GetVoiceConfig().FemaleVoicePresetsBroken)
+            foreach (var (backend, o) in femaleVoicePresetsBroken)
             {
                 if (o is int id)
                 {
