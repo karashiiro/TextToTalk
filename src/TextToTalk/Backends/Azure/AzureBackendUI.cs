@@ -123,11 +123,11 @@ public class AzureBackendUI
             }
         }
 
-        var playbackRate = currentVoicePreset.PlaybackRate;
-        if (ImGui.SliderInt($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 20, 200, "%d%%",
+        var playbackRate = 100 + currentVoicePreset.PlaybackRate;
+        if (ImGui.SliderInt($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 50, 200, "%d%%",
                 ImGuiSliderFlags.AlwaysClamp))
         {
-            currentVoicePreset.PlaybackRate = playbackRate;
+            currentVoicePreset.PlaybackRate = playbackRate - 100;
             this.config.Save();
         }
 
