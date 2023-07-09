@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 
@@ -19,7 +20,7 @@ namespace TextToTalk.Migrations
 #pragma warning disable CS1062 // The best overloaded Add method for the collection initializer element is obsolete
 #pragma warning disable 618
                 EnableAllChatTypes = config.EnableAllChatTypes,
-                EnabledChatTypes = config.EnabledChatTypes.ToList(),
+                EnabledChatTypes = config.EnabledChatTypes?.ToList() ?? new List<int>(),
 #pragma warning restore 618
 #pragma warning restore CS1062 // The best overloaded Add method for the collection initializer element is obsolete
                 Name = "Default",

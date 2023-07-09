@@ -23,9 +23,10 @@ public class Migration1_17 : IConfigurationMigration
     {
         // Migrate System voice configuration
         {
-            for (var i = 0; i < config.VoicePresets.Count; i++)
+            var voicePresets = config.VoicePresets ?? new List<VoicePreset>();
+            for (var i = 0; i < voicePresets.Count; i++)
             {
-                var preset = config.VoicePresets[i];
+                var preset = voicePresets[i];
             
                 // Check if this is an instance of VoicePreset directly, rather
                 // than one of its inheritors.
@@ -155,7 +156,7 @@ public class Migration1_17 : IConfigurationMigration
     
     private int GetHighestVoicePresetIdObsolete(PluginConfiguration config)
     {
-        return config.VoicePresets.Select(p => p.Id).Max();
+        return config.VoicePresets?.Select(p => p.Id).Max() ?? 0;
     }
     
     private bool TryCreateVoicePresetObsolete<TPreset>(PluginConfiguration config, out TPreset preset) where TPreset : VoicePreset, new()
