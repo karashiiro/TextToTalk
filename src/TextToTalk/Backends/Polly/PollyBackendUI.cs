@@ -17,7 +17,11 @@ public class PollyBackendUI
     private readonly LexiconComponent lexiconComponent;
     private readonly PollyBackendUIModel model;
 
-    public PollyBackendUI(PollyBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager, HttpClient http)
+    private string accessKey;
+    private string secretKey;
+
+    public PollyBackendUI(PollyBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
+        HttpClient http)
     {
         this.model = model;
 
@@ -29,32 +33,28 @@ public class PollyBackendUI
         this.config = config;
         this.lexiconComponent =
             new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.PollyLexiconFiles);
+
+        (this.accessKey, this.secretKey) = this.model.GetKeyPair();
     }
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
         var region = this.model.GetCurrentRegion();
         var regionIndex = Array.IndexOf(this.model.Regions, region.SystemName);
-        if (ImGui.Combo($"Region##{MemoizedId.Create()}", ref regionIndex, this.model.Regions, this.model.Regions.Length))
+        if (ImGui.Combo($"Region##{MemoizedId.Create()}", ref regionIndex, this.model.Regions,
+                this.model.Regions.Length))
         {
             this.model.SetCurrentRegion(this.model.Regions[regionIndex]);
         }
 
-        var (accessKey, secretKey) = this.model.GetKeyPair();
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Access key", ref accessKey, 100,
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Access key", ref this.accessKey, 100,
             ImGuiInputTextFlags.Password);
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Secret key", ref secretKey, 100,
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Secret key", ref this.secretKey, 100,
             ImGuiInputTextFlags.Password);
 
         if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
-            this.model.LoginWith(accessKey, secretKey);
-        }
-
-        var loginError = this.model.PollyLoginException?.Message;
-        if (loginError != null)
-        {
-            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+            this.model.LoginWith(this.accessKey, this.secretKey);
         }
 
         ImGui.SameLine();
@@ -64,6 +64,12 @@ public class PollyBackendUI
         }
 
         ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+
+        var loginError = this.model.PollyLoginException?.Message;
+        if (loginError != null)
+        {
+            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+        }
 
         ImGui.Spacing();
 
@@ -109,7 +115,8 @@ public class PollyBackendUI
 
         var engine = this.model.GetCurrentEngine();
         var engineIndex = Array.IndexOf(this.model.Engines, engine.Value);
-        if (ImGui.Combo($"Engine##{MemoizedId.Create()}", ref engineIndex, this.model.Engines, this.model.Engines.Length))
+        if (ImGui.Combo($"Engine##{MemoizedId.Create()}", ref engineIndex, this.model.Engines,
+                this.model.Engines.Length))
         {
             this.model.SetCurrentEngine(this.model.Engines[engineIndex]);
         }
@@ -182,8 +189,8 @@ public class PollyBackendUI
 
         {
             ConfigComponents.ToggleUseGenderedVoicePresets(
-                    $"Use gendered voices##{MemoizedId.Create()}",
-                    this.config);
+                $"Use gendered voices##{MemoizedId.Create()}",
+                this.config);
 
             ImGui.Spacing();
             if (this.config.UseGenderedVoicePresets)
