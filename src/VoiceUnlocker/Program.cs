@@ -6,6 +6,7 @@ namespace VoiceUnlocker
     public static class Program
     {
         private const string SpeechOneCoreTokensPath = @"SOFTWARE\Microsoft\Speech_OneCore\Voices\Tokens";
+        private const string SpeechOneCoreCortanaTokensPath = @"SOFTWARE\Microsoft\Speech_OneCore\CortanaVoices\Tokens";
         private const string SpeechTokensPath = @"SOFTWARE\Microsoft\Speech\Voices\Tokens";
         private const string SpeechSysWOW64TokensPath = @"SOFTWARE\WOW6432Node\Microsoft\SPEECH\Voices\Tokens";
 
@@ -13,9 +14,11 @@ namespace VoiceUnlocker
         {
             // Open mobile voices registry
             using var speechOneCoreTokens = Registry.LocalMachine.OpenSubKey(SpeechOneCoreTokensPath);
-            if (speechOneCoreTokens == null)
+            using var speechOneCoreCortanaTokens = Registry.LocalMachine.OpenSubKey(SpeechOneCoreCortanaTokensPath);
+
+            if (speechOneCoreTokens == null && speechOneCoreCortanaTokens == null)
             {
-                Console.WriteLine("No mobile voices found!");
+                Console.WriteLine("No additional voices found!");
                 return;
             }
 
@@ -26,16 +29,37 @@ namespace VoiceUnlocker
             using var sysWOW64SpeechTokens = Registry.LocalMachine.CreateSubKey(SpeechSysWOW64TokensPath);
 
             // Copy mobile voice info into x86_64 and x64 registry keys
-            foreach (var voice in speechOneCoreTokens.GetSubKeyNames())
+            if (speechOneCoreTokens is not null)
             {
-                Console.WriteLine($"Copying {voice} from mobile voices to desktop voices...");
+                foreach (var voice in speechOneCoreTokens.GetSubKeyNames())
+                {
+                    Console.WriteLine($"Copying {voice} from mobile voices to desktop voices...");
 
-                using var mobileVoiceInfo = speechOneCoreTokens.OpenSubKey(voice);
-                using var x64VoiceInfo = speechTokens?.CreateSubKey(voice);
-                using var x86VoiceInfo = sysWOW64SpeechTokens?.CreateSubKey(voice);
+                    using var mobileVoiceInfo = speechOneCoreTokens.OpenSubKey(voice);
 
-                CopyRegistryKey(mobileVoiceInfo, x64VoiceInfo);
-                CopyRegistryKey(mobileVoiceInfo, x86VoiceInfo);
+                    using var x64VoiceInfo = speechTokens?.CreateSubKey(voice);
+                    CopyRegistryKey(mobileVoiceInfo, x64VoiceInfo);
+
+                    using var x86VoiceInfo = sysWOW64SpeechTokens?.CreateSubKey(voice);
+                    CopyRegistryKey(mobileVoiceInfo, x86VoiceInfo);
+                }
+            }
+
+            // Copy mobile Cortana voice info into x86_64 and x64 registry keys
+            if (speechOneCoreCortanaTokens is not null)
+            {
+                foreach (var voice in speechOneCoreCortanaTokens.GetSubKeyNames())
+                {
+                    Console.WriteLine($"Copying {voice} from mobile Cortana voices to desktop voices...");
+
+                    using var mobileVoiceInfo = speechOneCoreCortanaTokens.OpenSubKey(voice);
+
+                    using var x64VoiceInfo = speechTokens?.CreateSubKey(voice);
+                    CopyRegistryKey(mobileVoiceInfo, x64VoiceInfo);
+
+                    using var x86VoiceInfo = sysWOW64SpeechTokens?.CreateSubKey(voice);
+                    CopyRegistryKey(mobileVoiceInfo, x86VoiceInfo);
+                }
             }
 
             Console.WriteLine("Done!");

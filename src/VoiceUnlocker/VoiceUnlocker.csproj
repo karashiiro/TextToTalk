@@ -9,7 +9,10 @@
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<StartupObject>VoiceUnlocker.Program</StartupObject>
 		<PlatformTarget>x64</PlatformTarget>
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PublishTrimmed>true</PublishTrimmed>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
