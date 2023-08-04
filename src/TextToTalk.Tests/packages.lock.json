@@ -1182,7 +1182,6 @@
           "TextToTalk.Lexicons.Updater": "[1.0.0, )",
           "TextToTalk.UI.Core": "[1.0.0, )",
           "TextToTalk.UngenderedOverrides": "[1.0.0, )",
-          "VoiceUnlocker": "[1.0.0, )",
           "websocket-sharp": "[1.0.0, )"
         }
       },
@@ -1205,9 +1204,6 @@
         "type": "Project"
       },
       "texttotalk.ungenderedoverrides": {
-        "type": "Project"
-      },
-      "voiceunlocker": {
         "type": "Project"
       },
       "websocket-sharp": {
