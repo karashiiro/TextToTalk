@@ -44,9 +44,7 @@ public class Migration1_25_0 : IConfigurationMigration
             }
             catch (RuntimeBinderException)
             {
-                var jsonPlayerInfo = (JObject)playerInfo;
-                
-                if (!jsonPlayerInfo.TryGetValue("Name", out var name))
+                if (!playerInfo.TryGetValue("Name", out dynamic name))
                 {
                     continue;
                 }
@@ -55,7 +53,7 @@ public class Migration1_25_0 : IConfigurationMigration
                 {
                     Id = playerId,
                     Name = name.Value<string>() ?? "",
-                    WorldId = jsonPlayerInfo["WorldId"]?.Value<uint>() ?? 81,
+                    WorldId = playerInfo["WorldId"]?.Value<uint>() ?? 81,
                 });
             }
         }
@@ -84,9 +82,7 @@ public class Migration1_25_0 : IConfigurationMigration
             {
                 // This degraded to a JObject since the original type was deleted and
                 // the new field type is dynamic.
-                var jsonNpcInfo = (JObject)npcInfo;
-                
-                if (!jsonNpcInfo.TryGetValue("Name", out var name))
+                if (!npcInfo.TryGetValue("Name", out dynamic name))
                 {
                     continue;
                 }
