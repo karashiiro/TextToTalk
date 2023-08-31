@@ -16,6 +16,9 @@ public class AzureBackendUI
     private readonly LexiconComponent lexiconComponent;
     private readonly AzureBackendUIModel model;
 
+    private string region;
+    private string subscriptionKey;
+
     public AzureBackendUI(AzureBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
         HttpClient http)
     {
@@ -29,11 +32,12 @@ public class AzureBackendUI
         this.config = config;
         this.lexiconComponent =
             new LexiconComponent(lexiconManager, lexiconRepository, config, Array.Empty<string>);
+
+        (region, subscriptionKey) = this.model.GetLoginInfo();
     }
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        var (region, subscriptionKey) = this.model.GetLoginInfo();
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Region", ref region, 100);
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "Subscription key", ref subscriptionKey, 100,
             ImGuiInputTextFlags.Password);
@@ -143,8 +147,8 @@ public class AzureBackendUI
 
         {
             ConfigComponents.ToggleUseGenderedVoicePresets(
-                    $"Use gendered voices##{MemoizedId.Create()}",
-                    this.config);
+                $"Use gendered voices##{MemoizedId.Create()}",
+                this.config);
 
             ImGui.Spacing();
             if (this.config.UseGenderedVoicePresets)
