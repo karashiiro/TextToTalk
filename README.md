@@ -1,4 +1,4 @@
-[![Download count](https://img.shields.io/endpoint?url=https://vz32sgcoal.execute-api.us-east-1.amazonaws.com/TextToTalk)](https://github.com/karashiiro/TextToTalk)
+[![Download count](https://img.shields.io/endpoint?url=https://qzysathwfhebdai6xgauhz4q7m0mzmrf.lambda-url.us-east-1.on.aws/TextToTalk)](https://github.com/karashiiro/TextToTalk)
 
 # TextToTalk
 Chat TTS plugin for [Dalamud](https://github.com/goatcorp/Dalamud). Has support for triggers/exclusions, several TTS providers, and more!
