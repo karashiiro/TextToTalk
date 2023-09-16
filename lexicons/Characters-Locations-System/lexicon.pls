@@ -116,6 +116,7 @@
 <grapheme>Ixals</grapheme>
 <phoneme>ɪksəˈlz</phoneme>
 </lexeme>
+
 <lexeme>
 <grapheme>Leveilluer</grapheme>
 <phoneme>ləvɛ.jœʁ</phoneme>
@@ -222,7 +223,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Y'shtola</grapheme>
-<phoneme>ji ʃtəʊlə</phoneme>
+<phoneme>j ʃtəʊlə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Zodiark</grapheme>
@@ -258,7 +259,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Coerthas</grapheme>
-<phoneme>kəʊ.ˈɜː.θʌːs</phoneme>
+<phoneme>kɝː.θəs</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Crystarium</grapheme>
@@ -313,7 +314,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Lominsa</grapheme>
-<phoneme>loʊmɪnsə</phoneme>
+<phoneme>ləˈmɪnsə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Namazu</grapheme>
@@ -337,11 +338,11 @@
 </lexeme>
 <lexeme>
 <grapheme>Sharlayan</grapheme>
-<phoneme>ˈʃɑrliiən</phoneme>
+<phoneme>ˈʃɑrː liːæn</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Sharlayans</grapheme>
-<phoneme>ˈʃɑrliiənz</phoneme>
+<phoneme>ˈʃɑrː liːænz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Shirogane</grapheme>
@@ -349,7 +350,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Ul'dah</grapheme>
-<phoneme>ulˈdɑ</phoneme>
+<phoneme>uːlˈdɑ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Viera</grapheme>
@@ -369,14 +370,19 @@
 <phoneme>ˈaɪkɒnz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Aether</grapheme>
+<grapheme>aether</grapheme>
+<phoneme>ˈi.θɚ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Aetheryte</grapheme>
 <grapheme>aetheryte</grapheme>
-<phoneme>ˈeɪθəraɪt</phoneme>
+<phoneme>ˈi.θɚraɪt</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Aetherytes</grapheme>
 <grapheme>aetherytes</grapheme>
-<phoneme>ˈeɪθəraɪtz</phoneme>
+<phoneme>ˈi.θɚraɪtz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eld </grapheme>
@@ -391,13 +397,6 @@
 <grapheme>Enclave</grapheme>
 <grapheme>enclave</grapheme>
 <phoneme>ˈɑnkleɪv</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Hm,</grapheme>
-<grapheme> hm,</grapheme>
-<grapheme>Hm.</grapheme>
-<grapheme> hm.</grapheme>
-<phoneme>hm̩</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>NIN</grapheme>
@@ -476,6 +475,209 @@
 </lexeme>
 <lexeme>
 <grapheme>Gulg</grapheme>
-<phoneme>ˈɡuəlɡ</phoneme>
+<phoneme>ˈguəlg</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Zolka</grapheme>
+<phoneme>zolkɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Nym</grapheme>
+<phoneme>nɪ̈m</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Nymian</grapheme>
+<phoneme>nɪmi.ən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Mamool Ja</grapheme>
+<phoneme>ma.muːl d͡ʒɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Y'mhitra</grapheme>
+<phoneme>jˈmiːtɹɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Y'mhitra's</grapheme>
+<phoneme>jˈmiːtɹɑz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Mhitra</grapheme>
+<phoneme>miːtɹɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ramuh</grapheme>
+<phoneme>raɱu</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ifrit</grapheme>
+<phoneme>ifrjt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Mhach</grapheme>
+<phoneme>mɑ́ːk</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Mhachi</grapheme>
+<phoneme>mɑ́ːki</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>voidmage</grapheme>
+<phoneme>vɔɪdmeɪd͡ʒ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>spriggan</grapheme>
+<grapheme>Spriggan</grapheme>
+<phoneme>sprɪgən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Carito</grapheme>
+<phoneme>kɑɹˈiː.təʊ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Allag's</grapheme>
+<phoneme>ælɛgz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>R'ashaht</grapheme>
+<phoneme>ɹʌʃˈaːt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Qiqirn</grapheme>
+<phoneme>kɪˈkirn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Thanalan</grapheme>
+<phoneme>ˈθænələn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>a construct</grapheme>
+<phoneme>ɑːˈkɑn.stɹʌkt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Bozja</grapheme>
+<phoneme>ˈbozj̆a</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lahabrea</grapheme>
+<phoneme>lahaˈbɹeːæ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>-egi</grapheme>
+<grapheme>-Egi</grapheme>
+<grapheme> egi </grapheme>
+<grapheme> egi.</grapheme>
+<phoneme>ˈɛgi</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>-ing</grapheme>
+<phoneme>ˈɪng</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Yayake</grapheme>
+<phoneme>jə.jɑːkɛ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Telophoroi</grapheme>
+<phoneme>telˈɔfɔɹɔɪ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>grimoires</grapheme>
+<phoneme>ˈgɹɪmˌwɑːɹs</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Halone</grapheme>
+<phoneme>hɑlˈəʊnɛɪ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Cloudtop</grapheme>
+<phoneme>klaʊdtɒp</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Vundu Ok'Bendu</grapheme>
+<phoneme>ˈvundu ok bɛndu</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Padjal</grapheme>
+<phoneme>pʌˈd͡ʒæl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Vidofnir</grapheme>
+<phoneme>vɪd.ˈoʊfnɪɚ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ystride de Caulignont</grapheme>
+<phoneme>ɪstɹɪd du kɔlɪɲɒn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ystride</grapheme>
+<phoneme>ɪstɹɪd</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Caulignont</grapheme>
+<phoneme>kɔlɪɲɒn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Kupo</grapheme>
+<grapheme>kupo</grapheme>
+<phoneme>ˈkuːˌpoʊ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Moogle</grapheme>
+<grapheme>moogle</grapheme>
+<phoneme>muːgəl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Moogles</grapheme>
+<grapheme>moogles</grapheme>
+<phoneme>muːgəls</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Asah</grapheme>
+<phoneme>ʌsɑː</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Gegeruju</grapheme>
+<phoneme>gɛgɛˈɹu.d͡ʒu</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>PvP</grapheme>
+<phoneme>ˈpiːviːˈpiː</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lominsan</grapheme>
+<phoneme>ləˈmɪnsən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>E-Sumi-Yan</grapheme>
+<phoneme>ˈiːˈsuːmiˈjɛn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Er.</grapheme>
+<grapheme> er.</grapheme>
+<grapheme> er </grapheme>
+<grapheme> err.</grapheme>
+<grapheme> err </grapheme>
+<phoneme>ɜːɹ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Us.</grapheme>
+<grapheme>Us,</grapheme>
+<grapheme> us.</grapheme>
+<grapheme> us,</grapheme>
+<grapheme> us </grapheme>
+<phoneme>ʌs</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Hm,</grapheme>
+<grapheme>Hm.</grapheme>
+<grapheme>Hm?</grapheme>
+<grapheme> Hm,</grapheme>
+<grapheme> Hm.</grapheme>
+<grapheme> Hm?</grapheme>
+<grapheme> hm,</grapheme>
+<grapheme> hm.</grapheme>
+<grapheme> hm?</grapheme>
+<phoneme>hm̩</phoneme>
 </lexeme>
 </lexicon>
