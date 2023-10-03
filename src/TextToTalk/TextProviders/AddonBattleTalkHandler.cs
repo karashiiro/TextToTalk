@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
-using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects;
+using Dalamud.Plugin.Services;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -16,16 +15,16 @@ public class AddonBattleTalkHandler : IDisposable
 
     private readonly AddonBattleTalkManager addonTalkManager;
     private readonly MessageHandlerFilters filters;
-    private readonly ObjectTable objects;
+    private readonly IObjectTable objects;
     private readonly PluginConfiguration config;
-    private readonly Framework framework;
+    private readonly IFramework framework;
     private readonly ComponentUpdateState<AddonBattleTalkState> updateState;
     private readonly IDisposable subscription;
 
     public Action<TextEmitEvent> OnTextEmit { get; set; }
 
-    public AddonBattleTalkHandler(AddonBattleTalkManager addonTalkManager, Framework framework,
-        MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
+    public AddonBattleTalkHandler(AddonBattleTalkManager addonTalkManager, IFramework framework,
+        MessageHandlerFilters filters, IObjectTable objects, PluginConfiguration config)
     {
         this.addonTalkManager = addonTalkManager;
         this.framework = framework;
@@ -43,7 +42,7 @@ public class AddonBattleTalkHandler : IDisposable
     {
         return Observable.Create((IObserver<AddonPollSource> observer) =>
         {
-            void Handle(Framework _)
+            void Handle(IFramework _)
             {
                 if (!this.config.Enabled) return;
                 if (!this.config.ReadFromBattleTalkAddon) return;

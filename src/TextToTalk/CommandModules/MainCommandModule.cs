@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Backends;
 using TextToTalk.UI;
@@ -12,9 +12,9 @@ namespace TextToTalk.CommandModules
 {
     public class MainCommandModule : IDisposable
     {
-        private readonly ChatGui chat;
-        private readonly GameGui gui;
-        private readonly CommandManager commandManager;
+        private readonly IChatGui chat;
+        private readonly IGameGui gui;
+        private readonly ICommandManager commandManager;
 
         private readonly PluginConfiguration config;
         private readonly VoiceBackendManager backendManager;
@@ -22,8 +22,8 @@ namespace TextToTalk.CommandModules
 
         private readonly IList<string> commandNames;
 
-        public MainCommandModule(ChatGui chat, CommandManager commandManager, PluginConfiguration config,
-            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow, GameGui gui)
+        public MainCommandModule(IChatGui chat, ICommandManager commandManager, PluginConfiguration config,
+            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow, IGameGui gui)
         {
             this.chat = chat;
             this.gui = gui;

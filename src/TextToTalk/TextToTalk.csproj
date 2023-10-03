@@ -1,109 +1,113 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
-		<LangVersion>11.0</LangVersion>
-		<Version>1.27.3.0</Version>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<PlatformTarget>x64</PlatformTarget>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
-	
-	<PropertyGroup>
-		<WarningsAsErrors>CS8785</WarningsAsErrors>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <LangVersion>11.0</LangVersion>
+        <Version>1.28.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+        <PlatformTarget>x64</PlatformTarget>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)'=='Release'">
-		<AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-		<PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
-		<Deterministic>true</Deterministic>
-	</PropertyGroup>
+    <PropertyGroup>
+        <WarningsAsErrors>CS8785</WarningsAsErrors>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Content Include="..\..\images\icon.png" Link="images\icon.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-	
-	<ItemGroup>
-		<KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WindowsForms" IsWindowsOnly="false" />
-	</ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+        <PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
-		<PackageReference Include="AWSSDK.Polly" Version="3.7.106.22" />
-		<PackageReference Include="DalamudPackager" Version="2.1.11" />
-		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.26.0" />
-		<PackageReference Include="NAudio" Version="2.1.0" />
-		<PackageReference Include="Standart.Hash.xxHash" Version="4.0.5" />
-		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-		<PackageReference Include="System.Reactive" Version="5.0.0" />
-		<PackageReference Include="System.Speech" Version="7.0.0" />
-	</ItemGroup>
+    <ItemGroup>
+        <Content Include="..\..\images\icon.png" Link="images\icon.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\TextToTalk.Data\TextToTalk.Data.csproj" />
-		<ProjectReference Include="..\TextToTalk.Lexicons.Updater\TextToTalk.Lexicons.Updater.csproj" />
-		<ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj" />
-		<ProjectReference Include="..\TextToTalk.UI.SourceGeneration\TextToTalk.UI.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-		<ProjectReference Include="..\TextToTalk.UI.Core\TextToTalk.UI.Core.csproj" />
-		<ProjectReference Include="..\TextToTalk.UngenderedOverrides\TextToTalk.UngenderedOverrides.csproj" />
-		<ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" ReferenceOutputAssembly="false" />
-		<ProjectReference Include="..\websocket-sharp\websocket-sharp\websocket-sharp.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WindowsForms" IsWindowsOnly="false"/>
+    </ItemGroup>
 
-	<Target Name="CopyVoiceUnlocker" AfterTargets="Build">
-		<ItemGroup>
-			<VoiceUnlocker Include="..\VoiceUnlocker\bin\$(Configuration)\**\*" />
-		</ItemGroup>
-		<Copy SourceFiles="@(VoiceUnlocker)" DestinationFolder="$(TargetDir)\VoiceUnlocker" SkipUnchangedFiles="true" />
-	</Target>
+    <ItemGroup>
+        <PackageReference Include="AdysTech.CredentialManager" Version="2.6.0"/>
+        <PackageReference Include="AWSSDK.Polly" Version="3.7.106.22"/>
+        <PackageReference Include="DalamudPackager" Version="2.1.11"/>
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.26.0"/>
+        <PackageReference Include="NAudio" Version="2.1.0"/>
+        <PackageReference Include="Standart.Hash.xxHash" Version="4.0.5"/>
+        <PackageReference Include="System.Drawing.Common" Version="7.0.0"/>
+        <PackageReference Include="System.Reactive" Version="5.0.0"/>
+        <PackageReference Include="System.Speech" Version="7.0.0"/>
+    </ItemGroup>
 
-	<PropertyGroup>
-		<DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\TextToTalk.Data\TextToTalk.Data.csproj"/>
+        <ProjectReference Include="..\TextToTalk.Lexicons.Updater\TextToTalk.Lexicons.Updater.csproj"/>
+        <ProjectReference Include="..\TextToTalk.Lexicons\TextToTalk.Lexicons.csproj"/>
+        <ProjectReference Include="..\TextToTalk.UI.SourceGeneration\TextToTalk.UI.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\TextToTalk.UI.Core\TextToTalk.UI.Core.csproj"/>
+        <ProjectReference Include="..\TextToTalk.UngenderedOverrides\TextToTalk.UngenderedOverrides.csproj"/>
+        <ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\websocket-sharp\websocket-sharp\websocket-sharp.csproj"/>
+    </ItemGroup>
 
-	<PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
-		<DalamudLibPath>$(DALAMUD_HOME)/</DalamudLibPath>
-	</PropertyGroup>
+    <Target Name="CopyVoiceUnlocker" AfterTargets="Build">
+        <ItemGroup>
+            <VoiceUnlocker Include="..\VoiceUnlocker\bin\$(Configuration)\**\*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(VoiceUnlocker)" DestinationFolder="$(TargetDir)\VoiceUnlocker" SkipUnchangedFiles="true"/>
+    </Target>
 
-	<PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))'">
-		<DalamudLibPath>$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
-	</PropertyGroup>
+    <PropertyGroup>
+        <DalamudLibPath>$(appdata)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Reference Include="Dalamud">
-			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Lumina">
-			<HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Lumina.Excel">
-			<HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="ImGui.NET">
-			<HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="ImGuiScene">
-			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Newtonsoft.Json">
-			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="FFXIVClientStructs">
-			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
-	</ItemGroup>
+    <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
+        <DalamudLibPath>$(DALAMUD_HOME)/</DalamudLibPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))'">
+        <DalamudLibPath>$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <DalamudLibPath>$(DALAMUD_DEV)\</DalamudLibPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="Dalamud">
+            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Lumina">
+            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Lumina.Excel">
+            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="ImGui.NET">
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="ImGuiScene">
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="FFXIVClientStructs">
+            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
 </Project>

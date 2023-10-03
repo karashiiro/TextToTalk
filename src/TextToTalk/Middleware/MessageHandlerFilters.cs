@@ -1,5 +1,5 @@
-﻿using Dalamud.Game.ClientState;
-using Dalamud.Game.Text;
+﻿using Dalamud.Game.Text;
+using Dalamud.Plugin.Services;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Middleware;
@@ -8,9 +8,9 @@ public class MessageHandlerFilters
 {
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
-    private readonly ClientState clientState;
+    private readonly IClientState clientState;
 
-    public MessageHandlerFilters(SharedState sharedState, PluginConfiguration config, ClientState clientState)
+    public MessageHandlerFilters(SharedState sharedState, PluginConfiguration config, IClientState clientState)
     {
         this.sharedState = sharedState;
         this.config = config;

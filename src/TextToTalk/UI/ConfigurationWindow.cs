@@ -4,10 +4,10 @@ using System.Linq;
 using System.Numerics;
 using System.Reactive.Subjects;
 using System.Text;
-using Dalamud.Data;
 using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using TextToTalk.Backends;
@@ -23,7 +23,7 @@ namespace TextToTalk.UI
         private static readonly Vector4 Red = new(1.0f, 0.0f, 0.0f, 1.0f);
 
         private readonly PluginConfiguration config;
-        private readonly DataManager data;
+        private readonly IDataManager data;
         private readonly VoiceBackendManager backendManager;
         private readonly PlayerService players;
         private readonly NpcService npc;
@@ -38,7 +38,7 @@ namespace TextToTalk.UI
         private string? npcName = string.Empty;
         private string npcError = string.Empty;
 
-        public ConfigurationWindow(PluginConfiguration config, DataManager data, VoiceBackendManager backendManager,
+        public ConfigurationWindow(PluginConfiguration config, IDataManager data, VoiceBackendManager backendManager,
             PlayerService players, NpcService npc, Window voiceUnlockerWindow) : base(
             "TextToTalk Configuration###TextToTalkConfig")
         {

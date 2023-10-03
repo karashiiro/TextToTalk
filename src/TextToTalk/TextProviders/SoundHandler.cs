@@ -1,10 +1,10 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dalamud.Game;
 using Dalamud.Hooking;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 
 namespace TextToTalk.TextProviders;
@@ -40,14 +40,15 @@ public class SoundHandler : IDisposable
     private readonly AddonBattleTalkHandler addonBattleTalkHandler;
 
     public SoundHandler(AddonTalkHandler addonTalkHandler, AddonBattleTalkHandler addonBattleTalkHandler,
-        SigScanner sigScanner)
+        ISigScanner sigScanner, IGameInteropProvider gameInterop)
     {
         this.addonTalkHandler = addonTalkHandler;
         this.addonBattleTalkHandler = addonBattleTalkHandler;
 
         if (sigScanner.TryScanText(LoadSoundFileSig, out var loadSoundFilePtr))
         {
-            this.loadSoundFileHook = Hook<LoadSoundFileDelegate>.FromAddress(loadSoundFilePtr, LoadSoundFileDetour);
+            this.loadSoundFileHook =
+                gameInterop.HookFromAddress<LoadSoundFileDelegate>(loadSoundFilePtr, LoadSoundFileDetour);
             this.loadSoundFileHook.Enable();
             DetailedLog.Debug("Hooked into LoadSoundFile");
         }
@@ -59,7 +60,7 @@ public class SoundHandler : IDisposable
         if (sigScanner.TryScanText(PlaySpecificSoundSig, out var playSpecificSoundPtr))
         {
             this.playSpecificSoundHook =
-                Hook<PlaySpecificSoundDelegate>.FromAddress(playSpecificSoundPtr, PlaySpecificSoundDetour);
+                gameInterop.HookFromAddress<PlaySpecificSoundDelegate>(playSpecificSoundPtr, PlaySpecificSoundDetour);
             this.playSpecificSoundHook.Enable();
             DetailedLog.Debug("Hooked into PlaySpecificSound");
         }
