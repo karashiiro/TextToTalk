@@ -1,13 +1,10 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Gui;
+﻿using Dalamud.Plugin.Services;
 
 namespace TextToTalk.Talk;
 
 public class AddonBattleTalkManager : AddonManager
 {
-    public AddonBattleTalkManager(Framework framework, ClientState clientState, Condition condition, GameGui gui) :
+    public AddonBattleTalkManager(IFramework framework, IClientState clientState, ICondition condition, IGameGui gui) :
         base(framework, clientState, condition, gui, "_BattleTalk")
     {
     }

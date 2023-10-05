@@ -1,8 +1,5 @@
 ﻿using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
@@ -12,12 +9,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using Dalamud.Data;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
@@ -47,10 +41,10 @@ namespace TextToTalk
 
         private readonly DalamudPluginInterface pluginInterface;
         private readonly MainCommandModule commandModule;
-        private readonly KeyState keys;
-        private readonly ChatGui chat;
-        private readonly Framework framework;
-        private readonly ClientState clientState;
+        private readonly IKeyState keys;
+        private readonly IChatGui chat;
+        private readonly IFramework framework;
+        private readonly IClientState clientState;
 
         private readonly PluginConfiguration config;
         private readonly AddonTalkManager addonTalkManager;
@@ -85,16 +79,17 @@ namespace TextToTalk
 
         public TextToTalk(
             [RequiredVersion("1.0")] DalamudPluginInterface pi,
-            [RequiredVersion("1.0")] KeyState keyState,
-            [RequiredVersion("1.0")] ChatGui chat,
-            [RequiredVersion("1.0")] Framework framework,
-            [RequiredVersion("1.0")] ClientState clientState,
-            [RequiredVersion("1.0")] GameGui gui,
-            [RequiredVersion("1.0")] DataManager data,
-            [RequiredVersion("1.0")] ObjectTable objects,
-            [RequiredVersion("1.0")] Condition condition,
-            [RequiredVersion("1.0")] CommandManager commandManager,
-            [RequiredVersion("1.0")] SigScanner sigScanner)
+            [RequiredVersion("1.0")] IKeyState keyState,
+            [RequiredVersion("1.0")] IChatGui chat,
+            [RequiredVersion("1.0")] IFramework framework,
+            [RequiredVersion("1.0")] IClientState clientState,
+            [RequiredVersion("1.0")] IGameGui gui,
+            [RequiredVersion("1.0")] IDataManager data,
+            [RequiredVersion("1.0")] IObjectTable objects,
+            [RequiredVersion("1.0")] ICondition condition,
+            [RequiredVersion("1.0")] ICommandManager commandManager,
+            [RequiredVersion("1.0")] ISigScanner sigScanner,
+            [RequiredVersion("1.0")] IGameInteropProvider gameInterop)
         {
             this.pluginInterface = pi;
             this.clientState = clientState;
@@ -151,7 +146,8 @@ namespace TextToTalk
             this.chatMessageHandler =
                 new ChatMessageHandler(this.addonTalkManager, this.addonBattleTalkManager, chat, filters, objects,
                     this.config);
-            this.soundHandler = new SoundHandler(this.addonTalkHandler, this.addonBattleTalkHandler, sigScanner);
+            this.soundHandler =
+                new SoundHandler(this.addonTalkHandler, this.addonBattleTalkHandler, sigScanner, gameInterop);
 
             this.rateLimiter = new RateLimiter(() =>
             {
@@ -206,7 +202,7 @@ namespace TextToTalk
 
         private bool keysDown;
 
-        private void CheckKeybindPressed(Framework f)
+        private void CheckKeybindPressed(IFramework f)
         {
             if (this.CheckTTSToggleKeybind()) return;
             if (this.CheckPresetKeybind()) return;

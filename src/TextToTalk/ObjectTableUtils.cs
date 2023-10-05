@@ -1,14 +1,14 @@
 ﻿using System.Linq;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Plugin.Services;
 using TextToTalk.Talk;
 
 namespace TextToTalk;
 
 public static class ObjectTableUtils
 {
-    public static GameObject? GetGameObjectByName(ObjectTable objects, SeString? name)
+    public static GameObject? GetGameObjectByName(IObjectTable objects, SeString? name)
     {
         // Names are complicated; the name SeString can come from chat, meaning it can
         // include the cross-world icon or friend group icons or whatever else.

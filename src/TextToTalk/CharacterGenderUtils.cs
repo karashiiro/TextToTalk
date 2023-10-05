@@ -19,7 +19,7 @@ public static class CharacterGenderUtils
         var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)gObj.Address;
 
         // Get actor gender as defined by its struct.
-        var actorGender = (Gender)charaStruct->CustomizeData[1];
+        var actorGender = (Gender)charaStruct->DrawData.CustomizeData[1];
 
         // Player gender overrides will be handled by a different system.
         if (gObj.ObjectKind is ObjectKind.Player)

@@ -1,14 +1,11 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Gui;
+﻿using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 
 namespace TextToTalk.Talk;
 
 public class AddonTalkManager : AddonManager
 {
-    public AddonTalkManager(Framework framework, ClientState clientState, Condition condition, GameGui gui) : base(
+    public AddonTalkManager(IFramework framework, IClientState clientState, ICondition condition, IGameGui gui) : base(
         framework, clientState, condition, gui, "Talk")
     {
     }

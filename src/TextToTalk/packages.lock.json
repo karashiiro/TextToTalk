@@ -10,24 +10,24 @@
       },
       "AWSSDK.Polly": {
         "type": "Direct",
-        "requested": "[3.7.106.22, )",
-        "resolved": "3.7.106.22",
-        "contentHash": "WI5ZB/DK69Jn4Bi14zEURfzBMVtWcXbkdcbPtHnD6pB5rnFFCB2RGs0KHbdDFU8WVipDIAaSCBzOSgBpaQ5rTw==",
+        "requested": "[3.7.203.27, )",
+        "resolved": "3.7.203.27",
+        "contentHash": "4ig1PO+6tJoS6m/YowXK78Hsux6ZGoPwB6swlVmWkRvl85eEK/DphaW2VDuApKuzrgtG5uFwH8cYIOKMMMV9vA==",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.106.1, 4.0.0)"
+          "AWSSDK.Core": "[3.7.202.20, 4.0.0)"
         }
       },
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[2.1.11, )",
-        "resolved": "2.1.11",
-        "contentHash": "9qlAWoRRTiL/geAvuwR/g6Bcbrd/bJJgVnB/RurBiyKs6srsP0bvpoo8IK+Eg8EA6jWeM6/YJWs66w4FIAzqPw=="
+        "requested": "[2.1.12, )",
+        "resolved": "2.1.12",
+        "contentHash": "Sc0PVxvgg4NQjcI8n10/VfUQBAS4O+Fw2pZrAqBdRMbthYGeogzu5+xmIGCGmsEZ/ukMOBuAqiNiB5qA3MRalg=="
       },
       "Microsoft.CognitiveServices.Speech": {
         "type": "Direct",
-        "requested": "[1.26.0, )",
-        "resolved": "1.26.0",
-        "contentHash": "vGZAx5iFQnMW9RSbgrR1hPrWg3/bePU0dxHmNeqGLPiH7/RZldHmqWdE2Sa7PD2/o/FPzGr6bVgAEcuiRg+dnQ=="
+        "requested": "[1.32.1, )",
+        "resolved": "1.32.1",
+        "contentHash": "9oy2Yqd5AdGx2VQsUR2WbIuz87y+Wl3iyWnWxd2NlBINWTHsYRv1rT5iptsxb25sv+rFql0LhMpvEs30gx/fTg=="
       },
       "NAudio": {
         "type": "Direct",
@@ -72,8 +72,8 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "3.7.106.1",
-        "contentHash": "WVi66ESu06NFfkKE76uATNyISqnwg8ntYcEUCmZ4KFstZpPOlCXj7o9xO4glPGIvRSd8q6JvcWBnSAXjt+sTZw=="
+        "resolved": "3.7.202.20",
+        "contentHash": "rRoHtZMcC5DYzA9WTOQd2kLor1sHC0GHippL1mCF7aA0oS4ZGm0wflm2TwtOfr2GpJk1f8Ez0Ho9xQp11cIeIw=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -185,9 +185,9 @@
     "net7.0-windows7.0/win-x64": {
       "Microsoft.CognitiveServices.Speech": {
         "type": "Direct",
-        "requested": "[1.26.0, )",
-        "resolved": "1.26.0",
-        "contentHash": "vGZAx5iFQnMW9RSbgrR1hPrWg3/bePU0dxHmNeqGLPiH7/RZldHmqWdE2Sa7PD2/o/FPzGr6bVgAEcuiRg+dnQ=="
+        "requested": "[1.32.1, )",
+        "resolved": "1.32.1",
+        "contentHash": "9oy2Yqd5AdGx2VQsUR2WbIuz87y+Wl3iyWnWxd2NlBINWTHsYRv1rT5iptsxb25sv+rFql0LhMpvEs30gx/fTg=="
       },
       "System.Drawing.Common": {
         "type": "Direct",

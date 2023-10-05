@@ -1,32 +1,31 @@
 ﻿using System;
 using System.Reactive.Linq;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Gui;
+using Dalamud.Plugin.Services;
 
 namespace TextToTalk.Talk;
 
 public abstract class AddonManager : IDisposable
 {
-    private readonly ClientState clientState;
-    private readonly Condition condition;
-    private readonly GameGui gui;
+    private readonly IClientState clientState;
+    private readonly ICondition condition;
+    private readonly IGameGui gui;
     private readonly IDisposable subscription;
     private readonly string name;
 
     protected nint Address { get; set; }
 
-    protected AddonManager(Framework framework, ClientState clientState, Condition condition, GameGui gui, string name)
+    protected AddonManager(IFramework framework, IClientState clientState, ICondition condition, IGameGui gui,
+        string name)
     {
         this.clientState = clientState;
         this.condition = condition;
         this.gui = gui;
         this.name = name;
 
-        var onUpdate = Observable.Create((IObserver<Framework> observer) =>
+        var onUpdate = Observable.Create((IObserver<IFramework> observer) =>
         {
-            void Handle(Framework f)
+            void Handle(IFramework f)
             {
                 observer.OnNext(f);
             }

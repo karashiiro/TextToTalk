@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
-using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects;
+using Dalamud.Plugin.Services;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -14,9 +13,9 @@ public class AddonTalkHandler : IDisposable
 
     private readonly AddonTalkManager addonTalkManager;
     private readonly MessageHandlerFilters filters;
-    private readonly ObjectTable objects;
+    private readonly IObjectTable objects;
     private readonly PluginConfiguration config;
-    private readonly Framework framework;
+    private readonly IFramework framework;
     private readonly ComponentUpdateState<AddonTalkState> updateState;
     private readonly IDisposable subscription;
 
@@ -24,8 +23,8 @@ public class AddonTalkHandler : IDisposable
     public Action<AddonTalkAdvanceEvent> OnAdvance { get; set; }
     public Action<AddonTalkCloseEvent> OnClose { get; set; }
 
-    public AddonTalkHandler(AddonTalkManager addonTalkManager, Framework framework,
-        MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
+    public AddonTalkHandler(AddonTalkManager addonTalkManager, IFramework framework,
+        MessageHandlerFilters filters, IObjectTable objects, PluginConfiguration config)
     {
         this.addonTalkManager = addonTalkManager;
         this.framework = framework;
@@ -45,7 +44,7 @@ public class AddonTalkHandler : IDisposable
     {
         return Observable.Create((IObserver<AddonPollSource> observer) =>
         {
-            void Handle(Framework _)
+            void Handle(IFramework _)
             {
                 if (!this.config.Enabled) return;
                 if (!this.config.ReadFromQuestTalkAddon) return;

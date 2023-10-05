@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Plugin.Services;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -18,15 +17,15 @@ public class ChatMessageHandler : IDisposable
     private readonly AddonTalkManager addonTalkManager;
     private readonly AddonBattleTalkManager addonBattleTalkManager;
     private readonly MessageHandlerFilters filters;
-    private readonly ObjectTable objects;
+    private readonly IObjectTable objects;
     private readonly PluginConfiguration config;
-    private readonly ChatGui chat;
+    private readonly IChatGui chat;
     private readonly IDisposable subscription;
 
     public Action<ChatTextEmitEvent> OnTextEmit { get; set; }
 
     public ChatMessageHandler(AddonTalkManager addonTalkManager, AddonBattleTalkManager addonBattleTalkManager,
-        ChatGui chat, MessageHandlerFilters filters, ObjectTable objects, PluginConfiguration config)
+        IChatGui chat, MessageHandlerFilters filters, IObjectTable objects, PluginConfiguration config)
     {
         this.addonTalkManager = addonTalkManager;
         this.addonBattleTalkManager = addonBattleTalkManager;
