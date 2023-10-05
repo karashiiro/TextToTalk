@@ -35,9 +35,9 @@
 
     <ItemGroup>
         <PackageReference Include="AdysTech.CredentialManager" Version="2.6.0"/>
-        <PackageReference Include="AWSSDK.Polly" Version="3.7.106.22"/>
-        <PackageReference Include="DalamudPackager" Version="2.1.11"/>
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.26.0"/>
+        <PackageReference Include="AWSSDK.Polly" Version="3.7.203.27" />
+        <PackageReference Include="DalamudPackager" Version="2.1.12" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.32.1" />
         <PackageReference Include="NAudio" Version="2.1.0"/>
         <PackageReference Include="Standart.Hash.xxHash" Version="4.0.5"/>
         <PackageReference Include="System.Drawing.Common" Version="7.0.0"/>
