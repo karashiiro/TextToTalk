@@ -43,14 +43,14 @@ public class ChatMessageHandler : IDisposable
     {
         return Observable.Create((IObserver<ChatMessage> observer) =>
         {
+            this.chat.ChatMessage += HandleMessage;
+            return () => { this.chat.ChatMessage -= HandleMessage; };
+
             void HandleMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
             {
                 if (!this.config.Enabled) return;
                 observer.OnNext(new ChatMessage(type, sender, message));
             }
-
-            this.chat.ChatMessage += HandleMessage;
-            return () => { this.chat.ChatMessage -= HandleMessage; };
         });
     }
 

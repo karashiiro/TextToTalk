@@ -19,6 +19,10 @@ public class AddonTalkHandler : IDisposable
     private readonly ComponentUpdateState<AddonTalkState> updateState;
     private readonly IDisposable subscription;
 
+    // Most recent speaker/text specific to this addon
+    private string? lastAddonSpeaker;
+    private string? lastAddonText;
+
     public Action<TextEmitEvent> OnTextEmit { get; set; }
     public Action<AddonTalkAdvanceEvent> OnAdvance { get; set; }
     public Action<AddonTalkCloseEvent> OnClose { get; set; }
@@ -44,15 +48,15 @@ public class AddonTalkHandler : IDisposable
     {
         return Observable.Create((IObserver<AddonPollSource> observer) =>
         {
+            this.framework.Update += Handle;
+            return () => { this.framework.Update -= Handle; };
+
             void Handle(IFramework _)
             {
                 if (!this.config.Enabled) return;
                 if (!this.config.ReadFromQuestTalkAddon) return;
                 observer.OnNext(AddonPollSource.FrameworkUpdate);
             }
-
-            this.framework.Update += Handle;
-            return () => { this.framework.Update -= Handle; };
         });
     }
 
@@ -84,7 +88,20 @@ public class AddonTalkHandler : IDisposable
 
         text = TalkUtils.NormalizePunctuation(text);
 
-        DetailedLog.Debug($"AddonTalk: \"{text}\"");
+        DetailedLog.Debug($"AddonTalk ({pollSource}): \"{text}\"");
+
+        {
+            // This entire callback executes twice in a row - once for the voice line, and then again immediately
+            // afterwards for the framework update itself. This prevents the second invocation from being spoken.
+            if (this.lastAddonSpeaker == speaker && this.lastAddonText == text)
+            {
+                DetailedLog.Debug($"Skipping duplicate line: {text}");
+                return;
+            }
+
+            this.lastAddonSpeaker = speaker;
+            this.lastAddonText = text;
+        }
 
         if (pollSource == AddonPollSource.VoiceLinePlayback && this.config.SkipVoicedQuestText)
         {

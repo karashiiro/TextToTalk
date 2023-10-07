@@ -20,6 +20,10 @@ public class AddonBattleTalkHandler : IDisposable
     private readonly ComponentUpdateState<AddonBattleTalkState> updateState;
     private readonly IDisposable subscription;
 
+    // Most recent speaker/text specific to this addon
+    private string? lastAddonSpeaker;
+    private string? lastAddonText;
+
     public Action<TextEmitEvent> OnTextEmit { get; set; }
 
     public AddonBattleTalkHandler(AddonBattleTalkManager addonTalkManager, IFramework framework,
@@ -41,15 +45,15 @@ public class AddonBattleTalkHandler : IDisposable
     {
         return Observable.Create((IObserver<AddonPollSource> observer) =>
         {
+            this.framework.Update += Handle;
+            return () => { this.framework.Update -= Handle; };
+
             void Handle(IFramework _)
             {
                 if (!this.config.Enabled) return;
                 if (!this.config.ReadFromQuestTalkAddon) return;
                 observer.OnNext(AddonPollSource.FrameworkUpdate);
             }
-
-            this.framework.Update += Handle;
-            return () => { this.framework.Update -= Handle; };
         });
     }
 
@@ -77,7 +81,20 @@ public class AddonBattleTalkHandler : IDisposable
 
         text = TalkUtils.NormalizePunctuation(text);
 
-        DetailedLog.Debug($"AddonBattleTalk: \"{text}\"");
+        DetailedLog.Debug($"AddonBattleTalk ({pollSource}): \"{text}\"");
+
+        {
+            // This entire callback executes twice in a row - once for the voice line, and then again immediately
+            // afterwards for the framework update itself. This prevents the second invocation from being spoken.
+            if (this.lastAddonSpeaker == speaker && this.lastAddonText == text)
+            {
+                DetailedLog.Debug($"Skipping duplicate line: {text}");
+                return;
+            }
+
+            this.lastAddonSpeaker = speaker;
+            this.lastAddonText = text;
+        }
 
         if (pollSource == AddonPollSource.VoiceLinePlayback && this.config.SkipVoicedBattleText)
         {
