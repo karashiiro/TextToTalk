@@ -24,13 +24,13 @@ public abstract class AddonManager : IDisposable
 
         var onUpdate = Observable.Create((IObserver<IFramework> observer) =>
         {
+            framework.Update += Handle;
+            return () => { framework.Update -= Handle; };
+
             void Handle(IFramework f)
             {
                 observer.OnNext(f);
             }
-
-            framework.Update += Handle;
-            return () => { framework.Update -= Handle; };
         });
 
         this.subscription = onUpdate
