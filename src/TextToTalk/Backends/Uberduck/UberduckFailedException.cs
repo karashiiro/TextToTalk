@@ -7,7 +7,7 @@ public class UberduckFailedException : Exception
 {
     public HttpStatusCode StatusCode { get; }
 
-    public UberduckFailedException(HttpStatusCode status, string message) : base(message)
+    public UberduckFailedException(HttpStatusCode status, string? message) : base(message)
     {
         StatusCode = status;
     }
