@@ -256,6 +256,7 @@ namespace TextToTalk
 
             if (InitializedEver)
             {
+                DetailedLog.Info("Checking for required configuration migrations");
                 var migrations = new IConfigurationMigration[]
                 {
                     new Migration1_5(), new Migration1_6(), new Migration1_17(), new Migration1_18_2(),
@@ -265,6 +266,7 @@ namespace TextToTalk
                 {
                     if (migration.ShouldMigrate(this))
                     {
+                        DetailedLog.Info($"Upgrading configuration to {migration.Name}");
                         migration.Migrate(this);
                     }
                 }

@@ -12,6 +12,8 @@ namespace TextToTalk.Migrations;
 
 public class Migration1_25_0 : IConfigurationMigration
 {
+    public string Name => "v1.25.0";
+    
     private readonly PlayerCollection playerCollection;
     private readonly NpcCollection npcCollection;
 

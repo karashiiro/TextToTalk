@@ -7,6 +7,8 @@ namespace TextToTalk.Migrations
 {
     public class Migration1_5 : IConfigurationMigration
     {
+        public string Name => "v1.5";
+
         public bool ShouldMigrate(PluginConfiguration config)
         {
             return !config.MigratedTo1_5;
