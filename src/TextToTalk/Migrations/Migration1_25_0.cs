@@ -54,6 +54,8 @@ public class Migration1_25_0 : IConfigurationMigration
                     continue;
                 }
 
+                DetailedLog.Info(name.ToString());
+                DetailedLog.Info(name.GetType().ToString());
                 var nameStr = name.Value<string>() ?? "";
                 var worldId = playerInfo["WorldId"]?.Value<uint>() ?? 81;
                 
