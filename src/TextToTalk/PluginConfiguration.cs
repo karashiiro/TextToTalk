@@ -89,10 +89,10 @@ namespace TextToTalk
         [Obsolete] public int FemaleVoicePresetId { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
-        [Obsolete] public IDictionary<Guid, dynamic>? Players { get; set; }
+        [Obsolete] public IDictionary<Guid, PlayerInfo>? Players { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
-        [Obsolete] public IDictionary<Guid, dynamic>? Npcs { get; set; }
+        [Obsolete] public IDictionary<Guid, NpcInfo>? Npcs { get; set; }
 
         // ReSharper disable once CollectionNeverUpdated.Global
         [Obsolete] public IDictionary<Guid, int>? PlayerVoicePresets { get; set; }

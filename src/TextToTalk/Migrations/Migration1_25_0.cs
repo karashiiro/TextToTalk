@@ -30,42 +30,15 @@ public class Migration1_25_0 : IConfigurationMigration
 
     public void Migrate(PluginConfiguration config)
     {
-        var players = config.Players ?? new Dictionary<Guid, dynamic>();
+        var players = config.Players ?? new Dictionary<Guid, PlayerInfo>();
         foreach (var (playerId, playerInfo) in players)
         {
-            // Due to the old types being removed, this can degrade to JObject, which
-            // needs to be handled accordingly.
-            try
+            this.playerCollection.StorePlayer(new Player
             {
-                this.playerCollection.StorePlayer(new Player
-                {
-                    Id = playerId,
-                    Name = playerInfo.Name,
-                    WorldId = playerInfo.WorldId,
-                });
-            }
-            catch (RuntimeBinderException)
-            {
-                // This degraded to a JObject since the original type was deleted and
-                // the new field type is dynamic.
-                var name = playerInfo["Name"];
-                if (name == null)
-                {
-                    continue;
-                }
-
-                DetailedLog.Info(name.ToString());
-                DetailedLog.Info(name.GetType().ToString());
-                var nameStr = Extensions.Value<string>(name) ?? "";
-                var worldId = Extensions.Value<uint>(playerInfo["WorldId"]);
-                
-                this.playerCollection.StorePlayer(new Player
-                {
-                    Id = playerId,
-                    Name = nameStr,
-                    WorldId = worldId,
-                });
-            }
+                Id = playerId,
+                Name = playerInfo.Name,
+                WorldId = playerInfo.WorldId,
+            });
         }
         
         foreach (var (playerId, voiceId) in config.PlayerVoicePresets ?? new Dictionary<Guid, int>())
@@ -77,35 +50,14 @@ public class Migration1_25_0 : IConfigurationMigration
             });
         }
 
-        var npcs = config.Npcs ?? new Dictionary<Guid, dynamic>();
+        var npcs = config.Npcs ?? new Dictionary<Guid, NpcInfo>();
         foreach (var (npcId, npcInfo) in npcs)
         {
-            try
+            this.npcCollection.StoreNpc(new Npc
             {
-                this.npcCollection.StoreNpc(new Npc
-                {
-                    Id = npcId,
-                    Name = npcInfo.Name,
-                });
-            }
-            catch (RuntimeBinderException)
-            {
-                // This degraded to a JObject since the original type was deleted and
-                // the new field type is dynamic.
-                var name = npcInfo["Name"];
-                if (name == null)
-                {
-                    continue;
-                }
-
-                var nameStr = Extensions.Value<string>(name) ?? "";
-                
-                this.npcCollection.StoreNpc(new Npc
-                {
-                    Id = npcId,
-                    Name = nameStr,
-                });
-            }
+                Id = npcId,
+                Name = npcInfo.Name,
+            });
         }
         
         foreach (var (npcId, voiceId) in config.NpcVoicePresets ?? new Dictionary<Guid, int>())
@@ -117,9 +69,9 @@ public class Migration1_25_0 : IConfigurationMigration
             });
         }
         
-        config.Players = new Dictionary<Guid, dynamic>();
+        config.Players = new Dictionary<Guid, PlayerInfo>();
         config.PlayerVoicePresets = new Dictionary<Guid, int>();
-        config.Npcs = new Dictionary<Guid, dynamic>();
+        config.Npcs = new Dictionary<Guid, NpcInfo>();
         config.NpcVoicePresets = new Dictionary<Guid, int>();
 
         config.MigratedTo1_25_0 = true;
