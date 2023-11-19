@@ -53,12 +53,15 @@ public class Migration1_25_0 : IConfigurationMigration
                 {
                     continue;
                 }
+
+                var nameStr = name.Value<string>() ?? "";
+                var worldId = playerInfo["WorldId"]?.Value<uint>() ?? 81;
                 
                 this.playerCollection.StorePlayer(new Player
                 {
                     Id = playerId,
-                    Name = name.Value<string>() ?? "",
-                    WorldId = playerInfo["WorldId"]?.Value<uint>() ?? 81,
+                    Name = nameStr,
+                    WorldId = worldId,
                 });
             }
         }
@@ -92,11 +95,13 @@ public class Migration1_25_0 : IConfigurationMigration
                 {
                     continue;
                 }
+
+                var nameStr = name.Value<string>() ?? "";
                 
                 this.npcCollection.StoreNpc(new Npc
                 {
                     Id = npcId,
-                    Name = name.Value<string>() ?? "",
+                    Name = nameStr,
                 });
             }
         }
