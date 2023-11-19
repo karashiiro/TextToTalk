@@ -46,7 +46,7 @@ public class Migration1_25_0 : IConfigurationMigration
             }
             catch (RuntimeBinderException)
             {
-                if (!playerInfo.TryGetValue("Name", out dynamic name))
+                if (!playerInfo.TryGetValue("Name", out JToken name))
                 {
                     continue;
                 }
@@ -84,7 +84,7 @@ public class Migration1_25_0 : IConfigurationMigration
             {
                 // This degraded to a JObject since the original type was deleted and
                 // the new field type is dynamic.
-                if (!npcInfo.TryGetValue("Name", out dynamic name))
+                if (!npcInfo.TryGetValue("Name", out JToken name))
                 {
                     continue;
                 }
