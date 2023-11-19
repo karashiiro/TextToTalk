@@ -46,13 +46,14 @@ public class Migration1_25_0 : IConfigurationMigration
             }
             catch (RuntimeBinderException)
             {
-                DetailedLog.Info(playerInfo.ToString());
-                DetailedLog.Info(playerInfo.GetType().ToString());
-                if (!((playerInfo as dynamic as JObject)!).TryGetValue("Name", out var name))
+                // This degraded to a JObject since the original type was deleted and
+                // the new field type is dynamic.
+                var name = playerInfo["Name"];
+                if (name == null)
                 {
                     continue;
                 }
-            
+                
                 this.playerCollection.StorePlayer(new Player
                 {
                     Id = playerId,
@@ -84,11 +85,10 @@ public class Migration1_25_0 : IConfigurationMigration
             }
             catch (RuntimeBinderException)
             {
-                DetailedLog.Info(npcInfo.ToString());
-                DetailedLog.Info(npcInfo.GetType().ToString());
                 // This degraded to a JObject since the original type was deleted and
                 // the new field type is dynamic.
-                if (!(npcInfo as dynamic as JObject)!.TryGetValue("Name", out var name))
+                var name = npcInfo["Name"];
+                if (name == null)
                 {
                     continue;
                 }
