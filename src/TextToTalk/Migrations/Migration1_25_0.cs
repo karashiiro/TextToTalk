@@ -56,8 +56,8 @@ public class Migration1_25_0 : IConfigurationMigration
 
                 DetailedLog.Info(name.ToString());
                 DetailedLog.Info(name.GetType().ToString());
-                var nameStr = (name as JValue)!.Value<string>() ?? "";
-                var worldId = (playerInfo["WorldId"] as JValue)?.Value<uint>() ?? 81;
+                var nameStr = Extensions.Value<string>(name) ?? "";
+                var worldId = Extensions.Value<uint>(playerInfo["WorldId"]);
                 
                 this.playerCollection.StorePlayer(new Player
                 {
@@ -98,7 +98,7 @@ public class Migration1_25_0 : IConfigurationMigration
                     continue;
                 }
 
-                var nameStr = (name as JValue)!.Value<string>() ?? "";
+                var nameStr = Extensions.Value<string>(name) ?? "";
                 
                 this.npcCollection.StoreNpc(new Npc
                 {
