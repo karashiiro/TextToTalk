@@ -35,7 +35,7 @@ namespace TextToTalk.UI
         private string playerName = string.Empty;
         private string playerWorld = string.Empty;
         private string playerWorldError = string.Empty;
-        private string? npcName = string.Empty;
+        private string npcName = string.Empty;
         private string npcError = string.Empty;
 
         public ConfigurationWindow(PluginConfiguration config, IDataManager data, VoiceBackendManager backendManager,
@@ -342,7 +342,7 @@ namespace TextToTalk.UI
                 row =>
                 {
                     var (id, playerInfo, worldName) = row;
-                    var name = playerInfo.Name;
+                    var name = playerInfo.Name ?? "";
 
                     // Allow player names to be edited in the table
                     if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
@@ -481,7 +481,7 @@ namespace TextToTalk.UI
                 },
                 () => this.npc
                     .GetAllNpcs()
-                    .Select(npc => { return (npc.Id, npc); }),
+                    .Select(npc => (npc.Id, npc)),
                 row =>
                 {
                     var (id, npcInfo) = row;
@@ -505,7 +505,7 @@ namespace TextToTalk.UI
                 row =>
                 {
                     var (id, npcInfo) = row;
-                    var name = npcInfo.Name;
+                    var name = npcInfo.Name ?? "";
 
                     // Allow NPC names to be edited in the table
                     if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
