@@ -292,6 +292,10 @@ namespace TextToTalk.UI
 
             ImGui.Spacing();
 
+            ConfigComponents.ToggleUsePlayerVoicePresets("Use player voice presets", this.config);
+
+            ImGui.Spacing();
+
             var tableSize = new Vector2(0.0f, 300f);
             var presets = this.config.GetVoicePresetsForBackend(this.config.Backend).ToList();
             presets.Sort((a, b) => a.Id - b.Id);
@@ -460,6 +464,10 @@ namespace TextToTalk.UI
         private void DrawNpcVoiceSettings()
         {
             ImGui.TextColored(HintColor, "Set specific voice presets for NPCs using the options below.");
+
+            ImGui.Spacing();
+
+            ConfigComponents.ToggleUseNpcVoicePresets("Use NPC voice presets", this.config);
 
             ImGui.Spacing();
 

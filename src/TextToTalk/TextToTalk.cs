@@ -336,6 +336,7 @@ namespace TextToTalk
         {
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is PlayerCharacter pc &&
+                this.config.UsePlayerVoicePresets &&
                 this.playerService.TryGetPlayer(speakerName, pc.HomeWorld.Id, out var playerInfo) &&
                 this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
             {
@@ -343,6 +344,7 @@ namespace TextToTalk
             }
 
             if (speaker is not null &&
+                this.config.UseNpcVoicePresets &&
                 this.npcService.TryGetNpc(speakerName, out var npcInfo) &&
                 this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
             {

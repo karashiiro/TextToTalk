@@ -141,6 +141,9 @@ namespace TextToTalk
 
         public bool UseGenderedVoicePresets { get; set; }
 
+        public bool UsePlayerVoicePresets { get; set; } = true;
+        public bool UseNpcVoicePresets { get; set; } = true;
+
         public TTSBackend Backend { get; set; }
 
         public IList<string> Lexicons { get; set; }
