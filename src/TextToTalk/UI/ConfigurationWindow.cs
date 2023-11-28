@@ -408,7 +408,6 @@ namespace TextToTalk.UI
                     {
                         this.players.SetPlayerVoice(playerInfo, presets[presetIndex]);
                         this.players.UpdatePlayer(playerInfo);
-                        this.config.Save();
                         DetailedLog.Debug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
                     }
                 });
@@ -434,7 +433,6 @@ namespace TextToTalk.UI
                 var world = GetWorldForUserInput(this.playerWorld);
                 if (world != null && this.players.AddPlayer(this.playerName, world.RowId))
                 {
-                    this.config.Save();
                     DetailedLog.Info($"Added player: {this.playerName}@{world.Name}");
                 }
                 else if (world == null)
@@ -511,8 +509,8 @@ namespace TextToTalk.UI
                     if (ImGui.InputText($"##{MemoizedId.Create(uniq: id.ToString())}", ref name, 32))
                     {
                         npcInfo.Name = name;
-                        this.config.Save();
-                        DetailedLog.Debug($"Updated NPC name: {npcInfo.Name}");
+                        this.npc.UpdateNpc(npcInfo);
+                        DetailedLog.Debug($"Updated NPC name: {name}");
                     }
                 },
                 row =>
@@ -525,9 +523,14 @@ namespace TextToTalk.UI
                     if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray,
                             presets.Count))
                     {
-                        this.npc.SetNpcVoice(npcInfo, presets[presetIndex]);
-                        this.config.Save();
-                        DetailedLog.Debug($"Updated voice for {name}: {presets[presetIndex].Name}");
+                        if (this.npc.SetNpcVoice(npcInfo, presets[presetIndex]))
+                        {
+                            DetailedLog.Debug($"Updated voice for {name}: {presets[presetIndex].Name}");
+                        }
+                        else
+                        {
+                            DetailedLog.Warn($"Failed to update voice for {name} ({{id}})");
+                        }
                     }
                 });
 

@@ -53,6 +53,11 @@ public class NpcService
         return voice != null;
     }
 
+    public void UpdateNpc(Npc info)
+    {
+        this.npc.StoreNpc(info);
+    }
+
     public bool SetNpcVoice(Npc info, VoicePreset voice)
     {
         if (info.Name is null || !TryGetNpc(info.Name, out _))
