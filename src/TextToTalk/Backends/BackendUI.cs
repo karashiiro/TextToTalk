@@ -77,6 +77,8 @@ public static class BackendUI
             voiceConfig.FemaleVoicePresets[backend].Remove(preset.Id);
 
             voiceConfig.VoicePresets.Remove(preset);
+
+            config.Save();
         }
     }
 
