@@ -6,28 +6,26 @@ namespace TextToTalk.Backends.OpenAI;
 
 public class OpenAiBackend : VoiceBackend
 {
-    private readonly StreamSoundQueue soundQueue;
     private readonly OpenAiClient client;
+    private readonly StreamSoundQueue soundQueue;
     private readonly OpenAiBackendUI ui;
 
     public OpenAiBackend(PluginConfiguration config, HttpClient http)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
-        this.soundQueue = new StreamSoundQueue();
+        soundQueue = new StreamSoundQueue();
         var model = new OpenAiBackendUIModel();
-        this.ui = new OpenAiBackendUI(model, config);
+        ui = new OpenAiBackendUI(model, config);
         model.ApiKey = OpenAiCredentialManager.LoadCredentials()?.Password ?? "";
-        this.client = new OpenAiClient(soundQueue, model, http);
+        client = new OpenAiClient(soundQueue, model, http);
     }
-    
+
     public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
     {
         if (preset is not OpenAiVoicePreset voicePreset)
-        {
             throw new InvalidOperationException("Invalid voice preset provided.");
-        }
-        
+
         _ = client.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume, source, text);
     }
 
@@ -55,9 +53,6 @@ public class OpenAiBackend : VoiceBackend
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing)
-        {
-            soundQueue.Dispose();
-        }
+        if (disposing) soundQueue.Dispose();
     }
 }

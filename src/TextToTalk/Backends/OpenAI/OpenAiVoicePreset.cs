@@ -5,14 +5,13 @@ namespace TextToTalk.Backends.OpenAI;
 public class OpenAiVoicePreset : VoicePreset
 {
     public float Volume { get; set; }
-    
+
     public string? Model { get; set; }
-    
+
     // 0.25 - 4.0 (default 1.0)
     public float? PlaybackRate { get; set; }
 
-    [JsonPropertyName("OpenAIVoiceName")]
-    public string? VoiceName { get; set; }
+    [JsonPropertyName("OpenAIVoiceName")] public string? VoiceName { get; set; }
 
     public override bool TrySetDefaultValues()
     {
