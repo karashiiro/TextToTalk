@@ -10,6 +10,7 @@ namespace TextToTalk.Backends
         Uberduck,
         Azure,
         ElevenLabs,
+        OpenAi,
     }
 
     public static class TTSBackendExtensions
@@ -24,6 +25,7 @@ namespace TextToTalk.Backends
                 TTSBackend.Uberduck => "Uberduck",
                 TTSBackend.Azure => "Azure Cognitive Services",
                 TTSBackend.ElevenLabs => "ElevenLabs",
+                TTSBackend.OpenAi => "OpenAI",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
@@ -38,6 +40,7 @@ namespace TextToTalk.Backends
                 TTSBackend.Uberduck => false,
                 TTSBackend.Azure => true,
                 TTSBackend.ElevenLabs => false,
+                TTSBackend.OpenAi => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
