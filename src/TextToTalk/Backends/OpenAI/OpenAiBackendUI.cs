@@ -7,23 +7,32 @@ namespace TextToTalk.Backends.OpenAI;
 
 public class OpenAiBackendUI
 {
-    public void DrawLoginOptions(OpenAiApiConfig apiConfig)
+    private readonly OpenAiBackendUIModel model;
+    private readonly PluginConfiguration config;
+
+    public OpenAiBackendUI(OpenAiBackendUIModel model, PluginConfiguration config)
     {
-        var apiKey = apiConfig.ApiKey;
+        this.model = model;
+        this.config = config;
+    }
+    
+    public void DrawLoginOptions()
+    {
+        var apiKey = model.ApiKey;
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref apiKey, 100,
             ImGuiInputTextFlags.Password);
         
         if (ImGui.Button($"Login##{MemoizedId.Create()}"))
         {
             OpenAiCredentialManager.SaveCredentials(apiKey);
-            apiConfig.ApiKey = apiKey;
+            model.ApiKey = apiKey;
         }
     }
 
-    public void DrawVoicePresetOptions(PluginConfiguration pluginConfiguration)
+    public void DrawVoicePresetOptions()
     {
-        var currentVoicePreset = pluginConfiguration.GetCurrentVoicePreset<OpenAiVoicePreset>();
-        var presets = pluginConfiguration.GetVoicePresetsForBackend(TTSBackend.OpenAi).ToList();
+        var currentVoicePreset = config.GetCurrentVoicePreset<OpenAiVoicePreset>();
+        var presets = config.GetVoicePresetsForBackend(TTSBackend.OpenAi).ToList();
 
         if (presets.Count > 0 && currentVoicePreset != null)
         {
@@ -31,7 +40,7 @@ public class OpenAiBackendUI
             if (ImGui.Combo($"Voice preset##{MemoizedId.Create()}", ref currentPresetIndex,
                 presets.Select(p => p.Name).ToArray(), presets.Count))
             {
-                pluginConfiguration.SetCurrentVoicePreset(presets[currentPresetIndex].Id);
+                config.SetCurrentVoicePreset(presets[currentPresetIndex].Id);
             }
         }
         else if (currentVoicePreset != null)
@@ -39,7 +48,7 @@ public class OpenAiBackendUI
             ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
         
-        BackendUI.NewPresetButton<OpenAiVoicePreset>($"New preset##{MemoizedId.Create()}", pluginConfiguration);
+        BackendUI.NewPresetButton<OpenAiVoicePreset>($"New preset##{MemoizedId.Create()}", config);
         
         if (presets.Count == 0 || currentVoicePreset is null)
         {
@@ -50,13 +59,13 @@ public class OpenAiBackendUI
         BackendUI.DeletePresetButton($"Delete preset##{MemoizedId.Create()}", 
             currentVoicePreset, 
             TTSBackend.OpenAi,
-            pluginConfiguration);
+            config);
 
         var presetName = currentVoicePreset.Name;
         if (ImGui.InputText($"Preset name ##{MemoizedId.Create()}", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
-            pluginConfiguration.Save();
+            config.Save();
         }
 
         var voiceNames = OpenAiClient.Voices;
@@ -67,7 +76,7 @@ public class OpenAiBackendUI
                 if (ImGui.Selectable(voiceName, voiceName == currentVoicePreset.VoiceName))
                 {
                     currentVoicePreset.VoiceName = voiceName;
-                    pluginConfiguration.Save();
+                    config.Save();
                 }
             }
             ImGui.EndCombo();
@@ -82,7 +91,7 @@ public class OpenAiBackendUI
                 if (ImGui.Selectable(modelName, modelName == currentVoicePreset.Model))
                 {
                     currentVoicePreset.Model = modelName;
-                    pluginConfiguration.Save();
+                    config.Save();
                 }
             }
             ImGui.EndCombo();
@@ -92,23 +101,23 @@ public class OpenAiBackendUI
         if (ImGui.SliderFloat($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 0.25f, 4f, "%.2fx"))
         {
             currentVoicePreset.PlaybackRate = playbackRate;
-            pluginConfiguration.Save();
+            config.Save();
         }
 
         var volume = (int)(currentVoicePreset.Volume * 100);
         if (ImGui.SliderInt($"Volume##{MemoizedId.Create()}", ref volume, 0, 200, "%d%%"))
         {
             currentVoicePreset.Volume = (float)Math.Round(volume / 100f, 2);
-            pluginConfiguration.Save();
+            config.Save();
         }
 
         ConfigComponents.ToggleUseGenderedVoicePresets(
             $"Use gendered voice presets##{MemoizedId.Create()}",
-            pluginConfiguration);
+            config);
         ImGui.Spacing();
-        if (pluginConfiguration.UseGenderedVoicePresets)
+        if (config.UseGenderedVoicePresets)
         {
-            BackendUI.GenderedPresetConfig("Polly", TTSBackend.OpenAi, pluginConfiguration, presets);
+            BackendUI.GenderedPresetConfig("Polly", TTSBackend.OpenAi, config, presets);
         }
     }
 }

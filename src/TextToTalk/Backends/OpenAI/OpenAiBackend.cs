@@ -6,22 +6,19 @@ namespace TextToTalk.Backends.OpenAI;
 
 public class OpenAiBackend : VoiceBackend
 {
-    private StreamSoundQueue soundQueue;
-    private readonly PluginConfiguration pluginConfiguration;
+    private readonly StreamSoundQueue soundQueue;
     private readonly OpenAiClient client;
     private readonly OpenAiBackendUI ui;
-    private readonly OpenAiApiConfig apiConfig;
 
-    public OpenAiBackend(PluginConfiguration pluginConfiguration, HttpClient http)
+    public OpenAiBackend(PluginConfiguration config, HttpClient http)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
         this.soundQueue = new StreamSoundQueue();
-        this.pluginConfiguration = pluginConfiguration;
-        this.ui = new OpenAiBackendUI();
-        this.apiConfig = new OpenAiApiConfig();
-        apiConfig.ApiKey = OpenAiCredentialManager.LoadCredentials()?.Password ?? "";
-        this.client = new OpenAiClient(soundQueue, apiConfig, http);
+        var model = new OpenAiBackendUIModel();
+        this.ui = new OpenAiBackendUI(model, config);
+        model.ApiKey = OpenAiCredentialManager.LoadCredentials()?.Password ?? "";
+        this.client = new OpenAiClient(soundQueue, model, http);
     }
     
     public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
@@ -46,9 +43,9 @@ public class OpenAiBackend : VoiceBackend
 
     public override void DrawSettings(IConfigUIDelegates helpers)
     {
-        ui.DrawLoginOptions(apiConfig);
+        ui.DrawLoginOptions();
         ImGui.Separator();
-        ui.DrawVoicePresetOptions(pluginConfiguration);
+        ui.DrawVoicePresetOptions();
     }
 
     public override TextSource GetCurrentlySpokenTextSource()

@@ -14,18 +14,18 @@ public class OpenAiClient
     
     private readonly HttpClient client;
     private readonly StreamSoundQueue soundQueue;
-    private readonly OpenAiApiConfig apiConifg;
+    private readonly OpenAiBackendUIModel model;
     
-    public OpenAiClient(StreamSoundQueue soundQueue, OpenAiApiConfig apiConifg, HttpClient http)
+    public OpenAiClient(StreamSoundQueue soundQueue, OpenAiBackendUIModel model, HttpClient http)
     {
         this.soundQueue = soundQueue;
-        this.apiConifg = apiConifg;
+        this.model = model;
         this.client = http;
     }
     
     private void AddAuthorization(HttpRequestMessage req)
     {
-        req.Headers.Add("Authorization", $"Bearer {apiConifg.ApiKey}");
+        req.Headers.Add("Authorization", $"Bearer {model.ApiKey}");
     }
     
     public async Task Say(string? voice, float? speed, float volume, TextSource source, string text)

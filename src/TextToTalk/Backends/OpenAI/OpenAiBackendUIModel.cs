@@ -1,6 +1,6 @@
 namespace TextToTalk.Backends.OpenAI;
 
-public class OpenAiApiConfig
+public class OpenAiBackendUIModel
 {
     public string ApiKey { get; set; } = "";
 }
