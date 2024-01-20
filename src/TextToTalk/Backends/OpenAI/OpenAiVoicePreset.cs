@@ -9,7 +9,7 @@ public class OpenAiVoicePreset : VoicePreset
     public string? Model { get; set; }
     
     // 0.25 - 4.0 (default 1.0)
-    public float? Speed { get; set; }
+    public float? PlaybackRate { get; set; }
 
     [JsonPropertyName("OpenAIVoiceName")]
     public string? VoiceName { get; set; }
@@ -17,7 +17,7 @@ public class OpenAiVoicePreset : VoicePreset
     public override bool TrySetDefaultValues()
     {
         Volume = 1.0f;
-        Speed = 1.0f;
+        PlaybackRate = 1.0f;
         VoiceName = "alloy";
         EnabledBackend = TTSBackend.OpenAi;
         Model = "tts-1";

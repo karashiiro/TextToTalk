@@ -88,10 +88,10 @@ public class OpenAiBackendUI
             ImGui.EndCombo();
         }
 
-        var playbackRate = currentVoicePreset.Speed ?? 1;
+        var playbackRate = currentVoicePreset.PlaybackRate ?? 1;
         if (ImGui.SliderFloat($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 0.25f, 4f, "%.2fx"))
         {
-            currentVoicePreset.Speed = playbackRate;
+            currentVoicePreset.PlaybackRate = playbackRate;
             pluginConfiguration.Save();
         }
 

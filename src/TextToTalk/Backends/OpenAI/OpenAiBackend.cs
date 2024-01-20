@@ -31,7 +31,7 @@ public class OpenAiBackend : VoiceBackend
             throw new InvalidOperationException("Invalid voice preset provided.");
         }
         
-        _ = client.Say(voicePreset.VoiceName, voicePreset.Speed, voicePreset.Volume, source, text);
+        _ = client.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume, source, text);
     }
 
     public override void CancelAllSpeech()
