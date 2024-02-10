@@ -442,7 +442,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Eulmore</grapheme>
-<phoneme>ˈjuːlˌmɔː(r)</phoneme>
+<phoneme>juːlˈmɔːr</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eulmorean</grapheme>
