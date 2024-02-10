@@ -266,10 +266,6 @@
 <phoneme>ˈkrɪstɛriəm</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Eulmore</grapheme>
-<phoneme>julˈmɔr</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>Gridania</grapheme>
 <phoneme>grɪdɔniə</phoneme>
 </lexeme>
