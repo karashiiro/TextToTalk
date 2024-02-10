@@ -74,7 +74,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Fordola</grapheme>
-<phoneme>fo(r)ˈdəʊlə</phoneme>
+<phoneme>forˈdəʊlə</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Fourchenault</grapheme>
@@ -422,7 +422,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Lydha Lran</grapheme>
-<phoneme>ˈliːdəə lɜ(r)ˈæn</phoneme>
+<phoneme>ˈliːdəə lɜrˈæn</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Matoya</grapheme>
@@ -446,11 +446,11 @@
 </lexeme>
 <lexeme>
 <grapheme>Eulmorean</grapheme>
-<phoneme>juːlˈmɔː(r)ˌən</phoneme>
+<phoneme>juːlˈmɔːrˌən</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eulmoreans</grapheme>
-<phoneme>juːlˈmɔː(r)ˌənz</phoneme>
+<phoneme>juːlˈmɔːrˌənz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Varis</grapheme>
