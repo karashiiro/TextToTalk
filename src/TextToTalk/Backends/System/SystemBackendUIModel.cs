@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Speech.Synthesis;
+using R3;
 
 namespace TextToTalk.Backends.System;
 
@@ -23,12 +22,7 @@ public class SystemBackendUIModel
         }
     });
 
-    public IReadOnlyDictionary<string, SelectVoiceFailedException> VoiceExceptions { get; private set; }
-
-    public SystemBackendUIModel()
-    {
-        VoiceExceptions = ImmutableDictionary<string, SelectVoiceFailedException>.Empty;
-    }
+    public IReadOnlyDictionary<string, SelectVoiceFailedException> VoiceExceptions { get; private set; } = ImmutableDictionary<string, SelectVoiceFailedException>.Empty;
 
     public List<InstalledVoice> GetInstalledVoices()
     {
@@ -37,10 +31,9 @@ public class SystemBackendUIModel
             : DummySynthesizer.Value.GetInstalledVoices().Where(iv => iv?.Enabled ?? false).ToList();
     }
 
-    public IDisposable SubscribeToVoiceExceptions(IObservable<SelectVoiceFailedException> voiceExceptions)
+    public IDisposable SubscribeToVoiceExceptions(Observable<SelectVoiceFailedException> voiceExceptions)
     {
         return voiceExceptions
-            .SubscribeOn(TaskPoolScheduler.Default)
             .Subscribe(exc =>
             {
                 var imm = ImmutableDictionary.CreateRange(VoiceExceptions.Append(

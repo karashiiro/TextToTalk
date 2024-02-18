@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Numerics;
-using System.Reactive.Subjects;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using R3;
 
 namespace TextToTalk.UI
 {
@@ -26,7 +26,7 @@ namespace TextToTalk.UI
             SizeCondition = ImGuiCond.FirstUseEver;
         }
 
-        public IObservable<string> OnResult()
+        public Observable<string> OnResult()
         {
             return this.onResult;
         }

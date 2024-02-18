@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Reactive.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
+using R3;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -40,16 +40,17 @@ public class ChatMessageHandler : IDisposable
         OnTextEmit = _ => { };
     }
 
-    private IObservable<ChatMessage> OnChatMessage()
+    private Observable<ChatMessage> OnChatMessage()
     {
-        return Observable.Create((IObserver<ChatMessage> observer) =>
+        return Observable.Create(this, static (Observer<ChatMessage> observer, ChatMessageHandler cmh) =>
         {
-            this.chat.ChatMessage += HandleMessage;
-            return () => { this.chat.ChatMessage -= HandleMessage; };
+            var handler = new IChatGui.OnMessageDelegate(HandleMessage);
+            cmh.chat.ChatMessage += handler;
+            return new DisposeHandler(() => { cmh.chat.ChatMessage -= handler; });
 
             void HandleMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
             {
-                if (!this.config.Enabled) return;
+                if (!cmh.config.Enabled) return;
                 observer.OnNext(new ChatMessage(type, sender, message));
             }
         });

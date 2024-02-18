@@ -2,8 +2,8 @@
 using System;
 using System.Net.Sockets;
 using System.Numerics;
-using System.Reactive.Subjects;
 using System.Text;
+using R3;
 using TextToTalk.UI;
 
 namespace TextToTalk.Backends.Websocket
@@ -35,7 +35,7 @@ namespace TextToTalk.Backends.Websocket
             this.wsServer.Start();
         }
 
-        public IObservable<int> OnFailedToBindPort()
+        public Observable<int> OnFailedToBindPort()
         {
             return this.failedToBindPort;
         }

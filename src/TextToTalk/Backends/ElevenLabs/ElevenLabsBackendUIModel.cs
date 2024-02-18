@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
+using R3;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -14,7 +12,7 @@ public class ElevenLabsBackendUIModel : IDisposable
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
 
     private readonly PluginConfiguration config;
-    private readonly ISubject<long> getUserSubscriptionInfoImmediately;
+    private readonly ReactiveProperty<long> getUserSubscriptionInfoImmediately;
     private readonly IDisposable observeUserSubscriptionInfo;
 
     private string apiKey;
@@ -49,7 +47,7 @@ public class ElevenLabsBackendUIModel : IDisposable
         SoundQueue = new StreamSoundQueue();
         ElevenLabs = new ElevenLabsClient(SoundQueue, http);
         this.config = config;
-        this.getUserSubscriptionInfoImmediately = new BehaviorSubject<long>(0);
+        this.getUserSubscriptionInfoImmediately = new ReactiveProperty<long>(0);
         this.observeUserSubscriptionInfo = ObserveUserSubscriptionInfo();
         this.apiKey = "";
 
@@ -65,8 +63,8 @@ public class ElevenLabsBackendUIModel : IDisposable
     private IDisposable ObserveUserSubscriptionInfo()
     {
         return this.getUserSubscriptionInfoImmediately
-            .Throttle(TimeSpan.FromSeconds(3))
-            .SelectMany(_ => Observable.FromAsync(async () =>
+            .Debounce(TimeSpan.FromSeconds(3))
+            .SelectAwait(async (_, _) =>
             {
                 try
                 {
@@ -77,12 +75,13 @@ public class ElevenLabsBackendUIModel : IDisposable
                     DetailedLog.Error(ex, "Failed to get user subscription info");
                     return null;
                 }
-            }))
+            })
             .Where(info => info is not null)
-            .SubscribeOn(TaskPoolScheduler.Default)
+            .SubscribeOnThreadPool()
             .Subscribe(
                 info => UserSubscriptionInfo = info,
-                ex => DetailedLog.Error(ex, "User subscription update stream has faulted"));
+                ex => DetailedLog.Error(ex, "User subscription update stream has faulted"),
+                _ => {});
     }
 
     /// <summary>
