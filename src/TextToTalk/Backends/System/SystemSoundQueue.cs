@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Reactive.Subjects;
 using System.Speech.Synthesis;
 using System.Threading;
+using R3;
 using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.System
@@ -12,7 +12,7 @@ namespace TextToTalk.Backends.System
         private readonly LexiconManager lexiconManager;
         private readonly AutoResetEvent speechCompleted;
 
-        public IObservable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
+        public Observable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
         private readonly Subject<SelectVoiceFailedException> selectVoiceFailed;
 
         public SystemSoundQueue(LexiconManager lexiconManager)

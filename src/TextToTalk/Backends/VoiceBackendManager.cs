@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net.Http;
 using System.Numerics;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Dalamud.Interface;
+using R3;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.Polly;
@@ -60,7 +60,7 @@ namespace TextToTalk.Backends
             return Backend?.GetCurrentlySpokenTextSource() ?? TextSource.None;
         }
 
-        public IObservable<int> OnFailedToBindWSPort()
+        public Observable<int> OnFailedToBindWSPort()
         {
             return this.onFailedToBindWsPort;
         }
@@ -76,7 +76,8 @@ namespace TextToTalk.Backends
                 {
                     var wsBackend = newBackend as WebsocketBackend;
                     this.handleFailedToBindWsPort =
-                        wsBackend?.OnFailedToBindPort().Subscribe(this.onFailedToBindWsPort);
+                        wsBackend?.OnFailedToBindPort().SubscribeOnThreadPool()
+                            .Subscribe(this.onFailedToBindWsPort.AsObserver());
                 }
 
                 Backend = newBackend;

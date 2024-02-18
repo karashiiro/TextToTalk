@@ -63,6 +63,19 @@
         "resolved": "5.0.16",
         "contentHash": "DMUYdRlgNbrSlyWzdQ4GqW934ntNHBGWMTNQlOL4hWz8WnveY6V9ZGo2ntPrSATW7kat8v5VoCXGSzToPiwZWw=="
       },
+      "Microsoft.Bcl.AsyncInterfaces": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
+      },
+      "Microsoft.Bcl.TimeProvider": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "f5Kr5JepAbiGo7uDmhgvMqhntwxqXNn6/IpTBSSI4cuHhgnJGrLxFRhMjVpRkLPp6zJXO0/G0l3j9p9zSJxa+w==",
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
+        }
+      },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
         "resolved": "17.5.0",
@@ -245,6 +258,14 @@
         "type": "Transitive",
         "resolved": "5.11.0",
         "contentHash": "eaiXkUjC4NPcquGWzAGMXjuxvLwc6XGKMptSyOGQeT0X70BUZObuybJFZLA0OfTdueLd3US23NBPTBb6iF3V1Q=="
+      },
+      "R3": {
+        "type": "Transitive",
+        "resolved": "1.0.1",
+        "contentHash": "QESbZntZBK5q5d287mK88pcsRaJp6TZpmihT+x6TAfBqbwtwYl2yos9/IbdGH28HjnSxs3GaQI+Vc6UOWq1uag==",
+        "dependencies": {
+          "Microsoft.Bcl.TimeProvider": "8.0.0"
+        }
       },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",
@@ -678,11 +699,6 @@
           "System.Runtime": "4.3.0",
           "System.Threading": "4.3.0"
         }
-      },
-      "System.Reactive": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "erBZjkQHWL9jpasCE/0qKAryzVBJFxGHVBAvgRN1bzM0q2s1S4oYREEEL0Vb+1kA/6BKb5FjUZMp5VXmy+gzkQ=="
       },
       "System.Reflection": {
         "type": "Transitive",
@@ -1173,9 +1189,9 @@
           "DalamudPackager": "[2.1.12, )",
           "Microsoft.CognitiveServices.Speech": "[1.32.1, )",
           "NAudio": "[2.1.0, )",
+          "R3": "[1.0.1, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
           "System.Drawing.Common": "[7.0.0, )",
-          "System.Reactive": "[5.0.0, )",
           "System.Speech": "[7.0.0, )",
           "TextToTalk.Data": "[1.0.0, )",
           "TextToTalk.Lexicons": "[1.0.0, )",

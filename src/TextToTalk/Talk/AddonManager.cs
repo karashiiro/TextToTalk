@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Reactive.Linq;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Plugin.Services;
+using R3;
 
 namespace TextToTalk.Talk;
 
@@ -11,21 +11,25 @@ public abstract class AddonManager : IDisposable
     private readonly ICondition condition;
     private readonly IGameGui gui;
     private readonly IDisposable subscription;
+    private readonly IFramework framework;
     private readonly string name;
 
     protected nint Address { get; set; }
 
-    protected AddonManager(IFramework framework, IClientState clientState, ICondition condition, IGameGui gui, string name)
+    protected AddonManager(IFramework framework, IClientState clientState, ICondition condition, IGameGui gui,
+        string name)
     {
         this.clientState = clientState;
         this.condition = condition;
         this.gui = gui;
         this.name = name;
+        this.framework = framework;
 
-        var onUpdate = Observable.Create((IObserver<IFramework> observer) =>
+        var onUpdate = Observable.Create(this, static (Observer<IFramework> observer, AddonManager am) =>
         {
-            framework.Update += Handle;
-            return () => { framework.Update -= Handle; };
+            var handler = new IFramework.OnUpdateDelegate(Handle);
+            am.framework.Update += handler;
+            return new DisposeHandler(() => { am.framework.Update -= handler; });
 
             void Handle(IFramework f)
             {
@@ -33,8 +37,7 @@ public abstract class AddonManager : IDisposable
             }
         });
 
-        this.subscription = onUpdate
-            .Subscribe(_ => UpdateAddonAddress());
+        this.subscription = onUpdate.Subscribe(this, static (_, am) => am.UpdateAddonAddress());
     }
 
     private void UpdateAddonAddress()

@@ -39,9 +39,9 @@
         <PackageReference Include="DalamudPackager" Version="2.1.12" />
         <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.32.1" />
         <PackageReference Include="NAudio" Version="2.1.0"/>
+        <PackageReference Include="R3" Version="1.0.1" />
         <PackageReference Include="Standart.Hash.xxHash" Version="4.0.5"/>
         <PackageReference Include="System.Drawing.Common" Version="7.0.0"/>
-        <PackageReference Include="System.Reactive" Version="5.0.0"/>
         <PackageReference Include="System.Speech" Version="7.0.0"/>
     </ItemGroup>
 

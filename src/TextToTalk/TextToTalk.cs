@@ -8,12 +8,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using LiteDB;
+using R3;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
@@ -191,34 +190,36 @@ namespace TextToTalk
         private IDisposable HandleTextCancel()
         {
             return OnTextSourceCancel()
-                .Where(_ => this.config is { Enabled: true, CancelSpeechOnTextAdvance: true })
-                .SubscribeOn(TaskPoolScheduler.Default)
+                .Where(this, static (_, p) => p.config is { Enabled: true, CancelSpeechOnTextAdvance: true })
+                .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
                         () => this.backendManager.CancelSay(ev.Source),
                         ex => DetailedLog.Error(ex, "Failed to handle text cancel event")),
-                    ex => DetailedLog.Error(ex, "Text cancel event sequence has faulted"));
+                    ex => DetailedLog.Error(ex, "Text cancel event sequence has faulted"),
+                    _ => {});
         }
 
         private IDisposable HandleTextEmit()
         {
             return OnTextEmit()
-                .Where(_ => this.config.Enabled)
-                .SubscribeOn(TaskPoolScheduler.Default)
+                .Where(this, static (_, p) => p.config.Enabled)
+                .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
                         () => Say(ev.Speaker, ev.SpeakerName, ev.Text.TextValue, ev.Source),
                         ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
-                    ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"));
+                    ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"),
+                    _ => {});
         }
 
         private IDisposable HandleFailedToBindWSPort()
         {
             return this.backendManager.OnFailedToBindWSPort()
-                .Subscribe(_ =>
+                .Subscribe(this, static (_, p) =>
                 {
-                    this.failedToBindWsPort = true;
-                    this.notifiedFailedToBindPort = false;
+                    p.failedToBindWsPort = true;
+                    p.notifiedFailedToBindPort = false;
                 });
         }
 

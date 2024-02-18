@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Reactive.Linq;
 using Dalamud.Plugin.Services;
+using R3;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -42,17 +42,18 @@ public class AddonBattleTalkHandler : IDisposable
         OnTextEmit = _ => { };
     }
 
-    private IObservable<AddonPollSource> OnFrameworkUpdate()
+    private Observable<AddonPollSource> OnFrameworkUpdate()
     {
-        return Observable.Create((IObserver<AddonPollSource> observer) =>
+        return Observable.Create(this, static (Observer<AddonPollSource> observer, AddonBattleTalkHandler abth) =>
         {
-            this.framework.Update += Handle;
-            return () => { this.framework.Update -= Handle; };
+            var handler = new IFramework.OnUpdateDelegate(Handle);
+            abth.framework.Update += handler;
+            return new DisposeHandler(() => { abth.framework.Update -= handler; });
 
-            void Handle(IFramework _)
+            void Handle(IFramework f)
             {
-                if (!this.config.Enabled) return;
-                if (!this.config.ReadFromBattleTalkAddon) return;
+                if (!abth.config.Enabled) return;
+                if (!abth.config.ReadFromBattleTalkAddon) return;
                 observer.OnNext(AddonPollSource.FrameworkUpdate);
             }
         });

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Reactive.Subjects;
 using System.Text;
 using Dalamud.Game.Text;
 using Dalamud.Interface;
@@ -10,6 +9,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
+using R3;
 using TextToTalk.Backends;
 using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
@@ -54,7 +54,7 @@ namespace TextToTalk.UI
             SizeCondition = ImGuiCond.FirstUseEver;
         }
 
-        public IObservable<bool> OnPresetOpenRequested()
+        public Observable<bool> OnPresetOpenRequested()
         {
             return this.onPresetOpenRequested;
         }

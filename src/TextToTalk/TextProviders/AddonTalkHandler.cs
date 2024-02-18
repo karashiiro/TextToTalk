@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Reactive.Linq;
 using Dalamud.Plugin.Services;
+using R3;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -45,17 +45,18 @@ public class AddonTalkHandler : IDisposable
         OnClose = _ => { };
     }
 
-    private IObservable<AddonPollSource> OnFrameworkUpdate()
+    private Observable<AddonPollSource> OnFrameworkUpdate()
     {
-        return Observable.Create((IObserver<AddonPollSource> observer) =>
+        return Observable.Create(this, static (Observer<AddonPollSource> observer, AddonTalkHandler ath) =>
         {
-            this.framework.Update += Handle;
-            return () => { this.framework.Update -= Handle; };
+            var handler = new IFramework.OnUpdateDelegate(Handle);
+            ath.framework.Update += handler;
+            return new DisposeHandler(() => { ath.framework.Update -= handler; });
 
             void Handle(IFramework _)
             {
-                if (!this.config.Enabled) return;
-                if (!this.config.ReadFromQuestTalkAddon) return;
+                if (!ath.config.Enabled) return;
+                if (!ath.config.ReadFromQuestTalkAddon) return;
                 observer.OnNext(AddonPollSource.FrameworkUpdate);
             }
         });
@@ -63,8 +64,7 @@ public class AddonTalkHandler : IDisposable
 
     private IDisposable HandleFrameworkUpdate()
     {
-        return OnFrameworkUpdate()
-            .Subscribe(PollAddon);
+        return OnFrameworkUpdate().Subscribe(PollAddon);
     }
 
     public void PollAddon(AddonPollSource pollSource)
