@@ -371,6 +371,11 @@
 <phoneme>ˈi.θɚ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Aetherial</grapheme>
+<grapheme>aetherial</grapheme>
+<phoneme>ˈiθɛriəl</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Aetheric</grapheme>
 <grapheme>aetheric</grapheme>
 <phoneme>ˈiθɛrɪk</phoneme>
