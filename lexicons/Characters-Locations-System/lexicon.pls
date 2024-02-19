@@ -566,7 +566,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Lahabrea</grapheme>
-<phoneme>lahaˈbɹeːæ</phoneme>
+<phoneme>ˈlahʌˈbɹeːæ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>-egi</grapheme>
@@ -593,7 +593,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Halone</grapheme>
-<phoneme>hɑlˈəʊnɛɪ</phoneme>
+<phoneme>hɑlˈoʊnɛ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Cloudtop</grapheme>
