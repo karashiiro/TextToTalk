@@ -200,6 +200,11 @@ namespace TextToTalk
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
 
+            foreach (var preset in EnabledChatTypesPresets)
+            {
+                preset.Initialize(this);
+            }
+
             AzureLexiconFiles ??= new List<string>();
             PollyLexiconFiles ??= new List<string>();
             Lexicons ??= new List<string>();
