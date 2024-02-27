@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TextToTalk.UI.Core;
 
 namespace TextToTalk;
@@ -19,15 +20,27 @@ public class EnabledChatTypesPreset : ISaveable
 
     public VirtualKey.Enum MajorKey { get; set; }
 
-    private readonly PluginConfiguration config;
+    private PluginConfiguration? config;
 
     public EnabledChatTypesPreset(PluginConfiguration config)
     {
         this.config = config;
     }
 
+    public void Initialize(PluginConfiguration pluginConfiguration)
+    {
+        // When loaded from an existing config file, the constructor is not properly
+        // invoked, so we need to support late-initialization here.
+        this.config = pluginConfiguration;
+    }
+
     public void Save()
     {
-        this.config.Save();
+        if (this.config is null)
+        {
+            throw new InvalidOperationException("No config is attached to this chat types preset.");
+        }
+
+        this.config?.Save();
     }
 }
