@@ -31,7 +31,7 @@ public class AzureBackendUI
 
         this.config = config;
         this.lexiconComponent =
-            new LexiconComponent(lexiconManager, lexiconRepository, config, Array.Empty<string>);
+            new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.AzureLexiconFiles);
 
         (region, subscriptionKey) = this.model.GetLoginInfo();
     }
