@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
+using TextToTalk.Backends.Websocket;
 using TextToTalk.Data.Service;
 using TextToTalk.Migrations;
 using TextToTalk.UI.Core;
@@ -23,7 +24,7 @@ namespace TextToTalk
         Last,
     }
 
-    public class PluginConfiguration : IPluginConfiguration, ISaveable
+    public class PluginConfiguration : IPluginConfiguration, ISaveable, IWebsocketConfigProvider
     {
         private const string DefaultPreset = "Default";
 
@@ -400,6 +401,11 @@ namespace TextToTalk
         public void SetCurrentVoicePreset(int presetId)
         {
             GetVoiceConfig().CurrentVoicePreset[Backend] = presetId;
+        }
+
+        bool IWebsocketConfigProvider.AreStuttersRemoved()
+        {
+            return RemoveStutterEnabled;
         }
     }
 }

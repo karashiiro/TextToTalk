@@ -24,11 +24,11 @@ namespace TextToTalk.Backends.Websocket
 
             try
             {
-                this.wsServer = new WSServer(this.config.WebsocketPort);
+                this.wsServer = new WSServer(this.config, this.config.WebsocketPort);
             }
             catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
             {
-                this.wsServer = new WSServer(0);
+                this.wsServer = new WSServer(this.config, 0);
                 this.failedToBindPort.OnNext(this.config.WebsocketPort);
             }
 

@@ -13,6 +13,8 @@ namespace TextToTalk.Backends.Websocket
         private ServerBehavior? behavior;
         private WebSocketServer server;
 
+        private readonly IWebsocketConfigProvider configProvider;
+
         private int port;
 
         public int Port
@@ -34,9 +36,11 @@ namespace TextToTalk.Backends.Websocket
 
         public bool Active { get; private set; }
 
-        public WSServer(int port)
+        public WSServer(IWebsocketConfigProvider configProvider, int port)
         {
             Port = port;
+
+            this.configProvider = configProvider;
 
             this.server = new WebSocketServer($"ws://localhost:{Port}");
             this.server.AddWebSocketService<ServerBehavior>("/Messages", b => { this.behavior = b; });
@@ -46,7 +50,8 @@ namespace TextToTalk.Backends.Websocket
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source);
+            var stuttersRemoved = this.configProvider.AreStuttersRemoved();
+            var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source, stuttersRemoved);
             this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -54,7 +59,9 @@ namespace TextToTalk.Backends.Websocket
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, TextSource.None);
+            var stuttersRemoved = this.configProvider.AreStuttersRemoved();
+            var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, TextSource.None,
+                stuttersRemoved);
             this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -62,7 +69,9 @@ namespace TextToTalk.Backends.Websocket
         {
             if (!Active) throw new InvalidOperationException("Server is not active!");
 
-            var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, source);
+            var stuttersRemoved = this.configProvider.AreStuttersRemoved();
+            var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, source,
+                stuttersRemoved);
             this.behavior?.SendMessage(JsonConvert.SerializeObject(ipcMessage));
         }
 
@@ -143,17 +152,24 @@ namespace TextToTalk.Backends.Websocket
             public VoicePreset? Voice { get; set; }
 
             /// <summary>
+            /// If stutters were removed from the payload or not.
+            /// </summary>
+            public bool StuttersRemoved { get; set; }
+
+            /// <summary>
             /// Text source; refer to <see cref="TextSource"/> for options.
             /// </summary>
             public string Source { get; set; }
 
-            public IpcMessage(string speaker, IpcMessageType type, string payload, VoicePreset? preset, TextSource source)
+            public IpcMessage(string speaker, IpcMessageType type, string payload, VoicePreset? preset,
+                TextSource source, bool stuttersRemoved)
             {
                 Speaker = speaker;
                 Type = type.ToString();
                 Payload = payload;
                 Voice = preset;
                 Source = source.ToString();
+                StuttersRemoved = stuttersRemoved;
             }
         }
 
