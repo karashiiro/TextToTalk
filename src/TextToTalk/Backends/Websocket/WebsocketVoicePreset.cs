@@ -1,4 +1,6 @@
-﻿namespace TextToTalk.Backends.Websocket;
+﻿using System;
+
+namespace TextToTalk.Backends.Websocket;
 
 public class WebsocketVoicePreset : VoicePreset
 {

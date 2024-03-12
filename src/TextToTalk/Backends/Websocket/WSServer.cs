@@ -129,7 +129,7 @@ namespace TextToTalk.Backends.Websocket
         }
 
         [Serializable]
-        private class IpcMessage
+        public class IpcMessage : IEquatable<IpcMessage>
         {
             /// <summary>
             /// The speaker name.
@@ -171,9 +171,29 @@ namespace TextToTalk.Backends.Websocket
                 Source = source.ToString();
                 StuttersRemoved = stuttersRemoved;
             }
+
+            public bool Equals(IpcMessage? other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return Speaker == other.Speaker && Type == other.Type && Payload == other.Payload &&
+                       Equals(Voice, other.Voice) && StuttersRemoved == other.StuttersRemoved && Source == other.Source;
+            }
+
+            public override bool Equals(object? obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                return obj.GetType() == this.GetType() && Equals((IpcMessage)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source);
+            }
         }
 
-        private enum IpcMessageType
+        public enum IpcMessageType
         {
             Say,
             Cancel,
