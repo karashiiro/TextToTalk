@@ -64,7 +64,7 @@ public class AddonTalkHandler : IDisposable
 
     private IDisposable HandleFrameworkUpdate()
     {
-        return OnFrameworkUpdate().Subscribe(PollAddon);
+        return OnFrameworkUpdate().Subscribe(this, static (s, h) => h.PollAddon(s));
     }
 
     public void PollAddon(AddonPollSource pollSource)

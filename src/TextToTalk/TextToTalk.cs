@@ -127,10 +127,10 @@ namespace TextToTalk
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
             this.voiceUnlockerWindow = new VoiceUnlockerWindow();
             this.handleUnlockerResult = this.voiceUnlockerWindow.OnResult()
-                .Subscribe(result =>
+                .Subscribe(unlockerResultWindow, static (result, window) =>
                 {
-                    unlockerResultWindow.Text = result;
-                    unlockerResultWindow.IsOpen = true;
+                    window.Text = result;
+                    window.IsOpen = true;
                 });
             this.configurationWindow = new ConfigurationWindow(this.config, data, this.backendManager,
                 this.playerService, this.npcService, this.voiceUnlockerWindow)
@@ -138,7 +138,7 @@ namespace TextToTalk
                 IsOpen = InitiallyVisible,
             };
             this.handlePresetOpenRequested = this.configurationWindow.OnPresetOpenRequested()
-                .Subscribe(_ => channelPresetModificationWindow.IsOpen = true);
+                .Subscribe(channelPresetModificationWindow, static (_, window) => window.IsOpen = true);
 
             this.windows.AddWindow(unlockerResultWindow);
             this.windows.AddWindow(this.voiceUnlockerWindow);
