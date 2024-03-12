@@ -1,11 +1,10 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
+using Microsoft.Win32;
 
 namespace VoiceUnlocker
 {
     public static class Program
     {
-
         public static void Main()
         {
             string[] addTokensPaths = {
@@ -13,14 +12,14 @@ namespace VoiceUnlocker
                 @"Speech_OneCore\CortanaVoices\Tokens",
                 @"Speech Server\v11.0\Voices\Tokens",
             };
-            bool addVoiceFound = false;
+            var addVoiceFound = false;
             const string speechTokensPath = @"Speech\Voices\Tokens";
             const string speechSysWOW64TokensPath = @"SPEECH\Voices\Tokens";
             const string x64Prefix = @"SOFTWARE\WOW6432Node\Microsoft\";
             const string x86Prefix = @"SOFTWARE\Microsoft\";
 
             // Create/open voices registry
-            Microsoft.Win32.RegistryKey[] speechTokens = {
+            RegistryKey[] speechTokens = {
                     Registry.LocalMachine.CreateSubKey(x64Prefix + speechTokensPath),
                     Registry.LocalMachine.CreateSubKey(x86Prefix + speechSysWOW64TokensPath),
             };
@@ -28,26 +27,26 @@ namespace VoiceUnlocker
             foreach (var tokensPath in addTokensPaths)
             {
                 // Open additional voices registry
-                Microsoft.Win32.RegistryKey[] addTokens = {
+                RegistryKey[] addTokens = {
                     Registry.LocalMachine.OpenSubKey(x64Prefix + tokensPath),
                     Registry.LocalMachine.OpenSubKey(x86Prefix + tokensPath),
                 };
 
-                foreach (var i in addTokens)
+                foreach (var addToken in addTokens)
                 {
                     // Copy voice info into registry keys
-                    if (i is not null)
+                    if (addToken is not null)
                     {
-                        foreach (var addVoice in i.GetSubKeyNames())
+                        foreach (var addVoice in addToken.GetSubKeyNames())
                         {
-                            using var addVoiceInfo = i.OpenSubKey(addVoice);
+                            using var addVoiceInfo = addToken.OpenSubKey(addVoice);
 
                             addVoiceFound = true;
                             Console.WriteLine($"Copying {addVoice} to desktop voices...");
 
-                            foreach (var j in speechTokens)
+                            foreach (var speechToken in speechTokens)
                             {
-                                using var speechVoiceInfo = j?.CreateSubKey(addVoice);
+                                using var speechVoiceInfo = speechToken?.CreateSubKey(addVoice);
                                 CopyRegistryKey(addVoiceInfo, speechVoiceInfo);
                             }
                         }
