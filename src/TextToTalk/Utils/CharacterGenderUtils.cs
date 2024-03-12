@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Dalamud.Game.ClientState.Objects.Enums;
+﻿using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using TextToTalk.GameEnums;
 using TextToTalk.UngenderedOverrides;
@@ -19,7 +18,7 @@ public static class CharacterGenderUtils
         var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)gObj.Address;
 
         // Get actor gender as defined by its struct.
-        var actorGender = (Gender)charaStruct->DrawData.CustomizeData[1];
+        var actorGender = (Gender)charaStruct->DrawData.CustomizeData.Sex;
 
         // Player gender overrides will be handled by a different system.
         if (gObj.ObjectKind is ObjectKind.Player)
@@ -31,11 +30,10 @@ public static class CharacterGenderUtils
         // Actors only have 0/1 genders regardless of their canonical genders, so this
         // needs to be specified by us. If an actor is canonically ungendered, their
         // gender seems to always be left at 0 (male).
-        var modelId = Marshal.ReadInt32((nint)charaStruct, 0x1BC);
+        var modelId = charaStruct->CharacterData.ModelCharaId_2;
         if (modelId == -1)
         {
-            // https://github.com/aers/FFXIVClientStructs/blob/5e6b8ca2959f396b4d8c88253e4bc82fa6af54b7/FFXIVClientStructs/FFXIV/Client/Game/Character/Character.cs#L23
-            modelId = Marshal.ReadInt32((nint)charaStruct, 0x1B4);
+            modelId = charaStruct->CharacterData.ModelCharaId;
         }
 
         // Get the override state and log the model ID so that we can add it to our overrides file if needed.
