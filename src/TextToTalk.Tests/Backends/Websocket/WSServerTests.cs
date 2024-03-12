@@ -286,12 +286,78 @@ public class WSServerTests : IDisposable
         Assert.Throws<InvalidOperationException>(() => this.server.Cancel(source));
     }
 
+    [Fact]
+    public async Task ServerBehavior_Supports_Reconnect()
+    {
+        // Set up the server
+        var configProvider = Mock.Of<IWebsocketConfigProvider>();
+        this.server = new WSServer(configProvider, 0);
+        this.server.Start();
+
+        // Set up the client
+        using var client = CreateClient();
+
+        // Send a message
+        using var list1 = OnIpcMessage(client).Take(1).ToLiveList();
+        this.server.CancelAll();
+        await Task.Delay(100);
+
+        // Confirm that it was received
+        Assert.True(list1.IsCompleted);
+        Assert.Single(list1);
+
+        // Disconnect from the server
+        // ReSharper disable once MethodHasAsyncOverload
+        client.Close();
+
+        // Reconnect to the server
+        // ReSharper disable once MethodHasAsyncOverload
+        client.Connect();
+
+        // Send a message
+        using var list2 = OnIpcMessage(client).Take(1).ToLiveList();
+        this.server.CancelAll();
+        await Task.Delay(100);
+
+        // Confirm that it was received
+        Assert.True(list2.IsCompleted);
+        Assert.Single(list2);
+    }
+
+    [Fact]
+    public async Task ServerBehavior_Supports_MultipleConnections()
+    {
+        // Set up the server
+        var configProvider = Mock.Of<IWebsocketConfigProvider>();
+        this.server = new WSServer(configProvider, 0);
+        this.server.Start();
+
+        // Set up a client
+        using var client1 = CreateClient();
+
+        // Set up a second client
+        using var client2 = CreateClient();
+
+        // Send a message
+        using var list1 = OnIpcMessage(client1).Take(1).ToLiveList();
+        using var list2 = OnIpcMessage(client2).Take(1).ToLiveList();
+        this.server.CancelAll();
+        await Task.Delay(100);
+
+        // Confirm that it was received by the second client (checking it first in case it clobbered the other one)
+        Assert.True(list2.IsCompleted);
+        Assert.Single(list2);
+
+        // Confirm that it was received by the first client
+        Assert.True(list1.IsCompleted);
+        Assert.Single(list1);
+    }
+
     private WebSocket CreateClient()
     {
         ArgumentNullException.ThrowIfNull(this.server);
 
         var client = new WebSocket($"ws://localhost:{this.server.Port}/Messages");
-        // ReSharper disable once MethodHasAsyncOverload
         client.Connect();
         return client;
     }
