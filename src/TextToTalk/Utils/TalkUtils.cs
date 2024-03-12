@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -51,9 +50,9 @@ namespace TextToTalk.Utils
             var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
             if (textLength is <= 0 or > int.MaxValue) return "";
 
-            var textBytes = new byte[textLength];
-            Marshal.Copy((nint)textPtr, textBytes, 0, (int)textLength);
-            var seString = SeString.Parse(textBytes);
+            var textLengthInt = Convert.ToInt32(textLength);
+
+            var seString = SeString.Parse(textPtr, textLengthInt);
             return seString.TextValue
                 .Trim()
                 .Replace("\n", "")
