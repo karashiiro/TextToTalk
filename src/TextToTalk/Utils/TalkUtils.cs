@@ -163,7 +163,7 @@ namespace TextToTalk.Utils
 
         public static string? GetPartialName(string? name, FirstOrLastName part)
         {
-            if (name == null)
+            if (string.IsNullOrWhiteSpace(name))
             {
                 return null;
             }
@@ -172,7 +172,7 @@ namespace TextToTalk.Utils
             return part switch
             {
                 FirstOrLastName.First => names[0],
-                FirstOrLastName.Last => names.Length == 1 ? names[0] : names[1], // Some NPCs only have one name.
+                FirstOrLastName.Last => names.Length == 1 ? names[0] : names[^1], // Some NPCs only have one name.
                 _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Enumeration value is out of range."),
             };
         }
