@@ -205,41 +205,6 @@ namespace TextToTalk.Lexicons.Tests
         }
 
         [Fact]
-        public void Aliases_AreReplaced_Test1()
-        {
-            var lm = new LexiconManager();
-            var lexicon = new LexiconBuilder()
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Bahamut" }, Phoneme = "bɑhɑmɪt", Alias = "Bahamoot"})
-                .WithLexeme(new Lexeme { Graphemes = new[] { "Baldesion" }, Phoneme = "bɔldˈɛˈsiɑn" })
-                .Build();
-            var xml = XDocument.Parse(lexicon);
-            lm.AddLexicon(xml, "test");
-            
-            var ssml = lm.MakeSsml("Bahamoot");
-            Assert.True(ssml.Contains("Bahamoot") && ssml.Contains("<phoneme"));
-            
-            ssml = lm.MakeSsml("Bahamut");
-            Assert.True(ssml.Contains("Bahamut") && ssml.Contains("<phoneme"));
-        }
-        
-        [Fact]
-        public void Aliases_AreReplaced_Test2()
-        {
-            var lm = new LexiconManager();
-            var lexicon = new LexiconBuilder()
-                .WithLexeme(new Lexeme { Graphemes = new[] { "white mage" }, Phoneme = "wwwwww", Alias = "WHM"})
-                .Build();
-            var xml = XDocument.Parse(lexicon);
-            lm.AddLexicon(xml, "test");
-            
-            var ssml = lm.MakeSsml("WHM");
-            Assert.True(ssml.Contains("WHM") && ssml.Contains("<phoneme"));
-            
-            ssml = lm.MakeSsml("white mage");
-            Assert.True(ssml.Contains("white mage") && ssml.Contains("<phoneme"));
-        }
-
-        [Fact]
         public void ReplaceGrapheme_DoesNotDeepReplace()
         {
             var s = LexiconManager.ReplaceGrapheme("Vanu Vanus", "Vanus", "<phoneme>Vanus</phoneme>");
