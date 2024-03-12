@@ -33,7 +33,9 @@ TTS prompt:
 	"Voice": {
 		"Name": "Gender"
 	},
-	"Source": "Chat"
+	"Speaker": "Firstname Lastname"
+	"Source": "Chat", // or "AddonTalk", or "AddonBattleTalk"
+	"StuttersRemoved": false
 }
 ```
 
@@ -43,7 +45,9 @@ TTS cancel:
 	"Type": "Cancel",
 	"Payload": "",
 	"Voice": null,
-	"Source": "None"
+	"Speaker": null,
+	"Source": "None", // or "Chat", "AddonTalk", or "AddonBattleTalk"
+	"StuttersRemoved": false
 }
 ```
 
