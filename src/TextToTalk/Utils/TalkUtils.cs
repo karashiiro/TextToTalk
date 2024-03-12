@@ -15,10 +15,10 @@ namespace TextToTalk.Utils
         [GeneratedRegex(@"\p{L}+|\p{M}+|\p{N}+|\s+", RegexOptions.Compiled)]
         private static partial Regex SpeakableRegex();
 
-        [GeneratedRegex(@"(?<=\s|^)\p{L}{1,2}-", RegexOptions.Compiled)]
+        [GeneratedRegex(@"(?<=\s|^)(\p{L}{1,2})-(?=\1)", RegexOptions.Compiled | RegexOptions.IgnoreCase)]
         private static partial Regex StutterRegex();
 
-        [GeneratedRegex(@"<[^<]*>", RegexOptions.Compiled)]
+        [GeneratedRegex("<[^<]*>", RegexOptions.Compiled)]
         private static partial Regex BracketedRegex();
 
         private static readonly Regex Speakable = SpeakableRegex();
@@ -126,13 +126,24 @@ namespace TextToTalk.Utils
         /// </summary>
         /// <param name="text">The input text.</param>
         /// <returns>The cleaned text.</returns>
-        public static string RemoveStutters(string text)
+        public static string RemoveStutters(string? text)
         {
+            if (string.IsNullOrEmpty(text)) return string.Empty;
+
+            var startsCapitalized = char.IsUpper(text, 0);
             while (true)
             {
-                if (!Stutter.IsMatch(text)) return text;
+                if (!Stutter.IsMatch(text)) break;
                 text = Stutter.Replace(text, "");
             }
+
+            var isCapitalized = char.IsUpper(text, 0);
+            if (startsCapitalized && !isCapitalized)
+            {
+                text = char.ToUpper(text[0]) + text[1..];
+            }
+
+            return text;
         }
 
         public static bool IsSpeakable(string text)
