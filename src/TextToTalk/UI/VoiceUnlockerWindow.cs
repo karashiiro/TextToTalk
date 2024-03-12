@@ -17,10 +17,12 @@ namespace TextToTalk.UI
         private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
 
         private readonly Subject<string> onResult;
+        private readonly VoiceUnlockerRunner voiceUnlockerRunner;
 
-        public VoiceUnlockerWindow() : base("VoiceUnlocker")
+        public VoiceUnlockerWindow(VoiceUnlockerRunner voiceUnlockerRunner) : base("VoiceUnlocker")
         {
             this.onResult = new Subject<string>();
+            this.voiceUnlockerRunner = voiceUnlockerRunner;
 
             Size = new Vector2(480, 320);
             SizeCondition = ImGuiCond.FirstUseEver;
@@ -65,7 +67,7 @@ namespace TextToTalk.UI
 
             if (ImGui.Button($"{EnableAllText}##{MemoizedId.Create()}"))
             {
-                var resultText = VoiceUnlockerRunner.Execute()
+                var resultText = this.voiceUnlockerRunner.Execute()
                     ? "Registry modification succeeded. Changes will be applied upon restarting the game."
                     : "VoiceUnlocker failed to start. No registry modifications were made.";
 

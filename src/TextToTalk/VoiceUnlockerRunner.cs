@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 
 namespace TextToTalk
 {
-    public static class VoiceUnlockerRunner
+    public class VoiceUnlockerRunner
     {
-        public static bool Execute()
+        private readonly string assemblyLocation;
+
+        public VoiceUnlockerRunner(string assemblyLocation)
+        {
+            this.assemblyLocation = assemblyLocation;
+        }
+
+        public bool Execute()
         {
             try
             {
-                var assemblyPath = Path.Combine(Assembly.GetExecutingAssembly().Location, "..");
+                var assemblyPath = Path.Combine(this.assemblyLocation, "..");
                 var applicationPath = Path.Combine(assemblyPath, "VoiceUnlocker", "VoiceUnlocker.exe");
                 using var application = Process.Start(new ProcessStartInfo(applicationPath)
                 {
