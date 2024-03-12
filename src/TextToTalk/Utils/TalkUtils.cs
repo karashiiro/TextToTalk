@@ -63,7 +63,7 @@ namespace TextToTalk.Utils
         public static string StripAngleBracketedText(string text)
         {
             // TextToTalk#17 "<sigh>"
-            return Bracketed.Replace(text, "");
+            return Bracketed.Replace(text, "").Trim();
         }
 
         public static string ReplaceSsmlTokens(string text)

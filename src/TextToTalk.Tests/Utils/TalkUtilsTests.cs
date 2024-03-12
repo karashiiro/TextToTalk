@@ -6,6 +6,14 @@ namespace TextToTalk.Tests.Utils;
 public class TalkUtilsTests
 {
     [Theory]
+    [InlineData("<sigh> Forgive me my outburst.", "Forgive me my outburst.")]
+    public void StripAngleBracketedText_RemovesAngleBracketedText(string input, string expected)
+    {
+        var actual = TalkUtils.StripAngleBracketedText(input);
+        Assert.Equal(expected, actual);
+    }
+
+    [Theory]
     [InlineData("あ-あ", "あ")]
     [InlineData("b-but", "but")]
     [InlineData("H-H-Hello!", "Hello!")]
