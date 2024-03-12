@@ -11,20 +11,13 @@ using Xunit;
 
 namespace TextToTalk.Tests.Backends.Websocket;
 
-public class WSServerTests : IDisposable
+public class WSServerTests
 {
-    private WSServer? server;
-
-    public void Dispose()
-    {
-        server?.Stop();
-    }
-
     [Fact]
     public void Ctor_WithValidPort_DoesNotThrow()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
+        using var server = new WSServer(configProvider, 0);
     }
 
     [Theory]
@@ -40,37 +33,37 @@ public class WSServerTests : IDisposable
     public void Ctor_StartsInactive()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        Assert.False(this.server.Active);
+        using var server = new WSServer(configProvider, 0);
+        Assert.False(server.Active);
     }
 
     [Fact]
     public void Start_MakesServerActive()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        this.server.Start();
-        Assert.True(this.server.Active);
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
+        Assert.True(server.Active);
     }
 
     [Fact]
     public void Start_Stop_MakesServerInactive()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        this.server.Start();
-        this.server.Stop();
-        Assert.False(this.server.Active);
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
+        server.Stop();
+        Assert.False(server.Active);
     }
 
     [Fact]
     public void RestartWithPort_WithValidPort_ChangesPort()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        var initialPort = this.server.Port;
-        this.server.RestartWithPort(0);
-        var finalPort = this.server.Port;
+        using var server = new WSServer(configProvider, 0);
+        var initialPort = server.Port;
+        server.RestartWithPort(0);
+        var finalPort = server.Port;
         Assert.NotEqual(initialPort, finalPort);
     }
 
@@ -80,8 +73,8 @@ public class WSServerTests : IDisposable
     public void RestartWithPort_WithInvalidPort_ThrowsArgumentOutOfRangeException(int port)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        Assert.Throws<ArgumentOutOfRangeException>(() => this.server.RestartWithPort(port));
+        using var server = new WSServer(configProvider, 0);
+        Assert.Throws<ArgumentOutOfRangeException>(() => server.RestartWithPort(port));
     }
 
     [Theory]
@@ -94,11 +87,11 @@ public class WSServerTests : IDisposable
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        this.server.Start();
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
 
         // Set up the client
-        using var client = CreateClient();
+        using var client = CreateClient(server);
 
         // Filter for say messages only
         using var list = OnIpcMessage(client)
@@ -115,7 +108,7 @@ public class WSServerTests : IDisposable
             Name = "Some Body",
         };
 
-        this.server.Broadcast("Speaker", source, preset, "Hello, world!");
+        server.Broadcast("Speaker", source, preset, "Hello, world!");
 
         // Wait a bit
         await Task.Delay(100);
@@ -136,8 +129,8 @@ public class WSServerTests : IDisposable
     public void Broadcast_WhileInactive_ThrowsInvalidOperationException(TextSource source)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        Assert.False(this.server.Active);
+        using var server = new WSServer(configProvider, 0);
+        Assert.False(server.Active);
 
         var preset = new WebsocketVoicePreset
         {
@@ -146,8 +139,7 @@ public class WSServerTests : IDisposable
             Name = "Some Body",
         };
 
-        Assert.Throws<InvalidOperationException>(
-            () => this.server.Broadcast("Speaker", source, preset, "Hello, world!"));
+        Assert.Throws<InvalidOperationException>(() => server.Broadcast("Speaker", source, preset, "Hello, world!"));
     }
 
     [Theory]
@@ -163,11 +155,11 @@ public class WSServerTests : IDisposable
         configProvider.Setup(p => p.AreStuttersRemoved()).Returns(true);
 
         // Set up the server
-        this.server = new WSServer(configProvider.Object, 0);
-        this.server.Start();
+        using var server = new WSServer(configProvider.Object, 0);
+        server.Start();
 
         // Set up the client
-        using var client = CreateClient();
+        using var client = CreateClient(server);
 
         // Filter for say messages only
         using var list = OnIpcMessage(client)
@@ -184,7 +176,7 @@ public class WSServerTests : IDisposable
             Name = "Some Body",
         };
 
-        this.server.Broadcast("Speaker", source, preset, "Hello, world!");
+        server.Broadcast("Speaker", source, preset, "Hello, world!");
 
         // Wait a bit
         await Task.Delay(100);
@@ -205,11 +197,11 @@ public class WSServerTests : IDisposable
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        this.server.Start();
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
 
         // Set up the client
-        using var client = CreateClient();
+        using var client = CreateClient(server);
 
         // Filter for cancel messages only
         using var list = OnIpcMessage(client)
@@ -220,7 +212,7 @@ public class WSServerTests : IDisposable
             .ToLiveList();
 
         // Send the cancel message
-        this.server.CancelAll();
+        server.CancelAll();
 
         // Wait a bit
         await Task.Delay(100);
@@ -234,9 +226,9 @@ public class WSServerTests : IDisposable
     public void CancelAll_WhileInactive_ThrowsInvalidOperationException()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        Assert.False(this.server.Active);
-        Assert.Throws<InvalidOperationException>(() => this.server.CancelAll());
+        using var server = new WSServer(configProvider, 0);
+        Assert.False(server.Active);
+        Assert.Throws<InvalidOperationException>(() => server.CancelAll());
     }
 
     [Theory]
@@ -249,11 +241,11 @@ public class WSServerTests : IDisposable
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        this.server.Start();
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
 
         // Set up the client
-        using var client = CreateClient();
+        using var client = CreateClient(server);
 
         // Filter for cancel messages only
         using var list = OnIpcMessage(client)
@@ -263,7 +255,7 @@ public class WSServerTests : IDisposable
             .ToLiveList();
 
         // Send the cancel message
-        this.server.Cancel(source);
+        server.Cancel(source);
 
         // Wait a bit
         await Task.Delay(100);
@@ -281,9 +273,9 @@ public class WSServerTests : IDisposable
     public void Cancel_WhileInactive_ThrowsInvalidOperationException(TextSource source)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        Assert.False(this.server.Active);
-        Assert.Throws<InvalidOperationException>(() => this.server.Cancel(source));
+        using var server = new WSServer(configProvider, 0);
+        Assert.False(server.Active);
+        Assert.Throws<InvalidOperationException>(() => server.Cancel(source));
     }
 
     [Fact]
@@ -291,15 +283,15 @@ public class WSServerTests : IDisposable
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        this.server.Start();
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
 
         // Set up the client
-        using var client = CreateClient();
+        using var client = CreateClient(server);
 
         // Send a message
         using var list1 = OnIpcMessage(client).Take(1).ToLiveList();
-        this.server.CancelAll();
+        server.CancelAll();
         await Task.Delay(100);
 
         // Confirm that it was received
@@ -316,7 +308,7 @@ public class WSServerTests : IDisposable
 
         // Send a message
         using var list2 = OnIpcMessage(client).Take(1).ToLiveList();
-        this.server.CancelAll();
+        server.CancelAll();
         await Task.Delay(100);
 
         // Confirm that it was received
@@ -329,19 +321,19 @@ public class WSServerTests : IDisposable
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        this.server = new WSServer(configProvider, 0);
-        this.server.Start();
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
 
         // Set up a client
-        using var client1 = CreateClient();
+        using var client1 = CreateClient(server);
 
         // Set up a second client
-        using var client2 = CreateClient();
+        using var client2 = CreateClient(server);
 
         // Send a message
         using var list1 = OnIpcMessage(client1).Take(1).ToLiveList();
         using var list2 = OnIpcMessage(client2).Take(1).ToLiveList();
-        this.server.CancelAll();
+        server.CancelAll();
         await Task.Delay(100);
 
         // Confirm that it was received by the second client (checking it first in case it clobbered the other one)
@@ -353,11 +345,9 @@ public class WSServerTests : IDisposable
         Assert.Single(list1);
     }
 
-    private WebSocket CreateClient()
+    private static WebSocket CreateClient(WSServer server)
     {
-        ArgumentNullException.ThrowIfNull(this.server);
-
-        var client = new WebSocket($"ws://localhost:{this.server.Port}/Messages");
+        var client = new WebSocket($"ws://localhost:{server.Port}/Messages");
         client.Connect();
         return client;
     }

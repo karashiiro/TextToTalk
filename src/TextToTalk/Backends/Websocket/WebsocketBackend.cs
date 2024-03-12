@@ -119,7 +119,7 @@ namespace TextToTalk.Backends.Websocket
         {
             if (disposing)
             {
-                this.wsServer.Stop();
+                this.wsServer.Dispose();
                 this.failedToBindPort.Dispose();
             }
         }

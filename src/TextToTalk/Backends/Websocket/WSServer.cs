@@ -9,8 +9,10 @@ using WebSocketSharp.Server;
 
 namespace TextToTalk.Backends.Websocket;
 
-public class WSServer
+public class WSServer : IDisposable
 {
+    private const string ServicePath = "/Messages";
+
     private readonly IWebsocketConfigProvider configProvider;
     private readonly IList<ServerBehavior> behaviors;
 
@@ -44,7 +46,13 @@ public class WSServer
         this.behaviors = new List<ServerBehavior>();
 
         this.server = new WebSocketServer($"ws://localhost:{Port}");
-        this.server.AddWebSocketService<ServerBehavior>("/Messages", b => this.behaviors.Add(b));
+        this.server.AddWebSocketService<ServerBehavior>(ServicePath, b => this.behaviors.Add(b));
+    }
+
+    public void Dispose()
+    {
+        Stop();
+        this.server.RemoveWebSocketService(ServicePath);
     }
 
     public void Broadcast(string speaker, TextSource source, VoicePreset voice, string message)
@@ -93,8 +101,9 @@ public class WSServer
         Port = newPort;
         Stop();
         this.behaviors.Clear();
+        this.server.RemoveWebSocketService(ServicePath);
         this.server = new WebSocketServer($"ws://localhost:{Port}");
-        this.server.AddWebSocketService<ServerBehavior>("/Messages", b => this.behaviors.Add(b));
+        this.server.AddWebSocketService<ServerBehavior>(ServicePath, b => this.behaviors.Add(b));
         Start();
     }
 
