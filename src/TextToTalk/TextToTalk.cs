@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
@@ -57,7 +56,7 @@ namespace TextToTalk
         private readonly AddonBattleTalkHandler addonBattleTalkHandler;
         private readonly ChatMessageHandler chatMessageHandler;
         private readonly SoundHandler soundHandler;
-        private readonly RateLimiter rateLimiter;
+        private readonly ConfiguredRateLimiter rateLimiter;
         private readonly UngenderedOverrideManager ungenderedOverrides;
         private readonly ILiteDatabase database;
         private readonly PlayerService playerService;
@@ -157,15 +156,7 @@ namespace TextToTalk
             this.soundHandler =
                 new SoundHandler(this.addonTalkHandler, this.addonBattleTalkHandler, sigScanner, gameInterop);
 
-            this.rateLimiter = new RateLimiter(() =>
-            {
-                if (this.config.MessagesPerSecond == 0)
-                {
-                    return long.MaxValue;
-                }
-
-                return (long)(1000f / this.config.MessagesPerSecond);
-            });
+            this.rateLimiter = new ConfiguredRateLimiter(this.config);
 
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
@@ -303,7 +294,7 @@ namespace TextToTalk
         private void Say(GameObject? speaker, SeString speakerName, string textValue, TextSource source)
         {
             // Check if this speaker should be skipped
-            if (speaker != null && ShouldRateLimit(speaker))
+            if (speaker != null && this.rateLimiter.TryRateLimit(speaker))
             {
                 return;
             }
@@ -421,13 +412,6 @@ namespace TextToTalk
             var nameHash = string.IsNullOrEmpty(name) ? 0 : xxHash32.ComputeHash(name);
             var voicePresetIndex = (int)(nameHash % (uint)voicePresets.Length);
             return voicePresets[voicePresetIndex];
-        }
-
-        private bool ShouldRateLimit(GameObject speaker)
-        {
-            return this.config.UsePlayerRateLimiter &&
-                   speaker.ObjectKind is ObjectKind.Player &&
-                   this.rateLimiter.TryRateLimit(speaker.Name.TextValue);
         }
 
         private void OpenConfigUi()

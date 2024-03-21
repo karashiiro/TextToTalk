@@ -11,6 +11,7 @@ using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.Data.Service;
+using TextToTalk.Middleware;
 using TextToTalk.Migrations;
 using TextToTalk.UI.Core;
 
@@ -24,7 +25,8 @@ namespace TextToTalk
         Last,
     }
 
-    public class PluginConfiguration : IPluginConfiguration, ISaveable, IWebsocketConfigProvider
+    public class PluginConfiguration : IPluginConfiguration, ISaveable, IWebsocketConfigProvider,
+        IRateLimiterConfigProvider
     {
         private const string DefaultPreset = "Default";
 
@@ -409,6 +411,16 @@ namespace TextToTalk
         bool IWebsocketConfigProvider.AreStuttersRemoved()
         {
             return RemoveStutterEnabled;
+        }
+
+        bool IRateLimiterConfigProvider.ShouldRateLimit()
+        {
+            return UsePlayerRateLimiter;
+        }
+
+        float IRateLimiterConfigProvider.MessagesPerSecond()
+        {
+            return MessagesPerSecond;
         }
     }
 }
