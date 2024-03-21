@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0-windows7.0": {
+    "net8.0-windows7.0": {
       "YamlDotNet": {
         "type": "Direct",
         "requested": "[13.0.2, )",
@@ -9,6 +9,6 @@
         "contentHash": "hRPqCt2bxTvHN6iT2JNG2KznDPFgD5B6j0bQ7woSpfGctmjgAYdKQ+LYHUaj/7q8sN1AbIcTNbaO75g8IFmTjw=="
       }
     },
-    "net7.0-windows7.0/win-x64": {}
+    "net8.0-windows7.0/win-x64": {}
   }
 }

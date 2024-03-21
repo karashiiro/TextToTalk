@@ -62,7 +62,7 @@ public class ConfigComponentsContext : ToolContext
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name, TypeName);
+            return Name.GetHashCode() | TypeName.GetHashCode();
         }
     }
 }

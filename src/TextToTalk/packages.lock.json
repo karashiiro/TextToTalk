@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0-windows7.0": {
+    "net8.0-windows7.0": {
       "AdysTech.CredentialManager": {
         "type": "Direct",
         "requested": "[2.6.0, )",
@@ -47,10 +47,7 @@
         "type": "Direct",
         "requested": "[1.0.1, )",
         "resolved": "1.0.1",
-        "contentHash": "QESbZntZBK5q5d287mK88pcsRaJp6TZpmihT+x6TAfBqbwtwYl2yos9/IbdGH28HjnSxs3GaQI+Vc6UOWq1uag==",
-        "dependencies": {
-          "Microsoft.Bcl.TimeProvider": "8.0.0"
-        }
+        "contentHash": "QESbZntZBK5q5d287mK88pcsRaJp6TZpmihT+x6TAfBqbwtwYl2yos9/IbdGH28HjnSxs3GaQI+Vc6UOWq1uag=="
       },
       "Standart.Hash.xxHash": {
         "type": "Direct",
@@ -82,19 +79,6 @@
         "type": "Transitive",
         "resolved": "5.0.16",
         "contentHash": "DMUYdRlgNbrSlyWzdQ4GqW934ntNHBGWMTNQlOL4hWz8WnveY6V9ZGo2ntPrSATW7kat8v5VoCXGSzToPiwZWw=="
-      },
-      "Microsoft.Bcl.AsyncInterfaces": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
-      },
-      "Microsoft.Bcl.TimeProvider": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "f5Kr5JepAbiGo7uDmhgvMqhntwxqXNn6/IpTBSSI4cuHhgnJGrLxFRhMjVpRkLPp6zJXO0/G0l3j9p9zSJxa+w==",
-        "dependencies": {
-          "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
-        }
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -206,7 +190,7 @@
         "type": "Project"
       }
     },
-    "net7.0-windows7.0/win-x64": {
+    "net8.0-windows7.0/win-x64": {
       "Microsoft.CognitiveServices.Speech": {
         "type": "Direct",
         "requested": "[1.32.1, )",

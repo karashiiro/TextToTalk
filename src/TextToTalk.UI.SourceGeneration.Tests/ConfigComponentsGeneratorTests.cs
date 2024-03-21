@@ -13,9 +13,9 @@ namespace TextToTalk.UI.SourceGeneration.Tests;
 
 public class ConfigComponentsGeneratorTests
 {
-    private static readonly ReferenceAssemblies Net70Windows = new("net7.0-windows",
-        new PackageIdentity("Microsoft.NETCore.App.Ref", "7.0.0"),
-        Path.Combine("ref", "net7.0-windows"));
+    private static readonly ReferenceAssemblies Net80Windows = new("net8.0-windows",
+        new PackageIdentity("Microsoft.NETCore.App.Ref", "8.0.0"),
+        Path.Combine("ref", "net8.0-windows"));
 
     private static string GetTargetConfigSourceCode(string configInterfaces)
     {
@@ -131,7 +131,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net70Windows,
+                ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
@@ -158,7 +158,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net70Windows,
+                ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
@@ -185,7 +185,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net70Windows,
+                ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
@@ -212,7 +212,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net70Windows,
+                ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -47,7 +46,7 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
     private static void Execute(SourceProductionContext context, ConfigComponentsContext data)
     {
         // Reuse the same modifiers; previous checks ensure this is partial and non-static
-        var modifiers = string.Join(' ', data.Modifiers.Select(mod => mod.Text));
+        var modifiers = string.Join(" ", data.Modifiers.Select(mod => mod.Text));
 
         // Note that the strings below must be LF, not CRLF. Git will auto-convert these,
         // which can cause unexpected test failures.
@@ -240,7 +239,7 @@ namespace {data.Namespace};
         MemberDeclarationSyntax decl,
         string attrName,
         SemanticModel model,
-        [NotNullWhen(true)] out AttributeSyntax? attr)
+        out AttributeSyntax? attr)
     {
         foreach (var attributeList in decl.AttributeLists)
         {
@@ -274,7 +273,7 @@ namespace {data.Namespace};
         AttributeSyntax attribute,
         SemanticModel semanticModel,
         CancellationToken cancellationToken,
-        [NotNullWhen(true)] out INamedTypeSymbol? target)
+        out INamedTypeSymbol? target)
     {
         if (attribute.ArgumentList is
             {

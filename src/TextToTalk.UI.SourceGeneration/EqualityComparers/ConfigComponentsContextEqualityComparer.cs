@@ -21,7 +21,7 @@ public class ConfigComponentsContextEqualityComparer : IEqualityComparer<ConfigC
         return ToolContextEqualityComparer.Default.Equals(x, y) &&
                x?.Namespace == y?.Namespace &&
                x?.Name == y?.Name &&
-               string.Join(' ', x?.Modifiers) == string.Join(' ', y?.Modifiers) &&
+               string.Join(" ", x?.Modifiers) == string.Join(" ", y?.Modifiers) &&
                x?.ConfigNamespace == y?.ConfigNamespace &&
                x?.ConfigName == y?.ConfigName;
     }
