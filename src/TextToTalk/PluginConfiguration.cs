@@ -345,31 +345,34 @@ namespace TextToTalk
                 p.EnabledBackend == Backend) as TPreset;
         }
 
-        public TPreset[]? GetCurrentUngenderedVoicePresets<TPreset>() where TPreset : VoicePreset
+        public TPreset[] GetCurrentUngenderedVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             var voiceConfig = GetVoiceConfig();
             var presets = voiceConfig.GetUngenderedPresets(Backend);
-            return voiceConfig.VoicePresets.Where(p =>
-                    presets.Contains(p.Id) && p.EnabledBackend == Backend)
-                .Cast<TPreset>().ToArray();
+            return voiceConfig.VoicePresets
+                .Where(p => presets.Contains(p.Id) && p.EnabledBackend == Backend)
+                .Cast<TPreset>()
+                .ToArray();
         }
 
-        public TPreset[]? GetCurrentMaleVoicePresets<TPreset>() where TPreset : VoicePreset
+        public TPreset[] GetCurrentMaleVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             var voiceConfig = GetVoiceConfig();
             var presets = voiceConfig.GetMalePresets(Backend);
-            return voiceConfig.VoicePresets.Where(p =>
-                    presets.Contains(p.Id) && p.EnabledBackend == Backend)
-                .Cast<TPreset>().ToArray();
+            return voiceConfig.VoicePresets
+                .Where(p => presets.Contains(p.Id) && p.EnabledBackend == Backend)
+                .Cast<TPreset>()
+                .ToArray();
         }
 
-        public TPreset[]? GetCurrentFemaleVoicePresets<TPreset>() where TPreset : VoicePreset
+        public TPreset[] GetCurrentFemaleVoicePresets<TPreset>() where TPreset : VoicePreset
         {
             var voiceConfig = GetVoiceConfig();
             var presets = voiceConfig.GetFemalePresets(Backend);
-            return voiceConfig.VoicePresets.Where(p =>
-                    presets.Contains(p.Id) && p.EnabledBackend == Backend)
-                .Cast<TPreset>().ToArray();
+            return voiceConfig.VoicePresets
+                .Where(p => presets.Contains(p.Id) && p.EnabledBackend == Backend)
+                .Cast<TPreset>()
+                .ToArray();
         }
 
         public int GetHighestVoicePresetId()

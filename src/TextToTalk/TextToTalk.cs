@@ -412,7 +412,7 @@ namespace TextToTalk
                 _ => this.config.GetCurrentUngenderedVoicePresets<TPreset>(),
             };
 
-            if (voicePresets == null || voicePresets.Length < 1)
+            if (voicePresets.Length < 1)
             {
                 return null;
             }
