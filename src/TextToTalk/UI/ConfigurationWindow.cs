@@ -636,7 +636,7 @@ namespace TextToTalk.UI
                 }
 
                 var selected = currentEnabledChatTypesPreset.EnabledChatTypes?.Contains((int)enumValue) ?? false;
-                if (!ImGui.Checkbox(channel == "PvPTeam" ? "PvP Team" : SplitWords(channel), ref selected)) continue;
+                if (!ImGui.Checkbox(FormatChatChannelName(channel), ref selected)) continue;
                 var isEnabled = currentEnabledChatTypesPreset.EnabledChatTypes?.Contains((int)enumValue) ?? false;
                 if (isEnabled)
                 {
@@ -649,6 +649,15 @@ namespace TextToTalk.UI
                     this.config.Save();
                 }
             }
+        }
+
+        private static string FormatChatChannelName(string channel)
+        {
+            // Split enum value name into words
+            var split = channel == "PvPTeam" ? "PvP Team" : SplitWords(channel);
+
+            // Handle linkshells
+            return split.StartsWith("Ls ") ? split.ToUpper() : split;
         }
 
         private static string SplitWords(string oneWord)
