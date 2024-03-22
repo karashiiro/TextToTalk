@@ -48,7 +48,7 @@ public class AddonBattleTalkHandler : IDisposable
         {
             var handler = new IFramework.OnUpdateDelegate(Handle);
             abth.framework.Update += handler;
-            return new DisposeHandler(() => { abth.framework.Update -= handler; });
+            return Disposable.Create(() => abth.framework.Update -= handler);
 
             void Handle(IFramework f)
             {

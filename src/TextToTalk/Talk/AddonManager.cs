@@ -29,7 +29,7 @@ public abstract class AddonManager : IDisposable
         {
             var handler = new IFramework.OnUpdateDelegate(Handle);
             am.framework.Update += handler;
-            return new DisposeHandler(() => { am.framework.Update -= handler; });
+            return Disposable.Create(() => { am.framework.Update -= handler; });
 
             void Handle(IFramework f)
             {

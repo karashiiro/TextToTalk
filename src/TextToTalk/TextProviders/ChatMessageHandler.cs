@@ -46,7 +46,7 @@ public class ChatMessageHandler : IDisposable
         {
             var handler = new IChatGui.OnMessageDelegate(HandleMessage);
             cmh.chat.ChatMessage += handler;
-            return new DisposeHandler(() => { cmh.chat.ChatMessage -= handler; });
+            return Disposable.Create(() => { cmh.chat.ChatMessage -= handler; });
 
             void HandleMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
             {

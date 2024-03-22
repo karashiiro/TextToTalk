@@ -51,7 +51,7 @@ public class AddonTalkHandler : IDisposable
         {
             var handler = new IFramework.OnUpdateDelegate(Handle);
             ath.framework.Update += handler;
-            return new DisposeHandler(() => { ath.framework.Update -= handler; });
+            return Disposable.Create(() => { ath.framework.Update -= handler; });
 
             void Handle(IFramework _)
             {

@@ -68,11 +68,7 @@ namespace TextToTalk
 
         private readonly HttpClient http;
 
-        private readonly IDisposable handleTextCancel;
-        private readonly IDisposable handleTextEmit;
-        private readonly IDisposable handleUnlockerResult;
-        private readonly IDisposable handlePresetOpenRequested;
-        private readonly IDisposable handleFailedToBindWsPort;
+        private readonly IDisposable unsubscribeAll;
 
         private bool failedToBindWsPort;
         private bool notifiedFailedToBindPort;
@@ -117,7 +113,7 @@ namespace TextToTalk
 
             this.http = new HttpClient();
             this.backendManager = new VoiceBackendManager(this.config, this.http, this.pluginInterface.UiBuilder);
-            this.handleFailedToBindWsPort = HandleFailedToBindWSPort();
+            var handleFailedToBindWsPort = HandleFailedToBindWSPort();
 
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
             this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);
@@ -126,7 +122,7 @@ namespace TextToTalk
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
             var voiceUnlockerRunner = new VoiceUnlockerRunner(pluginInterface.AssemblyLocation.Extension);
             this.voiceUnlockerWindow = new VoiceUnlockerWindow(voiceUnlockerRunner);
-            this.handleUnlockerResult = this.voiceUnlockerWindow.OnResult()
+            var handleUnlockerResult = this.voiceUnlockerWindow.OnResult()
                 .Subscribe(unlockerResultWindow, static (result, window) =>
                 {
                     window.Text = result;
@@ -137,7 +133,7 @@ namespace TextToTalk
             {
                 IsOpen = InitiallyVisible,
             };
-            this.handlePresetOpenRequested = this.configurationWindow.OnPresetOpenRequested()
+            var handlePresetOpenRequested = this.configurationWindow.OnPresetOpenRequested()
                 .Subscribe(channelPresetModificationWindow, static (_, window) => window.IsOpen = true);
 
             this.windows.AddWindow(unlockerResultWindow);
@@ -165,8 +161,11 @@ namespace TextToTalk
 
             RegisterCallbacks();
 
-            this.handleTextCancel = HandleTextCancel();
-            this.handleTextEmit = HandleTextEmit();
+            var handleTextCancel = HandleTextCancel();
+            var handleTextEmit = HandleTextEmit();
+
+            this.unsubscribeAll = Disposable.Combine(handleTextCancel, handleTextEmit, handleUnlockerResult,
+                handlePresetOpenRequested, handleFailedToBindWsPort);
         }
 
         private void CreateDatabasePath()
@@ -449,10 +448,7 @@ namespace TextToTalk
         {
             if (!disposing) return;
 
-            this.handleFailedToBindWsPort.Dispose();
-
-            this.handleTextEmit.Dispose();
-            this.handleTextCancel.Dispose();
+            this.unsubscribeAll.Dispose();
 
             this.chatMessageHandler.Dispose();
             this.addonTalkHandler.Dispose();
@@ -463,10 +459,8 @@ namespace TextToTalk
 
             this.soundHandler.Dispose();
 
-            this.handlePresetOpenRequested.Dispose();
             this.configurationWindow.Dispose();
 
-            this.handleUnlockerResult.Dispose();
             this.voiceUnlockerWindow.Dispose();
 
             this.pluginInterface.SavePluginConfig(this.config);
