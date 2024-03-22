@@ -117,7 +117,6 @@ public class ChatMessageHandler : IDisposable
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
         OnTextEmit.Invoke(new ChatTextEmitEvent(
-            TextSource.Chat,
             GetCleanSpeakerName(speaker, sender),
             textValue,
             speaker,
