@@ -50,7 +50,7 @@ public class MessageHandlerFilters
     public bool ShouldSaySender(XivChatType type)
     {
         return this.config.EnableNameWithSay &&
-               (this.config.NameNpcWithSay || (int)type != (int)AdditionalChatType.NPCDialogue);
+               (this.config.NameNpcWithSay || (int)type != (int)XivChatType.NPCDialogue);
     }
 
     public bool ShouldSayFromYou(string? speaker)
