@@ -69,14 +69,14 @@ public partial class TextToTalk
         }
 
         return this.config.Good
-            .Where(t => t.Text != "")
+            .Where(t => !string.IsNullOrWhiteSpace(t.Text))
             .Any(t => t.Match(text));
     }
 
     private bool IsTextBad(string text)
     {
         return this.config.Bad
-            .Where(t => t.Text != "")
+            .Where(t => !string.IsNullOrWhiteSpace(t.Text))
             .Any(t => t.Match(text));
     }
 }
