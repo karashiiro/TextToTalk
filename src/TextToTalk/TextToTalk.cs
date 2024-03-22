@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -22,6 +23,7 @@ using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.CommandModules;
 using TextToTalk.Data.Service;
+using TextToTalk.Events;
 using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -70,6 +72,9 @@ namespace TextToTalk
 
         private readonly IDisposable unsubscribeAll;
 
+        private ILiteDatabase? textEventLogDatabase;
+        private TextEventLogCollection? textEventLog;
+
         private bool failedToBindWsPort;
         private bool notifiedFailedToBindPort;
         private bool notifiedNoPresetsConfigured;
@@ -97,6 +102,7 @@ namespace TextToTalk
             this.framework = framework;
 
             CreateDatabasePath();
+            CreateEventLogDatabase();
             this.database = new LiteDatabase(GetDatabasePath("TextToTalk.db"));
             var playerCollection = new PlayerCollection(this.database);
             var npcCollection = new NpcCollection(this.database);
@@ -178,30 +184,46 @@ namespace TextToTalk
             return Path.Combine(this.pluginInterface.GetPluginConfigDirectory(), fileName);
         }
 
+        [Conditional("DEBUG")]
+        private void CreateEventLogDatabase()
+        {
+            this.textEventLogDatabase = new LiteDatabase(GetDatabasePath("log.db"));
+            this.textEventLog = new TextEventLogCollection(this.textEventLogDatabase);
+        }
+
         private IDisposable HandleTextCancel()
         {
             return OnTextSourceCancel()
                 .Where(this, static (_, p) => p.config is { Enabled: true, CancelSpeechOnTextAdvance: true })
+                .Do(LogTextEvent)
                 .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
                         () => this.backendManager.CancelSay(ev.Source),
                         ex => DetailedLog.Error(ex, "Failed to handle text cancel event")),
                     ex => DetailedLog.Error(ex, "Text cancel event sequence has faulted"),
-                    _ => {});
+                    _ => { });
         }
 
         private IDisposable HandleTextEmit()
         {
             return OnTextEmit()
                 .Where(this, static (_, p) => p.config.Enabled)
+                .Do(LogTextEvent)
                 .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
                         () => Say(ev.Speaker, ev.SpeakerName, ev.Text.TextValue, ev.Source),
                         ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
                     ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"),
-                    _ => {});
+                    _ => { });
+        }
+
+        private void LogTextEvent(TextEvent ev)
+        {
+            FunctionalUtils.RunSafely(
+                () => this.textEventLog?.StoreEvent(ev.ToLogEntry()),
+                ex => DetailedLog.Error(ex, "Failed to log text emit event"));
         }
 
         private IDisposable HandleFailedToBindWSPort()
@@ -468,6 +490,7 @@ namespace TextToTalk
             this.backendManager.Dispose();
             this.http.Dispose();
 
+            this.textEventLogDatabase?.Dispose();
             this.database.Dispose();
 
             this.addonBattleTalkManager.Dispose();
