@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using R3;
 using TextToTalk.Events;
 
@@ -53,12 +54,17 @@ public partial class TextToTalk
 
     private Observable<SourcedTextEvent> OnTextSourceCancel()
     {
-        return OnTalkAddonAdvance().Cast<AddonTalkAdvanceEvent, SourcedTextEvent>().Merge(OnTalkAddonClose().Cast<AddonTalkCloseEvent, SourcedTextEvent>());
+        return OnTalkAddonAdvance()
+            .Cast<AddonTalkAdvanceEvent, SourcedTextEvent>()
+            .Merge(OnTalkAddonClose().Cast<AddonTalkCloseEvent, SourcedTextEvent>());
     }
 
     private Observable<TextEmitEvent> OnTextEmit()
     {
-        return OnTalkAddonTextEmit().Merge(OnChatTextEmit().Cast<ChatTextEmitEvent, TextEmitEvent>()).Merge(OnBattleTalkAddonTextEmit());
+        return OnTalkAddonTextEmit()
+            .Merge(OnBattleTalkAddonTextEmit())
+            .Merge(OnChatTextEmit().Cast<ChatTextEmitEvent, TextEmitEvent>())
+            .DistinctUntilChanged(EqualityComparer<TextEmitEvent>.Create((a, b) => a?.IsEquivalent(b) ?? a == b));
     }
 
     private bool IsTextGood(string text)

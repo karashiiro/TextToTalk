@@ -1,14 +1,9 @@
 ﻿namespace TextToTalk.Events;
 
-public class SourcedTextEvent : TextEvent
+public abstract class SourcedTextEvent(TextSource source) : TextEvent
 {
     /// <summary>
     /// The source of the event.
     /// </summary>
-    public TextSource Source { get; }
-
-    protected SourcedTextEvent(TextSource source)
-    {
-        Source = source;
-    }
+    public TextSource Source { get; } = source;
 }
