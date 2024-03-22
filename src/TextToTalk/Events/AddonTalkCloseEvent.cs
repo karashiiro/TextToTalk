@@ -1,8 +1,3 @@
 ﻿namespace TextToTalk.Events;
 
-public class AddonTalkCloseEvent : SourcedTextEvent
-{
-    public AddonTalkCloseEvent() : base(TextSource.AddonTalk)
-    {
-    }
-}
+public class AddonTalkCloseEvent() : SourcedTextEvent(TextSource.AddonTalk);

@@ -1,5 +1,3 @@
 ﻿namespace TextToTalk.Events;
 
-public abstract class TextEvent
-{
-}
+public abstract class TextEvent;

@@ -3,28 +3,22 @@ using Dalamud.Game.Text.SeStringHandling;
 
 namespace TextToTalk.Events;
 
-public class TextEmitEvent : SourcedTextEvent
+public class TextEmitEvent(TextSource source, SeString speaker, SeString text, GameObject? speakerObj)
+    : SourcedTextEvent(source)
 {
     /// <summary>
     /// The speaker's name. This should be considered "clean" for the purposes of
     /// portable comparison.
     /// </summary>
-    public SeString SpeakerName { get; }
+    public SeString SpeakerName { get; } = speaker;
 
     /// <summary>
     /// The text being emitted.
     /// </summary>
-    public SeString Text { get; }
-    
+    public SeString Text { get; } = text;
+
     /// <summary>
     /// The speaking entity, if detected.
     /// </summary>
-    public GameObject? Speaker { get; }
-
-    public TextEmitEvent(TextSource source, SeString speaker, SeString text, GameObject? speakerObj) : base(source)
-    {
-        Speaker = speakerObj;
-        SpeakerName = speaker;
-        Text = text;
-    }
+    public GameObject? Speaker { get; } = speakerObj;
 }

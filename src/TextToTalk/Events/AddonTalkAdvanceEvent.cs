@@ -1,8 +1,3 @@
 ﻿namespace TextToTalk.Events;
 
-public class AddonTalkAdvanceEvent : SourcedTextEvent
-{
-    public AddonTalkAdvanceEvent() : base(TextSource.AddonTalk)
-    {
-    }
-}
+public class AddonTalkAdvanceEvent() : SourcedTextEvent(TextSource.AddonTalk);
