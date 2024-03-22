@@ -129,8 +129,8 @@ public class AddonTalkHandler : IDisposable
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
         OnTextEmit.Invoke(speakerObj != null
-            ? new TextEmitEvent(TextSource.AddonTalk, speakerObj.Name, text, speakerObj)
-            : new TextEmitEvent(TextSource.AddonTalk, state.Speaker ?? "", text, null));
+            ? new AddonTalkEmitEvent(speakerObj.Name, text, speakerObj)
+            : new AddonTalkEmitEvent(state.Speaker ?? "", text, null));
     }
 
     private AddonTalkState GetTalkAddonState(AddonPollSource pollSource)
