@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dalamud.Game.Command;
+using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using TextToTalk.Backends;
@@ -15,6 +17,7 @@ namespace TextToTalk.CommandModules
         private readonly IChatGui chat;
         private readonly IGameGui gui;
         private readonly ICommandManager commandManager;
+        private readonly IFramework framework;
 
         private readonly PluginConfiguration config;
         private readonly VoiceBackendManager backendManager;
@@ -23,16 +26,18 @@ namespace TextToTalk.CommandModules
         private readonly IList<string> commandNames;
 
         public MainCommandModule(IChatGui chat, ICommandManager commandManager, PluginConfiguration config,
-            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow, IGameGui gui)
+            VoiceBackendManager backendManager, ConfigurationWindow configurationWindow, IGameGui gui,
+            IFramework framework)
         {
             this.chat = chat;
             this.gui = gui;
             this.commandManager = commandManager;
+            this.framework = framework;
 
             this.config = config;
             this.backendManager = backendManager;
             this.configurationWindow = configurationWindow;
-            
+
             this.commandNames = new List<string>();
 
 #if DEBUG
@@ -45,10 +50,32 @@ namespace TextToTalk.CommandModules
             AddCommand("/tttconfig", ToggleConfig, "Toggle TextToTalk's configuration window.");
         }
 
-        public unsafe void ShowBattleTalk(string command = "", string args = "")
+        public void ShowBattleTalk(string command = "", string args = "")
         {
-            var ui = (UIModule*)this.gui.GetUIModule();
-            ui->ShowBattleTalk("Test", "Test Text", 60f, 0);
+            const string name = "Test";
+            const string message = "Test Text";
+
+            _ = Task.Run(async () =>
+            {
+                await this.framework.RunOnFrameworkThread(() =>
+                {
+                    this.chat.Print(new XivChatEntry
+                    {
+                        Name = name,
+                        Message = message,
+                        Type = XivChatType.NPCDialogueAnnouncements,
+                    });
+                });
+                await Task.Delay(1000);
+                await this.framework.RunOnFrameworkThread(() =>
+                {
+                    unsafe
+                    {
+                        var ui = (UIModule*)this.gui.GetUIModule();
+                        ui->ShowBattleTalk(name, message, 60f, 0);
+                    }
+                });
+            });
         }
 
         public void CancelTts(string command = "", string args = "")

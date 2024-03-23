@@ -31,4 +31,10 @@
     <ProjectReference Include="..\TextToTalk\TextToTalk.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Dalamud">
+      <HintPath>..\..\..\Dalamud\bin\Debug\Dalamud.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

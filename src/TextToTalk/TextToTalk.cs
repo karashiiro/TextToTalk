@@ -163,7 +163,7 @@ namespace TextToTalk
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
             this.commandModule = new MainCommandModule(this.chat, commandManager, this.config, this.backendManager,
-                this.configurationWindow, gui);
+                this.configurationWindow, gui, framework);
 
             RegisterCallbacks();
 
