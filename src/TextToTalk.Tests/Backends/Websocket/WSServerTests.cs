@@ -123,9 +123,10 @@ public class WSServerTests
     }
 
     [Fact]
-    public async Task Broadcast_WithIPv6_BroadcastsMessage()
+    public async Task Broadcast_WithIPv6_ThrowsArgumentException()
     {
-        await RunStandardBroadcastTest(IPAddress.IPv6Any, TextSource.Chat);
+        // websocket-sharp doesn't seem to support IPv6 addresses - this is here as a sanity check
+        await Assert.ThrowsAsync<ArgumentException>(() => RunStandardBroadcastTest(IPAddress.IPv6Any, TextSource.Chat));
     }
 
     private static async Task RunStandardBroadcastTest(IPAddress? address, TextSource source)

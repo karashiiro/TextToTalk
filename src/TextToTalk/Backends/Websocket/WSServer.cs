@@ -50,7 +50,7 @@ public class WSServer : IDisposable
         this.configProvider = configProvider;
         this.behaviors = new List<ServerBehavior>();
 
-        this.server = new WebSocketServer($"ws://localhost:{Port}");
+        this.server = new WebSocketServer(ServiceUrl);
         this.server.AddWebSocketService<ServerBehavior>(ServicePath, b => this.behaviors.Add(b));
     }
 

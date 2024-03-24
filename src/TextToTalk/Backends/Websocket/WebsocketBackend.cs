@@ -75,10 +75,11 @@ namespace TextToTalk.Backends.Websocket
         {
             DrawPortConfig();
             DrawAddressConfig();
+
+            ImGui.Spacing();
             DrawServerStatus();
 
             ImGui.Spacing();
-
             DrawServerRestart();
         }
 
@@ -123,6 +124,8 @@ namespace TextToTalk.Backends.Websocket
                     ImGui.TextColored(Red, "Failed to parse address!");
                 }
             }
+
+            ImGui.TextColored(Hint, "IPv6 address formats are not currently supported.");
         }
 
         private void DrawServerStatus()
