@@ -29,10 +29,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WindowsForms" IsWindowsOnly="false"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="AdysTech.CredentialManager" Version="2.6.0"/>
         <PackageReference Include="AWSSDK.Polly" Version="3.7.203.27" />
         <PackageReference Include="DalamudPackager" Version="2.1.12" />
