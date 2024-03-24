@@ -45,6 +45,7 @@ namespace TextToTalk
 
         private readonly DalamudPluginInterface pluginInterface;
         private readonly MainCommandModule commandModule;
+        private readonly DebugCommandModule debugCommandModule;
         private readonly IKeyState keys;
         private readonly IChatGui chat;
         private readonly IFramework framework;
@@ -162,8 +163,9 @@ namespace TextToTalk
 
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
-            this.commandModule = new MainCommandModule(this.chat, commandManager, this.config, this.backendManager,
-                this.configurationWindow, gui, framework);
+            this.commandModule = new MainCommandModule(commandManager, chat, this.config, this.backendManager,
+                this.configurationWindow);
+            this.debugCommandModule = new DebugCommandModule(commandManager, chat, gui, framework);
 
             RegisterCallbacks();
 
@@ -513,6 +515,7 @@ namespace TextToTalk
 
             UnregisterCallbacks();
 
+            this.debugCommandModule.Dispose();
             this.commandModule.Dispose();
 
             this.soundHandler.Dispose();
