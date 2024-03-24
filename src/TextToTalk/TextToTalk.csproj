@@ -9,7 +9,6 @@
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <PlatformTarget>x64</PlatformTarget>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
