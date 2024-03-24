@@ -74,11 +74,6 @@
         "resolved": "2.14.1",
         "contentHash": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw=="
       },
-      "IndexRange": {
-        "type": "Transitive",
-        "resolved": "1.0.3",
-        "contentHash": "tqgj3LuQHDH0OfGZamyiW1i9fhpny5piqvI+8Y7IIaRly+Bhqv5Z7zSlcIwA/DlYPS/cBmVwb+J4VGEFFqmnfQ=="
-      },
       "Microsoft.CodeAnalysis.Analyzer.Testing": {
         "type": "Transitive",
         "resolved": "1.1.1",
@@ -1465,10 +1460,7 @@
         }
       },
       "texttotalk.ui.sourcegeneration": {
-        "type": "Project",
-        "dependencies": {
-          "IndexRange": "[1.0.3, )"
-        }
+        "type": "Project"
       }
     }
   }
