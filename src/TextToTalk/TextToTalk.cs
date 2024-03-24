@@ -311,6 +311,7 @@ namespace TextToTalk
         {
             if (!this.clientState.IsLoggedIn || this.notifiedNoPresetsConfigured) return;
             if (this.config.Enabled &&
+                this.config.Backend != TTSBackend.Websocket &&
                 this.config.GetVoiceConfig().VoicePresets.All(vp => vp.EnabledBackend != this.config.Backend))
             {
                 FunctionalUtils.RunSafely(

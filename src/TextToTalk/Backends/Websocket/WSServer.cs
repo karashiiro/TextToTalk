@@ -12,13 +12,16 @@ namespace TextToTalk.Backends.Websocket;
 
 public class WSServer : IDisposable
 {
-    private const string ServicePath = "/Messages";
-
     private readonly IWebsocketConfigProvider configProvider;
     private readonly IList<ServerBehavior> behaviors;
 
     private WebSocketServer server;
     private int port;
+
+    public IPAddress? Address { get; private set; }
+
+    public string ServiceUrl => $"ws://{Address?.ToString() ?? "localhost"}:{Port}";
+    public string ServicePath => "/Messages";
 
     public int Port
     {
@@ -39,9 +42,10 @@ public class WSServer : IDisposable
 
     public bool Active { get; private set; }
 
-    public WSServer(IWebsocketConfigProvider configProvider, int port)
+    public WSServer(IWebsocketConfigProvider configProvider, int? overridePort = null)
     {
-        Port = port;
+        Address = configProvider.GetAddress();
+        Port = overridePort ?? configProvider.GetPort();
 
         this.configProvider = configProvider;
         this.behaviors = new List<ServerBehavior>();
@@ -99,13 +103,14 @@ public class WSServer : IDisposable
         this.server.Stop();
     }
 
-    public void RestartWithPort(int newPort)
+    public void RestartWithConnection(IPAddress? newAddress, int newPort)
     {
         Port = newPort;
+        Address = newAddress;
         Stop();
         this.behaviors.Clear();
         this.server.RemoveWebSocketService(ServicePath);
-        this.server = new WebSocketServer($"ws://localhost:{Port}");
+        this.server = new WebSocketServer(ServiceUrl);
         this.server.AddWebSocketService<ServerBehavior>(ServicePath, b => this.behaviors.Add(b));
         Start();
     }

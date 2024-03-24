@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Threading.Tasks;
 using Dalamud.Game.Text;
 using Moq;
@@ -14,6 +15,21 @@ namespace TextToTalk.Tests.Backends.Websocket;
 
 public class WSServerTests
 {
+    [Fact]
+    public void Ctor_WithNullAddress_DoesNotThrow()
+    {
+        var configProvider = Mock.Of<IWebsocketConfigProvider>();
+        using var server = new WSServer(configProvider);
+    }
+
+    [Fact]
+    public void Ctor_WithValidAddress_DoesNotThrow()
+    {
+        var configProvider = new Mock<IWebsocketConfigProvider>();
+        configProvider.Setup(x => x.GetAddress()).Returns(IPAddress.Any);
+        using var server = new WSServer(configProvider.Object);
+    }
+
     [Fact]
     public void Ctor_WithValidPort_DoesNotThrow()
     {
@@ -58,12 +74,24 @@ public class WSServerTests
     }
 
     [Fact]
-    public void RestartWithPort_WithValidPort_ChangesPort()
+    public void RestartWithConnection_WithValidAddress_ChangesAddress()
+    {
+        var configProvider = Mock.Of<IWebsocketConfigProvider>();
+        using var server = new WSServer(configProvider, 0);
+        var initialAddress = server.Address;
+        server.RestartWithConnection(IPAddress.Any, 0);
+        var finalAddress = server.Address;
+        Assert.Equal(IPAddress.Any, finalAddress);
+        Assert.NotEqual(initialAddress, finalAddress);
+    }
+
+    [Fact]
+    public void RestartWithConnection_WithValidPort_ChangesPort()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
         using var server = new WSServer(configProvider, 0);
         var initialPort = server.Port;
-        server.RestartWithPort(0);
+        server.RestartWithConnection(null, 0);
         var finalPort = server.Port;
         Assert.NotEqual(initialPort, finalPort);
     }
@@ -71,11 +99,11 @@ public class WSServerTests
     [Theory]
     [InlineData(-1)]
     [InlineData(65536)]
-    public void RestartWithPort_WithInvalidPort_ThrowsArgumentOutOfRangeException(int port)
+    public void RestartWithConnection_WithInvalidPort_ThrowsArgumentOutOfRangeException(int port)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
-        Assert.Throws<ArgumentOutOfRangeException>(() => server.RestartWithPort(port));
+        using var server = new WSServer(configProvider);
+        Assert.Throws<ArgumentOutOfRangeException>(() => server.RestartWithConnection(null, port));
     }
 
     [Theory]
@@ -83,12 +111,29 @@ public class WSServerTests
     [InlineData(TextSource.Chat)]
     [InlineData(TextSource.AddonTalk)]
     [InlineData(TextSource.AddonBattleTalk)]
-    [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
     public async Task Broadcast_WhileActive_BroadcastsMessage(TextSource source)
     {
+        await RunStandardBroadcastTest(null, source);
+    }
+
+    [Fact]
+    public async Task Broadcast_WithIPv4_BroadcastsMessage()
+    {
+        await RunStandardBroadcastTest(IPAddress.Any, TextSource.Chat);
+    }
+
+    [Fact]
+    public async Task Broadcast_WithIPv6_BroadcastsMessage()
+    {
+        await RunStandardBroadcastTest(IPAddress.IPv6Any, TextSource.Chat);
+    }
+
+    private static async Task RunStandardBroadcastTest(IPAddress? address, TextSource source)
+    {
         // Set up the server
-        var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var configProvider = new Mock<IWebsocketConfigProvider>();
+        configProvider.Setup(x => x.GetAddress()).Returns(address);
+        using var server = new WSServer(configProvider.Object, 0);
         server.Start();
 
         // Set up the client

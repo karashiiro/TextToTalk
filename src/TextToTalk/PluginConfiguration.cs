@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
@@ -127,6 +128,7 @@ namespace TextToTalk
         public IList<EnabledChatTypesPreset> EnabledChatTypesPresets { get; set; }
 
         public int WebsocketPort { get; set; }
+        public string? WebsocketAddress { get; set; }
 
         public bool NameNpcWithSay { get; set; } = true;
         public bool EnableNameWithSay { get; set; } = true;
@@ -406,6 +408,16 @@ namespace TextToTalk
         public void SetCurrentVoicePreset(int presetId)
         {
             GetVoiceConfig().CurrentVoicePreset[Backend] = presetId;
+        }
+
+        IPAddress? IWebsocketConfigProvider.GetAddress()
+        {
+            return IPAddress.TryParse(WebsocketAddress, out var ip) ? ip : null;
+        }
+
+        int IWebsocketConfigProvider.GetPort()
+        {
+            return WebsocketPort;
         }
 
         bool IWebsocketConfigProvider.AreStuttersRemoved()

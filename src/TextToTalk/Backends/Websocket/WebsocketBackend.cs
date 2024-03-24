@@ -1,8 +1,9 @@
 ﻿using ImGuiNET;
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
-using System.Text;
+using Dalamud.Interface.Utility.Raii;
 using R3;
 using TextToTalk.UI;
 
@@ -11,11 +12,17 @@ namespace TextToTalk.Backends.Websocket
     public class WebsocketBackend : VoiceBackend
     {
         private static readonly Vector4 Red = new(1, 0, 0, 1);
+        private static readonly Vector4 Hint = new(1.0f, 1.0f, 1.0f, 0.6f);
+        private static readonly Vector4 Azure = new(0.24f, 0.44f, 0.6f, 1.0f);
+        private static readonly Vector4 AzureHovered = new(0.21f, 0.49f, 0.7f, 1.0f);
+        private static readonly Vector4 AzureActive = new(0.16f, 0.52f, 0.8f, 1.0f);
 
         private readonly WSServer wsServer;
         private readonly PluginConfiguration config;
 
         private readonly ReplaySubject<int> failedToBindPort;
+
+        private bool dirtyConfig;
 
         public WebsocketBackend(PluginConfiguration config)
         {
@@ -24,7 +31,7 @@ namespace TextToTalk.Backends.Websocket
 
             try
             {
-                this.wsServer = new WSServer(this.config, this.config.WebsocketPort);
+                this.wsServer = new WSServer(this.config);
             }
             catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
             {
@@ -44,7 +51,8 @@ namespace TextToTalk.Backends.Websocket
         {
             try
             {
-                this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text, request.NpcId, request.ChatType);
+                this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text, request.NpcId,
+                    request.ChatType);
                 DetailedLog.Debug($"Sent message \"{request.Text}\" on WebSocket server.");
             }
             catch (Exception e)
@@ -65,45 +73,94 @@ namespace TextToTalk.Backends.Websocket
 
         public override void DrawSettings(IConfigUIDelegates helpers)
         {
-            var port = this.config.WebsocketPort;
-            var portBytes = Encoding.UTF8.GetBytes(port.ToString());
-            var inputBuffer = new byte[6]; // One extra byte for the null terminator
-            Array.Copy(portBytes, inputBuffer,
-                portBytes.Length > inputBuffer.Length ? inputBuffer.Length : portBytes.Length);
-
-            if (ImGui.InputText($"Port##{MemoizedId.Create()}", inputBuffer, (uint)inputBuffer.Length,
-                    ImGuiInputTextFlags.CharsDecimal))
-            {
-                if (int.TryParse(Encoding.UTF8.GetString(inputBuffer), out var newPort))
-                {
-                    try
-                    {
-                        this.wsServer.RestartWithPort(newPort);
-                        this.config.WebsocketPort = newPort;
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        ImGui.TextColored(Red, "Port out of range");
-                    }
-                    catch (SocketException)
-                    {
-                        ImGui.TextColored(Red, "Port already taken");
-                    }
-                }
-                else
-                {
-                    DetailedLog.Error("Failed to parse port!");
-                }
-            }
-
-            ImGui.TextColored(new Vector4(1.0f, 1.0f, 1.0f, 0.6f),
-                $"{(this.wsServer.Active ? "Started" : "Will start")} on ws://localhost:{this.wsServer.Port}/Messages");
+            DrawPortConfig();
+            DrawAddressConfig();
+            DrawServerStatus();
 
             ImGui.Spacing();
 
+            DrawServerRestart();
+        }
+
+        private void DrawPortConfig()
+        {
+            var port = this.config.WebsocketPort;
+            var portStr = port.ToString();
+            if (ImGui.InputText("Port", ref portStr, 5, ImGuiInputTextFlags.CharsDecimal))
+            {
+                if (int.TryParse(portStr, out var newPort))
+                {
+                    this.config.WebsocketPort = newPort;
+                    this.dirtyConfig = true;
+                    this.config.Save();
+                }
+                else
+                {
+                    ImGui.TextColored(Red, "Failed to parse port!");
+                }
+            }
+        }
+
+        private void DrawAddressConfig()
+        {
+            var address = this.config.WebsocketAddress ?? "";
+            if (ImGui.InputTextWithHint($"Address##{MemoizedId.Create()}", "localhost", ref address, 40))
+            {
+                if (string.IsNullOrWhiteSpace(address))
+                {
+                    this.config.WebsocketAddress = null;
+                    this.dirtyConfig = true;
+                    this.config.Save();
+                }
+                else if (IPAddress.TryParse(address, out _))
+                {
+                    this.config.WebsocketAddress = address;
+                    this.dirtyConfig = true;
+                    this.config.Save();
+                }
+                else
+                {
+                    ImGui.TextColored(Red, "Failed to parse address!");
+                }
+            }
+        }
+
+        private void DrawServerStatus()
+        {
+            var fullServiceUrl = this.wsServer.ServiceUrl + this.wsServer.ServicePath;
+            ImGui.TextColored(Hint, $"{(this.wsServer.Active ? "Started" : "Will start")} on {fullServiceUrl}");
+        }
+
+        private void DrawServerRestart()
+        {
+            using var bcAzure = ImRaii.PushColor(ImGuiCol.Button, Azure, this.dirtyConfig);
+            using var bcAzureHovered = ImRaii.PushColor(ImGuiCol.ButtonHovered, AzureHovered, this.dirtyConfig);
+            using var bcAzureActive = ImRaii.PushColor(ImGuiCol.ButtonActive, AzureActive, this.dirtyConfig);
             if (ImGui.Button($"Restart server##{MemoizedId.Create()}"))
             {
-                this.wsServer.RestartWithPort(this.config.WebsocketPort);
+                ImCatchServerRestart(() =>
+                {
+                    this.wsServer.RestartWithConnection(
+                        IPAddress.TryParse(this.config.WebsocketAddress, out var ip) ? ip : null,
+                        this.config.WebsocketPort);
+                    this.dirtyConfig = false;
+                });
+            }
+        }
+
+        private static void ImCatchServerRestart(Action fn)
+        {
+            try
+            {
+                fn();
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                ImGui.TextColored(Red, "Port out of range");
+            }
+            catch (SocketException)
+            {
+                ImGui.TextColored(Red, "Port already taken");
             }
         }
 
