@@ -213,10 +213,20 @@ namespace TextToTalk
                 .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
-                        () => Say(ev.Speaker, ev.SpeakerName, ev.Text.TextValue, ev.Source),
+                        () => Say(ev.Speaker, ev.SpeakerName, GetChatType(ev), ev.Text.TextValue, ev.Source),
                         ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
                     ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"),
                     _ => { });
+        }
+
+        private static XivChatType? GetChatType(TextEmitEvent ev)
+        {
+            if (ev is ChatTextEmitEvent chatEv)
+            {
+                return chatEv.ChatType;
+            }
+
+            return null;
         }
 
         private void LogTextEvent(TextEvent ev)
@@ -312,7 +322,8 @@ namespace TextToTalk
             this.notifiedNoPresetsConfigured = true;
         }
 
-        private void Say(GameObject? speaker, SeString speakerName, string textValue, TextSource source)
+        private void Say(GameObject? speaker, SeString speakerName, XivChatType? chatType, string textValue,
+            TextSource source)
         {
             // Check if this speaker should be skipped
             if (speaker != null && this.rateLimiter.TryRateLimit(speaker))
@@ -339,11 +350,14 @@ namespace TextToTalk
             // as hyphens for the sake of the plugin.
             var cleanSpeakerName = TalkUtils.NormalizePunctuation(speakerName.TextValue);
 
+            // Attempt to get the speaker's ID, if they're an NPC
+            var npcId = GetNpcId(speaker);
+
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
 
             // Say the thing
-            BackendSay(source, preset, cleanSpeakerName, cleanText);
+            BackendSay(source, preset, chatType, npcId, cleanSpeakerName, cleanText);
         }
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
@@ -373,7 +387,18 @@ namespace TextToTalk
             return GetVoiceForSpeaker(speakerName, gender);
         }
 
-        private void BackendSay(TextSource source, VoicePreset? voicePreset, string speaker, string text)
+        private static uint? GetNpcId(GameObject? gameObject)
+        {
+            if (gameObject is Npc npc)
+            {
+                return npc.DataId;
+            }
+
+            return null;
+        }
+
+        private void BackendSay(TextSource source, VoicePreset? voicePreset, XivChatType? chatType, uint? npcId,
+            string speaker, string text)
         {
             if (voicePreset is null)
             {
@@ -393,7 +418,9 @@ namespace TextToTalk
                 Source = source,
                 Voice = voicePreset,
                 Speaker = speaker,
+                NpcId = npcId,
                 Text = text,
+                ChatType = chatType,
             };
 
             this.backendManager.Say(req);

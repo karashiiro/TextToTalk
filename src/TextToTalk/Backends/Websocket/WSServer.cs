@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using Dalamud.Game.Text;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -55,12 +56,14 @@ public class WSServer : IDisposable
         this.server.RemoveWebSocketService(ServicePath);
     }
 
-    public void Broadcast(string speaker, TextSource source, VoicePreset voice, string message)
+    public void Broadcast(string speaker, TextSource source, VoicePreset voice, string message, uint? npcId,
+        XivChatType? chatType)
     {
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
         var stuttersRemoved = this.configProvider.AreStuttersRemoved();
-        var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source, stuttersRemoved);
+        var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source, stuttersRemoved, npcId,
+            (int?)chatType);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
@@ -75,7 +78,7 @@ public class WSServer : IDisposable
 
         var stuttersRemoved = this.configProvider.AreStuttersRemoved();
         var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, source,
-            stuttersRemoved);
+            stuttersRemoved, null, null);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
@@ -135,76 +138,5 @@ public class WSServer : IDisposable
             var baseWebsocket = targetType.GetField("_websocket", BindingFlags.Instance | BindingFlags.NonPublic);
             baseWebsocket?.SetValue(this, null);
         }
-    }
-
-    [Serializable]
-    public class IpcMessage : IEquatable<IpcMessage>
-    {
-        /// <summary>
-        /// The speaker name.
-        /// </summary>
-        public string Speaker { get; set; }
-
-        /// <summary>
-        /// The message type; refer tp <see cref="IpcMessageType"/> for options.
-        /// </summary>
-        public string Type { get; set; }
-
-        /// <summary>
-        /// The message parameter - the spoken text for speech requests, and nothing for cancellations.
-        /// </summary>
-        public string Payload { get; set; }
-
-        /// <summary>
-        /// Speaker voice ID.
-        /// </summary>
-        public VoicePreset? Voice { get; set; }
-
-        /// <summary>
-        /// If stutters were removed from the payload or not.
-        /// </summary>
-        public bool StuttersRemoved { get; set; }
-
-        /// <summary>
-        /// Text source; refer to <see cref="TextSource"/> for options.
-        /// </summary>
-        public string Source { get; set; }
-
-        public IpcMessage(string speaker, IpcMessageType type, string payload, VoicePreset? preset,
-            TextSource source, bool stuttersRemoved)
-        {
-            Speaker = speaker;
-            Type = type.ToString();
-            Payload = payload;
-            Voice = preset;
-            Source = source.ToString();
-            StuttersRemoved = stuttersRemoved;
-        }
-
-        public bool Equals(IpcMessage? other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Speaker == other.Speaker && Type == other.Type && Payload == other.Payload &&
-                   Equals(Voice, other.Voice) && StuttersRemoved == other.StuttersRemoved && Source == other.Source;
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == this.GetType() && Equals((IpcMessage)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source);
-        }
-    }
-
-    public enum IpcMessageType
-    {
-        Say,
-        Cancel,
     }
 }

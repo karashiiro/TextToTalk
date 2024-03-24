@@ -26,28 +26,32 @@ Direct links to information will be added here eventually.
 TextToTalk can optionally open a WebSocket server to serve messages over. There are currently two JSON-format messages that can be sent:
 
 TTS prompt:
-```
+```json5
 {
 	"Type": "Say",
 	"Payload": "Firstname Lastname says something",
 	"Voice": {
 		"Name": "Gender"
 	},
-	"Speaker": "Firstname Lastname"
+	"Speaker": "Firstname Lastname",
 	"Source": "Chat", // or "AddonTalk", or "AddonBattleTalk"
-	"StuttersRemoved": false
+	"StuttersRemoved": false,
+	"NpcId": 1000115, // or null, for non-NPCs
+	"ChatType": 10 // Refer to https://dalamud.dev/api/Dalamud.Game.Text/Enums/XivChatType
 }
 ```
 
 TTS cancel:
-```
+```json5
 {
 	"Type": "Cancel",
 	"Payload": "",
 	"Voice": null,
 	"Speaker": null,
 	"Source": "None", // or "Chat", "AddonTalk", or "AddonBattleTalk"
-	"StuttersRemoved": false
+	"StuttersRemoved": false,
+	"NpcId": null,
+	"ChatType": null
 }
 ```
 

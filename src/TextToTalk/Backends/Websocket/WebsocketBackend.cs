@@ -44,10 +44,8 @@ namespace TextToTalk.Backends.Websocket
         {
             try
             {
-                this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text);
-#if DEBUG
-                DetailedLog.Info("Sent message {0} on WebSocket server.", request.Text);
-#endif
+                this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text, request.NpcId, request.ChatType);
+                DetailedLog.Debug($"Sent message \"{request.Text}\" on WebSocket server.");
             }
             catch (Exception e)
             {

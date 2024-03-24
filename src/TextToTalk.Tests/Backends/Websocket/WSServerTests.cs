@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Dalamud.Game.Text;
 using Moq;
 using Newtonsoft.Json;
 using R3;
@@ -95,7 +96,7 @@ public class WSServerTests
 
         // Filter for say messages only
         using var list = OnIpcMessage(client)
-            .Where(m => m?.Type == WSServer.IpcMessageType.Say.ToString())
+            .Where(m => m?.Type == IpcMessageType.Say.ToString())
             .Select(m => m!)
             .Take(1)
             .ToLiveList();
@@ -108,7 +109,7 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!");
+        server.Broadcast("Speaker", source, preset, "Hello, world!", null, XivChatType.Say);
 
         // Wait a bit
         await Task.Delay(100);
@@ -117,7 +118,8 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new WSServer.IpcMessage("Speaker", WSServer.IpcMessageType.Say, "Hello, world!", preset, source, false),
+            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, false, null,
+                (int)XivChatType.Say),
         });
     }
 
@@ -139,7 +141,8 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        Assert.Throws<InvalidOperationException>(() => server.Broadcast("Speaker", source, preset, "Hello, world!"));
+        Assert.Throws<InvalidOperationException>(() =>
+            server.Broadcast("Speaker", source, preset, "Hello, world!", null, null));
     }
 
     [Theory]
@@ -163,7 +166,7 @@ public class WSServerTests
 
         // Filter for say messages only
         using var list = OnIpcMessage(client)
-            .Where(m => m?.Type == WSServer.IpcMessageType.Say.ToString())
+            .Where(m => m?.Type == IpcMessageType.Say.ToString())
             .Select(m => m!)
             .Take(1)
             .ToLiveList();
@@ -176,7 +179,7 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!");
+        server.Broadcast("Speaker", source, preset, "Hello, world!", 42, XivChatType.Say);
 
         // Wait a bit
         await Task.Delay(100);
@@ -185,7 +188,8 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new WSServer.IpcMessage("Speaker", WSServer.IpcMessageType.Say, "Hello, world!", preset, source, true),
+            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, true, 42,
+                (int)XivChatType.Say),
         });
 
         configProvider.Verify();
@@ -205,7 +209,7 @@ public class WSServerTests
 
         // Filter for cancel messages only
         using var list = OnIpcMessage(client)
-            .Where(m => m?.Type == WSServer.IpcMessageType.Cancel.ToString())
+            .Where(m => m?.Type == IpcMessageType.Cancel.ToString())
             .Where(m => m?.Source == TextSource.None.ToString())
             .Select(m => (m!.Type, m.Source))
             .Take(1)
@@ -219,7 +223,7 @@ public class WSServerTests
 
         // Assert that a cancel message was received
         Assert.True(list.IsCompleted);
-        Assert.Equal(list, new[] { (WSServer.IpcMessageType.Cancel.ToString(), TextSource.None.ToString()) });
+        Assert.Equal(list, new[] { (IpcMessageType.Cancel.ToString(), TextSource.None.ToString()) });
     }
 
     [Fact]
@@ -249,7 +253,7 @@ public class WSServerTests
 
         // Filter for cancel messages only
         using var list = OnIpcMessage(client)
-            .Where(m => m?.Type == WSServer.IpcMessageType.Cancel.ToString())
+            .Where(m => m?.Type == IpcMessageType.Cancel.ToString())
             .Select(m => m!.Type)
             .Take(1)
             .ToLiveList();
@@ -262,7 +266,7 @@ public class WSServerTests
 
         // Assert that a cancel message was received
         Assert.True(list.IsCompleted);
-        Assert.Equal(list, new[] { WSServer.IpcMessageType.Cancel.ToString() });
+        Assert.Equal(list, new[] { IpcMessageType.Cancel.ToString() });
     }
 
     [Theory]
@@ -352,11 +356,11 @@ public class WSServerTests
         return client;
     }
 
-    private static Observable<WSServer.IpcMessage?> OnIpcMessage(WebSocket client)
+    private static Observable<IpcMessage?> OnIpcMessage(WebSocket client)
     {
         var onMessage = Observable.FromEventHandler<MessageEventArgs>(
             handler => client.OnMessage += handler,
             handler => client.OnMessage -= handler);
-        return onMessage.Select(m => JsonConvert.DeserializeObject<WSServer.IpcMessage>(m.e.Data));
+        return onMessage.Select(m => JsonConvert.DeserializeObject<IpcMessage>(m.e.Data));
     }
 }
