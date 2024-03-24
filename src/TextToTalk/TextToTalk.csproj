@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0-windows</TargetFramework>
+        <RuntimeFrameworkVersion>8.0.0</RuntimeFrameworkVersion>
         <Version>1.29.0.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
