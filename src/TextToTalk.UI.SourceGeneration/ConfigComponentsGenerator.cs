@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using TextToTalk.UI.Core;
 using TextToTalk.UI.SourceGeneration.Contexts;
 using TextToTalk.UI.SourceGeneration.EqualityComparers;
 
@@ -105,7 +104,7 @@ namespace {data.Namespace};
 
     /// <summary>
     /// Transforms the node referenced by the provided generator context into a more
-    /// useful form, if it has a <see cref="UseConfigComponentsAttribute"/> attached.
+    /// useful form, if it has a UseConfigComponentsAttribute attached.
     /// </summary>
     /// <param name="context">The code generation context.</param>
     /// <param name="cancellationToken"></param>

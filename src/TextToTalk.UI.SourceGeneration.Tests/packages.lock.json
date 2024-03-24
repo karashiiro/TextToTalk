@@ -1464,14 +1464,10 @@
           "xunit.extensibility.core": "[2.4.2]"
         }
       },
-      "texttotalk.ui.core": {
-        "type": "Project"
-      },
       "texttotalk.ui.sourcegeneration": {
         "type": "Project",
         "dependencies": {
-          "IndexRange": "[1.0.3, )",
-          "TextToTalk.UI.Core": "[1.0.0, )"
+          "IndexRange": "[1.0.3, )"
         }
       }
     }

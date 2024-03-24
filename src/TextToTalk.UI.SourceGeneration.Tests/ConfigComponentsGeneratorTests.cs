@@ -1,9 +1,9 @@
+using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
 using Microsoft.CodeAnalysis.Text;
-using TextToTalk.UI.Core;
 using VerifyCS =
     TextToTalk.UI.SourceGeneration.Tests.CSharpSourceGeneratorVerifier<
         TextToTalk.UI.SourceGeneration.Tests.ConfigComponentsGeneratorTests,
@@ -124,6 +124,13 @@ namespace TextToTalk.UI;
         return Path.Combine(appData!, "XIVLauncher", "addon", "Hooks", "dev", "ImGui.NET.dll");
     }
 
+    private static string UICorePath()
+    {
+        var thisAssembly = Assembly.GetExecutingAssembly().Location;
+        return Path.Combine(thisAssembly, "..", "..", "..", "..", "..", "TextToTalk.UI.Core", "bin", "Debug", "net8.0",
+            "TextToTalk.UI.Core.dll");
+    }
+
     [Fact]
     public async Task Generates_Expected_Code_When_Public()
     {
@@ -134,7 +141,7 @@ namespace TextToTalk.UI;
                 ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
-                    MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
+                    MetadataReference.CreateFromFile(UICorePath()),
                     MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
@@ -161,7 +168,7 @@ namespace TextToTalk.UI;
                 ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
-                    MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
+                    MetadataReference.CreateFromFile(UICorePath()),
                     MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
@@ -188,7 +195,7 @@ namespace TextToTalk.UI;
                 ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
-                    MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
+                    MetadataReference.CreateFromFile(UICorePath()),
                     MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
@@ -215,7 +222,7 @@ namespace TextToTalk.UI;
                 ReferenceAssemblies = Net80Windows,
                 AdditionalReferences =
                 {
-                    MetadataReference.CreateFromFile(typeof(UseConfigComponentsAttribute).Assembly.Location),
+                    MetadataReference.CreateFromFile(UICorePath()),
                     MetadataReference.CreateFromFile(ImGuiNetPath()),
                 },
                 Sources =
