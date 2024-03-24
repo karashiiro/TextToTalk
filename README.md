@@ -63,3 +63,6 @@ TTS cancel:
 ![image](https://user-images.githubusercontent.com/49822414/126075852-f2aee169-c83c-4916-aca2-e715951eab36.png)
 ![image](https://user-images.githubusercontent.com/49822414/126075869-480cacb2-8537-41da-aaba-553da5ec9abb.png)
 ![image](https://user-images.githubusercontent.com/49822414/126075873-aa329726-92eb-4ea1-9127-39810016596b.png)
+
+## Development
+Refer to the [wiki](https://github.com/karashiiro/TextToTalk/wiki/Development) for dev documentation.
