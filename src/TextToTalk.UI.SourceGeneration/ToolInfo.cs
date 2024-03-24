@@ -1,45 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using System.Reflection;
-
-namespace TextToTalk.UI.SourceGeneration;
+﻿namespace TextToTalk.UI.SourceGeneration;
 
 internal static class ToolInfo
 {
-    internal static readonly Assembly ToolAssembly =
-        RunWithConsoleLogging(() => typeof(ConfigComponentsGenerator).Assembly);
+    internal static readonly string AssemblyName = "TextToTalk.UI.SourceGeneration";
 
-    internal static readonly string AssemblyName =
-        RunWithConsoleLogging(() => ToolAssembly.GetName().Name!);
-
-    internal static readonly string AssemblyVersion =
-        RunWithConsoleLogging(() => FileVersionInfo.GetVersionInfo(ToolAssembly.Location).FileVersion!);
-
-    private static T RunWithConsoleLogging<T>(Func<T> fn)
-    {
-        try
-        {
-            return fn();
-        }
-        catch (Exception ex)
-        {
-            LogException(ex);
-            throw;
-        }
-    }
-
-    private static void LogException(Exception ex)
-    {
-        while (true)
-        {
-            Console.WriteLine(ex);
-            if (ex.InnerException != null)
-            {
-                ex = ex.InnerException;
-                continue;
-            }
-
-            break;
-        }
-    }
+    internal static readonly string AssemblyVersion = "1.0.0.0";
 }
