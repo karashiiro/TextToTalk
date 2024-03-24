@@ -7,7 +7,7 @@ namespace TextToTalk.Backends
     {
         public Vector4 TitleBarColor { get; protected init; }
 
-        public abstract void Say(TextSource source, VoicePreset voice, string speaker, string text);
+        public abstract void Say(SayRequest request);
 
         public abstract void CancelAllSpeech();
 

@@ -20,9 +20,9 @@ public class AzureBackend : VoiceBackend
         this.ui = new AzureBackendUI(this.uiModel, config, lexiconManager, http);
     }
 
-    public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
+    public override void Say(SayRequest request)
     {
-        if (preset is not AzureVoicePreset azureVoicePreset)
+        if (request.Voice is not AzureVoicePreset azureVoicePreset)
         {
             throw new InvalidOperationException("Invalid voice preset provided.");
         }
@@ -34,7 +34,7 @@ public class AzureBackend : VoiceBackend
         }
 
         _ = this.uiModel.Azure.Say(azureVoicePreset.VoiceName,
-            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, source, text);
+            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, request.Source, request.Text);
     }
 
     public override void CancelAllSpeech()

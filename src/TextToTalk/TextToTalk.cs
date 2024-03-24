@@ -388,7 +388,15 @@ namespace TextToTalk
                 return;
             }
 
-            this.backendManager.Say(source, voicePreset, speaker, text);
+            var req = new SayRequest
+            {
+                Source = source,
+                Voice = voicePreset,
+                Speaker = speaker,
+                Text = text,
+            };
+
+            this.backendManager.Say(req);
         }
 
         private VoicePreset? GetVoiceForSpeaker(string? name, Gender gender)

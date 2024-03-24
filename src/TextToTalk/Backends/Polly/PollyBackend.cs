@@ -21,9 +21,9 @@ namespace TextToTalk.Backends.Polly
             this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http);
         }
 
-        public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
+        public override void Say(SayRequest request)
         {
-            if (preset is not PollyVoicePreset pollyVoicePreset)
+            if (request.Voice is not PollyVoicePreset pollyVoicePreset)
             {
                 throw new InvalidOperationException("Invalid voice preset provided.");
             }
@@ -36,7 +36,7 @@ namespace TextToTalk.Backends.Polly
 
             _ = this.uiModel.Polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName,
                 pollyVoicePreset.AmazonDomainName, pollyVoicePreset.SampleRate, pollyVoicePreset.PlaybackRate,
-                pollyVoicePreset.Volume, source, text);
+                pollyVoicePreset.Volume, request.Source, request.Text);
         }
 
         public override void CancelAllSpeech()

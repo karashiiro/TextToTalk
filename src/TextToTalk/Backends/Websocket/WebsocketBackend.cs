@@ -40,13 +40,13 @@ namespace TextToTalk.Backends.Websocket
             return this.failedToBindPort;
         }
 
-        public override void Say(TextSource source, VoicePreset voice, string speaker, string text)
+        public override void Say(SayRequest request)
         {
             try
             {
-                this.wsServer.Broadcast(speaker, source, voice, text);
+                this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text);
 #if DEBUG
-                DetailedLog.Info("Sent message {0} on WebSocket server.", text);
+                DetailedLog.Info("Sent message {0} on WebSocket server.", request.Text);
 #endif
             }
             catch (Exception e)

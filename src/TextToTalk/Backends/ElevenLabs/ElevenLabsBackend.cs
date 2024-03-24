@@ -20,9 +20,9 @@ public class ElevenLabsBackend : VoiceBackend
         this.uiBuilder = uiBuilder;
     }
 
-    public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
+    public override void Say(SayRequest request)
     {
-        if (preset is not ElevenLabsVoicePreset elevenLabsVoicePreset)
+        if (request.Voice is not ElevenLabsVoicePreset elevenLabsVoicePreset)
         {
             throw new InvalidOperationException("Invalid voice preset provided.");
         }
@@ -33,7 +33,7 @@ public class ElevenLabsBackend : VoiceBackend
             {
                 await this.uiModel.ElevenLabs.Say(elevenLabsVoicePreset.VoiceId, elevenLabsVoicePreset.PlaybackRate,
                     elevenLabsVoicePreset.Volume, elevenLabsVoicePreset.SimilarityBoost,
-                    elevenLabsVoicePreset.Stability, source, text);
+                    elevenLabsVoicePreset.Stability, request.Source, request.Text);
                 this.uiModel.UpdateUserSubscriptionInfo();
             }
             catch (ElevenLabsUnauthorizedException e)

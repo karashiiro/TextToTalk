@@ -23,9 +23,9 @@ namespace TextToTalk.Backends.System
             this.voiceExceptions = this.uiModel.SubscribeToVoiceExceptions(this.soundQueue.SelectVoiceFailed);
         }
 
-        public override void Say(TextSource source, VoicePreset voice, string speaker, string text)
+        public override void Say(SayRequest request)
         {
-            this.soundQueue.EnqueueSound(voice, source, text);
+            this.soundQueue.EnqueueSound(request.Voice, request.Source, request.Text);
         }
 
         public override void CancelAllSpeech()

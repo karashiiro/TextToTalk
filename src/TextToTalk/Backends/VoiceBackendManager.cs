@@ -35,9 +35,9 @@ namespace TextToTalk.Backends
             SetBackend(this.config.Backend);
         }
 
-        public override void Say(TextSource source, VoicePreset voice, string speaker, string text)
+        public override void Say(SayRequest request)
         {
-            Backend?.Say(source, voice, speaker, text);
+            Backend?.Say(request);
         }
 
         public override void CancelAllSpeech()

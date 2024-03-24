@@ -26,9 +26,9 @@ public class UberduckBackend : VoiceBackend
         this.ui = new UberduckBackendUI(config, this.uberduck, () => voices);
     }
 
-    public override void Say(TextSource source, VoicePreset preset, string speaker, string text)
+    public override void Say(SayRequest request)
     {
-        if (preset is not UberduckVoicePreset uberduckVoicePreset)
+        if (request.Voice is not UberduckVoicePreset uberduckVoicePreset)
         {
             throw new InvalidOperationException("Invalid voice preset provided.");
         }
@@ -44,7 +44,7 @@ public class UberduckBackend : VoiceBackend
             try
             {
                 await this.uberduck.Say(uberduckVoicePreset.VoiceName, uberduckVoicePreset.PlaybackRate,
-                    uberduckVoicePreset.Volume, source, text);
+                    uberduckVoicePreset.Volume, request.Source, request.Text);
             }
             catch (UberduckFailedException e)
             {
