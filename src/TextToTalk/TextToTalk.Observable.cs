@@ -34,7 +34,7 @@ public partial class TextToTalk
         return this.addonTalkHandler.OnTextEmit()
             .Merge(this.addonBattleTalkHandler.OnTextEmit())
             .Merge(OnChatTextEmit().Cast<ChatTextEmitEvent, TextEmitEvent>())
-            .DistinctUntilChanged(EqualityComparer<TextEmitEvent>.Create((a, b) => a?.IsEquivalent(b) ?? a == b));
+            .DistinctUntilChanged(TextEmitEventComparer.Instance);
     }
 
     private bool IsTextGood(string text)
