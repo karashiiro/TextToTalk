@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0-windows</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <RuntimeFrameworkVersion>8.0.0</RuntimeFrameworkVersion>
         <Version>1.29.0.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -51,7 +51,6 @@
         <ProjectReference Include="..\TextToTalk.UI.SourceGeneration\TextToTalk.UI.SourceGeneration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\TextToTalk.UI.Core\TextToTalk.UI.Core.csproj"/>
         <ProjectReference Include="..\TextToTalk.UngenderedOverrides\TextToTalk.UngenderedOverrides.csproj"/>
-        <ProjectReference Include="..\VoiceUnlocker\VoiceUnlocker.csproj" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\websocket-sharp\websocket-sharp\websocket-sharp.csproj"/>
     </ItemGroup>
 

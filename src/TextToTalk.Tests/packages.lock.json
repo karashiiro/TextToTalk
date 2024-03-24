@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0-windows7.0": {
+    "net8.0": {
       "coverlet.collector": {
         "type": "Direct",
         "requested": "[6.0.2, )",
@@ -135,7 +135,6 @@
           "NAudio.Core": "2.1.0",
           "NAudio.Midi": "2.1.0",
           "NAudio.Wasapi": "2.1.0",
-          "NAudio.WinForms": "2.1.0",
           "NAudio.WinMM": "2.1.0"
         }
       },
@@ -167,14 +166,6 @@
         "contentHash": "Zp/8l79aYQEu7/HfzXWVpqyIwRUPgsvCj/Qx+pR6ykJxvwjqOoUfMiEG9US1wW4d7PEzT5ZBIL+cp90t6HNNiw==",
         "dependencies": {
           "NAudio.Core": "2.1.0"
-        }
-      },
-      "NAudio.WinForms": {
-        "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "yoGCLidMVQmg66dNuEYusY1bttZJ5gxvufxRYFgxIw444dw4C70YsDgLeDugPd0rdwkSCQq5CtrVw6DSmxTxPA==",
-        "dependencies": {
-          "NAudio.WinMM": "2.1.0"
         }
       },
       "NAudio.WinMM": {

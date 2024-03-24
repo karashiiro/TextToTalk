@@ -2,10 +2,8 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0-windows</TargetFramework>
-        <RuntimeFrameworkVersion>8.0.0</RuntimeFrameworkVersion>
+        <TargetFramework>net8.0</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
