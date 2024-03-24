@@ -8,7 +8,7 @@ using TextToTalk.Utils;
 
 namespace TextToTalk.TextProviders;
 
-public class AddonTalkHandler : IDisposable
+public class AddonTalkHandler : IAddonTalkHandler
 {
     private record struct AddonTalkState(string? Speaker, string? Text, AddonPollSource PollSource);
 
@@ -149,5 +149,26 @@ public class AddonTalkHandler : IDisposable
     public void Dispose()
     {
         subscription.Dispose();
+    }
+
+    Observable<TextEmitEvent> IAddonTalkHandler.OnTextEmit()
+    {
+        return Observable.FromEvent<TextEmitEvent>(
+            h => OnTextEmit += h,
+            h => OnTextEmit -= h);
+    }
+
+    Observable<AddonTalkAdvanceEvent> IAddonTalkHandler.OnAdvance()
+    {
+        return Observable.FromEvent<AddonTalkAdvanceEvent>(
+            h => OnAdvance += h,
+            h => OnAdvance -= h);
+    }
+
+    Observable<AddonTalkCloseEvent> IAddonTalkHandler.OnClose()
+    {
+        return Observable.FromEvent<AddonTalkCloseEvent>(
+            h => OnClose += h,
+            h => OnClose -= h);
     }
 }

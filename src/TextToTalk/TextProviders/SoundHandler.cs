@@ -36,10 +36,10 @@ public class SoundHandler : IDisposable
     private static readonly Regex VoiceLineFileNameRegex = new(@"^cut/.*/(vo_|voice)");
     private readonly HashSet<nint> knownVoiceLinePtrs = new();
 
-    private readonly AddonTalkHandler addonTalkHandler;
-    private readonly AddonBattleTalkHandler addonBattleTalkHandler;
+    private readonly IAddonTalkHandler addonTalkHandler;
+    private readonly IAddonBattleTalkHandler addonBattleTalkHandler;
 
-    public SoundHandler(AddonTalkHandler addonTalkHandler, AddonBattleTalkHandler addonBattleTalkHandler,
+    public SoundHandler(IAddonTalkHandler addonTalkHandler, IAddonBattleTalkHandler addonBattleTalkHandler,
         ISigScanner sigScanner, IGameInteropProvider gameInterop)
     {
         this.addonTalkHandler = addonTalkHandler;

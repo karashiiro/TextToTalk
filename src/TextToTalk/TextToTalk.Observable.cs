@@ -9,9 +9,7 @@ public partial class TextToTalk
 {
     private Observable<ChatTextEmitEvent> OnChatTextEmit()
     {
-        return Observable.FromEvent<ChatTextEmitEvent>(
-                h => this.chatMessageHandler.OnTextEmit += h,
-                h => this.chatMessageHandler.OnTextEmit -= h)
+        return this.chatMessageHandler.OnTextEmit()
             .Where(this, static (ev, p) =>
             {
                 // Check all of the other filters to see if this should be dropped
@@ -24,45 +22,17 @@ public partial class TextToTalk
             .Where(this, static (ev, p) => p.IsTextGood(ev.Text.TextValue));
     }
 
-    private Observable<TextEmitEvent> OnTalkAddonTextEmit()
-    {
-        return Observable.FromEvent<TextEmitEvent>(
-            h => this.addonTalkHandler.OnTextEmit += h,
-            h => this.addonTalkHandler.OnTextEmit -= h);
-    }
-
-    private Observable<TextEmitEvent> OnBattleTalkAddonTextEmit()
-    {
-        return Observable.FromEvent<TextEmitEvent>(
-            h => this.addonBattleTalkHandler.OnTextEmit += h,
-            h => this.addonBattleTalkHandler.OnTextEmit -= h);
-    }
-
-    private Observable<AddonTalkAdvanceEvent> OnTalkAddonAdvance()
-    {
-        return Observable.FromEvent<AddonTalkAdvanceEvent>(
-            h => this.addonTalkHandler.OnAdvance += h,
-            h => this.addonTalkHandler.OnAdvance -= h);
-    }
-
-    private Observable<AddonTalkCloseEvent> OnTalkAddonClose()
-    {
-        return Observable.FromEvent<AddonTalkCloseEvent>(
-            h => this.addonTalkHandler.OnClose += h,
-            h => this.addonTalkHandler.OnClose -= h);
-    }
-
     private Observable<SourcedTextEvent> OnTextSourceCancel()
     {
-        return OnTalkAddonAdvance()
+        return this.addonTalkHandler.OnAdvance()
             .Cast<AddonTalkAdvanceEvent, SourcedTextEvent>()
-            .Merge(OnTalkAddonClose().Cast<AddonTalkCloseEvent, SourcedTextEvent>());
+            .Merge(this.addonTalkHandler.OnClose().Cast<AddonTalkCloseEvent, SourcedTextEvent>());
     }
 
     private Observable<TextEmitEvent> OnTextEmit()
     {
-        return OnTalkAddonTextEmit()
-            .Merge(OnBattleTalkAddonTextEmit())
+        return this.addonTalkHandler.OnTextEmit()
+            .Merge(this.addonBattleTalkHandler.OnTextEmit())
             .Merge(OnChatTextEmit().Cast<ChatTextEmitEvent, TextEmitEvent>())
             .DistinctUntilChanged(EqualityComparer<TextEmitEvent>.Create((a, b) => a?.IsEquivalent(b) ?? a == b));
     }

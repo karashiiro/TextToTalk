@@ -11,7 +11,7 @@ using TextToTalk.Utils;
 
 namespace TextToTalk.TextProviders;
 
-public class ChatMessageHandler : IDisposable
+public class ChatMessageHandler : IChatMessageHandler
 {
     private record struct ChatMessage(XivChatType Type, SeString Sender, SeString Message);
 
@@ -138,5 +138,12 @@ public class ChatMessageHandler : IDisposable
     public void Dispose()
     {
         this.subscription.Dispose();
+    }
+
+    Observable<ChatTextEmitEvent> IChatMessageHandler.OnTextEmit()
+    {
+        return Observable.FromEvent<ChatTextEmitEvent>(
+            h => OnTextEmit += h,
+            h => OnTextEmit -= h);
     }
 }

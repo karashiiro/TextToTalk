@@ -54,9 +54,9 @@ namespace TextToTalk
         private readonly AddonTalkManager addonTalkManager;
         private readonly AddonBattleTalkManager addonBattleTalkManager;
         private readonly VoiceBackendManager backendManager;
-        private readonly AddonTalkHandler addonTalkHandler;
-        private readonly AddonBattleTalkHandler addonBattleTalkHandler;
-        private readonly ChatMessageHandler chatMessageHandler;
+        private readonly IAddonTalkHandler addonTalkHandler;
+        private readonly IAddonBattleTalkHandler addonBattleTalkHandler;
+        private readonly IChatMessageHandler chatMessageHandler;
         private readonly SoundHandler soundHandler;
         private readonly ConfiguredRateLimiter rateLimiter;
         private readonly UngenderedOverrideManager ungenderedOverrides;

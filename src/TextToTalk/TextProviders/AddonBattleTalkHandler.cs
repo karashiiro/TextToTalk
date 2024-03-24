@@ -9,7 +9,7 @@ using TextToTalk.Utils;
 namespace TextToTalk.TextProviders;
 
 // This might be almost exactly the same as AddonTalkHandler, but it's too early to pull out a common base class.
-public class AddonBattleTalkHandler : IDisposable
+public class AddonBattleTalkHandler : IAddonBattleTalkHandler
 {
     private record struct AddonBattleTalkState(string? Speaker, string? Text, AddonPollSource PollSource);
 
@@ -142,5 +142,12 @@ public class AddonBattleTalkHandler : IDisposable
     public void Dispose()
     {
         subscription.Dispose();
+    }
+
+    Observable<TextEmitEvent> IAddonBattleTalkHandler.OnTextEmit()
+    {
+        return Observable.FromEvent<TextEmitEvent>(
+            h => OnTextEmit += h,
+            h => OnTextEmit -= h);
     }
 }
