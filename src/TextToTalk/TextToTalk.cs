@@ -119,7 +119,7 @@ namespace TextToTalk
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager = new VoiceBackendManager(this.config, this.http, this.pluginInterface.UiBuilder);
+            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder, clientState);
             var handleFailedToBindWsPort = HandleFailedToBindWSPort();
 
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
@@ -127,7 +127,7 @@ namespace TextToTalk
 
             var unlockerResultWindow = new UnlockerResultWindow();
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
-            var voiceUnlockerRunner = new VoiceUnlockerRunner(pluginInterface.AssemblyLocation.Extension);
+            var voiceUnlockerRunner = new VoiceUnlockerRunner(pi.AssemblyLocation.Extension);
             this.voiceUnlockerWindow = new VoiceUnlockerWindow(voiceUnlockerRunner);
             var handleUnlockerResult = this.voiceUnlockerWindow.OnResult()
                 .Subscribe(unlockerResultWindow, static (result, window) =>

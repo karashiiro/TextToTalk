@@ -1,4 +1,5 @@
 ﻿using System;
+using Dalamud;
 using Dalamud.Game.Text;
 using TextToTalk.GameEnums;
 
@@ -11,9 +12,10 @@ public class IpcMessage(
     string payload,
     VoicePreset? preset,
     TextSource source,
+    ClientLanguage? clientLanguage,
     bool stuttersRemoved,
     long? npcId,
-    int? chatType) : IEquatable<IpcMessage>
+    XivChatType? chatType) : IEquatable<IpcMessage>
 {
     /// <summary>
     /// The speaker name.
@@ -55,7 +57,13 @@ public class IpcMessage(
     /// The chat type, if applicable. Can be from either <see cref="XivChatType"/>
     /// or <see cref="AdditionalChatType"/>.
     /// </summary>
-    public int? ChatType { get; init; } = chatType;
+    public int? ChatType { get; init; } = (int?)chatType;
+
+    /// <summary>
+    /// The client's current language, from <see cref="ClientLanguage"/>. This will
+    /// be null for cancel messages.
+    /// </summary>
+    public string? Language { get; init; } = clientLanguage?.ToString();
 
     public bool Equals(IpcMessage? other)
     {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using Dalamud;
 using Dalamud.Game.Text;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -61,13 +62,13 @@ public class WSServer : IDisposable
     }
 
     public void Broadcast(string speaker, TextSource source, VoicePreset voice, string message, uint? npcId,
-        XivChatType? chatType)
+        XivChatType? chatType, ClientLanguage clientLanguage)
     {
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
         var stuttersRemoved = this.configProvider.AreStuttersRemoved();
-        var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source, stuttersRemoved, npcId,
-            (int?)chatType);
+        var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source, clientLanguage,
+            stuttersRemoved, npcId, chatType);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
@@ -81,7 +82,7 @@ public class WSServer : IDisposable
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
         var stuttersRemoved = this.configProvider.AreStuttersRemoved();
-        var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, source,
+        var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, source, null,
             stuttersRemoved, null, null);
         foreach (var behavior in this.behaviors)
         {

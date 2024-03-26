@@ -23,35 +23,39 @@ Direct links to information will be added here eventually.
 * Websocket
 
 ## WebSocket interfacing
-TextToTalk can optionally open a WebSocket server to serve messages over. There are currently two JSON-format messages that can be sent:
+TextToTalk can optionally open a WebSocket server to serve messages over.
+There are currently two JSON-format messages that can be sent (see
+[`IpcMessage`](https://github.com/karashiiro/TextToTalk/blob/main/src/TextToTalk/Backends/Websocket/IpcMessage.cs)):
 
 TTS prompt:
 ```json5
 {
-	"Type": "Say",
-	"Payload": "Firstname Lastname says something",
-	"Voice": {
-		"Name": "Gender"
-	},
-	"Speaker": "Firstname Lastname",
-	"Source": "Chat", // or "AddonTalk", or "AddonBattleTalk"
-	"StuttersRemoved": false,
-	"NpcId": 1000115, // or null, for non-NPCs
-	"ChatType": 10 // Refer to https://dalamud.dev/api/Dalamud.Game.Text/Enums/XivChatType
+    "Type": "Say",
+    "Payload": "Firstname Lastname says something",
+    "Voice": {
+        "Name": "Gender"
+    },
+    "Speaker": "Firstname Lastname",
+    "Source": "Chat", // or "AddonTalk", or "AddonBattleTalk"
+    "StuttersRemoved": false,
+    "NpcId": 1000115, // or null, for non-NPCs
+    "ChatType": 10, // Refer to https://dalamud.dev/api/Dalamud.Game.Text/Enums/XivChatType
+    "Language": "English" // Refer to https://dalamud.dev/api/Dalamud/Enums/ClientLanguage
 }
 ```
 
 TTS cancel:
 ```json5
 {
-	"Type": "Cancel",
-	"Payload": "",
-	"Voice": null,
-	"Speaker": null,
-	"Source": "None", // or "Chat", "AddonTalk", or "AddonBattleTalk"
-	"StuttersRemoved": false,
-	"NpcId": null,
-	"ChatType": null
+    "Type": "Cancel",
+    "Payload": "",
+    "Voice": null,
+    "Speaker": null,
+    "Source": "None", // or "Chat", "AddonTalk", or "AddonBattleTalk"
+    "StuttersRemoved": false,
+    "NpcId": null,
+    "ChatType": null,
+    "Language": null
 }
 ```
 

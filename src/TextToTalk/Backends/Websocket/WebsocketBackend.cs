@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using R3;
 using TextToTalk.UI;
 
@@ -19,15 +20,17 @@ namespace TextToTalk.Backends.Websocket
 
         private readonly WSServer wsServer;
         private readonly PluginConfiguration config;
+        private readonly IClientState clientState;
 
         private readonly ReplaySubject<int> failedToBindPort;
 
         private bool dirtyConfig;
 
-        public WebsocketBackend(PluginConfiguration config)
+        public WebsocketBackend(PluginConfiguration config, IClientState clientState)
         {
             this.config = config;
             this.failedToBindPort = new ReplaySubject<int>(1);
+            this.clientState = clientState;
 
             try
             {
@@ -52,7 +55,7 @@ namespace TextToTalk.Backends.Websocket
             try
             {
                 this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text, request.NpcId,
-                    request.ChatType);
+                    request.ChatType, this.clientState.ClientLanguage);
                 DetailedLog.Debug($"Sent message \"{request.Text}\" on WebSocket server.");
             }
             catch (Exception e)

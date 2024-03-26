@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading.Tasks;
+using Dalamud;
 using Dalamud.Game.Text;
 using Moq;
 using Newtonsoft.Json;
@@ -155,7 +156,7 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!", null, XivChatType.Say);
+        server.Broadcast("Speaker", source, preset, "Hello, world!", null, XivChatType.Say, ClientLanguage.English);
 
         // Wait a bit
         await Task.Delay(100);
@@ -164,8 +165,8 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, false, null,
-                (int)XivChatType.Say),
+            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, ClientLanguage.English,
+                false, null, XivChatType.Say),
         });
     }
 
@@ -188,7 +189,7 @@ public class WSServerTests
         };
 
         Assert.Throws<InvalidOperationException>(() =>
-            server.Broadcast("Speaker", source, preset, "Hello, world!", null, null));
+            server.Broadcast("Speaker", source, preset, "Hello, world!", null, null, ClientLanguage.English));
     }
 
     [Theory]
@@ -225,7 +226,7 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!", 42, XivChatType.Say);
+        server.Broadcast("Speaker", source, preset, "Hello, world!", 42, XivChatType.Say, ClientLanguage.English);
 
         // Wait a bit
         await Task.Delay(100);
@@ -234,8 +235,8 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, true, 42,
-                (int)XivChatType.Say),
+            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, ClientLanguage.English, true,
+                42, XivChatType.Say),
         });
 
         configProvider.Verify();
