@@ -47,7 +47,6 @@
   <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-      <Private>false</Private>
     </Reference>
   </ItemGroup>
 
