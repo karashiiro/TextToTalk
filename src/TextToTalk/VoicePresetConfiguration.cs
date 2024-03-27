@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
+using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -231,6 +232,15 @@ public class VoicePresetConfiguration
                 SimilarityBoost = Convert.ToSingle(GetNullableValue<double?>(corrupted, "SimilarityBoost")),
                 Stability = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Stability")),
                 EnabledBackend = TTSBackend.ElevenLabs,
+            },
+            TTSBackend.OpenAi => new OpenAiVoicePreset
+            {
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
+                VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
+                Model = GetNullableValue<string?>(corrupted, "Model"),
+                EnabledBackend = TTSBackend.OpenAi
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),
         };
