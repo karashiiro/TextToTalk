@@ -17,15 +17,14 @@ public class IpcMessageFactory(IClientState clientState, IWebsocketConfigProvide
             { "{{LAST_NAME}}", GetLocalLastName() },
         });
 
-        return new IpcMessage(IpcMessageType.Say, request.Speaker, request.Text, messageTemplate, request.Voice,
-            request.Source, clientLanguage, stuttersRemoved, request.NpcId, request.ChatType);
+        return IpcMessage.FromSayRequest(IpcMessageType.Say, request, messageTemplate, clientLanguage, stuttersRemoved);
     }
 
     public IpcMessage CreateCancel(TextSource source)
     {
         var stuttersRemoved = configProvider.AreStuttersRemoved();
-        return new IpcMessage(IpcMessageType.Cancel, string.Empty, string.Empty, string.Empty, null, source, null,
-            stuttersRemoved, null, null);
+        var request = SayRequest.Default.WithSource(source);
+        return IpcMessage.FromSayRequest(IpcMessageType.Cancel, request, request.Text, null, stuttersRemoved);
     }
 
     private string? GetLocalFullName()

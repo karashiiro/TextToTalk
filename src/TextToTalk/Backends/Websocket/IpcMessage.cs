@@ -94,4 +94,11 @@ public class IpcMessage(
     {
         return HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source, NpcId, ChatType);
     }
+
+    public static IpcMessage FromSayRequest(IpcMessageType type, SayRequest request, string payloadTemplate,
+        ClientLanguage? clientLanguage, bool stuttersRemoved)
+    {
+        return new IpcMessage(type, request.Speaker, request.Text, payloadTemplate, request.Voice, request.Source,
+            clientLanguage, stuttersRemoved, request.NpcId, request.ChatType);
+    }
 }

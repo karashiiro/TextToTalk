@@ -3,8 +3,21 @@ using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends;
 
-public class SayRequest
+public record SayRequest
 {
+    public static readonly SayRequest Default = new()
+    {
+        Source = TextSource.None,
+        Voice = new VoicePreset(),
+        Speaker = string.Empty,
+        Text = string.Empty,
+    };
+
+    public SayRequest WithSource(TextSource source)
+    {
+        return this with { Source = source };
+    }
+
     /// <summary>
     /// The text source.
     /// </summary>
