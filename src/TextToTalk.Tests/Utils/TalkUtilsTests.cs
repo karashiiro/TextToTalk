@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TextToTalk.Utils;
 using Xunit;
 
@@ -92,6 +93,41 @@ public class TalkUtilsTests
     public void GetPartialName_WithInvalidEnumValue_ThrowsArgumentOutOfRangeException()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => TalkUtils.GetPartialName("Someone", (FirstOrLastName)(-1)));
+    }
+
+    [Fact]
+    public void ExtractTokens_CanExtractTokens()
+    {
+        var actual = TalkUtils.ExtractTokens("This is a sentence.", new Dictionary<string, string?>
+        {
+            { "TOKEN", "sentence" },
+        });
+
+        Assert.Equal("This is a TOKEN.", actual);
+    }
+
+    [Fact]
+    public void ExtractTokens_SkipsNullTokenValues()
+    {
+        var actual = TalkUtils.ExtractTokens("This is a sentence.", new Dictionary<string, string?>
+        {
+            { "TOKEN", null },
+        });
+
+        Assert.Equal("This is a sentence.", actual);
+    }
+
+    [Fact]
+    public void ExtractTokens_ExtractsLargestTokensFirst()
+    {
+        var actual = TalkUtils.ExtractTokens("This is a sentence.", new Dictionary<string, string?>
+        {
+            { "TOKEN1", "a sentence" },
+            { "TOKEN2", "sentence" },
+            { "TOKEN3", "is a sentence" },
+        });
+
+        Assert.Equal("This TOKEN3.", actual);
     }
 
     private static void TestRemoveStutters(string input, string expected)

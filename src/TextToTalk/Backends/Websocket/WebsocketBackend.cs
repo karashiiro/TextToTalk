@@ -20,7 +20,6 @@ namespace TextToTalk.Backends.Websocket
 
         private readonly WSServer wsServer;
         private readonly PluginConfiguration config;
-        private readonly IClientState clientState;
 
         private readonly ReplaySubject<int> failedToBindPort;
 
@@ -30,15 +29,15 @@ namespace TextToTalk.Backends.Websocket
         {
             this.config = config;
             this.failedToBindPort = new ReplaySubject<int>(1);
-            this.clientState = clientState;
 
+            var messageFactory = new IpcMessageFactory(clientState, config);
             try
             {
-                this.wsServer = new WSServer(this.config);
+                this.wsServer = new WSServer(this.config, messageFactory);
             }
             catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
             {
-                this.wsServer = new WSServer(this.config, 0);
+                this.wsServer = new WSServer(this.config, messageFactory, 0);
                 this.failedToBindPort.OnNext(this.config.WebsocketPort);
             }
 
@@ -55,7 +54,7 @@ namespace TextToTalk.Backends.Websocket
             try
             {
                 this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text, request.NpcId,
-                    request.ChatType, this.clientState.ClientLanguage);
+                    request.ChatType);
                 DetailedLog.Debug($"Sent message \"{request.Text}\" on WebSocket server.");
             }
             catch (Exception e)

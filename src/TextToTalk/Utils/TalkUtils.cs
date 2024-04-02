@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Dalamud.Game.Text.SeStringHandling;
@@ -175,6 +176,20 @@ namespace TextToTalk.Utils
                 FirstOrLastName.Last => names.Length == 1 ? names[0] : names[^1], // Some NPCs only have one name.
                 _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Enumeration value is out of range."),
             };
+        }
+
+        public static string ExtractTokens(string text, IReadOnlyDictionary<string, string?> tokenMap)
+        {
+            // Extract tokens from the longest target values down to the shortest, to e.g.
+            // extract full names before first and last names.
+            foreach (var (k, v) in tokenMap
+                         .Where(kvp => kvp.Value is not null)
+                         .OrderByDescending(kvp => kvp.Value?.Length))
+            {
+                text = text.Replace(v!, k);
+            }
+
+            return text;
         }
     }
 }

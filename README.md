@@ -30,32 +30,40 @@ There are currently two JSON-format messages that can be sent (see
 TTS prompt:
 ```json5
 {
-    "Type": "Say",
-    "Payload": "Firstname Lastname says something",
-    "Voice": {
-        "Name": "Gender"
-    },
-    "Speaker": "Firstname Lastname",
-    "Source": "Chat", // or "AddonTalk", or "AddonBattleTalk"
-    "StuttersRemoved": false,
-    "NpcId": 1000115, // or null, for non-NPCs
-    "ChatType": 10, // Refer to https://dalamud.dev/api/Dalamud.Game.Text/Enums/XivChatType
-    "Language": "English" // Refer to https://dalamud.dev/api/Dalamud/Enums/ClientLanguage
+  "Type": "Say",
+  "Payload": "Firstname Lastname says something",
+  // Will replace the logged-in player's name with {{FULL_NAME}}, {{FIRST_NAME}}, or {{LAST_NAME}} as appropriate.
+  "PayloadTemplate": "Firstname Lastname says something",
+  "Voice": {
+    "Name": "Gender"
+  },
+  "Speaker": "Firstname Lastname",
+  // or "AddonTalk", or "AddonBattleTalk"
+  "Source": "Chat",
+  "StuttersRemoved": false,
+  // or null, for non-NPCs
+  "NpcId": 1000115,
+  // Refer to https://dalamud.dev/api/Dalamud.Game.Text/Enums/XivChatType
+  "ChatType": 10,
+  // Refer to https://dalamud.dev/api/Dalamud/Enums/ClientLanguage
+  "Language": "English"
 }
 ```
 
 TTS cancel:
 ```json5
 {
-    "Type": "Cancel",
-    "Payload": "",
-    "Voice": null,
-    "Speaker": null,
-    "Source": "None", // or "Chat", "AddonTalk", or "AddonBattleTalk"
-    "StuttersRemoved": false,
-    "NpcId": null,
-    "ChatType": null,
-    "Language": null
+  "Type": "Cancel",
+  "Payload": "",
+  "PayloadTemplate": "",
+  "Voice": null,
+  "Speaker": null,
+  "Source": "None",
+  // or "Chat", "AddonTalk", or "AddonBattleTalk"
+  "StuttersRemoved": false,
+  "NpcId": null,
+  "ChatType": null,
+  "Language": null
 }
 ```
 

@@ -20,7 +20,8 @@ public class WSServerTests
     public void Ctor_WithNullAddress_DoesNotThrow()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory);
     }
 
     [Fact]
@@ -28,14 +29,16 @@ public class WSServerTests
     {
         var configProvider = new Mock<IWebsocketConfigProvider>();
         configProvider.Setup(x => x.GetAddress()).Returns(IPAddress.Any);
-        using var server = new WSServer(configProvider.Object);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider.Object, messageFactory);
     }
 
     [Fact]
     public void Ctor_WithValidPort_DoesNotThrow()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
     }
 
     [Theory]
@@ -44,14 +47,16 @@ public class WSServerTests
     public void Ctor_WithInvalidPort_ThrowsArgumentOutOfRangeException(int port)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        Assert.Throws<ArgumentOutOfRangeException>(() => new WSServer(configProvider, port));
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        Assert.Throws<ArgumentOutOfRangeException>(() => new WSServer(configProvider, messageFactory, port));
     }
 
     [Fact]
     public void Ctor_StartsInactive()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         Assert.False(server.Active);
     }
 
@@ -59,7 +64,8 @@ public class WSServerTests
     public void Start_MakesServerActive()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         server.Start();
         Assert.True(server.Active);
     }
@@ -68,7 +74,8 @@ public class WSServerTests
     public void Start_Stop_MakesServerInactive()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         server.Start();
         server.Stop();
         Assert.False(server.Active);
@@ -78,7 +85,8 @@ public class WSServerTests
     public void RestartWithConnection_WithValidAddress_ChangesAddress()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         var initialAddress = server.Address;
         server.RestartWithConnection(IPAddress.Any, 0);
         var finalAddress = server.Address;
@@ -90,7 +98,8 @@ public class WSServerTests
     public void RestartWithConnection_WithValidPort_ChangesPort()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         var initialPort = server.Port;
         server.RestartWithConnection(null, 0);
         var finalPort = server.Port;
@@ -103,7 +112,8 @@ public class WSServerTests
     public void RestartWithConnection_WithInvalidPort_ThrowsArgumentOutOfRangeException(int port)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory);
         Assert.Throws<ArgumentOutOfRangeException>(() => server.RestartWithConnection(null, port));
     }
 
@@ -135,7 +145,9 @@ public class WSServerTests
         // Set up the server
         var configProvider = new Mock<IWebsocketConfigProvider>();
         configProvider.Setup(x => x.GetAddress()).Returns(address);
-        using var server = new WSServer(configProvider.Object, 0);
+        var messageFactory = CreateIpcMessageFactory(configProvider.Object);
+
+        using var server = new WSServer(configProvider.Object, messageFactory.Object, 0);
         server.Start();
 
         // Set up the client
@@ -156,7 +168,7 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!", null, XivChatType.Say, ClientLanguage.English);
+        server.Broadcast("Speaker", source, preset, "Hello, world!", null, XivChatType.Say);
 
         // Wait a bit
         await Task.Delay(100);
@@ -165,7 +177,8 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, ClientLanguage.English,
+            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", "Hello, world!", preset, source,
+                ClientLanguage.English,
                 false, null, XivChatType.Say),
         });
     }
@@ -178,7 +191,8 @@ public class WSServerTests
     public void Broadcast_WhileInactive_ThrowsInvalidOperationException(TextSource source)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         Assert.False(server.Active);
 
         var preset = new WebsocketVoicePreset
@@ -189,7 +203,7 @@ public class WSServerTests
         };
 
         Assert.Throws<InvalidOperationException>(() =>
-            server.Broadcast("Speaker", source, preset, "Hello, world!", null, null, ClientLanguage.English));
+            server.Broadcast("Speaker", source, preset, "Hello, world!", null, null));
     }
 
     [Theory]
@@ -203,9 +217,10 @@ public class WSServerTests
         // Mock the config value
         var configProvider = new Mock<IWebsocketConfigProvider>();
         configProvider.Setup(p => p.AreStuttersRemoved()).Returns(true);
+        var messageFactory = CreateIpcMessageFactory(configProvider.Object);
 
         // Set up the server
-        using var server = new WSServer(configProvider.Object, 0);
+        using var server = new WSServer(configProvider.Object, messageFactory.Object, 0);
         server.Start();
 
         // Set up the client
@@ -226,7 +241,7 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!", 42, XivChatType.Say, ClientLanguage.English);
+        server.Broadcast("Speaker", source, preset, "Hello, world!", 42, XivChatType.Say);
 
         // Wait a bit
         await Task.Delay(100);
@@ -235,8 +250,8 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", preset, source, ClientLanguage.English, true,
-                42, XivChatType.Say),
+            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", "Hello, world!", preset, source,
+                ClientLanguage.English, true, 42, XivChatType.Say),
         });
 
         configProvider.Verify();
@@ -248,7 +263,8 @@ public class WSServerTests
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = CreateIpcMessageFactory(configProvider);
+        using var server = new WSServer(configProvider, messageFactory.Object, 0);
         server.Start();
 
         // Set up the client
@@ -277,7 +293,8 @@ public class WSServerTests
     public void CancelAll_WhileInactive_ThrowsInvalidOperationException()
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         Assert.False(server.Active);
         Assert.Throws<InvalidOperationException>(() => server.CancelAll());
     }
@@ -292,7 +309,8 @@ public class WSServerTests
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = CreateIpcMessageFactory(configProvider);
+        using var server = new WSServer(configProvider, messageFactory.Object, 0);
         server.Start();
 
         // Set up the client
@@ -324,7 +342,8 @@ public class WSServerTests
     public void Cancel_WhileInactive_ThrowsInvalidOperationException(TextSource source)
     {
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = Mock.Of<IIpcMessageFactory>();
+        using var server = new WSServer(configProvider, messageFactory, 0);
         Assert.False(server.Active);
         Assert.Throws<InvalidOperationException>(() => server.Cancel(source));
     }
@@ -334,7 +353,8 @@ public class WSServerTests
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = CreateIpcMessageFactory(configProvider);
+        using var server = new WSServer(configProvider, messageFactory.Object, 0);
         server.Start();
 
         // Set up the client
@@ -372,7 +392,8 @@ public class WSServerTests
     {
         // Set up the server
         var configProvider = Mock.Of<IWebsocketConfigProvider>();
-        using var server = new WSServer(configProvider, 0);
+        var messageFactory = CreateIpcMessageFactory(configProvider);
+        using var server = new WSServer(configProvider, messageFactory.Object, 0);
         server.Start();
 
         // Set up a client
@@ -409,5 +430,20 @@ public class WSServerTests
             handler => client.OnMessage += handler,
             handler => client.OnMessage -= handler);
         return onMessage.Select(m => JsonConvert.DeserializeObject<IpcMessage>(m.e.Data));
+    }
+
+    private static Mock<IIpcMessageFactory> CreateIpcMessageFactory(IWebsocketConfigProvider configProvider)
+    {
+        var messageFactory = new Mock<IIpcMessageFactory>();
+        messageFactory
+            .Setup(x => x.CreateBroadcast(It.IsAny<string>(), It.IsAny<TextSource>(), It.IsAny<VoicePreset>(),
+                It.IsAny<string>(), It.IsAny<uint?>(), It.IsAny<XivChatType?>()))
+            .Returns((string a1, TextSource a2, VoicePreset a3, string a4, uint? a5, XivChatType? a6) =>
+                new IpcMessage(a1, IpcMessageType.Say, a4, a4, a3, a2, ClientLanguage.English,
+                    configProvider.AreStuttersRemoved(), a5, a6));
+        messageFactory.Setup(x => x.CreateCancel(It.IsAny<TextSource>())).Returns((TextSource source) =>
+            new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, string.Empty, null, source, null,
+                configProvider.AreStuttersRemoved(), null, null));
+        return messageFactory;
     }
 }

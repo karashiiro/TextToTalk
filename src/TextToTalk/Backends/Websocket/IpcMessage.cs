@@ -10,6 +10,7 @@ public class IpcMessage(
     string speaker,
     IpcMessageType type,
     string payload,
+    string payloadTemplate,
     VoicePreset? preset,
     TextSource source,
     ClientLanguage? clientLanguage,
@@ -34,9 +35,17 @@ public class IpcMessage(
     public string Type { get; init; } = type.ToString();
 
     /// <summary>
-    /// The message parameter - the spoken text for speech requests, and nothing for cancellations.
+    /// The message parameter - the spoken text for speech requests, and an empty string for cancellations.
     /// </summary>
     public string Payload { get; init; } = payload;
+
+    /// <summary>
+    /// The message, with the player name replaced with a token.
+    ///
+    /// Full names are replaced with "{{FULL_NAME}}", first names are replaced with "{{FIRST_NAME}}", and last names
+    /// are replaced with "{{LAST_NAME}}".
+    /// </summary>
+    public string PayloadTemplate { get; init; } = payloadTemplate;
 
     /// <summary>
     /// Speaker voice ID.

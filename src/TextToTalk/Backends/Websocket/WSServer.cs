@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using Dalamud;
 using Dalamud.Game.Text;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -13,7 +12,7 @@ namespace TextToTalk.Backends.Websocket;
 
 public class WSServer : IDisposable
 {
-    private readonly IWebsocketConfigProvider configProvider;
+    private readonly IIpcMessageFactory ipcMessageFactory;
     private readonly IList<ServerBehavior> behaviors;
 
     private WebSocketServer server;
@@ -43,12 +42,13 @@ public class WSServer : IDisposable
 
     public bool Active { get; private set; }
 
-    public WSServer(IWebsocketConfigProvider configProvider, int? overridePort = null)
+    public WSServer(IWebsocketConfigProvider configProvider, IIpcMessageFactory ipcMessageFactory,
+        int? overridePort = null)
     {
         Address = configProvider.GetAddress();
         Port = overridePort ?? configProvider.GetPort();
 
-        this.configProvider = configProvider;
+        this.ipcMessageFactory = ipcMessageFactory;
         this.behaviors = new List<ServerBehavior>();
 
         this.server = new WebSocketServer(ServiceUrl);
@@ -62,13 +62,11 @@ public class WSServer : IDisposable
     }
 
     public void Broadcast(string speaker, TextSource source, VoicePreset voice, string message, uint? npcId,
-        XivChatType? chatType, ClientLanguage clientLanguage)
+        XivChatType? chatType)
     {
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
-        var stuttersRemoved = this.configProvider.AreStuttersRemoved();
-        var ipcMessage = new IpcMessage(speaker, IpcMessageType.Say, message, voice, source, clientLanguage,
-            stuttersRemoved, npcId, chatType);
+        var ipcMessage = this.ipcMessageFactory.CreateBroadcast(speaker, source, voice, message, npcId, chatType);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
@@ -81,9 +79,7 @@ public class WSServer : IDisposable
     {
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
-        var stuttersRemoved = this.configProvider.AreStuttersRemoved();
-        var ipcMessage = new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, null, source, null,
-            stuttersRemoved, null, null);
+        var ipcMessage = this.ipcMessageFactory.CreateCancel(source);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
