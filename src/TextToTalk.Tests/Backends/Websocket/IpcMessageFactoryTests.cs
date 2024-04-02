@@ -7,6 +7,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Moq;
+using TextToTalk.Backends;
 using TextToTalk.Backends.Websocket;
 using Xunit;
 
@@ -31,8 +32,7 @@ public class IpcMessageFactoryTests
         var (clientState, configProvider) = CreateMocks();
 
         var messageFactory = new IpcMessageFactory(clientState.Object, configProvider.Object);
-        var actual = messageFactory.CreateBroadcast(FullName, TextSource.Chat, new VoicePreset(),
-            $"{FullName} says something to them.", null, null);
+        var actual = messageFactory.CreateBroadcast(CreateSayRequest());
 
         Assert.Equal(IpcMessageType.Say.ToString(), actual.Type);
     }
@@ -43,8 +43,7 @@ public class IpcMessageFactoryTests
         var (clientState, configProvider) = CreateMocks(localPlayer: null);
 
         var messageFactory = new IpcMessageFactory(clientState.Object, configProvider.Object);
-        var actual = messageFactory.CreateBroadcast(FullName, TextSource.Chat, new VoicePreset(),
-            $"{FullName} says something to them.", null, null);
+        var actual = messageFactory.CreateBroadcast(CreateSayRequest());
 
         Assert.Equal($"{FullName} says something to them.", actual.PayloadTemplate);
     }
@@ -55,8 +54,7 @@ public class IpcMessageFactoryTests
         var (clientState, configProvider) = CreateMocks();
 
         var messageFactory = new IpcMessageFactory(clientState.Object, configProvider.Object);
-        var actual = messageFactory.CreateBroadcast(FullName, TextSource.Chat, new VoicePreset(),
-            $"{FullName} says something to them.", null, null);
+        var actual = messageFactory.CreateBroadcast(CreateSayRequest());
 
         Assert.Equal("{{FULL_NAME}} says something to them.", actual.PayloadTemplate);
     }
@@ -67,8 +65,7 @@ public class IpcMessageFactoryTests
         var (clientState, configProvider) = CreateMocks();
 
         var messageFactory = new IpcMessageFactory(clientState.Object, configProvider.Object);
-        var actual = messageFactory.CreateBroadcast(FullName, TextSource.Chat, new VoicePreset(),
-            $"{FirstName} says something to them.", null, null);
+        var actual = messageFactory.CreateBroadcast(CreateSayRequest(FirstName));
 
         Assert.Equal("{{FIRST_NAME}} says something to them.", actual.PayloadTemplate);
     }
@@ -79,8 +76,7 @@ public class IpcMessageFactoryTests
         var (clientState, configProvider) = CreateMocks();
 
         var messageFactory = new IpcMessageFactory(clientState.Object, configProvider.Object);
-        var actual = messageFactory.CreateBroadcast(FullName, TextSource.Chat, new VoicePreset(),
-            $"{LastName} says something to them.", null, null);
+        var actual = messageFactory.CreateBroadcast(CreateSayRequest(LastName));
 
         Assert.Equal("{{LAST_NAME}} says something to them.", actual.PayloadTemplate);
     }
@@ -140,5 +136,16 @@ public class IpcMessageFactoryTests
         Assert.Equal(FullName, localPlayer.Name.TextValue);
 
         return localPlayer;
+    }
+
+    private static SayRequest CreateSayRequest(string textName = FullName)
+    {
+        return new SayRequest
+        {
+            Speaker = FullName,
+            Text = $"{textName} says something to them.",
+            Source = TextSource.Chat,
+            Voice = new VoicePreset(),
+        };
     }
 }

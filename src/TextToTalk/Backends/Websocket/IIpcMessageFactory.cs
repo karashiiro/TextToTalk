@@ -1,11 +1,8 @@
-﻿using Dalamud.Game.Text;
-
-namespace TextToTalk.Backends.Websocket;
+﻿namespace TextToTalk.Backends.Websocket;
 
 public interface IIpcMessageFactory
 {
-    IpcMessage CreateBroadcast(string speaker, TextSource source, VoicePreset voice, string message, uint? npcId,
-        XivChatType? chatType);
+    IpcMessage CreateBroadcast(SayRequest request);
 
     IpcMessage CreateCancel(TextSource source);
 }

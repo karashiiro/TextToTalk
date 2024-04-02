@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using Dalamud.Game.Text;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -61,12 +60,11 @@ public class WSServer : IDisposable
         this.server.RemoveWebSocketService(ServicePath);
     }
 
-    public void Broadcast(string speaker, TextSource source, VoicePreset voice, string message, uint? npcId,
-        XivChatType? chatType)
+    public void Broadcast(SayRequest request)
     {
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
-        var ipcMessage = this.ipcMessageFactory.CreateBroadcast(speaker, source, voice, message, npcId, chatType);
+        var ipcMessage = this.ipcMessageFactory.CreateBroadcast(request);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));

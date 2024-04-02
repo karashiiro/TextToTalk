@@ -168,7 +168,14 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!", null, XivChatType.Say);
+        server.Broadcast(new SayRequest
+        {
+            Source = source,
+            Voice = preset,
+            Speaker = "Speaker",
+            Text = "Hello, world!",
+            ChatType = XivChatType.Say,
+        });
 
         // Wait a bit
         await Task.Delay(100);
@@ -203,7 +210,13 @@ public class WSServerTests
         };
 
         Assert.Throws<InvalidOperationException>(() =>
-            server.Broadcast("Speaker", source, preset, "Hello, world!", null, null));
+            server.Broadcast(new SayRequest
+            {
+                Source = source,
+                Voice = preset,
+                Speaker = "Speaker",
+                Text = "Hello, world!",
+            }));
     }
 
     [Theory]
@@ -241,7 +254,15 @@ public class WSServerTests
             Name = "Some Body",
         };
 
-        server.Broadcast("Speaker", source, preset, "Hello, world!", 42, XivChatType.Say);
+        server.Broadcast(new SayRequest
+        {
+            Source = source,
+            Voice = preset,
+            Speaker = "Speaker",
+            NpcId = 42,
+            Text = "Hello, world!",
+            ChatType = XivChatType.Say,
+        });
 
         // Wait a bit
         await Task.Delay(100);
@@ -436,14 +457,21 @@ public class WSServerTests
     {
         var messageFactory = new Mock<IIpcMessageFactory>();
         messageFactory
-            .Setup(x => x.CreateBroadcast(It.IsAny<string>(), It.IsAny<TextSource>(), It.IsAny<VoicePreset>(),
-                It.IsAny<string>(), It.IsAny<uint?>(), It.IsAny<XivChatType?>()))
-            .Returns((string a1, TextSource a2, VoicePreset a3, string a4, uint? a5, XivChatType? a6) =>
-                new IpcMessage(a1, IpcMessageType.Say, a4, a4, a3, a2, ClientLanguage.English,
-                    configProvider.AreStuttersRemoved(), a5, a6));
-        messageFactory.Setup(x => x.CreateCancel(It.IsAny<TextSource>())).Returns((TextSource source) =>
-            new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, string.Empty, null, source, null,
-                configProvider.AreStuttersRemoved(), null, null));
+            .Setup(x => x.CreateBroadcast(It.IsAny<SayRequest>()))
+            .Returns((SayRequest request) =>
+            {
+                var sr = configProvider.AreStuttersRemoved();
+                return new IpcMessage(request.Speaker, IpcMessageType.Say, request.Text, request.Text, request.Voice,
+                    request.Source, ClientLanguage.English, sr, request.NpcId, request.ChatType);
+            });
+        messageFactory
+            .Setup(x => x.CreateCancel(It.IsAny<TextSource>()))
+            .Returns((TextSource source) =>
+            {
+                var sr = configProvider.AreStuttersRemoved();
+                return new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, string.Empty, null, source,
+                    null, sr, null, null);
+            });
         return messageFactory;
     }
 }

@@ -53,8 +53,7 @@ namespace TextToTalk.Backends.Websocket
         {
             try
             {
-                this.wsServer.Broadcast(request.Speaker, request.Source, request.Voice, request.Text, request.NpcId,
-                    request.ChatType);
+                this.wsServer.Broadcast(request);
                 DetailedLog.Debug($"Sent message \"{request.Text}\" on WebSocket server.");
             }
             catch (Exception e)

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 using TextToTalk.Utils;
 
@@ -7,20 +6,19 @@ namespace TextToTalk.Backends.Websocket;
 
 public class IpcMessageFactory(IClientState clientState, IWebsocketConfigProvider configProvider) : IIpcMessageFactory
 {
-    public IpcMessage CreateBroadcast(string speaker, TextSource source, VoicePreset voice, string message, uint? npcId,
-        XivChatType? chatType)
+    public IpcMessage CreateBroadcast(SayRequest request)
     {
         var clientLanguage = clientState.ClientLanguage;
         var stuttersRemoved = configProvider.AreStuttersRemoved();
-        var messageTemplate = TalkUtils.ExtractTokens(message, new Dictionary<string, string?>
+        var messageTemplate = TalkUtils.ExtractTokens(request.Text, new Dictionary<string, string?>
         {
             { "{{FULL_NAME}}", GetLocalFullName() },
             { "{{FIRST_NAME}}", GetLocalFirstName() },
             { "{{LAST_NAME}}", GetLocalLastName() },
         });
 
-        return new IpcMessage(speaker, IpcMessageType.Say, message, messageTemplate, voice, source, clientLanguage,
-            stuttersRemoved, npcId, chatType);
+        return new IpcMessage(request.Speaker, IpcMessageType.Say, request.Text, messageTemplate, request.Voice,
+            request.Source, clientLanguage, stuttersRemoved, request.NpcId, request.ChatType);
     }
 
     public IpcMessage CreateCancel(TextSource source)
