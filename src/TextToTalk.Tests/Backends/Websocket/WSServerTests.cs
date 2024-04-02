@@ -184,9 +184,8 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", "Hello, world!", preset, source,
-                ClientLanguage.English,
-                false, null, XivChatType.Say),
+            new IpcMessage(IpcMessageType.Say, "Speaker", "Hello, world!", "Hello, world!", preset, source,
+                ClientLanguage.English, false, null, XivChatType.Say),
         });
     }
 
@@ -271,7 +270,7 @@ public class WSServerTests
         Assert.True(list.IsCompleted);
         Assert.Equal(list, new[]
         {
-            new IpcMessage("Speaker", IpcMessageType.Say, "Hello, world!", "Hello, world!", preset, source,
+            new IpcMessage(IpcMessageType.Say, "Speaker", "Hello, world!", "Hello, world!", preset, source,
                 ClientLanguage.English, true, 42, XivChatType.Say),
         });
 
@@ -461,7 +460,7 @@ public class WSServerTests
             .Returns((SayRequest request) =>
             {
                 var sr = configProvider.AreStuttersRemoved();
-                return new IpcMessage(request.Speaker, IpcMessageType.Say, request.Text, request.Text, request.Voice,
+                return new IpcMessage(IpcMessageType.Say, request.Speaker, request.Text, request.Text, request.Voice,
                     request.Source, ClientLanguage.English, sr, request.NpcId, request.ChatType);
             });
         messageFactory
@@ -469,7 +468,7 @@ public class WSServerTests
             .Returns((TextSource source) =>
             {
                 var sr = configProvider.AreStuttersRemoved();
-                return new IpcMessage(string.Empty, IpcMessageType.Cancel, string.Empty, string.Empty, null, source,
+                return new IpcMessage(IpcMessageType.Cancel, string.Empty, string.Empty, string.Empty, null, source,
                     null, sr, null, null);
             });
         return messageFactory;

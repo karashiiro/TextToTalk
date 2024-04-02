@@ -7,8 +7,8 @@ namespace TextToTalk.Backends.Websocket;
 
 [Serializable]
 public class IpcMessage(
-    string speaker,
     IpcMessageType type,
+    string speaker,
     string payload,
     string payloadTemplate,
     VoicePreset? preset,
