@@ -165,6 +165,7 @@ public class WSServerTests
             Text = "Hello, world!",
             TextTemplate = "Hello, world!",
             Race = "Hyur",
+            Age = "Adult",
             ChatType = XivChatType.Say,
             Language = ClientLanguage.English,
         });
@@ -215,6 +216,7 @@ public class WSServerTests
                 Text = "Hello, world!",
                 TextTemplate = "Hello, world!",
                 Race = "Hyur",
+                Age = "Adult",
                 Language = ClientLanguage.English,
             }));
     }
