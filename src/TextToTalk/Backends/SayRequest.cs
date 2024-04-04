@@ -32,7 +32,7 @@ public record SayRequest
     /// <summary>
     /// The speaker's race in the Race table (e.g. "Hyur", "Elezen", etc.).
     /// </summary>
-    public required string Race {get; init;}
+    public required string Race { get; init; }
 
     /// <summary>
     /// The spoken text.
