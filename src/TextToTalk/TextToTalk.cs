@@ -405,15 +405,17 @@ namespace TextToTalk
         private string GetSpeakerRace(GameObject? speaker)
         {
             var race = this.data.GetExcelSheet<Race>();
-            if (race is null || speaker is null || speaker is not Character ch)
+            if (race is null || speaker is not Character ch)
             {
                 return "Unknown";
             }
+
             var row = race.GetRow(ch.Customize[(int)CustomizeIndex.Race]);
             if (row is null)
             {
                 return "Unknown";
             }
+
             return row.Masculine;
         }
 
