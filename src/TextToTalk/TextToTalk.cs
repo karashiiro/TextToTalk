@@ -366,6 +366,9 @@ namespace TextToTalk
             // Get the speaker's race if it exists.
             var race = GetSpeakerRace(speaker);
 
+            // Get the speaker's age if it exists.
+            var age = GetSpeakerAge(speaker);
+
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
             if (preset is null)
@@ -386,6 +389,7 @@ namespace TextToTalk
                 Language = this.clientState.ClientLanguage,
                 NpcId = npcId,
                 Race = race,
+                Age = age,
                 StuttersRemoved = this.config.RemoveStutterEnabled,
             });
         }
@@ -402,21 +406,49 @@ namespace TextToTalk
             this.backendManager.Say(request);
         }
 
-        private string GetSpeakerRace(GameObject? speaker)
+        private unsafe string GetSpeakerRace(GameObject? speaker)
         {
             var race = this.data.GetExcelSheet<Race>();
-            if (race is null || speaker is not Character ch)
+            if (race is null || speaker is null || speaker.Address == nint.Zero)
             {
                 return "Unknown";
             }
 
-            var row = race.GetRow(ch.Customize[(int)CustomizeIndex.Race]);
+            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
+            var speakerRace = charaStruct->DrawData.CustomizeData.Race;
+            var row = race.GetRow(speakerRace);
+
             if (row is null)
             {
                 return "Unknown";
             }
 
             return row.Masculine;
+        }
+
+        private unsafe string GetSpeakerAge(GameObject? speaker)
+        {
+            if (speaker is null || speaker.Address == nint.Zero)
+            {
+                return "Unknown";
+            }
+
+            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
+            var speakerBodyType = charaStruct->DrawData.CustomizeData.BodyType;
+
+            switch (speakerBodyType)
+            {
+                case 0:
+                    return "Unknown";
+                case 1:
+                    return "Adult";
+                case 3:
+                    return "Elder";
+                case 4:
+                    return "Youth";
+                default:
+                    return "Unknown";
+            }
         }
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)

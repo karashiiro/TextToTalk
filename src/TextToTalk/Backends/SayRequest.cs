@@ -35,6 +35,12 @@ public record SayRequest
     public required string Race { get; init; }
 
     /// <summary>
+    /// The speaker's age, which can be one of the following:
+    /// "Unknown", "Youth", "Adult", "Elder".
+    /// </summary>
+    public required string Age { get; init; }
+
+    /// <summary>
     /// The spoken text.
     /// </summary>
     public required string Text { get; init; }
