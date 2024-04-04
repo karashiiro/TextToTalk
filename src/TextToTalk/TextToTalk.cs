@@ -34,6 +34,11 @@ using TextToTalk.UI;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Lumina.Excel.GeneratedSheets;
+using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Component.Excel;
 
 namespace TextToTalk
 {
@@ -67,6 +72,7 @@ namespace TextToTalk
         private readonly PlayerService playerService;
         private readonly NpcService npcService;
         private readonly WindowSystem windows;
+        private readonly IDataManager data;
 
         private readonly ConfigurationWindow configurationWindow;
         private readonly VoiceUnlockerWindow voiceUnlockerWindow;
@@ -103,6 +109,7 @@ namespace TextToTalk
             this.keys = keyState;
             this.chat = chat;
             this.framework = framework;
+            this.data = data;
 
             CreateDatabasePath();
             CreateEventLogDatabase();
@@ -356,6 +363,9 @@ namespace TextToTalk
             // Attempt to get the speaker's ID, if they're an NPC
             var npcId = speaker?.GetNpcId();
 
+            // Get the speaker's race if it exists.
+            var race = GetSpeakerRace(speaker);
+
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
             if (preset is null)
@@ -375,6 +385,7 @@ namespace TextToTalk
                 ChatType = chatType,
                 Language = this.clientState.ClientLanguage,
                 NpcId = npcId,
+                Race = race,
                 StuttersRemoved = this.config.RemoveStutterEnabled,
             });
         }
@@ -389,6 +400,21 @@ namespace TextToTalk
             }
 
             this.backendManager.Say(request);
+        }
+
+        private string GetSpeakerRace(GameObject? speaker)
+        {
+            var race = this.data.GetExcelSheet<Race>();
+            if (race is null || speaker is null || speaker is not Character ch)
+            {
+                return "Unknown";
+            }
+            var row = race.GetRow(ch.Customize[(int)CustomizeIndex.Race]);
+            if (row is null)
+            {
+                return "Unknown";
+            }
+            return row.Masculine;
         }
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
