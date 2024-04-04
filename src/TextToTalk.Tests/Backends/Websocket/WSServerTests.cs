@@ -164,6 +164,7 @@ public class WSServerTests
             Speaker = "Speaker",
             Text = "Hello, world!",
             TextTemplate = "Hello, world!",
+            Race = "Hyur",
             ChatType = XivChatType.Say,
             Language = ClientLanguage.English,
         });
@@ -213,6 +214,7 @@ public class WSServerTests
                 Speaker = "Speaker",
                 Text = "Hello, world!",
                 TextTemplate = "Hello, world!",
+                Race = "Hyur",
                 Language = ClientLanguage.English,
             }));
     }

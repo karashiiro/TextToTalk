@@ -30,6 +30,11 @@ public record SayRequest
     public uint? NpcId { get; init; }
 
     /// <summary>
+    /// The speaker's race in the Race table (e.g. "Hyur", "Elezen", etc.).
+    /// </summary>
+    public required string Race {get; init;}
+
+    /// <summary>
     /// The spoken text.
     /// </summary>
     public required string Text { get; init; }

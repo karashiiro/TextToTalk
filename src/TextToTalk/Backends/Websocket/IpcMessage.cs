@@ -25,6 +25,11 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public long? NpcId { get; init; }
 
     /// <summary>
+    /// The speaker's race in the Race table (e.g. "Hyur", "Elezen", etc.).
+    /// </summary>
+    public string? Race { get; init; }
+
+    /// <summary>
     /// The message parameter - the spoken text for speech requests, and an empty string for cancellations.
     /// </summary>
     public string Payload { get; init; } = "";
