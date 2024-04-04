@@ -25,6 +25,7 @@ using TextToTalk.Backends.Websocket;
 using TextToTalk.CommandModules;
 using TextToTalk.Data.Service;
 using TextToTalk.Events;
+using TextToTalk.Extensions;
 using TextToTalk.GameEnums;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -216,20 +217,10 @@ namespace TextToTalk
                 .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
-                        () => Say(ev.Speaker, ev.SpeakerName, GetChatType(ev), ev.Text.TextValue, ev.Source),
+                        () => Say(ev.Speaker, ev.SpeakerName, ev.GetChatType(), ev.Text.TextValue, ev.Source),
                         ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
                     ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"),
                     _ => { });
-        }
-
-        private static XivChatType? GetChatType(TextEmitEvent ev)
-        {
-            if (ev is ChatTextEmitEvent chatEv)
-            {
-                return chatEv.ChatType;
-            }
-
-            return null;
         }
 
         private void LogTextEvent(TextEvent ev)
@@ -353,9 +344,9 @@ namespace TextToTalk
             // Build a template for the text payload
             var textTemplate = TalkUtils.ExtractTokens(cleanText, new Dictionary<string, string?>
             {
-                { "{{FULL_NAME}}", GetLocalFullName() },
-                { "{{FIRST_NAME}}", GetLocalFirstName() },
-                { "{{LAST_NAME}}", GetLocalLastName() },
+                { "{{FULL_NAME}}", this.clientState.LocalPlayer?.GetFullName() },
+                { "{{FIRST_NAME}}", this.clientState.LocalPlayer?.GetFirstName() },
+                { "{{LAST_NAME}}", this.clientState.LocalPlayer?.GetLastName() },
             });
 
             // Some characters have emdashes in their names, which should be treated
@@ -363,7 +354,7 @@ namespace TextToTalk
             var cleanSpeakerName = TalkUtils.NormalizePunctuation(speakerName.TextValue);
 
             // Attempt to get the speaker's ID, if they're an NPC
-            var npcId = GetNpcId(speaker);
+            var npcId = speaker?.GetNpcId();
 
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
@@ -425,16 +416,6 @@ namespace TextToTalk
                 : Gender.None;
 
             return GetVoiceForSpeaker(speakerName, gender);
-        }
-
-        private static uint? GetNpcId(GameObject? gameObject)
-        {
-            if (gameObject is Npc npc)
-            {
-                return npc.DataId;
-            }
-
-            return null;
         }
 
         private VoicePreset? GetVoiceForSpeaker(string? name, Gender gender)
@@ -508,23 +489,6 @@ namespace TextToTalk
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
-        }
-        
-        private string? GetLocalFullName()
-        {
-            return clientState.LocalPlayer?.Name.TextValue;
-        }
-
-        private string? GetLocalFirstName()
-        {
-            var parts = GetLocalFullName()?.Split(" ");
-            return parts is [{ } firstName, not null] ? firstName : null;
-        }
-
-        private string? GetLocalLastName()
-        {
-            var parts = GetLocalFullName()?.Split(" ");
-            return parts is [not null, { } lastName] ? lastName : null;
         }
 
         #region IDisposable Support
