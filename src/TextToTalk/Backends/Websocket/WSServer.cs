@@ -11,8 +11,8 @@ namespace TextToTalk.Backends.Websocket;
 
 public class WSServer : IDisposable
 {
-    private readonly IIpcMessageFactory ipcMessageFactory;
-    private readonly IList<ServerBehavior> behaviors;
+    private readonly IpcMessageMapper mapper = new();
+    private readonly List<ServerBehavior> behaviors = [];
 
     private WebSocketServer server;
     private int port;
@@ -41,14 +41,10 @@ public class WSServer : IDisposable
 
     public bool Active { get; private set; }
 
-    public WSServer(IWebsocketConfigProvider configProvider, IIpcMessageFactory ipcMessageFactory,
-        int? overridePort = null)
+    public WSServer(IWebsocketConfigProvider configProvider, int? overridePort = null)
     {
         Address = configProvider.GetAddress();
         Port = overridePort ?? configProvider.GetPort();
-
-        this.ipcMessageFactory = ipcMessageFactory;
-        this.behaviors = new List<ServerBehavior>();
 
         this.server = new WebSocketServer(ServiceUrl);
         this.server.AddWebSocketService<ServerBehavior>(ServicePath, b => this.behaviors.Add(b));
@@ -64,7 +60,7 @@ public class WSServer : IDisposable
     {
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
-        var ipcMessage = this.ipcMessageFactory.CreateBroadcast(request);
+        var ipcMessage = this.mapper.MapSayRequest(request);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
@@ -77,7 +73,7 @@ public class WSServer : IDisposable
     {
         if (!Active) throw new InvalidOperationException("Server is not active!");
 
-        var ipcMessage = this.ipcMessageFactory.CreateCancel(source);
+        var ipcMessage = new IpcMessage(IpcMessageType.Cancel, source);
         foreach (var behavior in this.behaviors)
         {
             behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));

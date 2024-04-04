@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Plugin.Services;
 using R3;
 using TextToTalk.UI;
 
@@ -25,19 +24,18 @@ namespace TextToTalk.Backends.Websocket
 
         private bool dirtyConfig;
 
-        public WebsocketBackend(PluginConfiguration config, IClientState clientState)
+        public WebsocketBackend(PluginConfiguration config)
         {
             this.config = config;
             this.failedToBindPort = new ReplaySubject<int>(1);
 
-            var messageFactory = new IpcMessageFactory(clientState, config);
             try
             {
-                this.wsServer = new WSServer(this.config, messageFactory);
+                this.wsServer = new WSServer(this.config);
             }
             catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
             {
-                this.wsServer = new WSServer(this.config, messageFactory, 0);
+                this.wsServer = new WSServer(this.config, 0);
                 this.failedToBindPort.OnNext(this.config.WebsocketPort);
             }
 

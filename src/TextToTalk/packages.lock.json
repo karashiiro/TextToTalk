@@ -48,6 +48,12 @@
         "resolved": "1.0.1",
         "contentHash": "QESbZntZBK5q5d287mK88pcsRaJp6TZpmihT+x6TAfBqbwtwYl2yos9/IbdGH28HjnSxs3GaQI+Vc6UOWq1uag=="
       },
+      "Riok.Mapperly": {
+        "type": "Direct",
+        "requested": "[3.4.0, )",
+        "resolved": "3.4.0",
+        "contentHash": "bTxBEQ0+2x816IL78Fv0B/KkaGRtzfisit9dfWTfa7jjjwMMzpMW9A+V/hyxqHdJtYvtDL6dUNMLJige4zxJvw=="
+      },
       "Standart.Hash.xxHash": {
         "type": "Direct",
         "requested": "[4.0.5, )",

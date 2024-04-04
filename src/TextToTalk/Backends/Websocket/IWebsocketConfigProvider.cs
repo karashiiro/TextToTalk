@@ -19,10 +19,4 @@ public interface IWebsocketConfigProvider
     /// </summary>
     /// <returns></returns>
     IPAddress? GetAddress();
-
-    /// <summary>
-    /// Returns whether or not stutters are being removed from message payloads.
-    /// </summary>
-    /// <returns>true if stutters are being removed; otherwise false.</returns>
-    bool AreStuttersRemoved();
 }

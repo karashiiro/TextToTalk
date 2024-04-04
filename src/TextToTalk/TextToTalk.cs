@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -119,7 +120,7 @@ namespace TextToTalk
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder, clientState);
+            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder);
             var handleFailedToBindWsPort = HandleFailedToBindWSPort();
 
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
@@ -349,6 +350,14 @@ namespace TextToTalk
                 return;
             }
 
+            // Build a template for the text payload
+            var textTemplate = TalkUtils.ExtractTokens(cleanText, new Dictionary<string, string?>
+            {
+                { "{{FULL_NAME}}", GetLocalFullName() },
+                { "{{FIRST_NAME}}", GetLocalFirstName() },
+                { "{{LAST_NAME}}", GetLocalLastName() },
+            });
+
             // Some characters have emdashes in their names, which should be treated
             // as hyphens for the sake of the plugin.
             var cleanSpeakerName = TalkUtils.NormalizePunctuation(speakerName.TextValue);
@@ -358,9 +367,37 @@ namespace TextToTalk
 
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
+            if (preset is null)
+            {
+                DetailedLog.Error("Attempted to speak with null voice preset");
+                return;
+            }
 
             // Say the thing
-            BackendSay(source, preset, chatType, npcId, cleanSpeakerName, cleanText);
+            BackendSay(new SayRequest
+            {
+                Source = source,
+                Speaker = cleanSpeakerName,
+                Text = cleanText,
+                TextTemplate = textTemplate,
+                Voice = preset,
+                ChatType = chatType,
+                Language = this.clientState.ClientLanguage,
+                NpcId = npcId,
+                StuttersRemoved = this.config.RemoveStutterEnabled,
+            });
+        }
+
+        private void BackendSay(SayRequest request)
+        {
+            if (request.Voice.EnabledBackend != this.config.Backend)
+            {
+                DetailedLog.Error(
+                    $"Voice preset {request.Voice.Name} is not compatible with the {this.config.Backend} backend");
+                return;
+            }
+
+            this.backendManager.Say(request);
         }
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
@@ -398,35 +435,6 @@ namespace TextToTalk
             }
 
             return null;
-        }
-
-        private void BackendSay(TextSource source, VoicePreset? voicePreset, XivChatType? chatType, uint? npcId,
-            string speaker, string text)
-        {
-            if (voicePreset is null)
-            {
-                DetailedLog.Error("Attempted to speak with null voice preset");
-                return;
-            }
-
-            if (voicePreset.EnabledBackend != this.config.Backend)
-            {
-                DetailedLog.Error(
-                    $"Voice preset {voicePreset.Name} is not compatible with the {this.config.Backend} backend");
-                return;
-            }
-
-            var req = new SayRequest
-            {
-                Source = source,
-                Voice = voicePreset,
-                Speaker = speaker,
-                NpcId = npcId,
-                Text = text,
-                ChatType = chatType,
-            };
-
-            this.backendManager.Say(req);
         }
 
         private VoicePreset? GetVoiceForSpeaker(string? name, Gender gender)
@@ -500,6 +508,23 @@ namespace TextToTalk
             this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
+        }
+        
+        private string? GetLocalFullName()
+        {
+            return clientState.LocalPlayer?.Name.TextValue;
+        }
+
+        private string? GetLocalFirstName()
+        {
+            var parts = GetLocalFullName()?.Split(" ");
+            return parts is [{ } firstName, not null] ? firstName : null;
+        }
+
+        private string? GetLocalLastName()
+        {
+            var parts = GetLocalFullName()?.Split(" ");
+            return parts is [not null, { } lastName] ? lastName : null;
         }
 
         #region IDisposable Support

@@ -6,38 +6,28 @@ using TextToTalk.GameEnums;
 namespace TextToTalk.Backends.Websocket;
 
 [Serializable]
-public class IpcMessage(
-    IpcMessageType type,
-    string speaker,
-    string payload,
-    string payloadTemplate,
-    VoicePreset? preset,
-    TextSource source,
-    ClientLanguage? clientLanguage,
-    bool stuttersRemoved,
-    long? npcId,
-    XivChatType? chatType) : IEquatable<IpcMessage>
+public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<IpcMessage>
 {
+    /// <summary>
+    /// The message type; refer to <see cref="IpcMessageType"/> for options.
+    /// </summary>
+    public string Type { get; init; } = type.ToString();
+
     /// <summary>
     /// The speaker name.
     /// </summary>
-    public string Speaker { get; init; } = speaker;
+    public string? Speaker { get; init; }
 
     /// <summary>
     /// The speaker's data ID, in the case of NPCs. For most NPCs, their name can
     /// be retrieved from the ENpcResident table, if needed.
     /// </summary>
-    public long? NpcId { get; init; } = npcId;
-
-    /// <summary>
-    /// The message type; refer tp <see cref="IpcMessageType"/> for options.
-    /// </summary>
-    public string Type { get; init; } = type.ToString();
+    public long? NpcId { get; init; }
 
     /// <summary>
     /// The message parameter - the spoken text for speech requests, and an empty string for cancellations.
     /// </summary>
-    public string Payload { get; init; } = payload;
+    public string Payload { get; init; } = "";
 
     /// <summary>
     /// The message, with the player name replaced with a token.
@@ -45,17 +35,17 @@ public class IpcMessage(
     /// Full names are replaced with "{{FULL_NAME}}", first names are replaced with "{{FIRST_NAME}}", and last names
     /// are replaced with "{{LAST_NAME}}".
     /// </summary>
-    public string PayloadTemplate { get; init; } = payloadTemplate;
+    public string PayloadTemplate { get; init; } = "";
 
     /// <summary>
     /// Speaker voice ID.
     /// </summary>
-    public VoicePreset? Voice { get; init; } = preset;
+    public VoicePreset? Voice { get; init; }
 
     /// <summary>
     /// If stutters were removed from the payload or not.
     /// </summary>
-    public bool StuttersRemoved { get; init; } = stuttersRemoved;
+    public bool StuttersRemoved { get; init; }
 
     /// <summary>
     /// Text source; refer to <see cref="TextSource"/> for options.
@@ -66,13 +56,13 @@ public class IpcMessage(
     /// The chat type, if applicable. Can be from either <see cref="XivChatType"/>
     /// or <see cref="AdditionalChatType"/>.
     /// </summary>
-    public int? ChatType { get; init; } = (int?)chatType;
+    public int? ChatType { get; init; }
 
     /// <summary>
     /// The client's current language, from <see cref="ClientLanguage"/>. This will
     /// be null for cancel messages.
     /// </summary>
-    public string? Language { get; init; } = clientLanguage?.ToString();
+    public string? Language { get; init; }
 
     public bool Equals(IpcMessage? other)
     {
@@ -93,12 +83,5 @@ public class IpcMessage(
     public override int GetHashCode()
     {
         return HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source, NpcId, ChatType);
-    }
-
-    public static IpcMessage FromSayRequest(IpcMessageType type, SayRequest request, string payloadTemplate,
-        ClientLanguage? clientLanguage, bool stuttersRemoved)
-    {
-        return new IpcMessage(type, request.Speaker, request.Text, payloadTemplate, request.Voice, request.Source,
-            clientLanguage, stuttersRemoved, request.NpcId, request.ChatType);
     }
 }

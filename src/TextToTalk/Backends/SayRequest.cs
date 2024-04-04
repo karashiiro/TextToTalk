@@ -1,23 +1,12 @@
-﻿using Dalamud.Game.Text;
+﻿using Dalamud;
+using Dalamud.Game.Text;
+using TextToTalk.Backends.Websocket;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends;
 
 public record SayRequest
 {
-    public static readonly SayRequest Default = new()
-    {
-        Source = TextSource.None,
-        Voice = new VoicePreset(),
-        Speaker = string.Empty,
-        Text = string.Empty,
-    };
-
-    public SayRequest WithSource(TextSource source)
-    {
-        return this with { Source = source };
-    }
-
     /// <summary>
     /// The text source.
     /// </summary>
@@ -46,8 +35,32 @@ public record SayRequest
     public required string Text { get; init; }
 
     /// <summary>
+    /// The message, with the player name replaced with a token.
+    ///
+    /// Full names are replaced with "{{FULL_NAME}}", first names are replaced with "{{FIRST_NAME}}", and last names
+    /// are replaced with "{{LAST_NAME}}".
+    /// </summary>
+    public required string TextTemplate { get; init; }
+
+    /// <summary>
+    /// If stutters were removed from the payload or not.
+    /// </summary>
+    public bool StuttersRemoved { get; init; }
+
+    /// <summary>
     /// The chat type, if applicable. Can be from either <see cref="XivChatType"/>
     /// or <see cref="AdditionalChatType"/>.
     /// </summary>
     public XivChatType? ChatType { get; init; }
+
+    /// <summary>
+    /// The current <see cref="ClientLanguage"/>, to be used for quest dialogues etc.
+    /// This does not have any bearing on player chat message languages.
+    /// </summary>
+    public required ClientLanguage Language { get; init; }
+
+    /// <summary>
+    /// The intended IPC message type for this object, only to be used for object mapping.
+    /// </summary>
+    public IpcMessageType MessageType => IpcMessageType.Say;
 }

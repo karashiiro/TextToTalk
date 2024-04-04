@@ -58,8 +58,8 @@ TTS cancel:
   "PayloadTemplate": "",
   "Voice": null,
   "Speaker": null,
-  "Source": "None",
   // or "Chat", "AddonTalk", or "AddonBattleTalk"
+  "Source": "None",
   "StuttersRemoved": false,
   "NpcId": null,
   "ChatType": null,

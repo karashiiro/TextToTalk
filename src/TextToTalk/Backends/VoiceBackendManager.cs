@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Interface;
-using Dalamud.Plugin.Services;
 using R3;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
@@ -20,21 +19,18 @@ namespace TextToTalk.Backends
         private readonly PluginConfiguration config;
         private readonly Subject<int> onFailedToBindWsPort;
         private readonly UiBuilder uiBuilder;
-        private readonly IClientState clientState;
 
         private IDisposable? handleFailedToBindWsPort;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
-        public VoiceBackendManager(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder,
-            IClientState clientState)
+        public VoiceBackendManager(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder)
         {
             this.config = config;
             this.http = http;
             this.onFailedToBindWsPort = new Subject<int>();
             this.uiBuilder = uiBuilder;
-            this.clientState = clientState;
 
             SetBackend(this.config.Backend);
         }
@@ -100,7 +96,7 @@ namespace TextToTalk.Backends
             return backendKind switch
             {
                 TTSBackend.System => new SystemBackend(this.config, this.http),
-                TTSBackend.Websocket => new WebsocketBackend(this.config, this.clientState),
+                TTSBackend.Websocket => new WebsocketBackend(this.config),
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
                 TTSBackend.Azure => new AzureBackend(this.config, this.http),

@@ -420,11 +420,6 @@ namespace TextToTalk
             return WebsocketPort;
         }
 
-        bool IWebsocketConfigProvider.AreStuttersRemoved()
-        {
-            return RemoveStutterEnabled;
-        }
-
         bool IRateLimiterConfigProvider.ShouldRateLimit()
         {
             return UsePlayerRateLimiter;
