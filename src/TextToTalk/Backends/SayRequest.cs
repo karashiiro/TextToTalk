@@ -38,7 +38,7 @@ public record SayRequest
     /// The speaker's age, which can be one of the following:
     /// "Unknown", "Youth", "Adult", "Elder".
     /// </summary>
-    public required string Age { get; init; }
+    public required BodyType BodyType { get; init; }
 
     /// <summary>
     /// The spoken text.
