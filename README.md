@@ -33,7 +33,8 @@ TTS prompt:
   "Type": "Say",
   "Payload": "Firstname Lastname says something",
   // Will replace the logged-in player's name with {{FULL_NAME}}, {{FIRST_NAME}}, or {{LAST_NAME}} as appropriate.
-  "PayloadTemplate": "Firstname Lastname says something",
+  // Does not currently apply to players other than the logged-in player.
+  "PayloadTemplate": "{{FULL_NAME}} says something",
   "Voice": {
     "Name": "Gender"
   },
