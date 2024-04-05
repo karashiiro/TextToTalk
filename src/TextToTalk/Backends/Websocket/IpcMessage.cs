@@ -33,7 +33,7 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     /// The speaker's age, which can be one of the following:
     /// "Unknown", "Youth", "Adult", "Elder".
     /// </summary>
-    public string? Age { get; init; }
+    public string? BodyType { get; init; }
 
     /// <summary>
     /// The message parameter - the spoken text for speech requests, and an empty string for cancellations.

@@ -367,7 +367,7 @@ namespace TextToTalk
             var race = GetSpeakerRace(speaker);
 
             // Get the speaker's age if it exists.
-            var age = GetSpeakerAge(speaker);
+            var bodyType = GetSpeakerBodyType(speaker);
 
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
@@ -389,7 +389,7 @@ namespace TextToTalk
                 Language = this.clientState.ClientLanguage,
                 NpcId = npcId,
                 Race = race,
-                Age = age,
+                BodyType = bodyType,
                 StuttersRemoved = this.config.RemoveStutterEnabled,
             });
         }
@@ -426,29 +426,16 @@ namespace TextToTalk
             return row.Masculine;
         }
 
-        private unsafe string GetSpeakerAge(GameObject? speaker)
+        private unsafe BodyType GetSpeakerBodyType(GameObject? speaker)
         {
             if (speaker is null || speaker.Address == nint.Zero)
             {
-                return "Unknown";
+                return BodyType.Unknown;
             }
 
             var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
             var speakerBodyType = charaStruct->DrawData.CustomizeData.BodyType;
-
-            switch (speakerBodyType)
-            {
-                case 0:
-                    return "Unknown";
-                case 1:
-                    return "Adult";
-                case 3:
-                    return "Elder";
-                case 4:
-                    return "Youth";
-                default:
-                    return "Unknown";
-            }
+            return (BodyType)speakerBodyType;
         }
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
