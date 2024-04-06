@@ -7,6 +7,13 @@ public static class OpenAiCredentialManager
 {
     private const string CredentialsTarget = "TextToTalk_AccessKeys_OpenAI";
 
+    public static string GetApiKey()
+    {
+        var credentials = LoadCredentials();
+        if (credentials == null) return "";
+        return credentials.Password;
+    }
+
     public static NetworkCredential? LoadCredentials()
     {
         var credentials = CredentialManager.GetCredentials(CredentialsTarget);

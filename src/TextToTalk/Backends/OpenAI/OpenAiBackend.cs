@@ -15,18 +15,17 @@ public class OpenAiBackend : VoiceBackend
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
         soundQueue = new StreamSoundQueue();
-        var model = new OpenAiBackendUIModel();
-        ui = new OpenAiBackendUI(model, config);
-        model.ApiKey = OpenAiCredentialManager.LoadCredentials()?.Password ?? "";
-        client = new OpenAiClient(soundQueue, model, http);
+        client = new OpenAiClient(soundQueue, http);
+        ui = new OpenAiBackendUI(config, client);
     }
 
     public override void Say(SayRequest request)
     {
         if (request.Voice is not OpenAiVoicePreset voicePreset)
             throw new InvalidOperationException("Invalid voice preset provided.");
-        
-        _ = client.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume, request.Source, request.Text);
+
+        _ = client.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume, request.Source,
+            request.Text);
     }
 
     public override void CancelAllSpeech()
