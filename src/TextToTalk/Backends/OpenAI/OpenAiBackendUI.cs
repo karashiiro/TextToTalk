@@ -7,25 +7,26 @@ namespace TextToTalk.Backends.OpenAI;
 
 public class OpenAiBackendUI
 {
+    private readonly OpenAiClient client;
     private readonly PluginConfiguration config;
-    private readonly OpenAiBackendUIModel model;
 
-    public OpenAiBackendUI(OpenAiBackendUIModel model, PluginConfiguration config)
+    public OpenAiBackendUI(PluginConfiguration config, OpenAiClient client)
     {
-        this.model = model;
         this.config = config;
+        this.client = client;
+        client.ApiKey = OpenAiCredentialManager.GetApiKey();
     }
 
     public void DrawLoginOptions()
     {
-        var apiKey = model.ApiKey;
+        var apiKey = client.ApiKey;
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref apiKey, 100,
             ImGuiInputTextFlags.Password);
 
         if (ImGui.Button($"Login##{MemoizedId.Create()}"))
         {
             OpenAiCredentialManager.SaveCredentials(apiKey);
-            model.ApiKey = apiKey;
+            client.ApiKey = apiKey;
         }
     }
 
@@ -57,7 +58,7 @@ public class OpenAiBackendUI
             config);
 
         var presetName = currentVoicePreset.Name;
-        if (ImGui.InputText($"Preset name ##{MemoizedId.Create()}", ref presetName, 64))
+        if (ImGui.InputText($"Preset name##{MemoizedId.Create()}", ref presetName, 64))
         {
             currentVoicePreset.Name = presetName;
             config.Save();
@@ -67,11 +68,12 @@ public class OpenAiBackendUI
         if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentVoicePreset.VoiceName))
         {
             foreach (var voiceName in voiceNames)
-                if (ImGui.Selectable(voiceName, voiceName == currentVoicePreset.VoiceName))
-                {
-                    currentVoicePreset.VoiceName = voiceName;
-                    config.Save();
-                }
+            {
+                if (!ImGui.Selectable(voiceName, voiceName == currentVoicePreset.VoiceName)) continue;
+
+                currentVoicePreset.VoiceName = voiceName;
+                config.Save();
+            }
 
             ImGui.EndCombo();
         }
@@ -81,11 +83,13 @@ public class OpenAiBackendUI
         {
             currentVoicePreset.Model ??= modelNames.First();
             foreach (var modelName in modelNames)
+            {
                 if (ImGui.Selectable(modelName, modelName == currentVoicePreset.Model))
                 {
                     currentVoicePreset.Model = modelName;
                     config.Save();
                 }
+            }
 
             ImGui.EndCombo();
         }
@@ -104,10 +108,11 @@ public class OpenAiBackendUI
             config.Save();
         }
 
-        ConfigComponents.ToggleUseGenderedVoicePresets(
-            $"Use gendered voice presets##{MemoizedId.Create()}",
-            config);
+        ConfigComponents.ToggleUseGenderedVoicePresets($"Use gendered voices##{MemoizedId.Create()}", config);
         ImGui.Spacing();
-        if (config.UseGenderedVoicePresets) BackendUI.GenderedPresetConfig("Polly", TTSBackend.OpenAi, config, presets);
+        if (config.UseGenderedVoicePresets)
+        {
+            BackendUI.GenderedPresetConfig("OpenAI", TTSBackend.OpenAi, config, presets);
+        }
     }
 }

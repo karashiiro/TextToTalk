@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace TextToTalk.Backends.OpenAI;
 
@@ -29,19 +29,19 @@ public class OpenAiClient
     };
 
     private readonly HttpClient client;
-    private readonly OpenAiBackendUIModel model;
     private readonly StreamSoundQueue soundQueue;
 
-    public OpenAiClient(StreamSoundQueue soundQueue, OpenAiBackendUIModel model, HttpClient http)
+    public OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
     {
         this.soundQueue = soundQueue;
-        this.model = model;
         client = http;
     }
 
+    public string? ApiKey { get; set; }
+
     private void AddAuthorization(HttpRequestMessage req)
     {
-        req.Headers.Add("Authorization", $"Bearer {model.ApiKey}");
+        req.Headers.Add("Authorization", $"Bearer {ApiKey}");
     }
 
     public async Task Say(string? voice, float? speed, float volume, TextSource source, string text)
@@ -59,7 +59,7 @@ public class OpenAiClient
             speed = speed ?? 1.0f
         };
 
-        var json = JsonConvert.SerializeObject(args);
+        var json = JsonSerializer.Serialize(args);
         DetailedLog.Info(json);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
         req.Content = content;
