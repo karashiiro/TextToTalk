@@ -120,7 +120,8 @@ public class ChatMessageHandler : IChatMessageHandler
             GetCleanSpeakerName(speaker, sender),
             textValue,
             speaker,
-            type));
+            type,
+            null));
     }
 
     private static SeString GetCleanSpeakerName(GameObject? speaker, SeString sender)

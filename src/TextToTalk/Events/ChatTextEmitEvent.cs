@@ -8,8 +8,9 @@ public class ChatTextEmitEvent(
     SeString speaker,
     SeString text,
     GameObject? obj,
-    XivChatType chatType)
-    : TextEmitEvent(TextSource.Chat, speaker, text, obj)
+    XivChatType chatType,
+    string? voiceFile)
+    : TextEmitEvent(TextSource.Chat, speaker, text, obj, voiceFile)
 {
     /// <summary>
     /// The chat type of the message.

@@ -8,5 +8,5 @@ public interface IAddonBattleTalkHandler : IDisposable
 {
     Observable<TextEmitEvent> OnTextEmit();
 
-    void PollAddon(AddonPollSource pollSource);
+    void PollAddon(AddonPollSource pollSource, string? voiceFile);
 }

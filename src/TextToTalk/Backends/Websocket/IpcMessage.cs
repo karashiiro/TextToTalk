@@ -36,6 +36,11 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public string? BodyType { get; init; }
 
     /// <summary>
+    /// The in-game voice file for this line, if applicable.
+    /// </summary>
+    public string? VoiceFile { get; init; }
+
+    /// <summary>
     /// The message parameter - the spoken text for speech requests, and an empty string for cancellations.
     /// </summary>
     public string Payload { get; init; } = "";

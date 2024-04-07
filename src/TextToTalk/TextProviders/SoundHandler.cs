@@ -34,7 +34,7 @@ public class SoundHandler : IDisposable
         @"^(bgcommon|music|sound/(battle|foot|instruments|strm|vfx|voice/Vo_Emote|zingle))/");
 
     private static readonly Regex VoiceLineFileNameRegex = new(@"^cut/.*/(vo_|voice)");
-    private readonly HashSet<nint> knownVoiceLinePtrs = new();
+    private readonly Dictionary<nint, string> knownVoiceLinePtrs = new();
 
     private readonly IAddonTalkHandler addonTalkHandler;
     private readonly IAddonBattleTalkHandler addonBattleTalkHandler;
@@ -108,7 +108,7 @@ public class SoundHandler : IDisposable
                     if (isVoiceLine)
                     {
                         DetailedLog.Debug($"Discovered voice line at address {resourceDataPtr:x}");
-                        this.knownVoiceLinePtrs.Add(resourceDataPtr);
+                        this.knownVoiceLinePtrs.Add(resourceDataPtr, fileName);
                     }
                     else
                     {
@@ -140,11 +140,13 @@ public class SoundHandler : IDisposable
             var soundDataPtr = Marshal.ReadIntPtr(soundPtr + SoundDataOffset);
             // Assume that a voice line will be played only once after it's loaded. Then the set can be pruned as voice
             // lines are played.
-            if (this.knownVoiceLinePtrs.Remove(soundDataPtr))
+            if (this.knownVoiceLinePtrs.ContainsKey(soundDataPtr))
             {
                 DetailedLog.Debug($"Caught playback of known voice line at address {soundDataPtr:x}");
-                this.addonTalkHandler.PollAddon(AddonPollSource.VoiceLinePlayback);
-                this.addonBattleTalkHandler.PollAddon(AddonPollSource.VoiceLinePlayback);
+                this.knownVoiceLinePtrs.TryGetValue(soundDataPtr, out var fileName);
+                this.knownVoiceLinePtrs.Remove(soundDataPtr);
+                this.addonTalkHandler.PollAddon(AddonPollSource.VoiceLinePlayback, fileName);
+                this.addonBattleTalkHandler.PollAddon(AddonPollSource.VoiceLinePlayback, fileName);
             }
         }
         catch (Exception exc)

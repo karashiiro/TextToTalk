@@ -10,7 +10,7 @@ namespace TextToTalk.TextProviders;
 
 public class AddonTalkHandler : IAddonTalkHandler
 {
-    private record struct AddonTalkState(string? Speaker, string? Text, AddonPollSource PollSource);
+    private record struct AddonTalkState(string? Speaker, string? Text, AddonPollSource PollSource, string? VoiceFile);
 
     private readonly AddonTalkManager addonTalkManager;
     private readonly MessageHandlerFilters filters;
@@ -64,18 +64,18 @@ public class AddonTalkHandler : IAddonTalkHandler
 
     private IDisposable HandleFrameworkUpdate()
     {
-        return OnFrameworkUpdate().Subscribe(this, static (s, h) => h.PollAddon(s));
+        return OnFrameworkUpdate().Subscribe(this, static (s, h) => h.PollAddon(s, null));
     }
 
-    public void PollAddon(AddonPollSource pollSource)
+    public void PollAddon(AddonPollSource pollSource, string? voiceFile)
     {
-        var state = GetTalkAddonState(pollSource);
+        var state = GetTalkAddonState(pollSource, voiceFile);
         this.updateState.Mutate(state);
     }
 
     private void HandleChange(AddonTalkState state)
     {
-        var (speaker, text, pollSource) = state;
+        var (speaker, text, pollSource, voiceFile) = state;
 
         if (state == default)
         {
@@ -129,11 +129,11 @@ public class AddonTalkHandler : IAddonTalkHandler
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
         OnTextEmit.Invoke(speakerObj != null
-            ? new AddonTalkEmitEvent(speakerObj.Name, text, speakerObj)
-            : new AddonTalkEmitEvent(state.Speaker ?? "", text, null));
+            ? new AddonTalkEmitEvent(speakerObj.Name, text, speakerObj, voiceFile)
+            : new AddonTalkEmitEvent(state.Speaker ?? "", text, null, voiceFile));
     }
 
-    private AddonTalkState GetTalkAddonState(AddonPollSource pollSource)
+    private AddonTalkState GetTalkAddonState(AddonPollSource pollSource, string? voiceFile)
     {
         if (!this.addonTalkManager.IsVisible())
         {
@@ -142,7 +142,7 @@ public class AddonTalkHandler : IAddonTalkHandler
 
         var addonTalkText = this.addonTalkManager.ReadText();
         return addonTalkText != null
-            ? new AddonTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource)
+            ? new AddonTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource, voiceFile)
             : default;
     }
 

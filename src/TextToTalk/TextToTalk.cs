@@ -225,7 +225,7 @@ namespace TextToTalk
                 .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
-                        () => Say(ev.Speaker, ev.SpeakerName, ev.GetChatType(), ev.Text.TextValue, ev.Source),
+                        () => Say(ev.Speaker, ev.SpeakerName, ev.GetChatType(), ev.Text.TextValue, ev.Source, ev.VoiceFile),
                         ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
                     ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"),
                     _ => { });
@@ -326,7 +326,7 @@ namespace TextToTalk
         }
 
         private void Say(GameObject? speaker, SeString speakerName, XivChatType? chatType, string textValue,
-            TextSource source)
+            TextSource source, string? voiceFile)
         {
             // Check if this speaker should be skipped
             if (speaker != null && this.rateLimiter.TryRateLimit(speaker))
@@ -369,7 +369,7 @@ namespace TextToTalk
 
             // Get the speaker's age if it exists.
             var bodyType = GetSpeakerBodyType(speaker);
-
+            DetailedLog.Debug($"Voice File{voiceFile}");
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
             if (preset is null)
@@ -391,6 +391,7 @@ namespace TextToTalk
                 NpcId = npcId,
                 Race = race,
                 BodyType = bodyType,
+                VoiceFile = voiceFile ?? "",
                 StuttersRemoved = this.config.RemoveStutterEnabled,
             });
         }

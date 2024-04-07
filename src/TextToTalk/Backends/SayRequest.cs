@@ -41,6 +41,11 @@ public record SayRequest
     public required BodyType BodyType { get; init; }
 
     /// <summary>
+    /// The in-game voice file for this line, if applicable.
+    /// </summary>
+    public required string VoiceFile { get; init; }
+
+    /// <summary>
     /// The spoken text.
     /// </summary>
     public required string Text { get; init; }

@@ -12,5 +12,5 @@ public interface IAddonTalkHandler : IDisposable
 
     Observable<AddonTalkCloseEvent> OnClose();
 
-    void PollAddon(AddonPollSource pollSource);
+    void PollAddon(AddonPollSource pollSource, string? voiceFile);
 }

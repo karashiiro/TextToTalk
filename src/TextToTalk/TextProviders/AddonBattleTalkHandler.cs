@@ -11,7 +11,7 @@ namespace TextToTalk.TextProviders;
 // This might be almost exactly the same as AddonTalkHandler, but it's too early to pull out a common base class.
 public class AddonBattleTalkHandler : IAddonBattleTalkHandler
 {
-    private record struct AddonBattleTalkState(string? Speaker, string? Text, AddonPollSource PollSource);
+    private record struct AddonBattleTalkState(string? Speaker, string? Text, AddonPollSource PollSource, string? VoiceFile);
 
     private readonly AddonBattleTalkManager addonTalkManager;
     private readonly MessageHandlerFilters filters;
@@ -61,18 +61,18 @@ public class AddonBattleTalkHandler : IAddonBattleTalkHandler
 
     private IDisposable HandleFrameworkUpdate()
     {
-        return OnFrameworkUpdate().Subscribe(this, static (s, h) => h.PollAddon(s));
+        return OnFrameworkUpdate().Subscribe(this, static (s, h) => h.PollAddon(s, null));
     }
 
-    public void PollAddon(AddonPollSource pollSource)
+    public void PollAddon(AddonPollSource pollSource, string? voiceFile)
     {
-        var state = GetTalkAddonState(pollSource);
+        var state = GetTalkAddonState(pollSource, voiceFile);
         this.updateState.Mutate(state);
     }
 
     private void HandleChange(AddonBattleTalkState state)
     {
-        var (speaker, text, pollSource) = state;
+        var (speaker, text, pollSource, voiceFile) = state;
 
         if (state == default)
         {
@@ -122,11 +122,11 @@ public class AddonBattleTalkHandler : IAddonBattleTalkHandler
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
         OnTextEmit.Invoke(speakerObj != null
-            ? new AddonBattleTalkEmitEvent(speakerObj.Name, text, speakerObj)
-            : new AddonBattleTalkEmitEvent(state.Speaker ?? "", text, null));
+            ? new AddonBattleTalkEmitEvent(speakerObj.Name, text, speakerObj, voiceFile)
+            : new AddonBattleTalkEmitEvent(state.Speaker ?? "", text, null, voiceFile));
     }
 
-    private AddonBattleTalkState GetTalkAddonState(AddonPollSource pollSource)
+    private AddonBattleTalkState GetTalkAddonState(AddonPollSource pollSource, string? voiceFile)
     {
         if (!this.addonTalkManager.IsVisible())
         {
@@ -135,7 +135,7 @@ public class AddonBattleTalkHandler : IAddonBattleTalkHandler
 
         var addonTalkText = this.addonTalkManager.ReadText();
         return addonTalkText != null
-            ? new AddonBattleTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource)
+            ? new AddonBattleTalkState(addonTalkText.Speaker, addonTalkText.Text, pollSource, voiceFile)
             : default;
     }
 

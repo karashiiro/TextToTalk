@@ -3,7 +3,7 @@ using Dalamud.Game.Text.SeStringHandling;
 
 namespace TextToTalk.Events;
 
-public abstract class TextEmitEvent(TextSource source, SeString speaker, SeString text, GameObject? speakerObj)
+public abstract class TextEmitEvent(TextSource source, SeString speaker, SeString text, GameObject? speakerObj, string? voiceFile)
     : SourcedTextEvent(source)
 {
     /// <summary>
@@ -21,6 +21,11 @@ public abstract class TextEmitEvent(TextSource source, SeString speaker, SeStrin
     /// The speaking entity, if detected.
     /// </summary>
     public GameObject? Speaker { get; } = speakerObj;
+
+    /// <summary>
+    /// The filename of the spoken voice line, if applicable.
+    /// </summary>
+    public string? VoiceFile { get; } = voiceFile;
 
     /// <summary>
     /// Returns if this event instance is equivalent to another.
