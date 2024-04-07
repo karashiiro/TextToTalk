@@ -13,6 +13,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using LiteDB;
+using Lumina.Excel.GeneratedSheets;
 using R3;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
@@ -35,11 +36,6 @@ using TextToTalk.UI;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
-using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Game.ClientState.Objects.Enums;
-using Lumina.Excel.GeneratedSheets;
-using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Component.Excel;
 
 namespace TextToTalk
 {
