@@ -11,6 +11,7 @@ namespace TextToTalk.Backends
         Azure,
         ElevenLabs,
         OpenAi,
+        GoogleCloud,
     }
 
     public static class TTSBackendExtensions
@@ -26,6 +27,7 @@ namespace TextToTalk.Backends
                 TTSBackend.Azure => "Azure Cognitive Services",
                 TTSBackend.ElevenLabs => "ElevenLabs",
                 TTSBackend.OpenAi => "OpenAI",
+                TTSBackend.GoogleCloud => "GoogleCloud",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
@@ -41,6 +43,7 @@ namespace TextToTalk.Backends
                 TTSBackend.Azure => true,
                 TTSBackend.ElevenLabs => false,
                 TTSBackend.OpenAi => false,
+                TTSBackend.GoogleCloud => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }

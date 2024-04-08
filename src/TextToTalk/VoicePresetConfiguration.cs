@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
+using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -241,6 +242,15 @@ public class VoicePresetConfiguration
                 VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
                 Model = GetNullableValue<string?>(corrupted, "Model"),
                 EnabledBackend = TTSBackend.OpenAi
+            },
+            TTSBackend.GoogleCloud => new GoogleCloudVoicePreset
+            {
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
+                Locale = GetNullableValue<string?>(corrupted, "Locale"),
+                VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
+                EnabledBackend = TTSBackend.GoogleCloud
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),
         };
