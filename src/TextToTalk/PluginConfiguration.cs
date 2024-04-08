@@ -158,6 +158,8 @@ namespace TextToTalk
 
         public IList<string> AzureLexiconFiles { get; set; }
 
+        public string GoogleCreds { get; set; }
+
         public bool RemoveStutterEnabled { get; set; } = true;
 
         public IDictionary<string, IDictionary<TTSBackend, bool>>? RemoteLexiconEnabledBackends { get; set; }
