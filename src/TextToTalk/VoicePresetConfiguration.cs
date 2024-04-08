@@ -247,6 +247,7 @@ public class VoicePresetConfiguration
             {
                 Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
                 Name = GetNullableValue<string?>(corrupted, "Name"),
+                PlaybackRate = Convert.ToSingle(GetNullableValue<double?>(corrupted, "PlaybackRate")),
                 Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
                 Locale = GetNullableValue<string?>(corrupted, "Locale"),
                 VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
