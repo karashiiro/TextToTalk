@@ -91,6 +91,23 @@ public class GoogleCloudBackendUI
             ImGui.EndCombo();
         }
 
+        var validSampleRates = new[] { "8000", "16000", "22050", "24000" };
+        var sampleRate = currentVoicePreset.SampleRate.ToString();
+        var sampleRateIndex = Array.IndexOf(validSampleRates, sampleRate);
+        if (ImGui.Combo($"Sample rate##{MemoizedId.Create()}", ref sampleRateIndex, validSampleRates,
+                validSampleRates.Length))
+        {
+            currentVoicePreset.SampleRate = int.Parse(validSampleRates[sampleRateIndex]);
+            this.config.Save();
+        }
+
+        var pitch = currentVoicePreset.Pitch ?? 0;
+        if (ImGui.SliderFloat($"Pitch##{MemoizedId.Create()}", ref pitch, -10f, 10f, "%.2fx"))
+        {
+            currentVoicePreset.Pitch = pitch;
+            config.Save();
+        }
+
         var playbackRate = currentVoicePreset.PlaybackRate ?? 1;
         if (ImGui.SliderFloat($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 0.25f, 4f, "%.2fx"))
         {

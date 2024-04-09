@@ -60,7 +60,7 @@ public class GoogleCloudClient
         return uniqueLocales.ToList().OrderBy(lang => lang).ToList();
     }
 
-    public async Task Say(string? locale, string? voice, float? speed, float volume, TextSource source,
+    public async Task Say(string? locale, string? voice, int? sampleRate, float? pitch, float? speed, float volume, TextSource source,
         string text)
     {
         if (client == null || soundQueue == null || locale == null)
@@ -79,6 +79,8 @@ public class GoogleCloudClient
             AudioConfig = new AudioConfig
             {
                 AudioEncoding = AudioEncoding.Mp3,
+                SampleRateHertz = sampleRate ?? 22050,
+                Pitch = pitch ?? 0,
                 SpeakingRate = speed ?? 1.0f,
                 VolumeGainDb = volume
             }
