@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 namespace TextToTalk;
 
 public static class DetailedLog
 {
+    private static IPluginLog? logger;
+
+    public static void SetLogger(IPluginLog pluginLog)
+    {
+        logger = pluginLog;
+    }
+
     public static void Verbose(
         string messageTemplate,
         [CallerMemberName] string memberName = "",
@@ -16,7 +23,7 @@ public static class DetailedLog
         [CallerLineNumber] int sourceLineNumber = 0,
         params object[] values)
     {
-        PluginLog.LogVerbose(
+        logger?.Verbose(
             WrapTemplate(messageTemplate),
             WrapParameters(memberName, sourceFilePath, sourceLineNumber, values));
     }
@@ -29,7 +36,7 @@ public static class DetailedLog
         [CallerLineNumber] int sourceLineNumber = 0,
         params object[] values)
     {
-        PluginLog.LogDebug(
+        logger?.Debug(
             WrapTemplate(messageTemplate),
             WrapParameters(memberName, sourceFilePath, sourceLineNumber, values));
     }
@@ -41,7 +48,7 @@ public static class DetailedLog
         [CallerLineNumber] int sourceLineNumber = 0,
         params object[] values)
     {
-        PluginLog.LogInformation(
+        logger?.Information(
             WrapTemplate(messageTemplate),
             WrapParameters(memberName, sourceFilePath, sourceLineNumber, values));
     }
@@ -53,7 +60,7 @@ public static class DetailedLog
         [CallerLineNumber] int sourceLineNumber = 0,
         params object[] values)
     {
-        PluginLog.LogWarning(
+        logger?.Warning(
             WrapTemplate(messageTemplate),
             WrapParameters(memberName, sourceFilePath, sourceLineNumber, values));
     }
@@ -65,7 +72,7 @@ public static class DetailedLog
         [CallerLineNumber] int sourceLineNumber = 0,
         params object[] values)
     {
-        PluginLog.LogError(
+        logger?.Error(
             WrapTemplate(messageTemplate),
             WrapParameters(memberName, sourceFilePath, sourceLineNumber, values));
     }
@@ -78,7 +85,7 @@ public static class DetailedLog
         [CallerLineNumber] int sourceLineNumber = 0,
         params object[] values)
     {
-        PluginLog.LogError(
+        logger?.Error(
             exception,
             WrapTemplate(messageTemplate),
             WrapParameters(memberName, sourceFilePath, sourceLineNumber, values));

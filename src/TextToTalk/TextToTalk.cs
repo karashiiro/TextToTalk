@@ -99,8 +99,11 @@ namespace TextToTalk
             ICondition condition,
             ICommandManager commandManager,
             ISigScanner sigScanner,
-            IGameInteropProvider gameInterop)
+            IGameInteropProvider gameInterop,
+            IPluginLog pluginLog)
         {
+            DetailedLog.SetLogger(pluginLog);
+
             this.pluginInterface = pi;
             this.clientState = clientState;
             this.keys = keyState;
