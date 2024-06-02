@@ -134,7 +134,7 @@ namespace TextToTalk
 
             var unlockerResultWindow = new UnlockerResultWindow();
             var channelPresetModificationWindow = new ChannelPresetModificationWindow(this.config);
-            var voiceUnlockerRunner = new VoiceUnlockerRunner(pi.AssemblyLocation.Extension);
+            var voiceUnlockerRunner = new VoiceUnlockerRunner(pi.AssemblyLocation.FullName);
             this.voiceUnlockerWindow = new VoiceUnlockerWindow(voiceUnlockerRunner);
             var handleUnlockerResult = this.voiceUnlockerWindow.OnResult()
                 .Subscribe(unlockerResultWindow, static (result, window) =>
