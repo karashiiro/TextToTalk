@@ -157,6 +157,8 @@ namespace TextToTalk
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
 
+            pi.UiBuilder.OpenMainUi += this.configurationWindow.Open;
+
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler =
                 new AddonTalkHandler(this.addonTalkManager, framework, filters, objects, this.config);
@@ -558,6 +560,7 @@ namespace TextToTalk
 
             this.soundHandler.Dispose();
 
+            this.pluginInterface.UiBuilder.OpenMainUi -= this.configurationWindow.Open;
             this.configurationWindow.Dispose();
 
             this.voiceUnlockerWindow.Dispose();

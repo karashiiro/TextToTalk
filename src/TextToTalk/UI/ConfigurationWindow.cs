@@ -54,6 +54,11 @@ namespace TextToTalk.UI
             SizeCondition = ImGuiCond.FirstUseEver;
         }
 
+        public void Open()
+        {
+            IsOpen = true;
+        }
+
         public Observable<bool> OnPresetOpenRequested()
         {
             return this.onPresetOpenRequested;
