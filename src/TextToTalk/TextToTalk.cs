@@ -158,8 +158,6 @@ namespace TextToTalk
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
 
-            pi.UiBuilder.OpenMainUi += this.configurationWindow.Open;
-
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler =
                 new AddonTalkHandler(this.addonTalkManager, framework, filters, objects, this.config);
@@ -514,16 +512,12 @@ namespace TextToTalk
             return voicePresets[voicePresetIndex];
         }
 
-        private void OpenConfigUi()
-        {
-            this.configurationWindow.IsOpen = true;
-        }
-
         private void RegisterCallbacks()
         {
             this.pluginInterface.UiBuilder.Draw += this.windows.Draw;
 
-            this.pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+            this.pluginInterface.UiBuilder.OpenMainUi += this.configurationWindow.Open;
+            this.pluginInterface.UiBuilder.OpenConfigUi += this.configurationWindow.Open;
 
             this.chat.ChatMessage += CheckFailedToBindPort;
             this.chat.ChatMessage += WarnIfNoPresetsConfiguredForBackend;
@@ -538,7 +532,8 @@ namespace TextToTalk
             this.chat.ChatMessage -= WarnIfNoPresetsConfiguredForBackend;
             this.chat.ChatMessage -= CheckFailedToBindPort;
 
-            this.pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+            this.pluginInterface.UiBuilder.OpenConfigUi -= this.configurationWindow.Open;
+            this.pluginInterface.UiBuilder.OpenMainUi -= this.configurationWindow.Open;
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
         }
@@ -561,7 +556,6 @@ namespace TextToTalk
 
             this.soundHandler.Dispose();
 
-            this.pluginInterface.UiBuilder.OpenMainUi -= this.configurationWindow.Open;
             this.configurationWindow.Dispose();
 
             this.voiceUnlockerWindow.Dispose();
