@@ -148,7 +148,8 @@ public class VoicePresetConfiguration
         var config = JsonConvert.DeserializeObject<VoicePresetConfiguration>(data, SerializerSettings);
         if (config == null)
         {
-            throw new InvalidOperationException("Voice preset config was null.");
+            DetailedLog.Error("Voice preset configuration was corrupted; creating new voice preset configuration.");
+            return new VoicePresetConfiguration();
         }
 
         config.VoicePresets = config.VoicePresetsRaw?.Select(RepairPreset).ToList() ?? new List<VoicePreset>();
