@@ -1,7 +1,7 @@
 ﻿using LiteDB;
 using TextToTalk.Data.Model;
 
-namespace TextToTalk.Data.Service;
+namespace TextToTalk.Data.Services;
 
 public class TextEventLogCollection(ILiteDatabase db)
 {

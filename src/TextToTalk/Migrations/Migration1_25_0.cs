@@ -4,7 +4,8 @@ using System.Linq;
 using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json.Linq;
 using TextToTalk.Data.Model;
-using TextToTalk.Data.Service;
+using TextToTalk.Data.Services;
+
 #pragma warning disable CS0612
 #pragma warning disable CS0618
 

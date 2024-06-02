@@ -11,7 +11,7 @@ using System.Net;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
-using TextToTalk.Data.Service;
+using TextToTalk.Data.Services;
 using TextToTalk.Middleware;
 using TextToTalk.Migrations;
 using TextToTalk.UI.Core;

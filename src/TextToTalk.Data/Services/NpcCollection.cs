@@ -2,19 +2,12 @@
 using LiteDB;
 using TextToTalk.Data.Model;
 
-namespace TextToTalk.Data.Service;
+namespace TextToTalk.Data.Services;
 
-public class NpcCollection
+public class NpcCollection(ILiteDatabase db)
 {
     private const string NpcCollectionName = "npc";
     private const string NpcVoiceCollectionName = "npc_voice";
-
-    private readonly ILiteDatabase db;
-
-    public NpcCollection(ILiteDatabase db)
-    {
-        this.db = db;
-    }
 
     /// <summary>
     /// Fetches all stored NPCs from the database.
@@ -103,14 +96,14 @@ public class NpcCollection
 
     private ILiteCollection<Npc> GetNpcCollection()
     {
-        var collection = this.db.GetCollection<Npc>(NpcCollectionName);
+        var collection = db.GetCollection<Npc>(NpcCollectionName);
         EnsureIndices(collection);
         return collection;
     }
 
     private ILiteCollection<NpcVoice> GetNpcVoiceCollection()
     {
-        var collection = this.db.GetCollection<NpcVoice>(NpcVoiceCollectionName);
+        var collection = db.GetCollection<NpcVoice>(NpcVoiceCollectionName);
         EnsureIndices(collection);
         return collection;
     }

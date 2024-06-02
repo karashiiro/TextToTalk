@@ -2,19 +2,12 @@
 using LiteDB;
 using TextToTalk.Data.Model;
 
-namespace TextToTalk.Data.Service;
+namespace TextToTalk.Data.Services;
 
-public class PlayerCollection
+public class PlayerCollection(ILiteDatabase db)
 {
     private const string PlayerCollectionName = "player";
     private const string PlayerVoiceCollectionName = "player_voice";
-
-    private readonly ILiteDatabase db;
-
-    public PlayerCollection(ILiteDatabase db)
-    {
-        this.db = db;
-    }
 
     /// <summary>
     /// Fetches all stored players from the database.
@@ -104,14 +97,14 @@ public class PlayerCollection
 
     private ILiteCollection<Player> GetPlayerCollection()
     {
-        var collection = this.db.GetCollection<Player>(PlayerCollectionName);
+        var collection = db.GetCollection<Player>(PlayerCollectionName);
         EnsureIndices(collection);
         return collection;
     }
 
     private ILiteCollection<PlayerVoice> GetPlayerVoiceCollection()
     {
-        var collection = this.db.GetCollection<PlayerVoice>(PlayerVoiceCollectionName);
+        var collection = db.GetCollection<PlayerVoice>(PlayerVoiceCollectionName);
         EnsureIndices(collection);
         return collection;
     }

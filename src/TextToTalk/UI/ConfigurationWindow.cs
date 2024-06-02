@@ -13,6 +13,7 @@ using R3;
 using TextToTalk.Backends;
 using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
+using TextToTalk.Services;
 
 namespace TextToTalk.UI
 {
