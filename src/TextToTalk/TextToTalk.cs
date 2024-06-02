@@ -1,7 +1,6 @@
 ﻿using Dalamud.Game;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
@@ -89,18 +88,18 @@ namespace TextToTalk
         public string Name => "TextToTalk";
 
         public TextToTalk(
-            [RequiredVersion("1.0")] DalamudPluginInterface pi,
-            [RequiredVersion("1.0")] IKeyState keyState,
-            [RequiredVersion("1.0")] IChatGui chat,
-            [RequiredVersion("1.0")] IFramework framework,
-            [RequiredVersion("1.0")] IClientState clientState,
-            [RequiredVersion("1.0")] IGameGui gui,
-            [RequiredVersion("1.0")] IDataManager data,
-            [RequiredVersion("1.0")] IObjectTable objects,
-            [RequiredVersion("1.0")] ICondition condition,
-            [RequiredVersion("1.0")] ICommandManager commandManager,
-            [RequiredVersion("1.0")] ISigScanner sigScanner,
-            [RequiredVersion("1.0")] IGameInteropProvider gameInterop)
+            DalamudPluginInterface pi,
+            IKeyState keyState,
+            IChatGui chat,
+            IFramework framework,
+            IClientState clientState,
+            IGameGui gui,
+            IDataManager data,
+            IObjectTable objects,
+            ICondition condition,
+            ICommandManager commandManager,
+            ISigScanner sigScanner,
+            IGameInteropProvider gameInterop)
         {
             this.pluginInterface = pi;
             this.clientState = clientState;
