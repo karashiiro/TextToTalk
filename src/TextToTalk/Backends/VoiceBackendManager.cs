@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Numerics;
 using System.Threading.Tasks;
 using Dalamud.Interface;
-using R3;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
@@ -12,6 +12,7 @@ using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
+using TextToTalk.Services;
 
 namespace TextToTalk.Backends
 {
@@ -19,20 +20,19 @@ namespace TextToTalk.Backends
     {
         private readonly HttpClient http;
         private readonly PluginConfiguration config;
-        private readonly Subject<int> onFailedToBindWsPort;
         private readonly UiBuilder uiBuilder;
-
-        private IDisposable? handleFailedToBindWsPort;
+        private readonly INotificationService notificationService;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
-        public VoiceBackendManager(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder)
+        public VoiceBackendManager(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder,
+            INotificationService notificationService)
         {
             this.config = config;
             this.http = http;
-            this.onFailedToBindWsPort = new Subject<int>();
             this.uiBuilder = uiBuilder;
+            this.notificationService = notificationService;
 
             SetBackend(this.config.Backend);
         }
@@ -62,11 +62,6 @@ namespace TextToTalk.Backends
             return Backend?.GetCurrentlySpokenTextSource() ?? TextSource.None;
         }
 
-        public Observable<int> OnFailedToBindWSPort()
-        {
-            return this.onFailedToBindWsPort;
-        }
-
         public void SetBackend(TTSBackend backendKind)
         {
             _ = Task.Run(() =>
@@ -74,18 +69,25 @@ namespace TextToTalk.Backends
                 BackendLoading = true;
                 var newBackend = CreateBackendFor(backendKind);
                 var oldBackend = Backend;
-                if (backendKind == TTSBackend.Websocket)
-                {
-                    var wsBackend = newBackend as WebsocketBackend;
-                    this.handleFailedToBindWsPort =
-                        wsBackend?.OnFailedToBindPort().SubscribeOnThreadPool()
-                            .Subscribe(this.onFailedToBindWsPort.AsObserver());
-                }
-
                 Backend = newBackend;
                 BackendLoading = false;
                 oldBackend?.Dispose();
+                WarnIfNoPresetsConfiguredForBackend();
             });
+        }
+
+        private void WarnIfNoPresetsConfiguredForBackend()
+        {
+            if (!this.config.Enabled ||
+                this.config.Backend == TTSBackend.Websocket ||
+                this.config.GetVoiceConfig().VoicePresets.Any(vp => vp.EnabledBackend == this.config.Backend))
+            {
+                return;
+            }
+
+            this.notificationService.NotifyWarning(
+                "You have no voice presets configured.",
+                "Please create a voice preset in the TextToTalk configuration.");
         }
 
         public Vector4 GetBackendTitleBarColor()
@@ -98,7 +100,7 @@ namespace TextToTalk.Backends
             return backendKind switch
             {
                 TTSBackend.System => new SystemBackend(this.config, this.http),
-                TTSBackend.Websocket => new WebsocketBackend(this.config),
+                TTSBackend.Websocket => new WebsocketBackend(this.config, this.notificationService),
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
                 TTSBackend.Azure => new AzureBackend(this.config, this.http),
@@ -113,7 +115,6 @@ namespace TextToTalk.Backends
         {
             if (disposing)
             {
-                this.handleFailedToBindWsPort?.Dispose();
                 Backend?.Dispose();
             }
         }

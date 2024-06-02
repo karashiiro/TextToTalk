@@ -71,6 +71,7 @@ namespace TextToTalk
         private readonly NpcService npcService;
         private readonly WindowSystem windows;
         private readonly IDataManager data;
+        private readonly NotificationService notificationService;
 
         private readonly ConfigurationWindow configurationWindow;
         private readonly VoiceUnlockerWindow voiceUnlockerWindow;
@@ -81,10 +82,6 @@ namespace TextToTalk
 
         private ILiteDatabase? textEventLogDatabase;
         private TextEventLogCollection? textEventLog;
-
-        private bool failedToBindWsPort;
-        private bool notifiedFailedToBindPort;
-        private bool notifiedNoPresetsConfigured;
 
         public string Name => "TextToTalk";
 
@@ -101,6 +98,7 @@ namespace TextToTalk
             ICommandManager commandManager,
             ISigScanner sigScanner,
             IGameInteropProvider gameInterop,
+            INotificationManager notificationManager,
             IPluginLog pluginLog)
         {
             DetailedLog.SetLogger(pluginLog);
@@ -118,6 +116,8 @@ namespace TextToTalk
             var playerCollection = new PlayerCollection(this.database);
             var npcCollection = new NpcCollection(this.database);
 
+            this.notificationService = new NotificationService(notificationManager, chat, clientState);
+
             this.windows = new WindowSystem("TextToTalk");
 
             this.config = (PluginConfiguration?)this.pluginInterface.GetPluginConfig() ?? new PluginConfiguration();
@@ -129,8 +129,8 @@ namespace TextToTalk
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder);
-            var handleFailedToBindWsPort = HandleFailedToBindWSPort();
+            this.backendManager =
+                new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
 
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
             this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);
@@ -183,7 +183,7 @@ namespace TextToTalk
             var handleTextEmit = HandleTextEmit();
 
             this.unsubscribeAll = Disposable.Combine(handleTextCancel, handleTextEmit, handleUnlockerResult,
-                handlePresetOpenRequested, handleFailedToBindWsPort);
+                handlePresetOpenRequested);
         }
 
         private void CreateDatabasePath()
@@ -238,16 +238,6 @@ namespace TextToTalk
                 ex => DetailedLog.Error(ex, "Failed to log text emit event"));
         }
 
-        private IDisposable HandleFailedToBindWSPort()
-        {
-            return this.backendManager.OnFailedToBindWSPort()
-                .Subscribe(this, static (_, p) =>
-                {
-                    p.failedToBindWsPort = true;
-                    p.notifiedFailedToBindPort = false;
-                });
-        }
-
         private bool keysDown;
 
         private void CheckKeybindPressed(IFramework f)
@@ -295,34 +285,6 @@ namespace TextToTalk
             }
 
             return false;
-        }
-
-        private void CheckFailedToBindPort(XivChatType type, uint id, ref SeString sender, ref SeString message,
-            ref bool handled)
-        {
-            if (!this.clientState.IsLoggedIn || !this.failedToBindWsPort ||
-                this.notifiedFailedToBindPort) return;
-            this.chat.Print($"TextToTalk failed to bind to port {this.config.WebsocketPort}. " +
-                            "Please close the owner of that port and reload the Websocket server, " +
-                            "or select a different port.");
-            this.notifiedFailedToBindPort = true;
-        }
-
-        private void WarnIfNoPresetsConfiguredForBackend(XivChatType type, uint id, ref SeString sender,
-            ref SeString message, ref bool handled)
-        {
-            if (!this.clientState.IsLoggedIn || this.notifiedNoPresetsConfigured) return;
-            if (this.config.Enabled &&
-                this.config.Backend != TTSBackend.Websocket &&
-                this.config.GetVoiceConfig().VoicePresets.All(vp => vp.EnabledBackend != this.config.Backend))
-            {
-                FunctionalUtils.RunSafely(
-                    () => this.chat.Print(
-                        "You have no voice presets configured. Please create a voice preset in the TextToTalk configuration."),
-                    ex => DetailedLog.Error(ex, "Failed to print chat message."));
-            }
-
-            this.notifiedNoPresetsConfigured = true;
         }
 
         private void Say(GameObject? speaker, SeString speakerName, XivChatType? chatType, string textValue,
@@ -519,18 +481,14 @@ namespace TextToTalk
             this.pluginInterface.UiBuilder.OpenMainUi += this.configurationWindow.Open;
             this.pluginInterface.UiBuilder.OpenConfigUi += this.configurationWindow.Open;
 
-            this.chat.ChatMessage += CheckFailedToBindPort;
-            this.chat.ChatMessage += WarnIfNoPresetsConfiguredForBackend;
-
+            this.framework.Update += this.notificationService.ProcessNotifications;
             this.framework.Update += CheckKeybindPressed;
         }
 
         private void UnregisterCallbacks()
         {
             this.framework.Update -= CheckKeybindPressed;
-
-            this.chat.ChatMessage -= WarnIfNoPresetsConfiguredForBackend;
-            this.chat.ChatMessage -= CheckFailedToBindPort;
+            this.framework.Update -= this.notificationService.ProcessNotifications;
 
             this.pluginInterface.UiBuilder.OpenConfigUi -= this.configurationWindow.Open;
             this.pluginInterface.UiBuilder.OpenMainUi -= this.configurationWindow.Open;
