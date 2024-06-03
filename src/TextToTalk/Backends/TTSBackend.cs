@@ -27,7 +27,7 @@ namespace TextToTalk.Backends
                 TTSBackend.Azure => "Azure Cognitive Services",
                 TTSBackend.ElevenLabs => "ElevenLabs",
                 TTSBackend.OpenAi => "OpenAI",
-                TTSBackend.GoogleCloud => "GoogleCloud",
+                TTSBackend.GoogleCloud => "Google Cloud",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
