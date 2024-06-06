@@ -327,6 +327,9 @@
       "texttotalk.ungenderedoverrides": {
         "type": "Project"
       },
+      "voiceunlocker": {
+        "type": "Project"
+      },
       "websocket-sharp": {
         "type": "Project"
       }
