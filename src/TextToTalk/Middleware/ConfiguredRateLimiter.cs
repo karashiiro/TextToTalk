@@ -10,7 +10,7 @@ namespace TextToTalk.Middleware;
 /// <param name="config">The plugin's configuration.</param>
 public class ConfiguredRateLimiter(IRateLimiterConfigProvider config) : RateLimiter(GetLimitDuration(config))
 {
-    public bool TryRateLimit(GameObject speaker)
+    public bool TryRateLimit(IGameObject speaker)
     {
         return config.ShouldRateLimit() && speaker.ObjectKind is ObjectKind.Player &&
                TryRateLimit(speaker.Name.TextValue);

@@ -17,7 +17,7 @@ public class ObjectMapper
             deserialize: _ => throw new NotSupportedException());
 
         // Register one-way GameObject mapper
-        BsonMapper.Global.RegisterType<GameObject>(
+        BsonMapper.Global.RegisterType<IGameObject>(
             serialize: value => value.Name.TextValue,
             deserialize: _ => throw new NotSupportedException());
     }

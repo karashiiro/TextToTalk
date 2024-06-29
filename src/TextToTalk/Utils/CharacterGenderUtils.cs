@@ -8,7 +8,7 @@ namespace TextToTalk.Utils;
 public static class CharacterGenderUtils
 {
     // TODO: Use NPC ID instead of reading the model information :(
-    public static unsafe Gender GetCharacterGender(GameObject? gObj, UngenderedOverrideManager overrides)
+    public static unsafe Gender GetCharacterGender(IGameObject? gObj, UngenderedOverrideManager overrides)
     {
         if (gObj == null || gObj.Address == nint.Zero)
         {

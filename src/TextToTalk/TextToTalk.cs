@@ -36,7 +36,7 @@ using TextToTalk.TextProviders;
 using TextToTalk.UI;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
-using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace TextToTalk
 {
@@ -404,7 +404,7 @@ namespace TextToTalk
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
         {
             // Check if the speaker is a player and we have a custom voice for this speaker
-            if (speaker is PlayerCharacter pc &&
+            if (speaker is IPlayerCharacter pc &&
                 this.config.UsePlayerVoicePresets &&
                 this.playerService.TryGetPlayer(speakerName, pc.HomeWorld.Id, out var playerInfo) &&
                 this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))

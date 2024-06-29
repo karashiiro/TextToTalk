@@ -5,9 +5,9 @@ namespace TextToTalk.Extensions;
 
 public static class GameObjectExtensions
 {
-    public static uint? GetNpcId(this GameObject gameObject)
+    public static uint? GetNpcId(this IGameObject gameObject)
     {
-        if (gameObject is Npc npc)
+        if (gameObject is INpc npc)
         {
             return npc.DataId;
         }

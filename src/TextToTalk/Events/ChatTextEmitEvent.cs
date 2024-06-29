@@ -7,7 +7,7 @@ namespace TextToTalk.Events;
 public class ChatTextEmitEvent(
     SeString speaker,
     SeString text,
-    GameObject? obj,
+    IGameObject? obj,
     XivChatType chatType)
     : TextEmitEvent(TextSource.Chat, speaker, text, obj)
 {
