@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading.Tasks;
 using Dalamud;
+using Dalamud.Game;
 using Dalamud.Game.Text;
 using Moq;
 using Newtonsoft.Json;
