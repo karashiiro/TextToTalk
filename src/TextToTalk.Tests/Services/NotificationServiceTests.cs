@@ -1,5 +1,4 @@
 ﻿using Dalamud.Interface.ImGuiNotification;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Plugin.Services;
 using Moq;
 using TextToTalk.Services;

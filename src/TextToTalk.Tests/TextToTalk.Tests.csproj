@@ -41,10 +41,6 @@
     <DalamudLibPath>$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DalamudLibPath>$(DALAMUD_DEV)\</DalamudLibPath>
-  </PropertyGroup>
-
   <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
