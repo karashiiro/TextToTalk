@@ -1,5 +1,6 @@
 ﻿using Dalamud;
 using Dalamud.Game.Text;
+using Dalamud.Game;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.GameEnums;
 

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Dalamud.Interface.ImGuiNotification;
-using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Plugin.Services;
 
 // ReSharper disable ExplicitCallerInfoArgument

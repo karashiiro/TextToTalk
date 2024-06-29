@@ -3,7 +3,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Interface.ImGuiNotification;
+using Dalamud.Plugin.Services;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -11,9 +12,10 @@ public class ElevenLabsBackend : VoiceBackend
 {
     private readonly ElevenLabsBackendUI ui;
     private readonly ElevenLabsBackendUIModel uiModel;
-    private readonly UiBuilder uiBuilder;
+    private readonly IUiBuilder uiBuilder;
+    private readonly INotificationManager notificationManager;
 
-    public ElevenLabsBackend(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder)
+    public ElevenLabsBackend(PluginConfiguration config, HttpClient http, IUiBuilder uiBuilder)
     {
         this.uiModel = new ElevenLabsBackendUIModel(config, http);
         this.ui = new ElevenLabsBackendUI(uiModel, config);
@@ -43,11 +45,14 @@ public class ElevenLabsBackend : VoiceBackend
             catch (ElevenLabsFailedException e) when (e.StatusCode == HttpStatusCode.TooManyRequests)
             {
                 DetailedLog.Error(e, $"Failed to make ElevenLabs TTS request ({e.StatusCode}).");
-                this.uiBuilder.AddNotification(
-                    "TTS is being rate-limited, please slow down.",
-                    title: null,
-                    NotificationType.Warning,
-                    10000);
+                this.notificationManager.AddNotification(
+                    new Notification()
+                    {
+                        Content = "TTS is being rate-limited, please slow down.",
+                        Title = null,
+                        Type = NotificationType.Warning,
+                        InitialDuration = new TimeSpan(10000)
+                    });
             }
             catch (ElevenLabsFailedException e)
             {

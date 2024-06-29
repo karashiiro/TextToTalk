@@ -9,7 +9,7 @@ public class CommandModule(ICommandManager commandManager) : IDisposable
 {
     private readonly List<string> commandNames = [];
 
-    protected void AddCommand(string name, CommandInfo.HandlerDelegate method, string help)
+    protected void AddCommand(string name, IReadOnlyCommandInfo.HandlerDelegate method, string help)
     {
         commandManager.AddHandler(name, new CommandInfo(method)
         {

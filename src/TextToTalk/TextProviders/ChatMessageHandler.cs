@@ -48,11 +48,12 @@ public class ChatMessageHandler : IChatMessageHandler
             cmh.chat.ChatMessage += handler;
             return Disposable.Create(() => { cmh.chat.ChatMessage -= handler; });
 
-            void HandleMessage(XivChatType type, uint id, ref SeString sender, ref SeString message, ref bool handled)
+            void HandleMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool handled)
             {
                 if (!cmh.config.Enabled) return;
                 observer.OnNext(new ChatMessage(type, sender, message));
             }
+
         });
     }
 
@@ -123,7 +124,7 @@ public class ChatMessageHandler : IChatMessageHandler
             type));
     }
 
-    private static SeString GetCleanSpeakerName(GameObject? speaker, SeString sender)
+    private static SeString GetCleanSpeakerName(IGameObject? speaker, SeString sender)
     {
         // Get the speaker name from their entity data, if possible
         if (speaker != null)

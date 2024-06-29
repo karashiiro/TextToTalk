@@ -20,13 +20,13 @@ namespace TextToTalk.Backends
     {
         private readonly HttpClient http;
         private readonly PluginConfiguration config;
-        private readonly UiBuilder uiBuilder;
+        private readonly IUiBuilder uiBuilder;
         private readonly INotificationService notificationService;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
-        public VoiceBackendManager(PluginConfiguration config, HttpClient http, UiBuilder uiBuilder,
+        public VoiceBackendManager(PluginConfiguration config, HttpClient http, IUiBuilder uiBuilder,
             INotificationService notificationService)
         {
             this.config = config;
