@@ -10,24 +10,24 @@
       },
       "AWSSDK.Polly": {
         "type": "Direct",
-        "requested": "[3.7.203.27, )",
-        "resolved": "3.7.203.27",
-        "contentHash": "4ig1PO+6tJoS6m/YowXK78Hsux6ZGoPwB6swlVmWkRvl85eEK/DphaW2VDuApKuzrgtG5uFwH8cYIOKMMMV9vA==",
+        "requested": "[3.7.304.5, )",
+        "resolved": "3.7.304.5",
+        "contentHash": "LV/4bEdemF3ORbXYV8s+MKZfKrgjoOAwW/wNXj6bd6tVHbzd4o5PNf9HcASNAj4I5q8AHhFnQRm0rxcwhfGU6A==",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.202.20, 4.0.0)"
+          "AWSSDK.Core": "[3.7.304.22, 4.0.0)"
         }
       },
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[2.1.12, )",
-        "resolved": "2.1.12",
-        "contentHash": "Sc0PVxvgg4NQjcI8n10/VfUQBAS4O+Fw2pZrAqBdRMbthYGeogzu5+xmIGCGmsEZ/ukMOBuAqiNiB5qA3MRalg=="
+        "requested": "[2.1.13, )",
+        "resolved": "2.1.13",
+        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
       },
       "Google.Cloud.TextToSpeech.V1": {
         "type": "Direct",
-        "requested": "[3.5.0, )",
-        "resolved": "3.5.0",
-        "contentHash": "xKekdJA+ZYSru3sChpYX8/4cFKLk5qhW/i94aYG82FmWsv1kOAKUAi3MbtvRHEznl0toC4d2VSYKxDI77e2z0Q==",
+        "requested": "[3.6.0, )",
+        "resolved": "3.6.0",
+        "contentHash": "O6Pt34Bi2UUHGK9JTruVo8AG0WbSMuczrBkslVhWG9iotRxwbJNfQD6Go57d2t9J7m/97ZrDes8Aevm+JaYQ9A==",
         "dependencies": {
           "Google.Api.Gax.Grpc": "[4.8.0, 5.0.0)",
           "Google.LongRunning": "[3.2.0, 4.0.0)"
@@ -35,34 +35,34 @@
       },
       "Microsoft.CognitiveServices.Speech": {
         "type": "Direct",
-        "requested": "[1.32.1, )",
-        "resolved": "1.32.1",
-        "contentHash": "9oy2Yqd5AdGx2VQsUR2WbIuz87y+Wl3iyWnWxd2NlBINWTHsYRv1rT5iptsxb25sv+rFql0LhMpvEs30gx/fTg=="
+        "requested": "[1.38.0, )",
+        "resolved": "1.38.0",
+        "contentHash": "i8hWZNyZJq4yBd0Id6iEiCBg5/yUMtoGfTCUVv2g9AMXjHWWnltl4RhZfOAyiKeAurp13UOO3iaw+6HQC4diSQ=="
       },
       "NAudio": {
         "type": "Direct",
-        "requested": "[2.1.0, )",
-        "resolved": "2.1.0",
-        "contentHash": "iamDtIq4Tcq6BDEMatX7Wj6KI7rscECS72ZejjnL9RK8BgfrVRH2RlhlQVNxXNp9Up1eFESEiCILNBo7//Rr0g==",
+        "requested": "[2.2.1, )",
+        "resolved": "2.2.1",
+        "contentHash": "c0DzwiyyklM0TP39Y7RObwO3QkWecgM6H60ikiEnsV/aEAJPbj5MFCLaD8BSfKuZe0HGuh9GRGWWlJmSxDc9MA==",
         "dependencies": {
-          "NAudio.Asio": "2.1.0",
-          "NAudio.Core": "2.1.0",
-          "NAudio.Midi": "2.1.0",
-          "NAudio.Wasapi": "2.1.0",
-          "NAudio.WinMM": "2.1.0"
+          "NAudio.Asio": "2.2.1",
+          "NAudio.Core": "2.2.1",
+          "NAudio.Midi": "2.2.1",
+          "NAudio.Wasapi": "2.2.1",
+          "NAudio.WinMM": "2.2.1"
         }
       },
       "R3": {
         "type": "Direct",
-        "requested": "[1.0.1, )",
-        "resolved": "1.0.1",
-        "contentHash": "QESbZntZBK5q5d287mK88pcsRaJp6TZpmihT+x6TAfBqbwtwYl2yos9/IbdGH28HjnSxs3GaQI+Vc6UOWq1uag=="
+        "requested": "[1.1.13, )",
+        "resolved": "1.1.13",
+        "contentHash": "McZxKrxNQticKHztfz5JiEVW6L2IAAi8/ytKJDXHrcGunRG5nu9Gbml3kY2hjpbSWgRs7A+gns2VFaohAYZm5g=="
       },
       "Riok.Mapperly": {
         "type": "Direct",
-        "requested": "[3.4.0, )",
-        "resolved": "3.4.0",
-        "contentHash": "bTxBEQ0+2x816IL78Fv0B/KkaGRtzfisit9dfWTfa7jjjwMMzpMW9A+V/hyxqHdJtYvtDL6dUNMLJige4zxJvw=="
+        "requested": "[3.6.0, )",
+        "resolved": "3.6.0",
+        "contentHash": "eQkT3evicd5fdb8HgAJjJ+uvbhfA76ozZZsBtounFrOvk0mj+9tozv1hCYV0f0cTmXIZsxtU93FMWPzd76wSaw=="
       },
       "Standart.Hash.xxHash": {
         "type": "Direct",
@@ -72,23 +72,23 @@
       },
       "System.Drawing.Common": {
         "type": "Direct",
-        "requested": "[8.0.0, )",
-        "resolved": "8.0.0",
-        "contentHash": "JkbHJjtI/dWc5dfmEdJlbe3VwgZqCkZRtfuWFh5GOv0f+gGCfBtzMpIVkmdkj2AObO9y+oiOi81UGwH3aBYuqA==",
+        "requested": "[8.0.6, )",
+        "resolved": "8.0.6",
+        "contentHash": "aSwRnJzz6fZ73JvWMMG0KvBwOnXsBTFtfHLriQyAPrDIZ+NrDfl15GWbO/A35k0dtH77D7jfxzEcFF7RONtU/w==",
         "dependencies": {
           "Microsoft.Win32.SystemEvents": "8.0.0"
         }
       },
       "System.Speech": {
         "type": "Direct",
-        "requested": "[7.0.0, )",
-        "resolved": "7.0.0",
-        "contentHash": "7E0uB92Cx2sXR67HW9rMKJqDACdLuz9t3I3OwZUFDzAgwKXWuY6CYeRT/NiypHcyZO2be9+0H0w0M6fn7HQtgQ=="
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "CNuiA6vb95Oe5PRjClZEBiaju31vwB8OIeCgeSBXyZL6+MS4RVVB2X/C11z0xCkooHE3Vy91nM2z76emIzR+sg=="
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "3.7.202.20",
-        "contentHash": "rRoHtZMcC5DYzA9WTOQd2kLor1sHC0GHippL1mCF7aA0oS4ZGm0wflm2TwtOfr2GpJk1f8Ez0Ho9xQp11cIeIw=="
+        "resolved": "3.7.304.22",
+        "contentHash": "aJPaRoxoJzQRfn7MXl7yEM2wncJl+K2jMU4IL3bIXmm7GBWDYspC2uLAEMiZMEJIDASmRmIzirx8z1GSYFY1Ng=="
       },
       "Google.Api.CommonProtos": {
         "type": "Transitive",
@@ -193,8 +193,8 @@
       },
       "LiteDB": {
         "type": "Transitive",
-        "resolved": "5.0.16",
-        "contentHash": "DMUYdRlgNbrSlyWzdQ4GqW934ntNHBGWMTNQlOL4hWz8WnveY6V9ZGo2ntPrSATW7kat8v5VoCXGSzToPiwZWw=="
+        "resolved": "5.0.20",
+        "contentHash": "/tUhRpJvx1sXJni7cbXPpctFHH1vifoJlg/QB+Cw22IYWqzbC3MAMOy/11limMHmZSPk6NU6JRA+lwqLy2f1Xw=="
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
@@ -232,41 +232,41 @@
       },
       "NAudio.Asio": {
         "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "YMXffgqPTsQIjmXYyzLrXSpQZzC7ZH49mmdXaPW3o/5S+AhFKZeOrwUA2fkvphQdGhryObbZnPAq+u8uABkH5A==",
+        "resolved": "2.2.1",
+        "contentHash": "hQglyOT5iT3XuGpBP8ZG0+aoqwRfidHjTNehpoWwX0g6KJEgtH2VaqM2nuJ2mheKZa/IBqB4YQTZVvrIapzfOA==",
         "dependencies": {
           "Microsoft.Win32.Registry": "4.7.0",
-          "NAudio.Core": "2.1.0"
+          "NAudio.Core": "2.2.1"
         }
       },
       "NAudio.Core": {
         "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "0iowfmolibU4KxjaC/s7lox/BeDg76UVvXtCuCzRiNpylVndqsxXxp+bVWFrpv0KzQDIKLxZrnDmYENlAI0u9g=="
+        "resolved": "2.2.1",
+        "contentHash": "GgkdP6K/7FqXFo7uHvoqGZTJvW4z8g2IffhOO4JHaLzKCdDOUEzVKtveoZkCuUX8eV2HAINqi7VFqlFndrnz/g=="
       },
       "NAudio.Midi": {
         "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "m2ZunnyZ1p7OoAMh1scHRVle+GiFuIRrzkcxZJREUFHje8O2hcMGya3ZAjD+dV2FTcrbqNQUc4kJy9LOTuydUw==",
+        "resolved": "2.2.1",
+        "contentHash": "6r23ylGo5aeP02WFXsPquz0T0hFJWyh+7t++tz19tc3Kr38NHm+Z9j+FiAv+xkH8tZqXJqus9Q8p6u7bidIgbw==",
         "dependencies": {
-          "NAudio.Core": "2.1.0"
+          "NAudio.Core": "2.2.1"
         }
       },
       "NAudio.Wasapi": {
         "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "Zp/8l79aYQEu7/HfzXWVpqyIwRUPgsvCj/Qx+pR6ykJxvwjqOoUfMiEG9US1wW4d7PEzT5ZBIL+cp90t6HNNiw==",
+        "resolved": "2.2.1",
+        "contentHash": "lFfXoqacZZe0WqNChJgGYI+XV/n/61LzPHT3C1CJp4khoxeo2sziyX5wzNYWeCMNbsWxFvT3b3iXeY1UYjBhZw==",
         "dependencies": {
-          "NAudio.Core": "2.1.0"
+          "NAudio.Core": "2.2.1"
         }
       },
       "NAudio.WinMM": {
         "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "lUU5C+XNzKhFUIEafA/nJpbtjksFtbUd033fs27KeHlOM0r6rQFF3l75dqxg+rWkGu81MfkBbYrNpH9p8qmtBA==",
+        "resolved": "2.2.1",
+        "contentHash": "xFHRFwH4x6aq3IxRbewvO33ugJRvZFEOfO62i7uQJRUNW2cnu6BeBTHUS0JD5KBucZbHZaYqxQG8dwZ47ezQuQ==",
         "dependencies": {
           "Microsoft.Win32.Registry": "4.7.0",
-          "NAudio.Core": "2.1.0"
+          "NAudio.Core": "2.2.1"
         }
       },
       "Newtonsoft.Json": {
@@ -303,13 +303,13 @@
       },
       "YamlDotNet": {
         "type": "Transitive",
-        "resolved": "13.0.2",
-        "contentHash": "hRPqCt2bxTvHN6iT2JNG2KznDPFgD5B6j0bQ7woSpfGctmjgAYdKQ+LYHUaj/7q8sN1AbIcTNbaO75g8IFmTjw=="
+        "resolved": "15.3.0",
+        "contentHash": "F93japYa9YrJ59AZGhgdaUGHN7ITJ55FBBg/D/8C0BDgahv/rQD6MOSwHxOJJpon1kYyslVbeBrQ2wcJhox01w=="
       },
       "texttotalk.data": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "[5.0.16, )"
+          "LiteDB": "[5.0.20, )"
         }
       },
       "texttotalk.lexicons": {
@@ -318,7 +318,7 @@
       "texttotalk.lexicons.updater": {
         "type": "Project",
         "dependencies": {
-          "YamlDotNet": "[13.0.2, )"
+          "YamlDotNet": "[15.3.0, )"
         }
       },
       "texttotalk.ui.core": {

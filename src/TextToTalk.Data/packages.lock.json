@@ -4,9 +4,9 @@
     "net8.0": {
       "LiteDB": {
         "type": "Direct",
-        "requested": "[5.0.16, )",
-        "resolved": "5.0.16",
-        "contentHash": "DMUYdRlgNbrSlyWzdQ4GqW934ntNHBGWMTNQlOL4hWz8WnveY6V9ZGo2ntPrSATW7kat8v5VoCXGSzToPiwZWw=="
+        "requested": "[5.0.20, )",
+        "resolved": "5.0.20",
+        "contentHash": "/tUhRpJvx1sXJni7cbXPpctFHH1vifoJlg/QB+Cw22IYWqzbC3MAMOy/11limMHmZSPk6NU6JRA+lwqLy2f1Xw=="
       }
     }
   }
