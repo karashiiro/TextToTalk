@@ -178,7 +178,7 @@ namespace TextToTalk
 #pragma warning restore 618
         }
 
-        [JsonIgnore] private DalamudPluginInterface pluginInterface;
+        [JsonIgnore] private IDalamudPluginInterface pluginInterface;
 
         [JsonIgnore] private object cfgLock;
 
@@ -196,7 +196,7 @@ namespace TextToTalk
         }
 
         public void Initialize(
-            DalamudPluginInterface pi,
+            IDalamudPluginInterface pi,
             PlayerCollection playerCollection,
             NpcCollection npcCollection)
         {

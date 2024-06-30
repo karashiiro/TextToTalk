@@ -48,7 +48,7 @@ namespace TextToTalk
         private const bool InitiallyVisible = false;
 #endif
 
-        private readonly DalamudPluginInterface pluginInterface;
+        private readonly IDalamudPluginInterface pluginInterface;
         private readonly MainCommandModule commandModule;
         private readonly DebugCommandModule debugCommandModule;
         private readonly IKeyState keys;
@@ -86,7 +86,7 @@ namespace TextToTalk
         public string Name => "TextToTalk";
 
         public TextToTalk(
-            DalamudPluginInterface pi,
+            IDalamudPluginInterface pi,
             IKeyState keyState,
             IChatGui chat,
             IFramework framework,
