@@ -209,14 +209,4 @@
 <grapheme>irl</grapheme>
 <alias>IRL</alias>
 </lexeme>
-<lexeme>
-<grapheme> tho </grapheme>
-<grapheme> tho.</grapheme>
-<grapheme> tho,</grapheme>
-<alias>though</alias>
-</lexeme>
-<lexeme>
-<grapheme>OP</grapheme>
-<alias>O P</alias>
-</lexeme>
 </lexicon>
