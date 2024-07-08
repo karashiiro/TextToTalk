@@ -28,11 +28,11 @@
 </lexeme>
 <lexeme>
 <grapheme>Amalj'aa</grapheme>
-<phoneme>a.mɔld͡ʒæ</phoneme>
+<phoneme>əˌmald͡ʒæ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Amalj'aas</grapheme>
-<phoneme>a.mɔld͡ʒæz</phoneme>
+<phoneme>əˌmald͡ʒæ z</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Arenvald</grapheme>
