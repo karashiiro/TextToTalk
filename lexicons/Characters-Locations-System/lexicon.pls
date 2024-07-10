@@ -47,8 +47,16 @@
 <phoneme>æmɛrɪk</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Bakool Ja Ja</grapheme>
+<phoneme>bækuːl ʒɑ ʒɑ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Bahamut</grapheme>
 <phoneme>bɑhɑmɪt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Br'uk Evu</grapheme>
+<phoneme>brðˈɪ̈k iːˈvu</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Chocobo</grapheme>
@@ -116,7 +124,14 @@
 <grapheme>Ixals</grapheme>
 <phoneme>ɪksəˈlz</phoneme>
 </lexeme>
-
+<lexeme>
+<grapheme>Ja Ja</grapheme>
+<phoneme>ʒɑ ʒɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lamaty'i</grapheme>
+<phoneme>ˈlɑːmə‖ʧi</phoneme>
+</lexeme>
 <lexeme>
 <grapheme>Leveilluer</grapheme>
 <phoneme>ləvɛ.jœʁ</phoneme>
@@ -174,6 +189,10 @@
 <phoneme>səˈhɑgɪnz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Sareel Ja</grapheme>
+<phoneme>sæ ril ʒɑ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Scaeva</grapheme>
 <phoneme>skeɪvɑ</phoneme>
 </lexeme>
@@ -228,6 +247,10 @@
 <lexeme>
 <grapheme>Zodiark</grapheme>
 <phoneme>ˈzoʊdɪɑrk</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Zoraal Ja</grapheme>
+<phoneme>ˈˈzɔræl ʒɑ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ahm Araeng</grapheme>
@@ -559,6 +582,10 @@
 <lexeme>
 <grapheme>Thanalan</grapheme>
 <phoneme>ˈθænələn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Tural</grapheme>
+<phoneme>ˈtəˈrɑːl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>a construct</grapheme>
