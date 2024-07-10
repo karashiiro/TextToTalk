@@ -484,6 +484,10 @@
 <phoneme>ˈguəlg</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Xbr'aal</grapheme>
+<phoneme>ʑb. ˈr. ˈɔl</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Zolka</grapheme>
 <phoneme>zolkɑ</phoneme>
 </lexeme>
