@@ -7,6 +7,10 @@
       alphabet="ipa" 
       xml:lang="en">
 <lexeme>
+<grapheme>A'anuhanu</grapheme>
+<phoneme>ɑ̆|ɑnu hɑnu</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Ascian</grapheme>
 <phoneme>ˈæsiːən</phoneme>
 </lexeme>
@@ -53,6 +57,10 @@
 <lexeme>
 <grapheme>Bahamut</grapheme>
 <phoneme>bɑhɑmɪt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Bloefhiswyn</grapheme>
+<phoneme>bluf ɪs‖vɪn</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Br'uk Evu</grapheme>
@@ -129,6 +137,10 @@
 <phoneme>ʒɑ ʒɑ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Kixaihih</grapheme>
+<phoneme>kæʃæ ihɪ̈</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Lamaty'i</grapheme>
 <phoneme>ˈlɑːmə‖ʧi</phoneme>
 </lexeme>
@@ -146,7 +158,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Merlwyb</grapheme>
-<phoneme>ˈmɛrɜrlwɪb</phoneme>
+<phoneme>mɛʁl ˈvɪb</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Midgardsormr</grapheme>
@@ -227,6 +239,10 @@
 <lexeme>
 <grapheme>Vrtra</grapheme>
 <phoneme>vitrʌ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Wuk Evu</grapheme>
+<phoneme>wʊk  iːˈvu</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>XIIth</grapheme>
@@ -328,6 +344,10 @@
 <phoneme>ˈkɒmi</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Kozanuakiy</grapheme>
+<phoneme>ˌkɑzɑ nu ˈæki</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Kugane</grapheme>
 <phoneme>kugɔneɪ</phoneme>
 </lexeme>
@@ -352,6 +372,14 @@
 <phoneme>ˈmɔgˈhoʊm</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Ok'bek'be</grapheme>
+<phoneme>ɑk bɛk bi</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ok'hanu</grapheme>
+<phoneme>oʊkhɑnu</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Rak'tika</grapheme>
 <phoneme>rækˈtikˈæ</phoneme>
 </lexeme>
@@ -366,6 +394,10 @@
 <lexeme>
 <grapheme>Shirogane</grapheme>
 <phoneme>ʃɪroʊgɔneɪ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Tuliyollal</grapheme>
+<phoneme>ˈtuli‖ˈjoʊ ˈlɔl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ul'dah</grapheme>
@@ -507,6 +539,10 @@
 <phoneme>ˈguəlg</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Xbalyav Ty'e</grapheme>
+<phoneme>ʑbɔl ˈjɑv taɪ‖i</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Xbr'aal</grapheme>
 <phoneme>ʑb. ˈr. ˈɔl</phoneme>
 </lexeme>
@@ -586,6 +622,10 @@
 <lexeme>
 <grapheme>Tural</grapheme>
 <phoneme>ˈtəˈrɑːl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Turali</grapheme>
+<phoneme>ˈtəˈrɑːlɪ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>a construct</grapheme>
