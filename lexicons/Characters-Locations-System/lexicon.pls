@@ -331,6 +331,10 @@
 <phoneme>ɪlˈmɛg</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Iq Br'aax</grapheme>
+<phoneme>ˈik bʁʌʃ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Qitari</grapheme>
 <phoneme>kɪtɑːriː</phoneme>
 </lexeme>
@@ -397,11 +401,19 @@
 </lexeme>
 <lexeme>
 <grapheme>Tuliyollal</grapheme>
-<phoneme>ˈtuli‖ˈjoʊ ˈlɔl</phoneme>
+<phoneme>tʊli‖ˈjoʊ ‖ ˈlʌl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ul'dah</grapheme>
 <phoneme>uːlˈdɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Urqopacha</grapheme>
+<phoneme>ɜrkˈoʊ‖pæˈʧæ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Yak T'el</grapheme>
+<phoneme>jæk tɛl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Viera</grapheme>
@@ -537,6 +549,10 @@
 <lexeme>
 <grapheme>Gulg</grapheme>
 <phoneme>ˈguəlg</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Xak </grapheme>
+<phoneme>ˈʧæk</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Xbalyav Ty'e</grapheme>
