@@ -1,6 +1,6 @@
 name: Characters and Locations
 author: johnysandels & ryankhart
 disabled: false
-description: Corrections for various characters' and locations' names. System lexicon for any system backend specific mispronunciations.
+description: Corrections for various characters' and locations' names. System lexicon for any system backend specific mispronunciations. UNINSTALL AND RE-INSTALL LEXICON TO UPDATE
 files:
   - lexicon.pls

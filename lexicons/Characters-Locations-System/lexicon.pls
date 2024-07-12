@@ -7,6 +7,10 @@
       alphabet="ipa" 
       xml:lang="en">
 <lexeme>
+<grapheme>A'anuhanu</grapheme>
+<phoneme>ɑ̆|ɑnu hɑnu</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Ascian</grapheme>
 <phoneme>ˈæsiːən</phoneme>
 </lexeme>
@@ -47,8 +51,20 @@
 <phoneme>æmɛrɪk</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Bakool Ja Ja</grapheme>
+<phoneme>bækuːl ʒɑ ʒɑ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Bahamut</grapheme>
 <phoneme>bɑhɑmɪt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Bloefhiswyn</grapheme>
+<phoneme>bluf ɪs‖vɪn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Br'uk Evu</grapheme>
+<phoneme>brðˈɪ̈k iːˈvu</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Chocobo</grapheme>
@@ -116,7 +132,18 @@
 <grapheme>Ixals</grapheme>
 <phoneme>ɪksəˈlz</phoneme>
 </lexeme>
-
+<lexeme>
+<grapheme>Ja Ja</grapheme>
+<phoneme>ʒɑ ʒɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Kixaihih</grapheme>
+<phoneme>kæʃæ ihɪ̈</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lamaty'i</grapheme>
+<phoneme>ˈlɑːmə‖ʧi</phoneme>
+</lexeme>
 <lexeme>
 <grapheme>Leveilluer</grapheme>
 <phoneme>ləvɛ.jœʁ</phoneme>
@@ -131,7 +158,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Merlwyb</grapheme>
-<phoneme>ˈmɛrɜrlwɪb</phoneme>
+<phoneme>mɛʁl ˈvɪb</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Midgardsormr</grapheme>
@@ -174,6 +201,10 @@
 <phoneme>səˈhɑgɪnz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Sareel Ja</grapheme>
+<phoneme>sæ ril ʒɑ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Scaeva</grapheme>
 <phoneme>skeɪvɑ</phoneme>
 </lexeme>
@@ -210,6 +241,10 @@
 <phoneme>vitrʌ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Wuk Evu</grapheme>
+<phoneme>wʊk  iːˈvu</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>XIIth</grapheme>
 <alias>12th</alias>
 </lexeme>
@@ -228,6 +263,10 @@
 <lexeme>
 <grapheme>Zodiark</grapheme>
 <phoneme>ˈzoʊdɪɑrk</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Zoraal Ja</grapheme>
+<phoneme>ˈˈzɔræl ʒɑ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ahm Araeng</grapheme>
@@ -292,6 +331,10 @@
 <phoneme>ɪlˈmɛg</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Iq Br'aax</grapheme>
+<phoneme>ˈik bʁʌʃ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Qitari</grapheme>
 <phoneme>kɪtɑːriː</phoneme>
 </lexeme>
@@ -303,6 +346,10 @@
 <grapheme>Kami</grapheme>
 <grapheme>kami</grapheme>
 <phoneme>ˈkɒmi</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Kozanuakiy</grapheme>
+<phoneme>ˌkɑzɑ nu ˈæki</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Kugane</grapheme>
@@ -329,6 +376,14 @@
 <phoneme>ˈmɔgˈhoʊm</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Ok'bek'be</grapheme>
+<phoneme>ɑk bɛk bi</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ok'hanu</grapheme>
+<phoneme>oʊkhɑnu</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Rak'tika</grapheme>
 <phoneme>rækˈtikˈæ</phoneme>
 </lexeme>
@@ -345,8 +400,20 @@
 <phoneme>ʃɪroʊgɔneɪ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Tuliyollal</grapheme>
+<phoneme>tʊli‖ˈjoʊ ‖ ˈlʌl</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Ul'dah</grapheme>
 <phoneme>uːlˈdɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Urqopacha</grapheme>
+<phoneme>ɜrkˈoʊ‖pæˈʧæ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Yak T'el</grapheme>
+<phoneme>jæk tɛl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Viera</grapheme>
@@ -484,6 +551,18 @@
 <phoneme>ˈguəlg</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Xak </grapheme>
+<phoneme>ˈʧæk</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Xbalyav Ty'e</grapheme>
+<phoneme>ʑbɔl ˈjɑv taɪ‖i</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Xbr'aal</grapheme>
+<phoneme>ʑb. ˈr. ˈɔl</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Zolka</grapheme>
 <phoneme>zolkɑ</phoneme>
 </lexeme>
@@ -555,6 +634,14 @@
 <lexeme>
 <grapheme>Thanalan</grapheme>
 <phoneme>ˈθænələn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Tural</grapheme>
+<phoneme>ˈtəˈrɑːl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Turali</grapheme>
+<phoneme>ˈtəˈrɑːlɪ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>a construct</grapheme>
