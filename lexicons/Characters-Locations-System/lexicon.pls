@@ -745,7 +745,10 @@
 <grapheme>Lominsan</grapheme>
 <phoneme>ləˈmɪnsən</phoneme>
 </lexeme>
-
+<lexeme>
+<grapheme>E-Sumi-Yan</grapheme>
+<phoneme>ˈiːˈsuːmiˈjɛn</phoneme>
+</lexeme>
 <lexeme>
 <grapheme>Er.</grapheme>
 <grapheme> er.</grapheme>
