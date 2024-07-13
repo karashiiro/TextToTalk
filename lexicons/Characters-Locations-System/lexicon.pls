@@ -43,6 +43,10 @@
 <phoneme>a.mɔld͡ʒæz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Apyaahi</grapheme>
+<phoneme>ˈəˈpaɪəˈhi</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Arenvald</grapheme>
 <phoneme>ɛrɪnvɔld</phoneme>
 </lexeme>
@@ -226,7 +230,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Urianger</grapheme>
-<phoneme>ori.ɒnˈʒe</phoneme>
+<phoneme>oriˈɒnˈʒe</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Vanu</grapheme>
@@ -401,7 +405,7 @@
 </lexeme>
 <lexeme>
 <grapheme>Tuliyollal</grapheme>
-<phoneme>tʊli‖ˈjoʊ ‖ ˈlʌl</phoneme>
+<phoneme>tʊliˈjoʊ ‖ ˈlʌl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ul'dah</grapheme>
@@ -741,10 +745,7 @@
 <grapheme>Lominsan</grapheme>
 <phoneme>ləˈmɪnsən</phoneme>
 </lexeme>
-<lexeme>
-<grapheme>E-Sumi-Yan</grapheme>
-<phoneme>ˈiːˈsuːmiˈjɛn</phoneme>
-</lexeme>
+
 <lexeme>
 <grapheme>Er.</grapheme>
 <grapheme> er.</grapheme>
@@ -752,6 +753,14 @@
 <grapheme> err.</grapheme>
 <grapheme> err </grapheme>
 <phoneme>ɜːɹ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>glyph</grapheme>
+<phoneme>ɡlɪf</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>glyphs</grapheme>
+<phoneme>ɡlɪfs</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Us.</grapheme>
@@ -772,5 +781,9 @@
 <grapheme> hm.</grapheme>
 <grapheme> hm?</grapheme>
 <phoneme>hm̩</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Pfff</grapheme>
+<phoneme>pʃf</phoneme>
 </lexeme>
 </lexicon>
