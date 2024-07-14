@@ -1,11 +1,28 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<lexicon version="1.0" 
-      xmlns="http://www.w3.org/2005/01/pronunciation-lexicon"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-      xsi:schemaLocation="http://www.w3.org/2005/01/pronunciation-lexicon 
-        http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
-      alphabet="ipa" 
-      xml:lang="en">
+<?xml version='1.0' encoding='UTF-8'?>
+<lexicon xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0"
+    xsi:schemaLocation="http://www.w3.org/2005/01/pronunciation-lexicon http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
+    alphabet="ipa" xml:lang="en" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon">
+    
+    <lexeme>
+        <grapheme>'s</grapheme>
+        <phoneme>z</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>'tis</grapheme>
+        <grapheme>'Tis</grapheme>
+        <phoneme>ˈtɪz</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>-egi</grapheme>
+        <grapheme>-Egi</grapheme>
+        <grapheme> egi </grapheme>
+        <grapheme> egi.</grapheme>
+        <phoneme>ˈɛgi</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>-ing</grapheme>
+        <phoneme>ˈɪng</phoneme>
+    </lexeme>
     <lexeme>
         <grapheme>a construct</grapheme>
         <phoneme>ɑːˈkɑn.stɹʌkt</phoneme>
@@ -33,16 +50,16 @@
         <phoneme>ˈælɪzeɪ</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>Allag's</grapheme>
+        <phoneme>ælɛgz</phoneme>
+    </lexeme>
+    <lexeme>
         <grapheme>Allagan</grapheme>
         <phoneme>ælɛgən</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Allagans</grapheme>
         <phoneme>ælɛgənz</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>Allag's</grapheme>
-        <phoneme>ælɛgz</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Alphinaud</grapheme>
@@ -151,11 +168,8 @@
         <phoneme>ˈkrɪstɛriəm</phoneme>
     </lexeme>
     <lexeme>
-        <grapheme>-egi</grapheme>
-        <grapheme>-Egi</grapheme>
-        <grapheme> egi </grapheme>
-        <grapheme> egi.</grapheme>
-        <phoneme>ˈɛgi</phoneme>
+        <grapheme>E-Sumi-Yan</grapheme>
+        <phoneme>ˈiːˈsuːmiˈjɛn</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Eikons</grapheme>
@@ -209,10 +223,6 @@
         <phoneme>ɛsˈtɪni :ɪn</phoneme>
     </lexeme>
     <lexeme>
-        <grapheme>E-Sumi-Yan</grapheme>
-        <phoneme>ˈiːˈsuːmiˈjɛn</phoneme>
-    </lexeme>
-    <lexeme>
         <grapheme>Eulmoran</grapheme>
         <phoneme>juːl.ˈmɔːr.ən</phoneme>
     </lexeme>
@@ -241,6 +251,10 @@
         <phoneme>fɔrʃɛˈnoʊ</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>G'raha</grapheme>
+        <phoneme>grɑhɑ</phoneme>
+    </lexeme>
+    <lexeme>
         <grapheme>Gaius</grapheme>
         <phoneme>gaɪəs</phoneme>
     </lexeme>
@@ -255,10 +269,6 @@
     <lexeme>
         <grapheme>glyphs</grapheme>
         <phoneme>ɡlɪfs</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>G'raha</grapheme>
-        <phoneme>grɑhɑ</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Gridania</grapheme>
@@ -334,10 +344,6 @@
     <lexeme>
         <grapheme>Il Mheg</grapheme>
         <phoneme>ɪlˈmɛg</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>-ing</grapheme>
-        <phoneme>ˈɪng</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Iq Br'aax</grapheme>
@@ -557,16 +563,16 @@
         <phoneme>kɪtɑːriːz</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>R'ashaht</grapheme>
+        <phoneme>ɹʌʃˈaːt</phoneme>
+    </lexeme>
+    <lexeme>
         <grapheme>Rak'tika</grapheme>
         <phoneme>rækˈtikˈæ</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Ramuh</grapheme>
         <phoneme>raɱu</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>R'ashaht</grapheme>
-        <phoneme>ɹʌʃˈaːt</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Raubahn</grapheme>
@@ -579,10 +585,6 @@
     <lexeme>
         <grapheme>Ryne</grapheme>
         <phoneme>ri:n</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>'s</grapheme>
-        <phoneme>z</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Sahagin</grapheme>
@@ -652,11 +654,6 @@
     <lexeme>
         <grapheme>Thancred</grapheme>
         <phoneme>θæŋkrɪd</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>'tis</grapheme>
-        <grapheme>'Tis</grapheme>
-        <phoneme>ˈtɪz</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Tuliyollal</grapheme>
@@ -743,14 +740,6 @@
         <alias>12th</alias>
     </lexeme>
     <lexeme>
-        <grapheme>Yak T'el</grapheme>
-        <phoneme>jæk tɛl</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>Yayake</grapheme>
-        <phoneme>jə.jɑːkɛ</phoneme>
-    </lexeme>
-    <lexeme>
         <grapheme>Y'mhitra</grapheme>
         <phoneme>jˈmiːtɹɑ</phoneme>
     </lexeme>
@@ -759,12 +748,20 @@
         <phoneme>jˈmiːtɹɑz</phoneme>
     </lexeme>
     <lexeme>
-        <grapheme>Yotsuyu</grapheme>
-        <phoneme>jʌt.ˈsu.ˈju</phoneme>
-    </lexeme>
-    <lexeme>
         <grapheme>Y'shtola</grapheme>
         <phoneme>j ʃˈtəʊlə</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Yak T'el</grapheme>
+        <phoneme>jæk tɛl</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Yayake</grapheme>
+        <phoneme>jə.jɑːkɛ</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Yotsuyu</grapheme>
+        <phoneme>jʌt.ˈsu.ˈju</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Ystride</grapheme>
