@@ -21,12 +21,6 @@ files:
 
 `disabled` is an optional field that may be set to true in order to temporarily hide the package from users (e.g. because it is broken).
 
-### Pre v1.12.0.0
-The following is no longer is required since TextToTalk v1.12.0.0.
-
-~~Each lexicon file should be at most 4000 characters, to allow lexicons to be used with [Amazon Polly](https://docs.aws.amazon.com/general/latest/gr/pol.html#limits_polly).
-Lexicons may be split into multiple files to work around this restriction. Also note that Amazon Polly only allows 5 lexicons to be used in a single request, so try to be mindful of this.~~
-
 ## Building phonemes using the International Phonetic Alphabet (IPA)
 Here are some free tools you can use to build phonomes.
 - https://console.aws.amazon.com/polly/home/SynthesizeSpeech - For testing how Amazon Polly would pronounce a word be default without needing to load the game.
