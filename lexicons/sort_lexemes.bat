@@ -17,12 +17,6 @@ if not exist "%input_file%" (
     exit /b 1
 )
 
-REM Install Python if it is not installed
-if not exist "%PYTHON%" (
-    echo Python is not installed!
-    exit /b 1
-)
-
 REM Call the Python script to perform the sorting
 python sort_lexemes.py "%input_file%" "%output_file%"
 
