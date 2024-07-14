@@ -57,6 +57,10 @@
         <phoneme>ˈi.θɚraɪtz</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>Ahm Araeng</grapheme>
+        <phoneme>ˈɑːmɐrɛng</phoneme>
+    </lexeme>
+    <lexeme>
         <grapheme>Alisaie</grapheme>
         <phoneme>ˈælɪzeɪ</phoneme>
     </lexeme>
@@ -197,6 +201,10 @@
         <phoneme>ɛld</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>Elidibus</grapheme>
+        <phoneme>iˈlɪt.əbəs</phoneme>
+    </lexeme>
+    <lexeme>
         <grapheme>Enclave</grapheme>
         <grapheme>enclave</grapheme>
         <phoneme>ˈɑnkleɪv</phoneme>
@@ -228,6 +236,14 @@
     <lexeme>
         <grapheme>Estinien</grapheme>
         <phoneme>ɛsˈtɪni :ɪn</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Eulmoran</grapheme>
+        <phoneme>juːl.ˈmɔːr.ən</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Eulmorans</grapheme>
+        <phoneme>juːl.ˈmɔːr.ənz</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Eulmore</grapheme>
@@ -606,6 +622,10 @@
         <phoneme>skeɪvɑ</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>Selch</grapheme>
+        <phoneme>ˈselk</phoneme>
+    </lexeme>
+    <lexeme>
         <grapheme>Sharlayan</grapheme>
         <phoneme>ˈʃɑrː liːæn</phoneme>
     </lexeme>
@@ -762,8 +782,6 @@
         <grapheme>Yak T'el</grapheme>
         <phoneme>jæk tɛl</phoneme>
     </lexeme>
-
-
     <lexeme>
         <grapheme>Yayake</grapheme>
         <phoneme>jə.jɑːkɛ</phoneme>
