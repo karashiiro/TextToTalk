@@ -6,9 +6,18 @@
         http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
       alphabet="ipa" 
       xml:lang="en">
+<!-- Names -->
 <lexeme>
 <grapheme>A'anuhanu</grapheme>
 <phoneme>ɑ̆|ɑnu hɑnu</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Archeion</grapheme>
+<phoneme>ɑr.kiː ən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Asah</grapheme>
+<phoneme>ʌsɑː</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ascian</grapheme>
@@ -17,6 +26,10 @@
 <lexeme>
 <grapheme>Ascians</grapheme>
 <phoneme>ˈæsiːənz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Allag's</grapheme>
+<phoneme>ælɛgz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Allagan</grapheme>
@@ -71,6 +84,14 @@
 <phoneme>brðˈɪ̈k iːˈvu</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Carito</grapheme>
+<phoneme>kɑɹˈiː.təʊ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Caulignont</grapheme>
+<phoneme>kɔlɪɲɒn</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Chocobo</grapheme>
 <grapheme>chocobo</grapheme>
 <phoneme>ˈʧəʊkəbəʊ</phoneme>
@@ -83,6 +104,15 @@
 <lexeme>
 <grapheme>Cid</grapheme>
 <phoneme>sɪd</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>E-Sumi-Yan</grapheme>
+<phoneme>ˈiːˈsuːmiˈjɛn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Eikons</grapheme>
+<grapheme>eikons</grapheme>
+<phoneme>ˈaɪkɒnz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Erenville</grapheme>
@@ -105,12 +135,20 @@
 <phoneme>grɑhɑ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Gegeruju</grapheme>
+<phoneme>gɛgɛˈɹu.d͡ʒu</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Gaius</grapheme>
 <phoneme>gaɪəs</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Guildivain</grapheme>
 <phoneme>gɪldɪveɪn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Halone</grapheme>
+<phoneme>hɑlˈoʊnɛ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Hien</grapheme>
@@ -123,6 +161,10 @@
 <lexeme>
 <grapheme>Hydaelyn</grapheme>
 <phoneme>haɪdɪllɪn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ifrit</grapheme>
+<phoneme>ifrjt</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ixal</grapheme>
@@ -141,8 +183,26 @@
 <phoneme>ʒɑ ʒɑ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Jul</grapheme>
+<phoneme>ˈʝuːəl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Kami</grapheme>
+<grapheme>kami</grapheme>
+<phoneme>ˈkɒmi</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Kixaihih</grapheme>
 <phoneme>kæʃæ ihɪ̈</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Kupo</grapheme>
+<grapheme>kupo</grapheme>
+<phoneme>ˈkuːˌpoʊ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lahabrea</grapheme>
+<phoneme>ˈlahʌˈbɹeːæ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Lamaty'i</grapheme>
@@ -157,12 +217,28 @@
 <phoneme>ˈlui:swɑ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Lydha Lran</grapheme>
+<phoneme>ˈliːdəə lɜrˈæn</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Lyse</grapheme>
 <phoneme>liːs</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Mamool Ja</grapheme>
+<phoneme>ma.muːl d͡ʒɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Matoya</grapheme>
+<phoneme>məˈtɔɪə</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Merlwyb</grapheme>
 <phoneme>mɛʁl ˈvɪb</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Mhitra</grapheme>
+<phoneme>miːtɹɑ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Midgardsormr</grapheme>
@@ -177,8 +253,38 @@
 <phoneme>mɪnˈfɪliəz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Miqo'te</grapheme>
+<phoneme>mɪˌqəʊteɪ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Moenbryda</grapheme>
+<phoneme>ˈmuːnˈbriːda</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Moogle</grapheme>
+<grapheme>moogle</grapheme>
+<phoneme>muːgəl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Moogles</grapheme>
+<grapheme>moogles</grapheme>
+<phoneme>muːgəls</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Nanamo</grapheme>
 <phoneme>ˈnɔnɔmoʊ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Nymian</grapheme>
+<phoneme>nɪmi.ən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ok'hanu</grapheme>
+<phoneme>oʊkhɑnu</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Padjal</grapheme>
+<phoneme>pʌˈd͡ʒæl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Papalymo</grapheme>
@@ -187,6 +293,26 @@
 <lexeme>
 <grapheme>Pipin</grapheme>
 <phoneme>ˈpɪpɪn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Qitari</grapheme>
+<phoneme>kɪtɑːriː</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Qitaris</grapheme>
+<phoneme>kɪtɑːriːz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Qiqirn</grapheme>
+<phoneme>kɪˈkirn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>R'ashaht</grapheme>
+<phoneme>ɹʌʃˈaːt</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ramuh</grapheme>
+<phoneme>raɱu</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Raubahn</grapheme>
@@ -217,12 +343,21 @@
 <phoneme>ˈsɔroʊban</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>spriggan</grapheme>
+<grapheme>Spriggan</grapheme>
+<phoneme>sprɪgən</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Sylph</grapheme>
 <phoneme>sɪlf</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Tataru</grapheme>
 <phoneme>tæˈ.tɑˈru</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Tesleen</grapheme>
+<phoneme>ˈtesliːn</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Thancred</grapheme>
@@ -233,6 +368,10 @@
 <phoneme>oriˈɒnˈʒe</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Valigarmanda</grapheme>
+<phoneme>ˈvɑli ˈɡɑr mʌŋˈdɑ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Vanu</grapheme>
 <phoneme>vɑːnu</phoneme>
 </lexeme>
@@ -241,24 +380,64 @@
 <phoneme>vɑːnuz</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Varis</grapheme>
+<phoneme>ˈvɑːrɪs</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Vidofnir</grapheme>
+<phoneme>vɪd.ˈoʊfnɪɚ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>voidmage</grapheme>
+<phoneme>vɔɪdmeɪd͡ʒ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Vrtra</grapheme>
 <phoneme>vitrʌ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Vundu Ok'Bendu</grapheme>
+<phoneme>ˈvundu ok bɛndu</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Wuk Evu</grapheme>
 <phoneme>wʊk  iːˈvu</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Xak </grapheme>
+<phoneme>ˈʧæk</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>XIIth</grapheme>
 <alias>12th</alias>
+</lexeme>
+<lexeme>
+<grapheme>Yayake</grapheme>
+<phoneme>jə.jɑːkɛ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Yotsuyu</grapheme>
 <phoneme>jʌt.ˈsu.ˈju</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Ystride de Caulignont</grapheme>
+<phoneme>ɪstɹɪd du kɔlɪɲɒn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Ystride</grapheme>
+<phoneme>ɪstɹɪd</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Yugiri</grapheme>
 <phoneme>ˈju:gɪði</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Y'mhitra</grapheme>
+<phoneme>jˈmiːtɹɑ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Y'mhitra's</grapheme>
+<phoneme>jˈmiːtɹɑz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Y'shtola</grapheme>
@@ -269,16 +448,18 @@
 <phoneme>ˈzoʊdɪɑrk</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Zolka</grapheme>
+<phoneme>zolkɑ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Zoraal Ja</grapheme>
 <phoneme>ˈˈzɔræl ʒɑ</phoneme>
 </lexeme>
+
+<!-- Location -->
 <lexeme>
-<grapheme>Ahm Araeng</grapheme>
-<phoneme>ˈɑːmɐrɛng</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Archeion</grapheme>
-<phoneme>ɑr.kiː ən</phoneme>
+<grapheme>Amh Araeng</grapheme>
+<phoneme>ˈæm məˈræŋ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Azys Lla</grapheme>
@@ -287,6 +468,27 @@
 <lexeme>
 <grapheme>Baldesion</grapheme>
 <phoneme>bɔldˈɛˈs ˈiən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Bozja</grapheme>
+<phoneme>ˈbozj̆a</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Cloudtop</grapheme>
+<phoneme>klaʊdtɒp</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Coerthas</grapheme>
+<phoneme>kɝː.θəs</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Crystarium</grapheme>
+<phoneme>ˈkrɪstɛriəm</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Enclave</grapheme>
+<grapheme>enclave</grapheme>
+<phoneme>ˈɑnkleɪv</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Eorzea</grapheme>
@@ -301,12 +503,16 @@
 <phoneme>eɪ ɔrːzˈiːənz</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Coerthas</grapheme>
-<phoneme>kɝː.θəs</phoneme>
+<grapheme>Eulmore</grapheme>
+<phoneme>juːlˈmɔːr</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Crystarium</grapheme>
-<phoneme>ˈkrɪstɛriəm</phoneme>
+<grapheme>Eulmorean</grapheme>
+<phoneme>juːlˈmɔːrˌən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Eulmoreans</grapheme>
+<phoneme>juːlˈmɔːrˌənz</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Gridania</grapheme>
@@ -321,6 +527,10 @@
 <grapheme>Gridanians</grapheme>
 <grapheme>gridanians</grapheme>
 <phoneme>grɪdɔniənz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Gulg</grapheme>
+<phoneme>ˈguəlg</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Gyr</grapheme>
@@ -339,17 +549,12 @@
 <phoneme>ˈik bʁʌʃ</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Qitari</grapheme>
-<phoneme>kɪtɑːriː</phoneme>
+<grapheme>Kholusia</grapheme>
+<phoneme>kəˈlusiə</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Qitaris</grapheme>
-<phoneme>kɪtɑːriːz</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Kami</grapheme>
-<grapheme>kami</grapheme>
-<phoneme>ˈkɒmi</phoneme>
+<grapheme>Kozama'uka</grapheme>
+<phoneme>kɔːzə muːkæ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Kozanuakiy</grapheme>
@@ -364,6 +569,26 @@
 <phoneme>ləˈmɪnsə</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Lominsan</grapheme>
+<phoneme>ləˈmɪnsən</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Lyhe Ghiah</grapheme>
+<phoneme>liegiə</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Mhach</grapheme>
+<phoneme>mɑ́ːk</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Mhachi</grapheme>
+<phoneme>mɑ́ːki</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Moghome</grapheme>
+<phoneme>ˈmɔgˈhoʊm</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Namazu</grapheme>
 <phoneme>nɑmʌzu</phoneme>
 </lexeme>
@@ -376,16 +601,12 @@
 <phoneme>noʊʃɑ</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Moghome</grapheme>
-<phoneme>ˈmɔgˈhoʊm</phoneme>
+<grapheme>Nym</grapheme>
+<phoneme>nɪ̈m</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ok'bek'be</grapheme>
 <phoneme>ɑk bɛk bi</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Ok'hanu</grapheme>
-<phoneme>oʊkhɑnu</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Rak'tika</grapheme>
@@ -404,37 +625,62 @@
 <phoneme>ʃɪroʊgɔneɪ</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Telophoroi</grapheme>
+<phoneme>telˈɔfɔɹɔɪ</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Thal</grapheme>
+<phoneme>ˈθɔl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Thanalan</grapheme>
+<phoneme>ˈθænələn</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Tural</grapheme>
+<phoneme>ˈtəˈrɑːl</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Turali</grapheme>
+<phoneme>ˈtəˈrɑːlɪ</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Tuliyollal</grapheme>
-<phoneme>tʊliˈjoʊ ‖ ˈlʌl</phoneme>
+<phoneme>ˈtuˈli‖ˈjoʊˈlɔl</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Ul'dah</grapheme>
 <phoneme>uːlˈdɑ</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Urqopacha</grapheme>
-<phoneme>ɜrkˈoʊ‖pæˈʧæ</phoneme>
+<grapheme>Ul'dahns</grapheme>
+<phoneme>ˈulˈdɔns</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Yak T'el</grapheme>
-<phoneme>jæk tɛl</phoneme>
+<grapheme>Urqopacha</grapheme>
+<phoneme>ɜrkˈoʊ‖pæˈʧæ</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Viera</grapheme>
 <phoneme>ˈviːˈɛrə</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Miqo'te</grapheme>
-<phoneme>mɪˌqəʊteɪ</phoneme>
+<grapheme>Xbalyav Ty'e</grapheme>
+<phoneme>ʑbɔl ˈjɑv taɪ‖i</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Moenbryda</grapheme>
-<phoneme>ˈmuːnˈbriːda</phoneme>
+<grapheme>Xbr'aal</grapheme>
+<phoneme>ʑərb ˈʀɔːl</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Eikons</grapheme>
-<grapheme>eikons</grapheme>
-<phoneme>ˈaɪkɒnz</phoneme>
+<grapheme>Yak T'el</grapheme>
+<phoneme>jæk tɛl</phoneme>
+</lexeme>
+
+<!-- Other -->
+<lexeme>
+<grapheme>a construct</grapheme>
+<phoneme>ɑːˈkɑn.stɹʌkt</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Aether</grapheme>
@@ -462,204 +708,6 @@
 <phoneme>ˈi.θɚraɪtz</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Eld </grapheme>
-<grapheme>Eld.</grapheme>
-<grapheme>Eld,</grapheme>
-<grapheme> eld </grapheme>
-<grapheme> eld,</grapheme>
-<grapheme> eld.</grapheme>
-<phoneme>ɛld</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Enclave</grapheme>
-<grapheme>enclave</grapheme>
-<phoneme>ˈɑnkleɪv</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>NIN</grapheme>
-<phoneme>ˈnɪndʒə</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>magitek</grapheme>
-<grapheme>Magitek</grapheme>
-<phoneme>ˈmæʝɪtek</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Regen</grapheme>
-<phoneme>riˈʝen</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>'s</grapheme>
-<phoneme>z</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>'tis</grapheme>
-<grapheme>'Tis</grapheme>
-<phoneme>ˈtɪz</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Lyhe Ghiah</grapheme>
-<phoneme>liegiə</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Lydha Lran</grapheme>
-<phoneme>ˈliːdəə lɜrˈæn</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Matoya</grapheme>
-<phoneme>məˈtɔɪə</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Amh Araeng</grapheme>
-<phoneme>ˈɑːm məˈræŋ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Jul</grapheme>
-<phoneme>ˈʝuːəl</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Tesleen</grapheme>
-<phoneme>ˈtesliːn</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Eulmore</grapheme>
-<phoneme>juːlˈmɔːr</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Eulmorean</grapheme>
-<phoneme>juːlˈmɔːrˌən</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Eulmoreans</grapheme>
-<phoneme>juːlˈmɔːrˌənz</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Varis</grapheme>
-<phoneme>ˈvɑːrɪs</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Thal</grapheme>
-<phoneme>ˈθɔl</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Hmpf</grapheme>
-<grapheme>Hmph</grapheme>
-<phoneme>ˈhm̩f</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Kholusia</grapheme>
-<phoneme>kəˈlusiə</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Gulg</grapheme>
-<phoneme>ˈguəlg</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Xak </grapheme>
-<phoneme>ˈʧæk</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Xbalyav Ty'e</grapheme>
-<phoneme>ʑbɔl ˈjɑv taɪ‖i</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Xbr'aal</grapheme>
-<phoneme>ʑb. ˈr. ˈɔl</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Zolka</grapheme>
-<phoneme>zolkɑ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Nym</grapheme>
-<phoneme>nɪ̈m</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Nymian</grapheme>
-<phoneme>nɪmi.ən</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Mamool Ja</grapheme>
-<phoneme>ma.muːl d͡ʒɑ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Y'mhitra</grapheme>
-<phoneme>jˈmiːtɹɑ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Y'mhitra's</grapheme>
-<phoneme>jˈmiːtɹɑz</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Mhitra</grapheme>
-<phoneme>miːtɹɑ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Ramuh</grapheme>
-<phoneme>raɱu</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Ifrit</grapheme>
-<phoneme>ifrjt</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Mhach</grapheme>
-<phoneme>mɑ́ːk</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Mhachi</grapheme>
-<phoneme>mɑ́ːki</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>voidmage</grapheme>
-<phoneme>vɔɪdmeɪd͡ʒ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>spriggan</grapheme>
-<grapheme>Spriggan</grapheme>
-<phoneme>sprɪgən</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Carito</grapheme>
-<phoneme>kɑɹˈiː.təʊ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Allag's</grapheme>
-<phoneme>ælɛgz</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>R'ashaht</grapheme>
-<phoneme>ɹʌʃˈaːt</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Qiqirn</grapheme>
-<phoneme>kɪˈkirn</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Thanalan</grapheme>
-<phoneme>ˈθænələn</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Tural</grapheme>
-<phoneme>ˈtəˈrɑːl</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Turali</grapheme>
-<phoneme>ˈtəˈrɑːlɪ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>a construct</grapheme>
-<phoneme>ɑːˈkɑn.stɹʌkt</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Bozja</grapheme>
-<phoneme>ˈbozj̆a</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Lahabrea</grapheme>
-<phoneme>ˈlahʌˈbɹeːæ</phoneme>
-</lexeme>
-<lexeme>
 <grapheme>-egi</grapheme>
 <grapheme>-Egi</grapheme>
 <grapheme> egi </grapheme>
@@ -667,87 +715,13 @@
 <phoneme>ˈɛgi</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>-ing</grapheme>
-<phoneme>ˈɪng</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Yayake</grapheme>
-<phoneme>jə.jɑːkɛ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Telophoroi</grapheme>
-<phoneme>telˈɔfɔɹɔɪ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>grimoires</grapheme>
-<phoneme>ˈgɹɪmˌwɑːɹs</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Halone</grapheme>
-<phoneme>hɑlˈoʊnɛ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Cloudtop</grapheme>
-<phoneme>klaʊdtɒp</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Vundu Ok'Bendu</grapheme>
-<phoneme>ˈvundu ok bɛndu</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Padjal</grapheme>
-<phoneme>pʌˈd͡ʒæl</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Vidofnir</grapheme>
-<phoneme>vɪd.ˈoʊfnɪɚ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Ystride de Caulignont</grapheme>
-<phoneme>ɪstɹɪd du kɔlɪɲɒn</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Ystride</grapheme>
-<phoneme>ɪstɹɪd</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Caulignont</grapheme>
-<phoneme>kɔlɪɲɒn</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Kupo</grapheme>
-<grapheme>kupo</grapheme>
-<phoneme>ˈkuːˌpoʊ</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Moogle</grapheme>
-<grapheme>moogle</grapheme>
-<phoneme>muːgəl</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Moogles</grapheme>
-<grapheme>moogles</grapheme>
-<phoneme>muːgəls</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Asah</grapheme>
-<phoneme>ʌsɑː</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Gegeruju</grapheme>
-<phoneme>gɛgɛˈɹu.d͡ʒu</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>PvP</grapheme>
-<phoneme>ˈpiːviːˈpiː</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>Lominsan</grapheme>
-<phoneme>ləˈmɪnsən</phoneme>
-</lexeme>
-<lexeme>
-<grapheme>E-Sumi-Yan</grapheme>
-<phoneme>ˈiːˈsuːmiˈjɛn</phoneme>
+<grapheme>Eld </grapheme>
+<grapheme>Eld.</grapheme>
+<grapheme>Eld,</grapheme>
+<grapheme> eld </grapheme>
+<grapheme> eld,</grapheme>
+<grapheme> eld.</grapheme>
+<phoneme>ɛld</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Er.</grapheme>
@@ -766,12 +740,8 @@
 <phoneme>ɡlɪfs</phoneme>
 </lexeme>
 <lexeme>
-<grapheme>Us.</grapheme>
-<grapheme>Us,</grapheme>
-<grapheme> us.</grapheme>
-<grapheme> us,</grapheme>
-<grapheme> us </grapheme>
-<phoneme>ʌs</phoneme>
+<grapheme>grimoires</grapheme>
+<phoneme>ˈgɹɪmˌwɑːɹs</phoneme>
 </lexeme>
 <lexeme>
 <grapheme>Hm,</grapheme>
@@ -786,7 +756,50 @@
 <phoneme>hm̩</phoneme>
 </lexeme>
 <lexeme>
+<grapheme>Hmpf</grapheme>
+<grapheme>Hmph</grapheme>
+<phoneme>ˈhm̩f</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>-ing</grapheme>
+<phoneme>ˈɪng</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>magitek</grapheme>
+<grapheme>Magitek</grapheme>
+<phoneme>ˈmæʝɪtek</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>NIN</grapheme>
+<phoneme>ˈnɪndʒə</phoneme>
+</lexeme>
+<lexeme>
 <grapheme>Pfff</grapheme>
 <phoneme>pʃf</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>PvP</grapheme>
+<phoneme>ˈpiːviːˈpiː</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Regen</grapheme>
+<phoneme>riˈʝen</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>'s</grapheme>
+<phoneme>z</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>'tis</grapheme>
+<grapheme>'Tis</grapheme>
+<phoneme>ˈtɪz</phoneme>
+</lexeme>
+<lexeme>
+<grapheme>Us.</grapheme>
+<grapheme>Us,</grapheme>
+<grapheme> us.</grapheme>
+<grapheme> us,</grapheme>
+<grapheme> us </grapheme>
+<phoneme>ʌs</phoneme>
 </lexeme>
 </lexicon>
