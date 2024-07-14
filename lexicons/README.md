@@ -24,6 +24,6 @@ files:
 ## Building phonemes using the International Phonetic Alphabet (IPA)
 Here are some free tools you can use to build phonomes.
 - https://console.aws.amazon.com/polly/home/SynthesizeSpeech - For testing how Amazon Polly would pronounce a word be default without needing to load the game.
-- https://www.macmillandictionary.com/ - For getting sample IPAs from existing words
+- https://dictionary.cambridge.org/us/dictionary/ - For getting sample IPAs from existing words
 - https://ipa.typeit.org/full/ - For building or tweaking IPAs
 - http://ipa-reader.xyz/ - For testing your IPAs
