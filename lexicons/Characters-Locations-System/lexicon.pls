@@ -757,10 +757,19 @@
         <grapheme>Xbalyav Ty'e</grapheme>
         <phoneme>ʑbɔl ˈjɑv taɪ‖i</phoneme>
     </lexeme>
+	<lexeme>
+		<grapheme>xibruq pibil</grapheme>
+		<grapheme>Xibruq pibil</grapheme>
+		<phoneme>ʃiː bʀʊk pibiːl</phoneme>
+	</lexeme>
     <lexeme>
         <grapheme>Xbr'aal</grapheme>
         <phoneme>ʑərb ˈʀɔːl</phoneme>
     </lexeme>
+	<lexeme>
+		<grapheme>Xbr'aax</grapheme>
+		<phoneme>ʑərb ˈʀæks</phoneme>
+	</lexeme>
     <lexeme>
         <grapheme>XIIth</grapheme>
         <alias>12th</alias>
