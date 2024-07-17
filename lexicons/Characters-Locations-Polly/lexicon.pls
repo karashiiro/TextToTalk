@@ -2,7 +2,6 @@
 <lexicon xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0"
     xsi:schemaLocation="http://www.w3.org/2005/01/pronunciation-lexicon http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
     alphabet="ipa" xml:lang="en" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon">
-    
     <lexeme>
         <grapheme>'s</grapheme>
         <phoneme>z</phoneme>
@@ -92,6 +91,10 @@
     <lexeme>
         <grapheme>Asah</grapheme>
         <phoneme>ʌsɑː</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Asahi</grapheme>
+        <phoneme>əˈsɑː.hi</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Ascian</grapheme>
@@ -672,6 +675,14 @@
         <phoneme>ˈuːl.dɑː</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>Ul'dahn</grapheme>
+        <phoneme>ˈulˈdɔən</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ul'dahns</grapheme>
+        <phoneme>ˈulˈdɔəns</phoneme>
+    </lexeme>
+    <lexeme>
         <grapheme>Urianger</grapheme>
         <phoneme>oriˈɒnˈʒe</phoneme>
     </lexeme>
@@ -786,5 +797,17 @@
     <lexeme>
         <grapheme>Zoraal Ja</grapheme>
         <phoneme>ˈˈzɔræl ʒɑ</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ishgard</grapheme>
+        <phoneme>ˈɪʃ.ɡɑːd</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ishgardian</grapheme>
+        <phoneme>ˈɪʃ .ɡɑːdi.ən</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ishgardians</grapheme>
+        <phoneme>ˈɪʃ .ɡɑːdi.ənz</phoneme>
     </lexeme>
 </lexicon>
