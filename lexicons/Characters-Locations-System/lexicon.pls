@@ -2,7 +2,6 @@
 <lexicon xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0"
     xsi:schemaLocation="http://www.w3.org/2005/01/pronunciation-lexicon http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
     alphabet="ipa" xml:lang="en" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon">
-
     <lexeme>
         <grapheme>'s</grapheme>
         <phoneme>z</phoneme>
@@ -385,15 +384,17 @@
         <grapheme>Ja Tiika</grapheme>
         <phoneme>ʒɑ tiː kæ</phoneme>
     </lexeme>
-    <lexeme>
-        <grapheme>Ja Ja</grapheme>
-        <phoneme>ʒɑ ʒɑ</phoneme>
-    </lexeme>
 	    <lexeme>
         <grapheme>Ja </grapheme>
         <grapheme>Ja,</grapheme>
         <grapheme>Ja.</grapheme>
+		<grapheme>Ja!</grapheme>
+		<grapheme>Ja?</grapheme>
         <phoneme>ʒɑ </phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ja Ja</grapheme>
+        <phoneme>ʒɑ ʒɑ</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Jul</grapheme>
@@ -497,6 +498,10 @@
     <lexeme>
         <grapheme>Midgardsormr</grapheme>
         <phoneme>ˈmɪdˈgɑrdsɜrˈmɜr</phoneme>
+    </lexeme>
+	<lexeme>
+        <grapheme>Miilal Ja</grapheme>
+        <phoneme>miːˈlɔl ʒɑ</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Minfilia</grapheme>
@@ -827,7 +832,7 @@
         <grapheme>Yugiri</grapheme>
         <phoneme>ˈju:gɪði</phoneme>
     </lexeme>
-<lexeme>
+	<lexeme>
         <grapheme>Zereel Ja</grapheme>
         <phoneme>zərɪəl ʒɑ</phoneme>
     </lexeme>
