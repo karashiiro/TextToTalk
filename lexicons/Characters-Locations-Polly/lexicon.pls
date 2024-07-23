@@ -1,7 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<lexicon xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0"
-    xsi:schemaLocation="http://www.w3.org/2005/01/pronunciation-lexicon http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd"
-    alphabet="ipa" xml:lang="en" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon">
+<lexicon xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://www.w3.org/2005/01/pronunciation-lexicon http://www.w3.org/TR/2007/CR-pronunciation-lexicon-20071212/pls.xsd" alphabet="ipa" xml:lang="en" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon">
     <lexeme>
         <grapheme>'s</grapheme>
         <phoneme>z</phoneme>
@@ -145,6 +143,14 @@
         <phoneme>kɔlɪɲɒn</phoneme>
     </lexeme>
     <lexeme>
+        <grapheme>chirurgeon</grapheme>
+        <phoneme>kaɪˈɝɚˌdʒən</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>chirurgeons</grapheme>
+        <phoneme>kaɪˈɝɚˌdʒənz</phoneme>
+    </lexeme>
+<lexeme>
         <grapheme>Chocobo</grapheme>
         <grapheme>chocobo</grapheme>
         <phoneme>ˈʧəʊkəbəʊ</phoneme>
@@ -351,6 +357,18 @@
     <lexeme>
         <grapheme>Iq Br'aax</grapheme>
         <phoneme>ˈik bʁʌʃ</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ishgard</grapheme>
+        <phoneme>ˈɪʃ.ɡɑːrd</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ishgardian</grapheme>
+        <phoneme>ˈɪʃ .ɡɑːrdi.ən</phoneme>
+    </lexeme>
+    <lexeme>
+        <grapheme>Ishgardians</grapheme>
+        <phoneme>ˈɪʃ .ɡɑːrdi.ənz</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Ixal</grapheme>
@@ -640,7 +658,7 @@
     </lexeme>
     <lexeme>
         <grapheme>Telophoroi</grapheme>
-        <phoneme>telˈɔfɔɹɔɪ</phoneme>
+        <phoneme>telˈɒfərˌɔɪ</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Tesleen</grapheme>
@@ -798,16 +816,4 @@
         <grapheme>Zoraal Ja</grapheme>
         <phoneme>ˈˈzɔræl ʒɑ</phoneme>
     </lexeme>
-    <lexeme>
-        <grapheme>Ishgard</grapheme>
-        <phoneme>ˈɪʃ.ɡɑːd</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>Ishgardian</grapheme>
-        <phoneme>ˈɪʃ .ɡɑːdi.ən</phoneme>
-    </lexeme>
-    <lexeme>
-        <grapheme>Ishgardians</grapheme>
-        <phoneme>ˈɪʃ .ɡɑːdi.ənz</phoneme>
-    </lexeme>
-</lexicon>
+    </lexicon>
