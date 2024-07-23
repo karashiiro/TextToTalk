@@ -21,3 +21,6 @@ REM Call the Python script to perform the sorting
 python sort_lexemes.py "%input_file%" "%output_file%"
 
 endlocal
+
+REM Pause so that the user can see the output before the window closes
+pause
