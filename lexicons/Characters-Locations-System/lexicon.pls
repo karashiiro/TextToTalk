@@ -215,11 +215,11 @@
     </lexeme>
     <lexeme>
         <grapheme>Eorzea</grapheme>
-        <phoneme>eɪ ɔrːzɪː ə</phoneme>
+        <phoneme>eɪɔrːˈzɪːə</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Eorzean</grapheme>
-        <phoneme>eɪ ɔrːzˈiːən</phoneme>
+        <phoneme>eɪɔrːˈziːən</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Eorzeans</grapheme>
@@ -694,6 +694,10 @@
         <grapheme>Thancred</grapheme>
         <phoneme>θæŋkrɪd</phoneme>
     </lexeme>
+	<lexeme>
+        <grapheme>Tonatenyawi</grapheme>
+        <phoneme>təʊnˈə ˈtɛnjə ˈwiː</phoneme>
+    </lexeme>
     <lexeme>
         <grapheme>Tuliyollal</grapheme>
         <phoneme>ˈtuli‖ˈjoʊˈlɔl</phoneme>
@@ -767,6 +771,10 @@
         <grapheme>Vundu Ok'Bendu</grapheme>
         <phoneme>ˈvundu ok bɛndu</phoneme>
     </lexeme>
+	<lexeme>
+        <grapheme>Wihuwte</grapheme>
+        <phoneme>wuːhuːteɪ</phoneme>
+    </lexeme>
     <lexeme>
         <grapheme>Wuk Evu</grapheme>
         <phoneme>wʊk iːˈvu</phoneme>
@@ -831,6 +839,10 @@
     <lexeme>
         <grapheme>Yugiri</grapheme>
         <phoneme>ˈju:gɪði</phoneme>
+    </lexeme>
+	<lexeme>
+        <grapheme>Zekowa</grapheme>
+        <phoneme>zɛkəʊwɒ</phoneme>
     </lexeme>
 	<lexeme>
         <grapheme>Zereel Ja</grapheme>
