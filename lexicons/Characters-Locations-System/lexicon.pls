@@ -152,6 +152,10 @@
         <grapheme>Br'uk Evu</grapheme>
         <phoneme>brðˈɪ̈k iːˈvu</phoneme>
     </lexeme>
+	<lexeme>
+        <grapheme>Cahciua</grapheme>
+        <phoneme>kɔːkiːwɒ</phoneme>
+    </lexeme>
     <lexeme>
         <grapheme>Carito</grapheme>
         <phoneme>kɑɹˈiː.təʊ</phoneme>
@@ -203,6 +207,10 @@
         <grapheme> eld,</grapheme>
         <grapheme> eld.</grapheme>
         <phoneme>ɛld</phoneme>
+    </lexeme>
+	<lexeme>
+        <grapheme>Elene'shpya</grapheme>
+        <phoneme>ˈɛləˈnɛʃˈpɪ͡jə</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Elidibus</grapheme>
@@ -661,6 +669,10 @@
         <grapheme>Soroban</grapheme>
         <phoneme>ˈsɔroʊban</phoneme>
     </lexeme>
+	<lexeme>
+        <grapheme>Sphene</grapheme>
+        <phoneme>sfˈiːn</phoneme>
+    </lexeme>
     <lexeme>
         <grapheme>spriggan</grapheme>
         <grapheme>Spriggan</grapheme>
@@ -700,7 +712,7 @@
     </lexeme>
     <lexeme>
         <grapheme>Tuliyollal</grapheme>
-        <phoneme>ˈtuli‖ˈjoʊˈlɔl</phoneme>
+        <phoneme>ˈtulijoʊˈlʌl</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Tural</grapheme>
