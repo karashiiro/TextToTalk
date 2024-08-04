@@ -152,7 +152,7 @@
         <grapheme>Br'uk Evu</grapheme>
         <phoneme>brðˈɪ̈k iːˈvu</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Cahciua</grapheme>
         <phoneme>kɔːkiːwɒ</phoneme>
     </lexeme>
@@ -208,7 +208,7 @@
         <grapheme> eld.</grapheme>
         <phoneme>ɛld</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Elene'shpya</grapheme>
         <phoneme>ˈɛləˈnɛʃˈpɪ͡jə</phoneme>
     </lexeme>
@@ -507,7 +507,7 @@
         <grapheme>Midgardsormr</grapheme>
         <phoneme>ˈmɪdˈgɑrdsɜrˈmɜr</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Miilal Ja</grapheme>
         <phoneme>miːˈlɔl ʒɑ</phoneme>
     </lexeme>
@@ -669,7 +669,7 @@
         <grapheme>Soroban</grapheme>
         <phoneme>ˈsɔroʊban</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Sphene</grapheme>
         <phoneme>sfˈiːn</phoneme>
     </lexeme>
@@ -706,7 +706,7 @@
         <grapheme>Thancred</grapheme>
         <phoneme>θæŋkrɪd</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Tonatenyawi</grapheme>
         <phoneme>təʊnˈə ˈtɛnjə ˈwiː</phoneme>
     </lexeme>
@@ -783,7 +783,7 @@
         <grapheme>Vundu Ok'Bendu</grapheme>
         <phoneme>ˈvundu ok bɛndu</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Wihuwte</grapheme>
         <phoneme>wuːhuːteɪ</phoneme>
     </lexeme>
@@ -852,11 +852,11 @@
         <grapheme>Yugiri</grapheme>
         <phoneme>ˈju:gɪði</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Zekowa</grapheme>
         <phoneme>zɛkəʊwɒ</phoneme>
     </lexeme>
-	<lexeme>
+    </lexeme>
         <grapheme>Zereel Ja</grapheme>
         <phoneme>zərɪəl ʒɑ</phoneme>
     </lexeme>
