@@ -9,24 +9,26 @@ public class OpenAiBackendUI
 {
     private readonly OpenAiClient client;
     private readonly PluginConfiguration config;
+    
+    private string apiKey;
 
     public OpenAiBackendUI(PluginConfiguration config, OpenAiClient client)
     {
         this.config = config;
         this.client = client;
-        client.ApiKey = OpenAiCredentialManager.GetApiKey();
+        apiKey = OpenAiCredentialManager.GetApiKey();
+        this.client.ApiKey = apiKey;
     }
 
     public void DrawLoginOptions()
     {
-        var apiKey = client.ApiKey;
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref apiKey, 100,
             ImGuiInputTextFlags.Password);
 
-        if (ImGui.Button($"Login##{MemoizedId.Create()}"))
+        if (ImGui.Button($"Save##{MemoizedId.Create()}"))
         {
             OpenAiCredentialManager.SaveCredentials(apiKey);
-            client.ApiKey = apiKey;
+            this.client.ApiKey = apiKey;
         }
     }
 
