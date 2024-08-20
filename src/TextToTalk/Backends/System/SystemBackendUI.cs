@@ -115,13 +115,19 @@ public class SystemBackendUI
             helpers.OpenVoiceUnlocker();
         }
 
+        ImGui.SameLine();
+        if (ImGui.Button($"Also check out NaturalVoiceSAPIAdapter!##{MemoizedId.Create()}"))
+        {
+            WebBrowser.Open("https://github.com/gexgd0419/NaturalVoiceSAPIAdapter");
+        }
+
         this.lexiconComponent.Draw();
 
         ImGui.Spacing();
 
         ConfigComponents.ToggleUseGenderedVoicePresets(
-                $"Use gendered voice presets##{MemoizedId.Create()}",
-                this.config);
+            $"Use gendered voice presets##{MemoizedId.Create()}",
+            this.config);
 
         if (this.config.UseGenderedVoicePresets)
         {
