@@ -108,7 +108,8 @@ public class ElevenLabsBackendUI
             var voiceDisplayNames = voiceCategoriesFlat.Select(v => v.Name).ToArray();
             var voiceIds = voiceCategoriesFlat.Select(v => v.VoiceId).ToArray();
             var voiceIndex = Array.IndexOf(voiceIds, currentVoicePreset.VoiceId);
-            if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", voiceDisplayNames[voiceIndex]))
+            var voicePreviewName = voiceIndex == -1 ? "" : voiceDisplayNames[voiceIndex];
+            if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", voicePreviewName))
             {
                 foreach (var (category, voices) in voiceCategories)
                 {
