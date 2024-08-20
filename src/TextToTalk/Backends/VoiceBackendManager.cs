@@ -104,8 +104,8 @@ namespace TextToTalk.Backends
                 TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
                 TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
                 TTSBackend.Azure => new AzureBackend(this.config, this.http),
-                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http, this.uiBuilder),
-                TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http),
+                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http, this.notificationService),
+                TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http, this.notificationService),
                 TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config),
                 _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };

@@ -1,22 +1,23 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using ImGuiNET;
+using TextToTalk.Services;
 
 namespace TextToTalk.Backends.OpenAI;
 
 public class OpenAiBackend : VoiceBackend
 {
-    private readonly OpenAiClient client;
-    private readonly StreamSoundQueue soundQueue;
     private readonly OpenAiBackendUI ui;
+    private readonly OpenAiBackendUIModel uiModel;
+    private readonly INotificationService notificationService;
 
-    public OpenAiBackend(PluginConfiguration config, HttpClient http)
+    public OpenAiBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
     {
-        TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
-
-        soundQueue = new StreamSoundQueue();
-        client = new OpenAiClient(soundQueue, http);
-        ui = new OpenAiBackendUI(config, client);
+        this.uiModel = new OpenAiBackendUIModel(config, http);
+        this.ui = new OpenAiBackendUI(uiModel, config);
+        this.notificationService = notificationService;
     }
 
     public override void Say(SayRequest request)
@@ -24,18 +25,49 @@ public class OpenAiBackend : VoiceBackend
         if (request.Voice is not OpenAiVoicePreset voicePreset)
             throw new InvalidOperationException("Invalid voice preset provided.");
 
-        _ = client.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume, request.Source,
-            request.Text);
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await this.uiModel.OpenAi.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume,
+                    request.Source, request.Text);
+            }
+            catch (OpenAiUnauthorizedException e)
+            {
+                DetailedLog.Error(e, "OpenAI API key is incorrect or invalid.");
+            }
+            catch (OpenAiFailedException e) when (e.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                DetailedLog.Error(e, $"Failed to make OpenAI TTS request ({e.StatusCode}).");
+                if (e.Error?.Message is { } errorMessage)
+                {
+                    this.notificationService.NotifyWarning("TTS is being rate-limited.", errorMessage);
+                }
+                else
+                {
+                    this.notificationService.NotifyWarning("TTS is being rate-limited.",
+                        "Please slow down or adjust your enabled chat channels to reduce load.");
+                }
+            }
+            catch (OpenAiFailedException e)
+            {
+                DetailedLog.Error(e, $"Failed to make OpenAI TTS request ({e.StatusCode}).");
+            }
+            catch (OpenAiMissingCredentialsException e)
+            {
+                DetailedLog.Warn(e.Message);
+            }
+        });
     }
 
     public override void CancelAllSpeech()
     {
-        soundQueue.CancelAllSounds();
+        this.uiModel.SoundQueue.CancelAllSounds();
     }
 
     public override void CancelSay(TextSource source)
     {
-        soundQueue.CancelFromSource(source);
+        this.uiModel.SoundQueue.CancelFromSource(source);
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)
@@ -47,11 +79,11 @@ public class OpenAiBackend : VoiceBackend
 
     public override TextSource GetCurrentlySpokenTextSource()
     {
-        return soundQueue.GetCurrentlySpokenTextSource();
+        return this.uiModel.SoundQueue.GetCurrentlySpokenTextSource();
     }
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) soundQueue.Dispose();
+        if (disposing) this.uiModel.SoundQueue.Dispose();
     }
 }

@@ -7,17 +7,16 @@ namespace TextToTalk.Backends.OpenAI;
 
 public class OpenAiBackendUI
 {
-    private readonly OpenAiClient client;
+    private readonly OpenAiBackendUIModel model;
     private readonly PluginConfiguration config;
     
     private string apiKey;
 
-    public OpenAiBackendUI(PluginConfiguration config, OpenAiClient client)
+    public OpenAiBackendUI(OpenAiBackendUIModel model, PluginConfiguration config)
     {
         this.config = config;
-        this.client = client;
-        apiKey = OpenAiCredentialManager.GetApiKey();
-        this.client.ApiKey = apiKey;
+        this.model = model;
+        this.apiKey = this.model.GetApiKey();
     }
 
     public void DrawLoginOptions()
@@ -26,10 +25,17 @@ public class OpenAiBackendUI
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref apiKey, 200,
             ImGuiInputTextFlags.Password);
 
-        if (ImGui.Button($"Save##{MemoizedId.Create()}"))
+        if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
-            OpenAiCredentialManager.SaveCredentials(apiKey);
-            this.client.ApiKey = apiKey;
+            this.model.LoginWith(this.apiKey);
+        }
+
+        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+
+        var loginError = this.model.OpenAiLoginException?.Message;
+        if (loginError != null)
+        {
+            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
         }
     }
 
