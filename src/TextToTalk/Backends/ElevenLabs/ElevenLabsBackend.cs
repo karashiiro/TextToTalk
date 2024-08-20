@@ -42,8 +42,8 @@ public class ElevenLabsBackend : VoiceBackend
             catch (ElevenLabsFailedException e) when (e.StatusCode == HttpStatusCode.TooManyRequests)
             {
                 DetailedLog.Error(e, $"Failed to make ElevenLabs TTS request ({e.StatusCode}).");
-                this.notificationService.NotifyWarning("TTS is being rate-limited",
-                    "TTS is being rate-limited, please slow down.");
+                this.notificationService.NotifyWarning("TTS is being rate-limited.",
+                    "Please slow down or adjust your enabled chat channels to reduce load.");
             }
             catch (ElevenLabsFailedException e)
             {
