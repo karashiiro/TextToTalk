@@ -22,7 +22,8 @@ public class OpenAiBackendUI
 
     public void DrawLoginOptions()
     {
-        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref apiKey, 100,
+        // API key length is 132, leaving a bit extra in case the format changes
+        ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref apiKey, 200,
             ImGuiInputTextFlags.Password);
 
         if (ImGui.Button($"Save##{MemoizedId.Create()}"))
