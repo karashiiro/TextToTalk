@@ -11,8 +11,6 @@ public class GoogleCloudBackend : VoiceBackend
 
     public GoogleCloudBackend(PluginConfiguration config)
     {
-        TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
-
         soundQueue = new StreamSoundQueue();
         client = new GoogleCloudClient(soundQueue, config.GoogleCreds);
         ui = new GoogleCloudBackendUI(config, client);
