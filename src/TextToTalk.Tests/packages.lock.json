@@ -51,15 +51,15 @@
       },
       "AWSSDK.Core": {
         "type": "Transitive",
-        "resolved": "3.7.304.22",
-        "contentHash": "aJPaRoxoJzQRfn7MXl7yEM2wncJl+K2jMU4IL3bIXmm7GBWDYspC2uLAEMiZMEJIDASmRmIzirx8z1GSYFY1Ng=="
+        "resolved": "3.7.400.48",
+        "contentHash": "YNGrlZNJh1VY8zLEQxo8BVq+QDXwLhCKcqcUd3jqzumT/OlvSzjx+Ca1WJ/HhjDd/2gUmVXOrvZceRavPcLB7Q=="
       },
       "AWSSDK.Polly": {
         "type": "Transitive",
-        "resolved": "3.7.304.5",
-        "contentHash": "LV/4bEdemF3ORbXYV8s+MKZfKrgjoOAwW/wNXj6bd6tVHbzd4o5PNf9HcASNAj4I5q8AHhFnQRm0rxcwhfGU6A==",
+        "resolved": "3.7.401.37",
+        "contentHash": "OHesfDkhC+Qc0Jtze8tKDjeN3/Iu1Fd4cX7QhieCwv61dhpYVGdPYbjARpR7x4rHDGnmlEhdXXDo6vGqgOG7Kw==",
         "dependencies": {
-          "AWSSDK.Core": "[3.7.304.22, 4.0.0)"
+          "AWSSDK.Core": "[3.7.400.48, 4.0.0)"
         }
       },
       "Castle.Core": {
@@ -72,117 +72,118 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "2.1.13",
-        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
+        "resolved": "11.0.0",
+        "contentHash": "bjT7XUlhIJSmsE/O76b7weUX+evvGQctbQB8aKXt94o+oPWxHpCepxAGMs7Thow3AzCyqWs7cOpp9/2wcgRRQA=="
       },
       "Google.Api.CommonProtos": {
         "type": "Transitive",
-        "resolved": "2.15.0",
-        "contentHash": "k+43CTEgMbT4C2JjcIJon3GvMNFJ3kLMjPTedOkXUAt0D5cFfrlee+M4oieueAVhbXktR89yoj5O/kVmC/AKJw==",
+        "resolved": "2.16.0",
+        "contentHash": "37MuZrE9AAqHAdYgFLoTHydAiXDRriQZGVKEg6fr6ASnrY5GtauYXnQrGk5x2K3NmYzEXe+wkpaPVmxjb3NKjg==",
         "dependencies": {
-          "Google.Protobuf": "[3.25.0, 4.0.0)"
+          "Google.Protobuf": "[3.28.2, 4.0.0)"
         }
       },
       "Google.Api.Gax": {
         "type": "Transitive",
-        "resolved": "4.8.0",
-        "contentHash": "xlV8Jq/G5CQAA3PwYAuKGjfzGOP7AvjhREnE6vgZlzxREGYchHudZWa2PWSqFJL+MBtz9YgitLpRogANN3CVvg==",
+        "resolved": "4.9.0",
+        "contentHash": "fjHHYcQ99u0ztqwT537rvVtJMdDy6G2VHBZ+F1cBjDGYNVZfrpk40DMQ/OpUGToT9ZGHVirhh3eJ73bw2ANVPQ==",
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "6.0.0",
-          "Newtonsoft.Json": "13.0.3"
+          "Newtonsoft.Json": "13.0.3",
+          "System.Diagnostics.DiagnosticSource": "6.0.1"
         }
       },
       "Google.Api.Gax.Grpc": {
         "type": "Transitive",
-        "resolved": "4.8.0",
-        "contentHash": "njcDsrFMZTmG2xdar6o5zyj7YVCUv6JNWU7un+q15Fm9DpGt0HSqHVnabVD2LBjUa3JWrqWX2kVv0w7qx4+tFQ==",
+        "resolved": "4.9.0",
+        "contentHash": "ToCx/0cs+wJ9j7vzKRcPAKneJVZrz/s9JhW9QsFx1dar9WzTxawQZ8xTjyieSy8tY0UiYCL1qYkn/iRrklYnSA==",
         "dependencies": {
-          "Google.Api.CommonProtos": "2.15.0",
-          "Google.Api.Gax": "4.8.0",
-          "Google.Apis.Auth": "[1.67.0, 2.0.0)",
-          "Grpc.Auth": "[2.60.0, 3.0.0)",
-          "Grpc.Core.Api": "[2.60.0, 3.0.0)",
-          "Grpc.Net.Client": "[2.60.0, 3.0.0)",
+          "Google.Api.CommonProtos": "2.16.0",
+          "Google.Api.Gax": "4.9.0",
+          "Google.Apis.Auth": "1.68.0",
+          "Grpc.Auth": "2.66.0",
+          "Grpc.Core.Api": "2.66.0",
+          "Grpc.Net.Client": "2.66.0",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0"
         }
       },
       "Google.Apis": {
         "type": "Transitive",
-        "resolved": "1.67.0",
-        "contentHash": "XM8/fViJaB1pN61OdXy5RMZoQEqd3hKlWvA/K431gFSb5XtQ48BynfgrbBkUtFcPbSRa4BdjBHzSbkBh/skyMg==",
+        "resolved": "1.68.0",
+        "contentHash": "s2MymhdpH+ybZNBeZ2J5uFgFHApBp+QXf9FjZSdM1lk/vx5VqIknJwnaWiuAzXxPrLEkesX0Q+UsiWn39yZ9zw==",
         "dependencies": {
-          "Google.Apis.Core": "1.67.0"
+          "Google.Apis.Core": "1.68.0"
         }
       },
       "Google.Apis.Auth": {
         "type": "Transitive",
-        "resolved": "1.67.0",
-        "contentHash": "Bs9BlbZ12Y4NXzMONjpzQhZr9VbwLUTGMHkcQRF36aYnk2fYrmj5HNVNh7PPHDDq1fcEQpCtPic2nSlpYQLKXw==",
+        "resolved": "1.68.0",
+        "contentHash": "hFx8Qz5bZ4w0hpnn4tSmZaaFpjAMsgVElZ+ZgVLUZ2r9i+AKcoVgwiNfv1pruNS5cCvpXqhKECbruBCfRezPHA==",
         "dependencies": {
-          "Google.Apis": "1.67.0",
-          "Google.Apis.Core": "1.67.0",
+          "Google.Apis": "1.68.0",
+          "Google.Apis.Core": "1.68.0",
           "System.Management": "7.0.2"
         }
       },
       "Google.Apis.Core": {
         "type": "Transitive",
-        "resolved": "1.67.0",
-        "contentHash": "IPq0I3B01NYZraPoMl8muELFLg4Vr2sbfyZp4PR2Xe3MAhHkZCiKyV28Yh1L14zIKUb0X0snol1sR5/mx4S6Iw==",
+        "resolved": "1.68.0",
+        "contentHash": "pAqwa6pfu53UXCR2b7A/PAPXeuVg6L1OFw38WckN27NU2+mf+KTjoEg2YGv/f0UyKxzz7DxF1urOTKg/6dTP9g==",
         "dependencies": {
           "Newtonsoft.Json": "13.0.3"
         }
       },
       "Google.Cloud.TextToSpeech.V1": {
         "type": "Transitive",
-        "resolved": "3.6.0",
-        "contentHash": "O6Pt34Bi2UUHGK9JTruVo8AG0WbSMuczrBkslVhWG9iotRxwbJNfQD6Go57d2t9J7m/97ZrDes8Aevm+JaYQ9A==",
+        "resolved": "3.9.0",
+        "contentHash": "JpejhPzzEQ6rdaf0nsjjJwj1CJb8Zs0x+TH27+A17KF2g0NqrgtAbpkUZTiGlQHhOzJSF1lB3amrQhbGjozJ3A==",
         "dependencies": {
-          "Google.Api.Gax.Grpc": "[4.8.0, 5.0.0)",
-          "Google.LongRunning": "[3.2.0, 4.0.0)"
+          "Google.Api.Gax.Grpc": "[4.9.0, 5.0.0)",
+          "Google.LongRunning": "[3.3.0, 4.0.0)"
         }
       },
       "Google.LongRunning": {
         "type": "Transitive",
-        "resolved": "3.2.0",
-        "contentHash": "aL3xbATOZCD5i8iNR1pYw/w3jEb8ndRUa6HAKCnNsEtu0FzpdqG4BvezWvJUM4kUIMjSGGBChOmnCLkjioBGrw==",
+        "resolved": "3.3.0",
+        "contentHash": "F2SZ83Jo466Wj/s1Z7QhIAmWBXxJZQyXZpcx0P8BR7d6s0FAj67vQjeUPESSJcvsy8AqYiYBhkUr2YpZhTQeHg==",
         "dependencies": {
           "Google.Api.Gax.Grpc": "[4.8.0, 5.0.0)"
         }
       },
       "Google.Protobuf": {
         "type": "Transitive",
-        "resolved": "3.25.0",
-        "contentHash": "pIEkH1IqZV1iK8J5MYdG1kOyY0EoQLB6yEKvBq12RYNtvGXwCvnQg5zQsFmcqAEPtIZvSqPozIbUZaEd5a2gCg=="
+        "resolved": "3.28.2",
+        "contentHash": "Z86ZKAB+v1B/m0LTM+EVamvZlYw/g3VND3/Gs4M/+aDIxa2JE9YPKjDxTpf0gv2sh26hrve3eI03brxBmzn92g=="
       },
       "Grpc.Auth": {
         "type": "Transitive",
-        "resolved": "2.60.0",
-        "contentHash": "mJAllsSsFix/wrp1l5QmHXRlzMFmnIGZJYuHG1thkDJPUE9ltHPkdL5x30xGpqKvka02Il2oHd66gt8YfSOIWg==",
+        "resolved": "2.66.0",
+        "contentHash": "FRQlhMAcHf0GjAXIfhN6RydfZncLLXNNTOtpLL1bt57kp59vu40faW+dr6Vwl7ef/IUFfF38aiB5jvhAA/9Aow==",
         "dependencies": {
-          "Google.Apis.Auth": "1.46.0",
-          "Grpc.Core.Api": "2.60.0"
+          "Google.Apis.Auth": "1.68.0",
+          "Grpc.Core.Api": "2.66.0"
         }
       },
       "Grpc.Core.Api": {
         "type": "Transitive",
-        "resolved": "2.60.0",
-        "contentHash": "VWah+8dGJhhsay5BQ/Ljq6GYDWj0lSjdzqyoBgUQhXTbBqhs+q5dRFROKxI1xxzlL4pfUO45cf/y+KnHVFG9ew=="
+        "resolved": "2.66.0",
+        "contentHash": "HsjsQVAHe4hqP4t4rpUnmq+MZvPdyrlPsWF4T5fbMvyP3o/lMV+KVJfDlaNH8+v0aGQTVT3EsDFufbhaWb52cw=="
       },
       "Grpc.Net.Client": {
         "type": "Transitive",
-        "resolved": "2.60.0",
-        "contentHash": "J9U96gjZHOcqSgAThg9vZZhLsbTD005bUggPtMP/RVQnGc3+tQJTpkRUCJtJWq9cykNydsRVoyU38TjPP/VJ4A==",
+        "resolved": "2.66.0",
+        "contentHash": "GwkSsssXFgN9+M2U+UQWdErf61sn1iqgP+2NRBlDXATcP9vlxda0wySxd/eIL8U522+SnyFNUXlvQ5tAzGk9cA==",
         "dependencies": {
-          "Grpc.Net.Common": "2.60.0",
+          "Grpc.Net.Common": "2.66.0",
           "Microsoft.Extensions.Logging.Abstractions": "6.0.0"
         }
       },
       "Grpc.Net.Common": {
         "type": "Transitive",
-        "resolved": "2.60.0",
-        "contentHash": "Y/917aplgD1RA0q1cd9WpnMGyl9Luu3WZl6ZMpPvNQwg2TNw/3uXUDSriDBybeCtxnKUCtxUcWO3WsVkhM1DcA==",
+        "resolved": "2.66.0",
+        "contentHash": "YJpQpIvpo0HKlsG6SHwaieyji08qfv0DdEDIewCAA0egQY08637sHOj1netLGUhzBEsCqlGC3e92TZ2uqhxnvw==",
         "dependencies": {
-          "Grpc.Core.Api": "2.60.0"
+          "Grpc.Core.Api": "2.66.0"
         }
       },
       "LiteDB": {
@@ -202,8 +203,8 @@
       },
       "Microsoft.CognitiveServices.Speech": {
         "type": "Transitive",
-        "resolved": "1.38.0",
-        "contentHash": "i8hWZNyZJq4yBd0Id6iEiCBg5/yUMtoGfTCUVv2g9AMXjHWWnltl4RhZfOAyiKeAurp13UOO3iaw+6HQC4diSQ=="
+        "resolved": "1.41.1",
+        "contentHash": "0572dYGk4eR2tFQly5t1wGCHzpqX6t6mHozVUPSjoEauI5HC0bT5bYfE+foCpIX4/bZlycMyLfqnsQ2TTuIfuw=="
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
@@ -248,8 +249,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
+        "resolved": "9.0.0",
+        "contentHash": "z8FfGIaoeALdD+KF44A2uP8PZIQQtDGiXsOLuN8nohbKhkyKt7zGaZb+fKiCxTuBqG22Q7myIAioSWaIcOOrOw=="
       },
       "NAudio": {
         "type": "Transitive",
@@ -309,8 +310,8 @@
       },
       "R3": {
         "type": "Transitive",
-        "resolved": "1.1.13",
-        "contentHash": "McZxKrxNQticKHztfz5JiEVW6L2IAAi8/ytKJDXHrcGunRG5nu9Gbml3kY2hjpbSWgRs7A+gns2VFaohAYZm5g=="
+        "resolved": "1.2.9",
+        "contentHash": "dKMFt90XW+n7JK2P40dx9uuLg57Pcj4cA/9n1NwdKWFcMAM6j49OU8h9EborpVe4KXI+2MV/EjKc1LG7fhQJUA=="
       },
       "Standart.Hash.xxHash": {
         "type": "Transitive",
@@ -322,6 +323,14 @@
         "resolved": "7.0.0",
         "contentHash": "GLltyqEsE5/3IE+zYRP5sNa1l44qKl9v+bfdMcwg+M9qnQf47wK3H0SUR/T+3N4JEQXF3vV4CSuuo0rsg+nq2A=="
       },
+      "System.Diagnostics.DiagnosticSource": {
+        "type": "Transitive",
+        "resolved": "6.0.1",
+        "contentHash": "KiLYDu2k2J82Q9BJpWiuQqCkFjRBWVq4jDzKKWawVi9KWzyD0XG3cmfX0vqTQlL14Wi9EufJrbL0+KCLTbqWiQ==",
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        }
+      },
       "System.Diagnostics.EventLog": {
         "type": "Transitive",
         "resolved": "6.0.0",
@@ -329,10 +338,10 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "8.0.6",
-        "contentHash": "aSwRnJzz6fZ73JvWMMG0KvBwOnXsBTFtfHLriQyAPrDIZ+NrDfl15GWbO/A35k0dtH77D7jfxzEcFF7RONtU/w==",
+        "resolved": "9.0.0",
+        "contentHash": "uoozjI3+dlgKh2onFJcz8aNLh6TRCPlLSh8Dbuljc8CdvqXrxHOVysJlrHvlsOCqceqGBR1wrMPxlnzzhynktw==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "8.0.0"
+          "Microsoft.Win32.SystemEvents": "9.0.0"
         }
       },
       "System.Management": {
@@ -347,6 +356,11 @@
         "type": "Transitive",
         "resolved": "1.6.0",
         "contentHash": "COC1aiAJjCoA5GBF+QKL2uLqEBew4JsCkQmoHKbN3TlOZKa2fKLz5CpiRQKDz0RsAOEGsVKqOD5bomsXq/4STQ=="
+      },
+      "System.Runtime.CompilerServices.Unsafe": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg=="
       },
       "System.Security.AccessControl": {
         "type": "Transitive",
@@ -364,8 +378,8 @@
       },
       "System.Speech": {
         "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "CNuiA6vb95Oe5PRjClZEBiaju31vwB8OIeCgeSBXyZL6+MS4RVVB2X/C11z0xCkooHE3Vy91nM2z76emIzR+sg=="
+        "resolved": "9.0.0",
+        "contentHash": "z8mvEVBfWSi0692vPOra8MougSEJCDzlaLj4g0aA87XDZpJoJD3BJTcJ0MuFbbN1fOT9Cr2ZFqXhZc+zzX0Gwg=="
       },
       "xunit.abstractions": {
         "type": "Transitive",
@@ -415,16 +429,16 @@
       "texttotalk": {
         "type": "Project",
         "dependencies": {
-          "AWSSDK.Polly": "[3.7.304.5, )",
+          "AWSSDK.Polly": "[3.7.401.37, )",
           "AdysTech.CredentialManager": "[2.6.0, )",
-          "DalamudPackager": "[2.1.13, )",
-          "Google.Cloud.TextToSpeech.V1": "[3.6.0, )",
-          "Microsoft.CognitiveServices.Speech": "[1.38.0, )",
+          "DalamudPackager": "[11.0.0, )",
+          "Google.Cloud.TextToSpeech.V1": "[3.9.0, )",
+          "Microsoft.CognitiveServices.Speech": "[1.41.1, )",
           "NAudio": "[2.2.1, )",
-          "R3": "[1.1.13, )",
+          "R3": "[1.2.9, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
-          "System.Drawing.Common": "[8.0.6, )",
-          "System.Speech": "[8.0.0, )",
+          "System.Drawing.Common": "[9.0.0, )",
+          "System.Speech": "[9.0.0, )",
           "TextToTalk.Data": "[1.0.0, )",
           "TextToTalk.Lexicons": "[1.0.0, )",
           "TextToTalk.Lexicons.Updater": "[1.0.0, )",

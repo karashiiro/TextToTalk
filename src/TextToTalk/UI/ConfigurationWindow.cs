@@ -8,7 +8,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using R3;
 using TextToTalk.Backends;
 using TextToTalk.Data.Model;
@@ -379,9 +379,9 @@ namespace TextToTalk.UI
                         if (worldPending != null)
                         {
                             this.playerWorldValid[id] = true;
-                            playerInfo.WorldId = worldPending.RowId;
+                            playerInfo.WorldId = worldPending.Value.RowId;
                             this.players.UpdatePlayer(playerInfo);
-                            DetailedLog.Debug($"Updated player world: {playerInfo.Name}@{worldPending.Name}");
+                            DetailedLog.Debug($"Updated player world: {playerInfo.Name}@{worldPending.Value.Name}");
                         }
                         else
                         {
@@ -441,14 +441,10 @@ namespace TextToTalk.UI
             {
                 // Validate data before saving the new player
                 var world = GetWorldForUserInput(this.playerWorld);
-                if (world != null && this.players.AddPlayer(this.playerName, world.RowId))
+
+                if (world.HasValue && this.players.AddPlayer(this.playerName, world.Value.RowId))
                 {
-                    DetailedLog.Info($"Added player: {this.playerName}@{world.Name}");
-                }
-                else if (world == null)
-                {
-                    this.playerWorldError = "Unknown world.";
-                    DetailedLog.Error("The provided world name was invalid");
+                    DetailedLog.Info($"Added player: {this.playerName}@{world.ToString()}");
                 }
                 else
                 {
@@ -462,9 +458,9 @@ namespace TextToTalk.UI
         {
             return data.GetExcelSheet<World>()?
                 .Where(w => w.IsPublic)
-                .Where(w => !string.IsNullOrWhiteSpace(w.Name))
+                .Where(w => !string.IsNullOrWhiteSpace(w.Name.ToString()))
                 .FirstOrDefault(w =>
-                    string.Equals(w.Name.RawString, worldName, StringComparison.InvariantCultureIgnoreCase));
+                    string.Equals(w.Name.ExtractText(), worldName, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private void DrawNpcVoiceSettings()
