@@ -12,7 +12,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using LiteDB;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using R3;
 using Standart.Hash.xxHash;
 using TextToTalk.Backends;
@@ -381,12 +381,7 @@ namespace TextToTalk
             var speakerRace = charaStruct->DrawData.CustomizeData.Race;
             var row = race.GetRow(speakerRace);
 
-            if (row is null)
-            {
-                return "Unknown";
-            }
-
-            return row.Masculine;
+            return row.Masculine.ToString();
         }
 
         private unsafe BodyType GetSpeakerBodyType(GameObject? speaker)
@@ -403,10 +398,12 @@ namespace TextToTalk
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
         {
+           
+
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is IPlayerCharacter pc &&
                 this.config.UsePlayerVoicePresets &&
-                this.playerService.TryGetPlayer(speakerName, pc.HomeWorld.Id, out var playerInfo) &&
+                this.playerService.TryGetPlayer(speakerName, pc.HomeWorld.RowId, out var playerInfo) &&
                 this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
             {
                 return playerVoice;
