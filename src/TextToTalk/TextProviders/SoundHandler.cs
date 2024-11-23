@@ -12,10 +12,10 @@ namespace TextToTalk.TextProviders;
 public class SoundHandler : IDisposable
 {
     // Signature strings drawn from Anna Clemens's Sound Filter plugin -
-    // https://git.anna.lgbt/ascclemens/SoundFilter/src/commit/3b8512b4cd2f3ea0a0d162db4fa251ccb61f7dc4/SoundFilter/Filter.cs#L12
-    private const string LoadSoundFileSig = "E8 ?? ?? ?? ?? 48 85 C0 75 04 B0 F6";
+    // https://git.anna.lgbt/anna/SoundFilter/src/commit/100829e0e763927f569f695d2033150e409efe2c/SoundFilter/Filter.cs#L12-L20
+    private const string LoadSoundFile = "E8 ?? ?? ?? ?? 48 85 C0 75 05 40 B7 F6";
 
-    private const string PlaySpecificSoundSig =
+    private const string PlaySpecificSound =
         "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 33 F6 8B DA 48 8B F9 0F BA E2 0F";
 
     private delegate nint LoadSoundFileDelegate(nint resourceHandlePtr, uint arg2);
@@ -45,7 +45,7 @@ public class SoundHandler : IDisposable
         this.addonTalkHandler = addonTalkHandler;
         this.addonBattleTalkHandler = addonBattleTalkHandler;
 
-        if (sigScanner.TryScanText(LoadSoundFileSig, out var loadSoundFilePtr))
+        if (sigScanner.TryScanText(LoadSoundFile, out var loadSoundFilePtr))
         {
             this.loadSoundFileHook =
                 gameInterop.HookFromAddress<LoadSoundFileDelegate>(loadSoundFilePtr, LoadSoundFileDetour);
@@ -57,7 +57,7 @@ public class SoundHandler : IDisposable
             DetailedLog.Error("Failed to hook into LoadSoundFile");
         }
 
-        if (sigScanner.TryScanText(PlaySpecificSoundSig, out var playSpecificSoundPtr))
+        if (sigScanner.TryScanText(PlaySpecificSound, out var playSpecificSoundPtr))
         {
             this.playSpecificSoundHook =
                 gameInterop.HookFromAddress<PlaySpecificSoundDelegate>(playSpecificSoundPtr, PlaySpecificSoundDetour);
