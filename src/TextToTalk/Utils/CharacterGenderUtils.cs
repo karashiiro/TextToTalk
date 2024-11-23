@@ -31,7 +31,7 @@ public static class CharacterGenderUtils
         // Actors only have 0/1 genders regardless of their canonical genders, so this
         // needs to be specified by us. If an actor is canonically ungendered, their
         // gender seems to always be left at 0 (male).
-        var modelId = charaStruct->ModelCharaId;
+        var modelId = charaStruct->ModelContainer.ModelCharaId;
 
         // Get the override state and log the model ID so that we can add it to our overrides file if needed.
         if (overrides.IsUngendered(modelId))
