@@ -12,9 +12,10 @@ public class ElevenLabsBackend : VoiceBackend
     private readonly ElevenLabsBackendUIModel uiModel;
     private readonly INotificationService notificationService;
 
-    public ElevenLabsBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
+    public ElevenLabsBackend(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider,
+        HttpClient http, INotificationService notificationService)
     {
-        this.uiModel = new ElevenLabsBackendUIModel(config, http);
+        this.uiModel = new ElevenLabsBackendUIModel(config, playbackDeviceProvider, http);
         this.ui = new ElevenLabsBackendUI(uiModel, config);
         this.notificationService = notificationService;
     }

@@ -16,11 +16,12 @@ namespace TextToTalk.Backends.Polly
         private readonly StreamSoundQueue soundQueue;
         private readonly LexiconManager lexiconManager;
 
-        public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager)
+        public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager,
+            IPlaybackDeviceProvider playbackDeviceProvider)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
-            this.soundQueue = new StreamSoundQueue();
+            this.soundQueue = new StreamSoundQueue(playbackDeviceProvider);
             this.lexiconManager = lexiconManager;
         }
 

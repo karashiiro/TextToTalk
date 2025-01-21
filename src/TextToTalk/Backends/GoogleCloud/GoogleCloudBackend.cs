@@ -9,9 +9,9 @@ public class GoogleCloudBackend : VoiceBackend
     private readonly StreamSoundQueue soundQueue;
     private readonly GoogleCloudBackendUI ui;
 
-    public GoogleCloudBackend(PluginConfiguration config)
+    public GoogleCloudBackend(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider)
     {
-        soundQueue = new StreamSoundQueue();
+        soundQueue = new StreamSoundQueue(playbackDeviceProvider);
         client = new GoogleCloudClient(soundQueue, config.GoogleCreds);
         ui = new GoogleCloudBackendUI(config, client);
     }
@@ -21,8 +21,8 @@ public class GoogleCloudBackend : VoiceBackend
         if (request.Voice is not GoogleCloudVoicePreset voicePreset)
             throw new InvalidOperationException("Invalid voice preset provided.");
 
-        _ = client.Say(voicePreset.Locale, voicePreset.VoiceName, voicePreset.SampleRate, voicePreset.Pitch, voicePreset.PlaybackRate, voicePreset.Volume, request.Source,
-            request.Text);
+        _ = client.Say(voicePreset.Locale, voicePreset.VoiceName, voicePreset.SampleRate, voicePreset.Pitch,
+            voicePreset.PlaybackRate, voicePreset.Volume, request.Source, request.Text);
     }
 
     public override void CancelAllSpeech()

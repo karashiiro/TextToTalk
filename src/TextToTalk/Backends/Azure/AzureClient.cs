@@ -16,12 +16,13 @@ public class AzureClient : IDisposable
     private readonly StreamSoundQueue soundQueue;
     private readonly LexiconManager lexiconManager;
 
-    public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager)
+    public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager,
+        IPlaybackDeviceProvider playbackDeviceProvider)
     {
         var audioConfig = AudioConfig.FromWavFileOutput("NUL");
         this.speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
         this.synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
-        this.soundQueue = new StreamSoundQueue();
+        this.soundQueue = new StreamSoundQueue(playbackDeviceProvider);
         this.lexiconManager = lexiconManager;
     }
 

@@ -9,12 +9,12 @@ namespace TextToTalk.Backends.Polly
         private readonly PollyBackendUI ui;
         private readonly PollyBackendUIModel uiModel;
 
-        public PollyBackend(PluginConfiguration config, HttpClient http)
+        public PollyBackend(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider, HttpClient http)
         {
             TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
             var lexiconManager = new DalamudLexiconManager();
-            this.uiModel = new PollyBackendUIModel(config, lexiconManager);
+            this.uiModel = new PollyBackendUIModel(config, lexiconManager, playbackDeviceProvider);
 
             LexiconUtils.LoadFromConfigPolly(lexiconManager, config);
 

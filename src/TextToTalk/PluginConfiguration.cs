@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using NAudio.Wave;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
@@ -168,6 +169,8 @@ namespace TextToTalk
         public float MessagesPerSecond { get; set; } = 5;
 
         public bool SkipMessagesFromYou { get; set; }
+
+        public Guid PlaybackDeviceId { get; set; } = DirectSoundOut.DSDEVID_DefaultPlayback;
 
         [JsonIgnore]
         public bool InitializedEver

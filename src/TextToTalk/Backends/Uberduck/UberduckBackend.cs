@@ -15,11 +15,11 @@ public class UberduckBackend : VoiceBackend
     private readonly UberduckBackendUI ui;
     private readonly UberduckClient? uberduck;
 
-    public UberduckBackend(PluginConfiguration config, HttpClient http)
+    public UberduckBackend(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider, HttpClient http)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFDE7312);
 
-        this.soundQueue = new StreamSoundQueue();
+        this.soundQueue = new StreamSoundQueue(playbackDeviceProvider);
         this.uberduck = new UberduckClient(this.soundQueue, http);
 
         var voices = this.uberduck.GetVoices().GetAwaiter().GetResult();

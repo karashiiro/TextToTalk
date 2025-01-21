@@ -3,7 +3,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Numerics;
 using System.Threading.Tasks;
-using Dalamud.Interface;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
@@ -20,18 +19,18 @@ namespace TextToTalk.Backends
     {
         private readonly HttpClient http;
         private readonly PluginConfiguration config;
-        private readonly IUiBuilder uiBuilder;
+        private readonly IPlaybackDeviceProvider playbackDeviceProvider;
         private readonly INotificationService notificationService;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
-        public VoiceBackendManager(PluginConfiguration config, HttpClient http, IUiBuilder uiBuilder,
-            INotificationService notificationService)
+        public VoiceBackendManager(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider,
+            HttpClient http, INotificationService notificationService)
         {
             this.config = config;
             this.http = http;
-            this.uiBuilder = uiBuilder;
+            this.playbackDeviceProvider = playbackDeviceProvider;
             this.notificationService = notificationService;
 
             SetBackend(this.config.Backend);
@@ -101,12 +100,14 @@ namespace TextToTalk.Backends
             {
                 TTSBackend.System => new SystemBackend(this.config, this.http),
                 TTSBackend.Websocket => new WebsocketBackend(this.config, this.notificationService),
-                TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
-                TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
-                TTSBackend.Azure => new AzureBackend(this.config, this.http),
-                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http, this.notificationService),
-                TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http, this.notificationService),
-                TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config),
+                TTSBackend.AmazonPolly => new PollyBackend(this.config, this.playbackDeviceProvider, this.http),
+                TTSBackend.Uberduck => new UberduckBackend(this.config, this.playbackDeviceProvider, this.http),
+                TTSBackend.Azure => new AzureBackend(this.config, this.playbackDeviceProvider, this.http),
+                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.playbackDeviceProvider, this.http,
+                    this.notificationService),
+                TTSBackend.OpenAi => new OpenAiBackend(this.config, this.playbackDeviceProvider, this.http,
+                    this.notificationService),
+                TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config, this.playbackDeviceProvider),
                 _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };
         }

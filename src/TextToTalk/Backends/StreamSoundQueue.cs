@@ -6,17 +6,11 @@ using System.Threading;
 
 namespace TextToTalk.Backends
 {
-    public class StreamSoundQueue : SoundQueue<StreamSoundQueueItem>
+    public class StreamSoundQueue(IPlaybackDeviceProvider playbackDeviceProvider) : SoundQueue<StreamSoundQueueItem>
     {
-        private readonly AutoResetEvent speechCompleted;
-        private readonly object soundLock;
+        private readonly AutoResetEvent speechCompleted = new(false);
+        private readonly object soundLock = true;
         private DirectSoundOut? soundOut;
-
-        public StreamSoundQueue()
-        {
-            this.speechCompleted = new AutoResetEvent(false);
-            this.soundLock = true;
-        }
 
         protected override void OnSoundLoop(StreamSoundQueueItem nextItem)
         {
@@ -30,11 +24,12 @@ namespace TextToTalk.Backends
             // Adjust the volume of the audio data
             var sampleProvider = reader.ToSampleProvider();
             var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
+            var playbackDeviceId = playbackDeviceProvider.GetDeviceId();
 
             // Play the sound
             lock (this.soundLock)
             {
-                this.soundOut = new DirectSoundOut();
+                this.soundOut = new DirectSoundOut(playbackDeviceId);
                 this.soundOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
                 this.soundOut.Init(volumeSampleProvider);
                 this.soundOut.Play();

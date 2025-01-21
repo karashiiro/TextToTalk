@@ -11,6 +11,7 @@ public class AzureBackendUIModel
 
     private readonly PluginConfiguration config;
     private readonly LexiconManager lexiconManager;
+    private readonly IPlaybackDeviceProvider playbackDeviceProvider;
 
     private List<string> voices;
     private AzureLoginInfo loginInfo;
@@ -24,16 +25,18 @@ public class AzureBackendUIModel
     /// Gets the exception thrown by the most recent login, or null if the login was successful.
     /// </summary>
     public Exception? AzureLoginException { get; private set; }
-    
+
     /// <summary>
     /// Gets the available voices.
     /// </summary>
     public IReadOnlyList<string> Voices => this.voices;
 
-    public AzureBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager)
+    public AzureBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager,
+        IPlaybackDeviceProvider playbackDeviceProvider)
     {
         this.config = config;
         this.lexiconManager = lexiconManager;
+        this.playbackDeviceProvider = playbackDeviceProvider;
         this.voices = new List<string>();
 
         this.loginInfo = new AzureLoginInfo();
@@ -46,7 +49,7 @@ public class AzureBackendUIModel
             TryAzureLogin();
         }
     }
-    
+
     /// <summary>
     /// Gets the client's current credentials.
     /// </summary>
@@ -71,7 +74,7 @@ public class AzureBackendUIModel
             AzureCredentialManager.SaveCredentials(username, password);
         }
     }
-    
+
     /// <summary>
     /// Gets the current voice preset.
     /// </summary>
@@ -96,7 +99,8 @@ public class AzureBackendUIModel
         try
         {
             DetailedLog.Info($"Logging into Azure region {this.loginInfo.Region}");
-            Azure = new AzureClient(this.loginInfo.SubscriptionKey, this.loginInfo.Region, this.lexiconManager);
+            Azure = new AzureClient(this.loginInfo.SubscriptionKey, this.loginInfo.Region, this.lexiconManager,
+                this.playbackDeviceProvider);
             // This should throw an exception if the login failed
             this.voices = Azure.GetVoices();
             return true;

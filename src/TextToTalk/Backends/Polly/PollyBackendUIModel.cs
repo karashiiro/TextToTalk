@@ -14,6 +14,7 @@ public class PollyBackendUIModel : IDisposable
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
 
     private readonly PluginConfiguration config;
+    private readonly IPlaybackDeviceProvider playbackDeviceProvider;
     private readonly LexiconManager lexiconManager;
 
     private List<Voice> voices;
@@ -46,10 +47,12 @@ public class PollyBackendUIModel : IDisposable
     /// </summary>
     public string[] Engines { get; } = { Engine.Neural, Engine.Standard };
 
-    public PollyBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager)
+    public PollyBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager,
+        IPlaybackDeviceProvider playbackDeviceProvider)
     {
         this.config = config;
         this.lexiconManager = lexiconManager;
+        this.playbackDeviceProvider = playbackDeviceProvider;
         this.voices = new List<Voice>();
 
         this.keyPair = new PollyKeyPair();
@@ -181,7 +184,7 @@ public class PollyBackendUIModel : IDisposable
         {
             DetailedLog.Info($"Logging into AWS region {regionEndpoint}");
             Polly = new PollyClient(this.keyPair.AccessKey, this.keyPair.SecretKey, regionEndpoint,
-                this.lexiconManager);
+                this.lexiconManager, this.playbackDeviceProvider);
             var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
             // This should throw an exception if the login credentials were incorrect
             this.voices = Polly.GetVoicesForEngine(currentVoicePreset?.VoiceEngine ?? Engine.Neural);

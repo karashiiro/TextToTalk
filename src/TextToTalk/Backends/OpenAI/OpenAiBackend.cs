@@ -13,9 +13,10 @@ public class OpenAiBackend : VoiceBackend
     private readonly OpenAiBackendUIModel uiModel;
     private readonly INotificationService notificationService;
 
-    public OpenAiBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
+    public OpenAiBackend(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider, HttpClient http,
+        INotificationService notificationService)
     {
-        this.uiModel = new OpenAiBackendUIModel(config, http);
+        this.uiModel = new OpenAiBackendUIModel(config, playbackDeviceProvider, http);
         this.ui = new OpenAiBackendUI(uiModel, config);
         this.notificationService = notificationService;
     }

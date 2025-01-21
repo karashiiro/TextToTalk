@@ -9,14 +9,14 @@ public class AzureBackend : VoiceBackend
     private readonly AzureBackendUI ui;
     private readonly AzureBackendUIModel uiModel;
 
-    public AzureBackend(PluginConfiguration config, HttpClient http)
+    public AzureBackend(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider, HttpClient http)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFF96800);
 
         var lexiconManager = new DalamudLexiconManager();
         LexiconUtils.LoadFromConfigAzure(lexiconManager, config);
 
-        this.uiModel = new AzureBackendUIModel(config, lexiconManager);
+        this.uiModel = new AzureBackendUIModel(config, lexiconManager, playbackDeviceProvider);
         this.ui = new AzureBackendUI(this.uiModel, config, lexiconManager, http);
     }
 

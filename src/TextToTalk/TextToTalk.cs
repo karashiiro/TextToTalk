@@ -126,11 +126,10 @@ namespace TextToTalk
             this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, gui);
             this.addonBattleTalkManager = new AddonBattleTalkManager(framework, clientState, condition, gui);
 
-            var sharedState = new SharedState();
-
+            var playbackDeviceProvider = new PlaybackDeviceProvider(this.config);
             this.http = new HttpClient();
             this.backendManager =
-                new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
+                new VoiceBackendManager(this.config, playbackDeviceProvider, this.http, this.notificationService);
 
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
             this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);
@@ -158,6 +157,7 @@ namespace TextToTalk
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
 
+            var sharedState = new SharedState();
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler =
                 new AddonTalkHandler(this.addonTalkManager, framework, filters, objects, this.config);
@@ -398,8 +398,6 @@ namespace TextToTalk
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
         {
-           
-
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is IPlayerCharacter pc &&
                 this.config.UsePlayerVoicePresets &&

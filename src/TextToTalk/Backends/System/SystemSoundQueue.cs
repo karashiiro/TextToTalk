@@ -20,6 +20,8 @@ namespace TextToTalk.Backends.System
             this.speechCompleted = new AutoResetEvent(false);
             this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
+            
+            // TODO: Use NAudio and unify around StreamSoundQueue to support customizing the playback device
             this.speechSynthesizer.SetOutputToDefaultAudioDevice();
 
             this.selectVoiceFailed = new Subject<SelectVoiceFailedException>();

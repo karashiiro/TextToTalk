@@ -33,9 +33,10 @@ public class OpenAiBackendUIModel
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Voices { get; private set; }
 
-    public OpenAiBackendUIModel(PluginConfiguration config, HttpClient http)
+    public OpenAiBackendUIModel(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider,
+        HttpClient http)
     {
-        SoundQueue = new StreamSoundQueue();
+        SoundQueue = new StreamSoundQueue(playbackDeviceProvider);
         OpenAi = new OpenAiClient(SoundQueue, http);
         this.config = config;
         this.apiKey = "";

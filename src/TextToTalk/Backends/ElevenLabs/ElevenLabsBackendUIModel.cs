@@ -42,9 +42,10 @@ public class ElevenLabsBackendUIModel : IDisposable
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<ElevenLabsVoice>> Voices { get; private set; }
 
-    public ElevenLabsBackendUIModel(PluginConfiguration config, HttpClient http)
+    public ElevenLabsBackendUIModel(PluginConfiguration config, IPlaybackDeviceProvider playbackDeviceProvider,
+        HttpClient http)
     {
-        SoundQueue = new StreamSoundQueue();
+        SoundQueue = new StreamSoundQueue(playbackDeviceProvider);
         ElevenLabs = new ElevenLabsClient(SoundQueue, http);
         this.config = config;
         this.getUserSubscriptionInfoImmediately = new ReactiveProperty<long>(0);
@@ -81,7 +82,7 @@ public class ElevenLabsBackendUIModel : IDisposable
             .Subscribe(
                 info => UserSubscriptionInfo = info,
                 ex => DetailedLog.Error(ex, "User subscription update stream has faulted"),
-                _ => {});
+                _ => { });
     }
 
     /// <summary>
