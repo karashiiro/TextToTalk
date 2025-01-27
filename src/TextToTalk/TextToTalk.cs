@@ -145,7 +145,7 @@ namespace TextToTalk
                     window.IsOpen = true;
                 });
             this.configurationWindow = new ConfigurationWindow(this.config, data, this.backendManager,
-                this.playerService, this.npcService, this.voiceUnlockerWindow)
+                this.playerService, this.npcService, playbackDeviceProvider, this.voiceUnlockerWindow)
             {
                 IsOpen = InitiallyVisible,
             };

@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using NAudio.Wave;
 using TextToTalk.UI;
 
 namespace TextToTalk.Backends;
@@ -79,23 +77,6 @@ public static class BackendUI
             voiceConfig.FemaleVoicePresets[backend].Remove(preset.Id);
 
             voiceConfig.VoicePresets.Remove(preset);
-
-            config.Save();
-        }
-    }
-
-    public static void ChooseDirectSoundDevice(string label, IList<DirectSoundDeviceInfo> devices,
-        PluginConfiguration config)
-    {
-        var deviceNames = devices.Select(d => d.ModuleName).ToArray();
-        var currentDeviceId = config.PlaybackDeviceId;
-        var currentIdx = devices.IndexOf(devices.First(d => d.Guid == currentDeviceId));
-        if (ImGui.Combo(label, ref currentIdx, deviceNames, devices.Count))
-        {
-            var newDevice = devices[currentIdx];
-            if (newDevice.Guid == currentDeviceId) return;
-
-            config.PlaybackDeviceId = newDevice.Guid;
 
             config.Save();
         }

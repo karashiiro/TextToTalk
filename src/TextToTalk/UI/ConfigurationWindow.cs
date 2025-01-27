@@ -30,6 +30,7 @@ namespace TextToTalk.UI
         private readonly NpcService npc;
         private readonly IConfigUIDelegates helpers;
         private readonly Subject<bool> onPresetOpenRequested;
+        private readonly IPlaybackDeviceProvider playbackDeviceProvider;
 
         private IDictionary<Guid, string> playerWorldEditing = new Dictionary<Guid, string>();
         private IDictionary<Guid, bool> playerWorldValid = new Dictionary<Guid, bool>();
@@ -40,7 +41,8 @@ namespace TextToTalk.UI
         private string npcError = string.Empty;
 
         public ConfigurationWindow(PluginConfiguration config, IDataManager data, VoiceBackendManager backendManager,
-            PlayerService players, NpcService npc, Window voiceUnlockerWindow) : base(
+            PlayerService players, NpcService npc, IPlaybackDeviceProvider playbackDeviceProvider,
+            Window voiceUnlockerWindow) : base(
             "TextToTalk Configuration###TextToTalkConfig")
         {
             this.config = config;
@@ -48,6 +50,7 @@ namespace TextToTalk.UI
             this.backendManager = backendManager;
             this.players = players;
             this.npc = npc;
+            this.playbackDeviceProvider = playbackDeviceProvider;
             this.helpers = new ConfigUIDelegates { OpenVoiceUnlockerAction = () => voiceUnlockerWindow.IsOpen = true };
             this.onPresetOpenRequested = new Subject<bool>();
 
@@ -162,6 +165,20 @@ namespace TextToTalk.UI
 
             if (ImGui.CollapsingHeader("General"))
             {
+                if (this.config.Backend == TTSBackend.System)
+                {
+                    ImGui.BeginDisabled();
+                }
+                Components.ChooseDirectSoundDevice($"Output Device##{MemoizedId.Create()}",
+                    this.playbackDeviceProvider);
+                if (this.config.Backend == TTSBackend.System)
+                {
+                    ImGui.EndDisabled();
+                    ImGui.TextColored(HintColor, "Not yet supported for the System voice backend.");
+                }
+
+                ImGui.Spacing();
+
                 ConfigComponents.ToggleReadFromQuestTalkAddon(
                     "Read NPC dialogue from the dialogue window",
                     this.config);

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using TextToTalk.Backends;
 
 namespace TextToTalk.UI;
 
@@ -26,6 +28,21 @@ public static class Components
             }
 
             ImGui.EndTable();
+        }
+    }
+
+    public static void ChooseDirectSoundDevice(string label, IPlaybackDeviceProvider playbackDeviceProvider)
+    {
+        var devices = playbackDeviceProvider.ListDevices();
+        var deviceNames = devices.Select(d => d.ModuleName).ToArray();
+        var currentDeviceId = playbackDeviceProvider.GetDeviceId();
+        var currentIdx = devices.IndexOf(devices.First(d => d.Guid == currentDeviceId));
+        if (ImGui.Combo(label, ref currentIdx, deviceNames, devices.Count))
+        {
+            var newDevice = devices[currentIdx];
+            if (newDevice.Guid == currentDeviceId) return;
+
+            playbackDeviceProvider.SetDevice(newDevice);
         }
     }
 }
