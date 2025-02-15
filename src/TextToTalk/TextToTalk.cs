@@ -372,7 +372,7 @@ namespace TextToTalk
         private unsafe string GetSpeakerRace(GameObject? speaker)
         {
             var race = this.data.GetExcelSheet<Race>();
-            if (race is null || speaker is null || speaker.Address == nint.Zero)
+            if (speaker is null || speaker.Address == nint.Zero)
             {
                 return "Unknown";
             }
@@ -384,7 +384,7 @@ namespace TextToTalk
             return row.Masculine.ToString();
         }
 
-        private unsafe BodyType GetSpeakerBodyType(GameObject? speaker)
+        private static unsafe BodyType GetSpeakerBodyType(GameObject? speaker)
         {
             if (speaker is null || speaker.Address == nint.Zero)
             {
@@ -398,8 +398,6 @@ namespace TextToTalk
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
         {
-           
-
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is IPlayerCharacter pc &&
                 this.config.UsePlayerVoicePresets &&
@@ -418,7 +416,7 @@ namespace TextToTalk
             }
 
             // Get the speaker's gender, if possible
-            var gender = this.config.UseGenderedVoicePresets
+            var gender = this.config.Backend == TTSBackend.Websocket || this.config.UseGenderedVoicePresets
                 ? CharacterGenderUtils.GetCharacterGender(speaker, this.ungenderedOverrides)
                 : Gender.None;
 
