@@ -77,7 +77,7 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         };
 
         var json = JsonSerializer.Serialize(args);
-        DetailedLog.Debug(json);
+        DetailedLog.Verbose(json);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
         req.Content = content;
 

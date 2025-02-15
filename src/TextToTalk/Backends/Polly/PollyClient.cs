@@ -58,7 +58,7 @@ namespace TextToTalk.Backends.Polly
             }
 
             var ssml = this.lexiconManager.MakeSsml(text, playbackRate: playbackRate, includeSpeakAttributes: false);
-            DetailedLog.Info(ssml);
+            DetailedLog.Verbose(ssml);
 
             var req = new SynthesizeSpeechRequest
             {

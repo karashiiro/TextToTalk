@@ -51,7 +51,7 @@ public class ElevenLabsClient
         AddAuthorization(req);
         req.Headers.Add("accept", "audio/mpeg");
 
-        DetailedLog.Info(JsonConvert.SerializeObject(args));
+        DetailedLog.Verbose(JsonConvert.SerializeObject(args));
         using var content = new StringContent(JsonConvert.SerializeObject(args));
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         req.Content = content;
