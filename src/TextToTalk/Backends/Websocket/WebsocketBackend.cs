@@ -21,6 +21,7 @@ public class WebsocketBackend : VoiceBackend
     private readonly PluginConfiguration config;
 
     private bool dirtyConfig;
+    private Exception? lastException;
 
     public WebsocketBackend(PluginConfiguration config, INotificationService notificationService)
     {
@@ -80,18 +81,25 @@ public class WebsocketBackend : VoiceBackend
     {
         var port = this.config.WebsocketPort;
         var portStr = port.ToString();
-        if (ImGui.InputText("Port", ref portStr, 5, ImGuiInputTextFlags.CharsDecimal))
+
+        var didUpdate = ImGui.InputText("Port", ref portStr, 5, ImGuiInputTextFlags.CharsDecimal);
+
+        if (int.TryParse(portStr, out var newPort))
         {
-            if (int.TryParse(portStr, out var newPort))
+            if (!IsValidPort(newPort))
+            {
+                ImGui.TextColored(Red, "Port is out of range [0, 65535]");
+            }
+            else if (didUpdate)
             {
                 this.config.WebsocketPort = newPort;
                 this.dirtyConfig = true;
                 this.config.Save();
             }
-            else
-            {
-                ImGui.TextColored(Red, "Failed to parse port!");
-            }
+        }
+        else
+        {
+            ImGui.TextColored(Red, "Unable to parse port.");
         }
     }
 
@@ -142,23 +150,45 @@ public class WebsocketBackend : VoiceBackend
                 this.dirtyConfig = false;
             });
         }
+
+        ImLastError();
     }
 
-    private static void ImCatchServerRestart(Action fn)
+    private void ImCatchServerRestart(Action fn)
     {
         try
         {
+            lastException = null;
             fn();
         }
-        catch (ArgumentOutOfRangeException)
+        catch (Exception e)
         {
-            ImGui.TextColored(Red, "Port out of range");
-        }
-        catch (SocketException)
-        {
-            ImGui.TextColored(Red, "Port already taken");
+            lastException = e;
         }
     }
+
+    private void ImLastError()
+    {
+        if (lastException == null)
+        {
+            return;
+        }
+
+        switch (lastException)
+        {
+            case ArgumentOutOfRangeException:
+                ImGui.TextColored(Red, "Port is out of range [0, 65535]");
+                break;
+            case SocketException:
+                ImGui.TextColored(Red, "Port is already in use by another server.");
+                break;
+            default:
+                ImGui.TextColored(Red, $"Unknown error: {lastException.Message}");
+                break;
+        }
+    }
+
+    private static bool IsValidPort(int port) => port is >= 0 and <= 65535;
 
     public override TextSource GetCurrentlySpokenTextSource()
     {
