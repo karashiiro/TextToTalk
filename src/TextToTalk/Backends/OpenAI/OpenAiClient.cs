@@ -22,10 +22,13 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
     public static readonly IReadOnlySet<string> Voices = new HashSet<string>
     {
         "alloy",
+        "ash",
+        "coral",
         "echo",
         "fable",
         "onyx",
         "nova",
+        "sage",
         "shimmer",
     };
 
