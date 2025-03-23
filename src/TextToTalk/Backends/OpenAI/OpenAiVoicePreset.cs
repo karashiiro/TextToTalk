@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace TextToTalk.Backends.OpenAI;
 
@@ -12,14 +13,17 @@ public class OpenAiVoicePreset : VoicePreset
     public float? PlaybackRate { get; set; }
 
     [JsonPropertyName("OpenAIVoiceName")] public string? VoiceName { get; set; }
+    
+    public string? Instructions { get; set; }
 
     public override bool TrySetDefaultValues()
     {
+        var defaultConfig = OpenAiClient.Models.First();
         Volume = 1.0f;
         PlaybackRate = 1.0f;
-        VoiceName = "alloy";
+        VoiceName = defaultConfig.Voices.First();
         EnabledBackend = TTSBackend.OpenAi;
-        Model = "tts-1";
+        Model = defaultConfig.ModelName;
         return true;
     }
 }
