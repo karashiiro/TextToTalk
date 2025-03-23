@@ -30,8 +30,9 @@ public class OpenAiBackendUIModel
 
     /// <summary>
     /// Gets the valid voices for the current voice engine.
+    /// NOTE: Currently there is no endpoint which provides this information for OpenAI.
     /// </summary>
-    public IReadOnlyDictionary<string, IReadOnlyList<string>> Voices { get; private set; }
+    // public IReadOnlyDictionary<string, IReadOnlyList<string>> Voices { get; private set; }
 
     public OpenAiBackendUIModel(PluginConfiguration config, HttpClient http)
     {
@@ -40,7 +41,7 @@ public class OpenAiBackendUIModel
         this.config = config;
         this.apiKey = "";
 
-        this.Voices = new Dictionary<string, IReadOnlyList<string>>();
+        // this.Voices = new Dictionary<string, IReadOnlyList<string>>();
 
         var credentials = OpenAiCredentialManager.LoadCredentials();
         if (credentials != null)
