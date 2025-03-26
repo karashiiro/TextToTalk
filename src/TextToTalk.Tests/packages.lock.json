@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0": {
+    "net9.0": {
       "coverlet.collector": {
         "type": "Direct",
         "requested": "[6.0.2, )",
@@ -72,8 +72,8 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "11.0.0",
-        "contentHash": "bjT7XUlhIJSmsE/O76b7weUX+evvGQctbQB8aKXt94o+oPWxHpCepxAGMs7Thow3AzCyqWs7cOpp9/2wcgRRQA=="
+        "resolved": "12.0.0",
+        "contentHash": "J5TJLV3f16T/E2H2P17ClWjtfEBPpq3yxvqW46eN36JCm6wR+EaoaYkqG9Rm5sHqs3/nK/vKjWWyvEs/jhKoXw=="
       },
       "Google.Api.CommonProtos": {
         "type": "Transitive",
@@ -431,7 +431,7 @@
         "dependencies": {
           "AWSSDK.Polly": "[3.7.401.37, )",
           "AdysTech.CredentialManager": "[2.6.0, )",
-          "DalamudPackager": "[11.0.0, )",
+          "DalamudPackager": "[12.0.0, )",
           "Google.Cloud.TextToSpeech.V1": "[3.9.0, )",
           "Microsoft.CognitiveServices.Speech": "[1.41.1, )",
           "NAudio": "[2.2.1, )",
