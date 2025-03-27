@@ -29,8 +29,7 @@ public class OpenAiBackend : VoiceBackend
         {
             try
             {
-                await this.uiModel.OpenAi.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume,
-                    request.Source, request.Text);
+                await this.uiModel.OpenAi.Say(voicePreset, request, request.Text);
             }
             catch (OpenAiUnauthorizedException e)
             {

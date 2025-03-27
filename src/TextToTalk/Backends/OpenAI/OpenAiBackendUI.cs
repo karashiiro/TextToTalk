@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Dalamud.Interface;
 using ImGuiNET;
 using TextToTalk.UI;
 
@@ -37,23 +38,38 @@ public class OpenAiBackendUI
         {
             ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
         }
+        
     }
 
     public void DrawVoicePresetOptions()
     {
-        var currentVoicePreset = config.GetCurrentVoicePreset<OpenAiVoicePreset>();
+        var currentVoicePreset = model.GetCurrentVoicePreset();
         var presets = config.GetVoicePresetsForBackend(TTSBackend.OpenAi).ToList();
 
         if (presets.Count > 0 && currentVoicePreset != null)
         {
             var currentPresetIndex = presets.IndexOf(currentVoicePreset);
-            if (ImGui.Combo($"Voice preset##{MemoizedId.Create()}", ref currentPresetIndex,
-                    presets.Select(p => p.Name).ToArray(), presets.Count))
+            var presetDisplayNames = presets
+                .Select(p =>
+                    {
+                        if (p is OpenAiVoicePreset openAiVoicePreset)
+                        {
+                            return $"{openAiVoicePreset.Name} ({openAiVoicePreset.Model} - {openAiVoicePreset.VoiceName})";
+                        }
+
+                        return p.Name;
+                    })
+                .ToArray();
+            if (ImGui.Combo($"Voice preset##{MemoizedId.Create()}", ref currentPresetIndex, presetDisplayNames, presets.Count))
                 config.SetCurrentVoicePreset(presets[currentPresetIndex].Id);
         }
         else if (currentVoicePreset != null)
         {
             ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+        }
+        else if (currentVoicePreset == null && presets.Count > 0)
+        {
+            config.SetCurrentVoicePreset(presets.First().Id);
         }
 
         BackendUI.NewPresetButton<OpenAiVoicePreset>($"New preset##{MemoizedId.Create()}", config);
@@ -72,8 +88,38 @@ public class OpenAiBackendUI
             currentVoicePreset.Name = presetName;
             config.Save();
         }
+        
+        var modelNames = OpenAiClient.Models.Select(x => x.ModelName).ToArray();
+        if (currentVoicePreset.Model == null || !modelNames.Contains(currentVoicePreset.Model))
+        {
+            currentVoicePreset.Model = modelNames.First();
+            config.Save();
+        }
+        
+        if (ImGui.BeginCombo($"Model##{MemoizedId.Create()}", currentVoicePreset.Model))
+        {
+            foreach (var modelName in modelNames)
+            {
+                if (ImGui.Selectable(modelName, modelName == currentVoicePreset.Model))
+                {
+                    currentVoicePreset.Model = modelName;
+                    config.Save();
+                }
+            }
 
-        var voiceNames = OpenAiClient.Voices;
+            ImGui.EndCombo();
+        }
+
+        if (currentVoicePreset.Model == null) return;
+        
+        var currentModel = OpenAiClient.Models.First(x => x.ModelName == currentVoicePreset.Model);
+        var voiceNames = currentModel.Voices;
+        if (currentVoicePreset.VoiceName == null || !voiceNames.Contains(currentVoicePreset.VoiceName))
+        {
+            currentVoicePreset.VoiceName = voiceNames.First();
+            config.Save();
+        }
+        
         if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentVoicePreset.VoiceName))
         {
             foreach (var voiceName in voiceNames)
@@ -87,35 +133,49 @@ public class OpenAiBackendUI
             ImGui.EndCombo();
         }
 
-        var modelNames = OpenAiClient.Models;
-        if (ImGui.BeginCombo($"Model##{MemoizedId.Create()}", currentVoicePreset.Model))
-        {
-            currentVoicePreset.Model ??= modelNames.First();
-            foreach (var modelName in modelNames)
-            {
-                if (ImGui.Selectable(modelName, modelName == currentVoicePreset.Model))
-                {
-                    currentVoicePreset.Model = modelName;
-                    config.Save();
-                }
-            }
-
-            ImGui.EndCombo();
-        }
-
-        var playbackRate = currentVoicePreset.PlaybackRate ?? 1;
-        if (ImGui.SliderFloat($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 0.25f, 4f, "%.2fx"))
-        {
-            currentVoicePreset.PlaybackRate = playbackRate;
-            config.Save();
-        }
-
         var volume = (int) (currentVoicePreset.Volume * 100);
         if (ImGui.SliderInt($"Volume##{MemoizedId.Create()}", ref volume, 0, 200, "%d%%"))
         {
             currentVoicePreset.Volume = (float) Math.Round(volume / 100f, 2);
             config.Save();
         }
+        
+        if (currentModel.SpeedSupported)
+        {
+            var playbackRate = currentVoicePreset.PlaybackRate ?? 1;
+            if (ImGui.SliderFloat($"Playback rate##{MemoizedId.Create()}", ref playbackRate, 0.25f, 4f, "%.2fx"))
+            {
+                currentVoicePreset.PlaybackRate = playbackRate;
+                config.Save();
+            }
+        }
+
+        if (currentModel.InstructionsSupported)
+        {
+            var instructions = currentVoicePreset.Instructions ?? "";
+            if (ImGui.InputTextWithHint($"Instructions##{MemoizedId.Create()}",
+                    "Enter instructions to direct the tone, style, pacing, pronunciation, etc.",
+                    ref instructions, 1024))
+            {
+                currentVoicePreset.Instructions = instructions;
+                config.Save();
+            }
+        }
+
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        ImGui.Text(FontAwesomeIcon.QuestionCircle.ToIconString());
+        ImGui.PopFont();
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text("Instructions are additional information that can be provided to the model to help it generate more accurate speech.\n" +
+                              "This can include things like emphasis, pronunciation, pauses, tone, pacing, voice affect, inflections, word choice etc.\n" +
+                              "Examples can be found at https://openai.fm");
+            ImGui.EndTooltip();
+        }
+        
+        ImGui.Separator();
 
         ConfigComponents.ToggleUseGenderedVoicePresets($"Use gendered voices##{MemoizedId.Create()}", config);
         ImGui.Spacing();
