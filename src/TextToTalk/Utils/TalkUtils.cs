@@ -48,7 +48,7 @@ namespace TextToTalk.Utils
             if (textNode == null) return "";
 
             var textPtr = textNode->NodeText.StringPtr;
-            if (textPtr == null) return "";
+            if (!textPtr.HasValue) return "";
 
             var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
             if (textLength is <= 0 or > int.MaxValue) return "";
