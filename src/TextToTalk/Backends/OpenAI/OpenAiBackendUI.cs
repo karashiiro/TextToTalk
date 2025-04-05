@@ -160,19 +160,19 @@ public class OpenAiBackendUI
                 currentVoicePreset.Instructions = instructions;
                 config.Save();
             }
-        }
 
-        ImGui.SameLine();
-        ImGui.PushFont(UiBuilder.IconFont);
-        ImGui.Text(FontAwesomeIcon.QuestionCircle.ToIconString());
-        ImGui.PopFont();
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.BeginTooltip();
-            ImGui.Text("Instructions are additional information that can be provided to the model to help it generate more accurate speech.\n" +
-                              "This can include things like emphasis, pronunciation, pauses, tone, pacing, voice affect, inflections, word choice etc.\n" +
-                              "Examples can be found at https://openai.fm");
-            ImGui.EndTooltip();
+            ImGui.SameLine();
+            ImGui.PushFont(UiBuilder.IconFont);
+            ImGui.Text(FontAwesomeIcon.QuestionCircle.ToIconString());
+            ImGui.PopFont();
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text("Instructions are additional information that can be provided to the model to help it generate more accurate speech.\n" +
+                           "This can include things like emphasis, pronunciation, pauses, tone, pacing, voice affect, inflections, word choice etc.\n" +
+                           "Examples can be found at https://openai.fm");
+                ImGui.EndTooltip();
+            }
         }
         
         ImGui.Separator();
