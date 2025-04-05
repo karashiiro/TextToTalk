@@ -82,7 +82,7 @@ public class AddonBattleTalkHandler : IAddonBattleTalkHandler
 
         text = TalkUtils.NormalizePunctuation(text);
 
-        DetailedLog.Debug($"AddonBattleTalk ({pollSource}): \"{text}\"");
+        DetailedLog.Debug($"AddonBattleTalk ({pollSource}): [{speaker}] \"{text}\"");
 
         {
             // This entire callback executes twice in a row - once for the voice line, and then again immediately

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using TextToTalk.Talk;
@@ -38,24 +39,15 @@ namespace TextToTalk.Utils
         {
             return new AddonTalkText
             {
-                Speaker = ReadTextNode(talkAddon->AtkTextNode220),
-                Text = ReadTextNode(talkAddon->AtkTextNode228),
+                Speaker = ReadTextNode(talkAddon->Speaker),
+                Text = ReadTextNode(talkAddon->Text),
             };
         }
 
         private static unsafe string ReadTextNode(AtkTextNode* textNode)
         {
             if (textNode == null) return "";
-
-            var textPtr = textNode->NodeText.StringPtr;
-            if (!textPtr.HasValue) return "";
-
-            var textLength = textNode->NodeText.BufUsed - 1; // Null-terminated; chop off the null byte
-            if (textLength is <= 0 or > int.MaxValue) return "";
-
-            var textLengthInt = Convert.ToInt32(textLength);
-
-            var seString = SeString.Parse(textPtr, textLengthInt);
+            var seString = textNode->NodeText.StringPtr.AsDalamudSeString();
             return seString.TextValue
                 .Trim()
                 .Replace("\n", "")
