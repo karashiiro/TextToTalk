@@ -10,5 +10,5 @@ public class UberduckVoice
 
     [JsonProperty("voicemodel_uuid")] public required string VoiceModelUuid { get; init; }
 
-    [JsonProperty("category")] public required string Category { get; init; }
+    [JsonProperty("category")] public required string? Category { get; init; }
 }
