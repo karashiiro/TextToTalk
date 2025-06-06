@@ -61,4 +61,16 @@
         <Copy SourceFiles="@(VoiceUnlocker)" DestinationFolder="$(TargetDir)\VoiceUnlocker" SkipUnchangedFiles="true" />
     </Target>
 
+    <Target Name="_ExcludeUnsupportedRuntimes" BeforeTargets="_CopyFilesMarkedCopyLocal">
+        <ItemGroup>
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').StartsWith('android'))" />
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').StartsWith('ios'))" />
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').StartsWith('osx'))" />
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').StartsWith('maccatalyst'))" />
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').EndsWith('-arm'))" />
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').EndsWith('-arm64'))" />
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').EndsWith('-x86'))" />
+        </ItemGroup>
+    </Target>
+
 </Project>
