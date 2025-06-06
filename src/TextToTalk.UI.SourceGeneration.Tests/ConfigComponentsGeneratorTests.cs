@@ -32,6 +32,7 @@ namespace TextToTalk.Configuration
 
         private bool Option2 {{ get; set; }}
 
+        [Tooltip(""This is the 3rd option."")]
         public bool Option3 {{ get; set; }}
 
         public void Save()
@@ -100,6 +101,12 @@ namespace TextToTalk.UI;
         {{
             config.Option3 = value;
             config.Save();
+        }}
+        if (global::ImGuiNET.ImGui.IsItemHovered())
+        {{
+            global::ImGuiNET.ImGui.BeginTooltip();
+            global::ImGuiNET.ImGui.Text(@""This is the 3rd option."");
+            global::ImGuiNET.ImGui.EndTooltip();
         }}
     }}
 }}
