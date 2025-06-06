@@ -23,6 +23,11 @@ public static class BackendUI
         {
             config.Save();
         }
+        Components.HelpTooltip("""
+            By default, NPCs in the game only have genders of 0 and 1, regardless of their canonical gender (or lack thereof).
+            As such, any ungendered characters need to be specified by us in order to be properly reflected in-game.
+            See https://github.com/karashiiro/TextToTalk/wiki/Adding-NPCs-to-the-Ungendered-Overrides-List for more information.
+            """);
 
         if (!ungenderedVoices.Any())
         {
