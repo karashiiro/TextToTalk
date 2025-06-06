@@ -289,6 +289,7 @@ namespace TextToTalk.UI
                 ConfigComponents.ToggleRemoveStutterEnabled(
                     "Attempt to remove stutter from NPC dialogue (default: On)",
                     this.config);
+                Components.Tooltip("Removes \"stuttering\" from NPC dialogue such as \"H-hello, nice to m-meet you...\"");
             }
         }
 
@@ -341,13 +342,7 @@ namespace TextToTalk.UI
                     }
 
                     ImGui.PopFont();
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.BeginTooltip();
-                        ImGui.Text("Delete");
-                        ImGui.EndTooltip();
-                    }
+                    Components.Tooltip("Delete");
                 },
                 row =>
                 {
@@ -502,13 +497,7 @@ namespace TextToTalk.UI
                     }
 
                     ImGui.PopFont();
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.BeginTooltip();
-                        ImGui.Text("Delete");
-                        ImGui.EndTooltip();
-                    }
+                    Components.Tooltip("Delete");
                 },
                 row =>
                 {
