@@ -52,6 +52,21 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
         // TODO: Autodetect this
         var methods = string.Join("\n\n    ", data.ConfigOptions.Select(option =>
         {
+            string? tooltipCode = null;
+            if (!string.IsNullOrEmpty(option.Tooltip))
+            {
+                //lang=c#
+                tooltipCode = $$"""
+
+                        if (global::ImGuiNET.ImGui.IsItemHovered())
+                        {
+                            global::ImGuiNET.ImGui.BeginTooltip();
+                            global::ImGuiNET.ImGui.Text(@"{{option.Tooltip}}");
+                            global::ImGuiNET.ImGui.EndTooltip();
+                        }
+                """;
+            }
+
             // ReSharper disable once ConvertToLambdaExpression
             //lang=c#
             return
@@ -68,7 +83,7 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
         {{
             config.{option.Name} = value;
             config.Save();
-        }}
+        }}{tooltipCode}
     }}";
         }));
 
@@ -222,8 +237,13 @@ namespace {data.Namespace};
 
         var type = property.Type.ToDisplayString();
         var name = property.Name;
+        string? tooltip = null;
+        if (property.GetAttributes() is [{ AttributeClass.Name: "TooltipAttribute" } attr])
+        {
+            tooltip = attr.ConstructorArguments.FirstOrDefault().Value as string;
+        }
 
-        return new ConfigComponentsContext.Option(name, type);
+        return new ConfigComponentsContext.Option(name, type, tooltip);
     }
 
     /// <summary>
