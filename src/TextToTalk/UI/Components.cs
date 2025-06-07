@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud.Interface;
 using ImGuiNET;
 
 namespace TextToTalk.UI;
@@ -27,5 +28,24 @@ public static class Components
 
             ImGui.EndTable();
         }
+    }
+
+    public static void Tooltip(string text)
+    {
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text(text);
+            ImGui.EndTooltip();
+        }
+    }
+
+    public static void HelpTooltip(string text)
+    {
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        ImGui.Text(FontAwesomeIcon.QuestionCircle.ToIconString());
+        ImGui.PopFont();
+        Tooltip(text);
     }
 }

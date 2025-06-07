@@ -40,17 +40,20 @@ public class ConfigComponentsContext : ToolContext
 
         public string TypeName { get; }
 
-        public Option(string name, string typeName)
+        public string? Tooltip { get; }
+
+        public Option(string name, string typeName, string? tooltip)
         {
             Name = name;
             TypeName = typeName;
+            Tooltip = tooltip;
         }
 
         public bool Equals(Option? other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Name == other.Name && TypeName == other.TypeName;
+            return Name == other.Name && TypeName == other.TypeName && Tooltip == other.Tooltip;
         }
 
         public override bool Equals(object? obj)
@@ -62,7 +65,7 @@ public class ConfigComponentsContext : ToolContext
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() | TypeName.GetHashCode();
+            return Name.GetHashCode() | TypeName.GetHashCode() | (Tooltip?.GetHashCode() ?? 0);
         }
     }
 }
