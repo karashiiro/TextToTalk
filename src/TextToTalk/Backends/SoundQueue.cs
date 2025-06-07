@@ -49,7 +49,7 @@ namespace TextToTalk.Backends
             }
         }
 
-        public void CancelAllSounds()
+        public virtual void CancelAllSounds()
         {
             lock (this.queuedSounds)
             {
@@ -62,7 +62,7 @@ namespace TextToTalk.Backends
             OnSoundCancelled();
         }
 
-        public void CancelFromSource(TextSource source)
+        public virtual void CancelFromSource(TextSource source)
         {
             lock (this.queuedSounds)
             {
@@ -84,6 +84,11 @@ namespace TextToTalk.Backends
         public TextSource GetCurrentlySpokenTextSource()
         {
             return this.currentItem?.Source ?? TextSource.None;
+        }
+
+        protected TQueueItem? GetCurrentItem()
+        {
+            return this.currentItem;
         }
 
         protected void AddQueueItem(TQueueItem item)

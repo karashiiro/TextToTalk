@@ -171,6 +171,8 @@ namespace TextToTalk
 
         public bool SkipMessagesFromYou { get; set; }
 
+        public bool KokoroUseAmericanEnglish { get; set; } = true;
+
         [JsonIgnore]
         public bool InitializedEver
         {
@@ -310,6 +312,16 @@ namespace TextToTalk
         {
             // ReSharper disable once InconsistentlySynchronizedField
             return Path.Combine(this.pluginInterface.GetPluginConfigDirectory(), "VoicePresets.json");
+        }
+
+        public string GetPluginAssemblyDirectory()
+        {
+            return this.pluginInterface.AssemblyLocation.DirectoryName!;
+        }
+
+        public string GetPluginConfigDirectory()
+        {
+            return this.pluginInterface.GetPluginConfigDirectory();
         }
 
         public EnabledChatTypesPreset GetCurrentEnabledChatTypesPreset()
