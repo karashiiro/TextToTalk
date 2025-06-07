@@ -13,9 +13,9 @@ namespace TextToTalk.UI.SourceGeneration.Tests;
 
 public class ConfigComponentsGeneratorTests
 {
-    private static readonly ReferenceAssemblies Net80Windows = new("net8.0-windows",
-        new PackageIdentity("Microsoft.NETCore.App.Ref", "8.0.0"),
-        Path.Combine("ref", "net8.0-windows"));
+    private static readonly ReferenceAssemblies Net90Windows = new("net9.0-windows",
+        new PackageIdentity("Microsoft.NETCore.App.Ref", "9.0.0"),
+        Path.Combine("ref", "net9.0-windows"));
 
     private static string GetTargetConfigSourceCode(string configInterfaces)
     {
@@ -127,7 +127,7 @@ namespace TextToTalk.UI;
     private static string UICorePath()
     {
         var thisAssembly = Assembly.GetExecutingAssembly().Location;
-        return Path.Combine(thisAssembly, "..", "..", "..", "..", "..", "TextToTalk.UI.Core", "bin", "Debug", "net8.0",
+        return Path.Combine(thisAssembly, "..", "..", "..", "..", "..", "TextToTalk.UI.Core", "bin", "Debug", "net9.0",
             "TextToTalk.UI.Core.dll");
     }
 
@@ -138,7 +138,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
@@ -165,7 +165,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
@@ -192,7 +192,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
@@ -219,7 +219,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
