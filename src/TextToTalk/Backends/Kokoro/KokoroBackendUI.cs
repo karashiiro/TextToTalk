@@ -72,6 +72,7 @@ public class KokoroBackendUI
 
             ImGui.EndCombo();
         }
+        Components.Tooltip("The built-in Kokoro voice to use for this preset. The first letter is the language/accent:\na - American, b - British, j - Japanese, ect.\nThe second latter is the gender:\nf - Female, m - Male");
 
         var speed = currentVoicePreset.Speed ?? 1f;
         if (ImGui.SliderFloat($"Speed##{MemoizedId.Create()}", ref speed, 0.5f, 2f, "%.2fx"))
@@ -89,6 +90,7 @@ public class KokoroBackendUI
                 kokoroBackend.Say($"Hello, my name is {presetName} and I am a TTS voice preset.", currentVoicePreset, TextSource.Chat, Dalamud.Game.ClientLanguage.English);
             }
         }
+        Components.Tooltip("Plays a test message using the current voice preset.");
 
         ImGui.Separator();
 
