@@ -7,6 +7,7 @@ using Dalamud.Interface;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
+using TextToTalk.Backends.Kokoro;
 using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -107,6 +108,7 @@ namespace TextToTalk.Backends
                 TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http, this.notificationService),
                 TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http, this.notificationService),
                 TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config),
+                TTSBackend.Kokoro => new KokoroBackend(this.config),
                 _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };
         }

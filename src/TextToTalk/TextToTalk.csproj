@@ -32,6 +32,7 @@
         <PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
         <PackageReference Include="AWSSDK.Polly" Version="3.7.401.37" />
         <PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.9.0" />
+        <PackageReference Include="KokoroSharp.CPU" Version="0.6.1" />
         <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.41.1" />
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="R3" Version="1.2.9" />

@@ -7,6 +7,7 @@ using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
+using TextToTalk.Backends.Kokoro;
 using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -255,6 +256,14 @@ public class VoicePresetConfiguration
                 Locale = GetNullableValue<string?>(corrupted, "Locale"),
                 VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
                 EnabledBackend = TTSBackend.GoogleCloud
+            },
+            TTSBackend.Kokoro => new KokoroVoicePreset
+            {
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Speed = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Speed")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                InternalName = GetNullableValue<string?>(corrupted, "InternalName"),
+                EnabledBackend = TTSBackend.Kokoro
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),
         };

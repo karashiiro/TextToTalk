@@ -12,6 +12,7 @@ namespace TextToTalk.Backends
         ElevenLabs,
         OpenAi,
         GoogleCloud,
+        Kokoro,
     }
 
     public static class TTSBackendExtensions
@@ -28,6 +29,7 @@ namespace TextToTalk.Backends
                 TTSBackend.ElevenLabs => "ElevenLabs",
                 TTSBackend.OpenAi => "OpenAI",
                 TTSBackend.GoogleCloud => "Google Cloud",
+                TTSBackend.Kokoro => "Kokoro",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
@@ -44,6 +46,7 @@ namespace TextToTalk.Backends
                 TTSBackend.ElevenLabs => false,
                 TTSBackend.OpenAi => false,
                 TTSBackend.GoogleCloud => false,
+                TTSBackend.Kokoro => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
