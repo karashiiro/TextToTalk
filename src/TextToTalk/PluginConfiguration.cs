@@ -171,6 +171,7 @@ namespace TextToTalk
 
         public bool SkipMessagesFromYou { get; set; }
 
+        [Tooltip("Use the American pronunciation for English instead of the British one. This doesn't affect the accents of the voices.")]
         public bool KokoroUseAmericanEnglish { get; set; } = true;
 
         [JsonIgnore]
