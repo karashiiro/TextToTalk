@@ -379,7 +379,11 @@ namespace TextToTalk
 
             var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
             var speakerRace = charaStruct->DrawData.CustomizeData.Race;
-            var row = race.GetRow(speakerRace);
+
+            if (!race.TryGetRow(speakerRace, out var row))
+            {
+                return "Unknown";
+            }
 
             return row.Masculine.ToString();
         }
