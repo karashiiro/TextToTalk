@@ -5,6 +5,7 @@ using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -373,12 +374,11 @@ namespace TextToTalk
         private unsafe string GetSpeakerRace(GameObject? speaker)
         {
             var race = this.data.GetExcelSheet<Race>();
-            if (speaker is null || speaker.Address == nint.Zero)
+            if (!TryGetCharacter(speaker, out var charaStruct))
             {
                 return "Unknown";
             }
 
-            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
             var speakerRace = charaStruct->DrawData.CustomizeData.Race;
 
             if (!race.TryGetRow(speakerRace, out var row))
@@ -391,14 +391,29 @@ namespace TextToTalk
 
         private static unsafe BodyType GetSpeakerBodyType(GameObject? speaker)
         {
-            if (speaker is null || speaker.Address == nint.Zero)
+            if (!TryGetCharacter(speaker, out var charaStruct))
             {
                 return BodyType.Unknown;
             }
 
-            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
             var speakerBodyType = charaStruct->DrawData.CustomizeData.BodyType;
             return (BodyType)speakerBodyType;
+        }
+
+        private static unsafe bool TryGetCharacter(GameObject? speaker, [NotNullWhen(true)] out FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character)
+        {
+            character = null;
+            if (speaker is null || speaker.Address == nint.Zero)
+            {
+                return false;
+            }
+            var objectStruct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)speaker.Address;
+            if (!objectStruct->IsCharacter())
+            {
+                return false;
+            }
+            character = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
+            return true;
         }
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
