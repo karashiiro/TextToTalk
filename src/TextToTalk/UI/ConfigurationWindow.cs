@@ -258,7 +258,7 @@ namespace TextToTalk.UI
             if (ImGui.CollapsingHeader($"Voices##{MemoizedId.Create()}", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 var backends = Enum.GetValues<TTSBackend>();
-                var backendsDisplay = backends.Select(b => b.GetFormattedName()).ToArray();
+                var backendsDisplay = backends.Select(b => b.GetFormattedName(config)).ToArray();
                 var backend = this.config.Backend;
                 var backendIndex = Array.IndexOf(backends, backend);
 

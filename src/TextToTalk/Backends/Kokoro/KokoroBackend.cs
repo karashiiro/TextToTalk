@@ -34,6 +34,21 @@ public class KokoroBackend : VoiceBackend
         DetailedLog.Info($"Kokoro voices loaded: {KokoroVoiceManager.Voices.Count} voices available.");
     }
 
+    /// <summary>
+    /// Returns if the model file is downloaded. This does not necessarily mean the file is correct.
+    /// Purely used for UI elsewhere.
+    /// </summary>
+    public static bool IsModelFileDownloaded(PluginConfiguration config)
+    {
+        var path = GetModelPath(config);
+        return Path.Exists(path);
+    }
+
+    private static string GetModelPath(PluginConfiguration config)
+    {
+        return Path.Join(config.GetPluginConfigDirectory(), "kokoro-quant.onnx");
+    }
+
     private bool TryGetModel([NotNullWhen(true)] out KokoroModel? tts)
     {
         if (modelTask.IsCompletedSuccessfully)
@@ -47,7 +62,7 @@ public class KokoroBackend : VoiceBackend
 
     private async Task<KokoroModel> GetModelAsync(PluginConfiguration config)
     {
-        var path = Path.Join(config.GetPluginConfigDirectory(), "kokoro-quant.onnx");
+        var path = GetModelPath(config);
         DetailedLog.Debug($"Checking for Kokoro model at '{path}'.");
         if (Path.Exists(path))
         {
@@ -74,7 +89,7 @@ public class KokoroBackend : VoiceBackend
             await responseStream.CopyToAsync(fileStream, cts.Token);
             await fileStream.FlushAsync(cts.Token);
         }
-        DetailedLog.Debug($"Kokoro model downloaded successfully.");
+        DetailedLog.Debug("Kokoro model downloaded successfully.");
         return new KokoroModel(path);
     }
 
@@ -130,7 +145,7 @@ public class KokoroBackend : VoiceBackend
         }
         else
         {
-            ImGui.TextColored(ImColor.HintColor, "Model is still downloading...");
+            ImGui.TextColored(ImColor.HintColor, "Model is still downloading or initializing...");
         }
     }
 
