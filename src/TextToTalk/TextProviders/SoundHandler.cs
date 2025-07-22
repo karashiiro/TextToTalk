@@ -13,7 +13,7 @@ public class SoundHandler : IDisposable
 {
     // Signature strings drawn from Anna Clemens's Sound Filter plugin -
     // https://git.anna.lgbt/anna/SoundFilter/src/commit/100829e0e763927f569f695d2033150e409efe2c/SoundFilter/Filter.cs#L12-L20
-    private const string LoadSoundFile = "E8 ?? ?? ?? ?? 48 85 C0 75 05 40 B7 F6";
+    private const string LoadSoundFile = "E8 ?? ?? ?? ?? 48 85 C0 75 12 B0 F6";
 
     private const string PlaySpecificSound =
         "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 33 F6 8B DA 48 8B F9 0F BA E2 0F";
