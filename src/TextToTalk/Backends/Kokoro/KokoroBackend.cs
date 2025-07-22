@@ -125,12 +125,12 @@ public class KokoroBackend : VoiceBackend
 
         if (modelTask.Status == TaskStatus.Faulted)
         {
-            ImGui.TextColored(BackendUI.Red, $"Failed to download model: {modelTask.Exception?.Message}");
+            ImGui.TextColored(ImColor.Red, $"Failed to download model: {modelTask.Exception?.Message}");
             DetailedLog.Error($"Failed to download Kokoro model: {modelTask.Exception}");
         }
         else
         {
-            ImGui.TextColored(BackendUI.HintColor, $"Model is still downloading...");
+            ImGui.TextColored(ImColor.HintColor, "Model is still downloading...");
         }
     }
 

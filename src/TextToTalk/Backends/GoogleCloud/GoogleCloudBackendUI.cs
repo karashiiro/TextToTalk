@@ -38,7 +38,7 @@ public class GoogleCloudBackendUI
         }
         else if (currentVoicePreset != null)
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         BackendUI.NewPresetButton<GoogleCloudVoicePreset>($"New preset##{MemoizedId.Create()}", config);

@@ -38,7 +38,7 @@ public class UberduckBackendUI
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.TextColored(BackendUI.HintColor, "TTS may be delayed due to rate-limiting.");
+        ImGui.TextColored(ImColor.HintColor, "TTS may be delayed due to rate-limiting.");
         ImGui.Spacing();
 
         ImGui.InputTextWithHint($"##{MemoizedId.Create()}", "API key", ref this.apiKey, 100,
@@ -61,7 +61,7 @@ public class UberduckBackendUI
             WebBrowser.Open("https://uberduck.ai/");
         }
 
-        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+        ImGui.TextColored(ImColor.HintColor, "Credentials secured with Windows Credential Manager");
 
         ImGui.Spacing();
 
@@ -82,7 +82,7 @@ public class UberduckBackendUI
         }
         else
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         BackendUI.NewPresetButton<UberduckVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
@@ -137,7 +137,7 @@ public class UberduckBackendUI
 
             if (voiceCategoriesFlat.Count == 0)
             {
-                ImGui.TextColored(BackendUI.Red,
+                ImGui.TextColored(ImColor.Red,
                     "No voices were found. This might indicate a temporary service outage.");
             }
         }
@@ -158,7 +158,7 @@ public class UberduckBackendUI
         }
 
         ImGui.Text("Lexicons");
-        ImGui.TextColored(BackendUI.HintColor, "Lexicons are not supported on the Uberduck backend.");
+        ImGui.TextColored(ImColor.HintColor, "Lexicons are not supported on the Uberduck backend.");
 
         ImGui.Spacing();
 

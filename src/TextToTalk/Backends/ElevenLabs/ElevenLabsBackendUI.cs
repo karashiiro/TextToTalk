@@ -36,12 +36,12 @@ public class ElevenLabsBackendUI
             WebBrowser.Open("https://beta.elevenlabs.io/");
         }
 
-        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+        ImGui.TextColored(ImColor.HintColor, "Credentials secured with Windows Credential Manager");
 
         var loginError = this.model.ElevenLabsLoginException?.Message;
         if (loginError != null)
         {
-            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+            ImGui.TextColored(ImColor.Red, $"Failed to login: {loginError}");
         }
 
         ImGui.Spacing();
@@ -58,7 +58,7 @@ public class ElevenLabsBackendUI
             ImGui.ProgressBar(ratio, Vector2.Zero, label);
             ImGui.SameLine(0, ImGui.GetStyle().ItemInnerSpacing.X);
             ImGui.Text("Characters used");
-            ImGui.TextColored(BackendUI.HintColor, $"Next quota reset: {quotaReset.ToLocalTime()}");
+            ImGui.TextColored(ImColor.HintColor, $"Next quota reset: {quotaReset.ToLocalTime()}");
             ImGui.Spacing();
         }
 
@@ -78,7 +78,7 @@ public class ElevenLabsBackendUI
         }
         else if (currentVoicePreset != null)
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         BackendUI.NewPresetButton<ElevenLabsVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
@@ -134,7 +134,7 @@ public class ElevenLabsBackendUI
 
             if (voiceCategoriesFlat.Count == 0)
             {
-                ImGui.TextColored(BackendUI.Red,
+                ImGui.TextColored(ImColor.Red,
                     "No voices were found. This might indicate a temporary service outage.");
             }
         }

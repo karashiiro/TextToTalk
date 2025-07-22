@@ -11,11 +11,6 @@ namespace TextToTalk.UI
         private const string ManualTutorialText = "Manual tutorial";
         private const string EnableAllText = "Enable all system voices";
 
-        private static readonly Vector4 Red = ImGui.ColorConvertU32ToFloat4(0xFF0000FF);
-        private static readonly Vector4 LightRed = ImGui.ColorConvertU32ToFloat4(0xFF8A8AFF);
-        private static readonly Vector4 DarkRed = ImGui.ColorConvertU32ToFloat4(0xFF00007D);
-        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-
         private readonly Subject<string> onResult;
         private readonly VoiceUnlockerRunner voiceUnlockerRunner;
 
@@ -35,10 +30,10 @@ namespace TextToTalk.UI
 
         public override void PreDraw()
         {
-            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, Red);
-            ImGui.PushStyleColor(ImGuiCol.CheckMark, Red);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, LightRed);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, DarkRed);
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ImColor.Red);
+            ImGui.PushStyleColor(ImGuiCol.CheckMark, ImColor.Red);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImColor.LightRed);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImColor.DarkRed);
         }
 
         public override void Draw()
@@ -75,7 +70,7 @@ namespace TextToTalk.UI
                 this.onResult.OnNext(resultText);
             }
 
-            ImGui.TextColored(HintColor, "Administrative privileges will be requested");
+            ImGui.TextColored(ImColor.HintColor, "Administrative privileges will be requested");
         }
 
         public override void PostDraw()

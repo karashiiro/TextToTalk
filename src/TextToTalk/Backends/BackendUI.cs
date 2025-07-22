@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using ImGuiNET;
 using TextToTalk.UI;
 
@@ -8,9 +7,6 @@ namespace TextToTalk.Backends;
 
 public static class BackendUI
 {
-    public static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-    public static readonly Vector4 Red = new(1, 0, 0, 1);
-
     public static void GenderedPresetConfig(string uniq, TTSBackend backend, PluginConfiguration config,
         List<VoicePreset> presets)
     {
@@ -31,7 +27,7 @@ public static class BackendUI
 
         if (!ungenderedVoices.Any())
         {
-            ImGui.TextColored(Red, "No ungendered voice preset(s) are selected.");
+            ImGui.TextColored(ImColor.Red, "No ungendered voice preset(s) are selected.");
         }
 
         if (ImGuiPresetCombo($"Male preset(s)##{MemoizedId.Create(uniq: uniq)}", maleVoices, presets))
@@ -41,7 +37,7 @@ public static class BackendUI
 
         if (!maleVoices.Any())
         {
-            ImGui.TextColored(Red, "No male voice preset(s) are selected.");
+            ImGui.TextColored(ImColor.Red, "No male voice preset(s) are selected.");
         }
 
         if (ImGuiPresetCombo($"Female preset(s)##{MemoizedId.Create(uniq: uniq)}", femaleVoices, presets))
@@ -51,7 +47,7 @@ public static class BackendUI
 
         if (!femaleVoices.Any())
         {
-            ImGui.TextColored(Red, "No female voice preset(s) are selected.");
+            ImGui.TextColored(ImColor.Red, "No female voice preset(s) are selected.");
         }
 
         ImGuiMultiVoiceHint();
@@ -89,17 +85,17 @@ public static class BackendUI
 
     public static void ImGuiVoiceNotSupported()
     {
-        ImGui.TextColored(Red, "Voice not supported on this engine");
+        ImGui.TextColored(ImColor.Red, "Voice not supported on this engine");
     }
 
     public static void ImGuiVoiceNotSelected()
     {
-        ImGui.TextColored(Red, "No voice selected");
+        ImGui.TextColored(ImColor.Red, "No voice selected");
     }
 
     public static void ImGuiMultiVoiceHint()
     {
-        ImGui.TextColored(HintColor,
+        ImGui.TextColored(ImColor.HintColor,
             "If multiple presets are selected per gender, they will be randomly assigned to characters.");
     }
 

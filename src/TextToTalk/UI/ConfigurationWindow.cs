@@ -19,10 +19,6 @@ namespace TextToTalk.UI
 {
     public class ConfigurationWindow : Window, IDisposable
     {
-        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-        private static readonly Vector4 Green = new(0.0f, 1.0f, 0.0f, 1.0f);
-        private static readonly Vector4 Red = new(1.0f, 0.0f, 0.0f, 1.0f);
-
         private readonly PluginConfiguration config;
         private readonly IDataManager data;
         private readonly VoiceBackendManager backendManager;
@@ -295,7 +291,7 @@ namespace TextToTalk.UI
 
         private void DrawPlayerVoiceSettings()
         {
-            ImGui.TextColored(HintColor, "Set specific voice presets for players using the options below.");
+            ImGui.TextColored(ImColor.HintColor, "Set specific voice presets for players using the options below.");
 
             ImGui.Spacing();
 
@@ -391,11 +387,11 @@ namespace TextToTalk.UI
                         ImGui.PushFont(UiBuilder.IconFont);
                         if (valid)
                         {
-                            ImGui.TextColored(Green, FontAwesomeIcon.CheckCircle.ToIconString());
+                            ImGui.TextColored(ImColor.Green, FontAwesomeIcon.CheckCircle.ToIconString());
                         }
                         else
                         {
-                            ImGui.TextColored(Red, FontAwesomeIcon.MinusCircle.ToIconString());
+                            ImGui.TextColored(ImColor.Red, FontAwesomeIcon.MinusCircle.ToIconString());
                         }
 
                         ImGui.PopFont();
@@ -429,7 +425,7 @@ namespace TextToTalk.UI
             ImGui.InputText($"Player world##{MemoizedId.Create()}", ref this.playerWorld, 32);
             if (!string.IsNullOrEmpty(this.playerWorldError))
             {
-                ImGui.TextColored(Red, this.playerWorldError);
+                ImGui.TextColored(ImColor.Red, this.playerWorldError);
             }
 
             if (ImGui.Button($"Add player##{MemoizedId.Create()}"))
@@ -460,7 +456,7 @@ namespace TextToTalk.UI
 
         private void DrawNpcVoiceSettings()
         {
-            ImGui.TextColored(HintColor, "Set specific voice presets for NPCs using the options below.");
+            ImGui.TextColored(ImColor.HintColor, "Set specific voice presets for NPCs using the options below.");
 
             ImGui.Spacing();
 
@@ -545,7 +541,7 @@ namespace TextToTalk.UI
 
             if (!string.IsNullOrEmpty(this.npcError))
             {
-                ImGui.TextColored(Red, this.npcError);
+                ImGui.TextColored(ImColor.Red, this.npcError);
             }
 
             if (ImGui.Button($"Add NPC##{MemoizedId.Create()}"))

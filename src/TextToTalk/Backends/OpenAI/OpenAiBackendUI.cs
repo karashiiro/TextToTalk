@@ -30,12 +30,12 @@ public class OpenAiBackendUI
             this.model.LoginWith(this.apiKey);
         }
 
-        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+        ImGui.TextColored(ImColor.HintColor, "Credentials secured with Windows Credential Manager");
 
         var loginError = this.model.OpenAiLoginException?.Message;
         if (loginError != null)
         {
-            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+            ImGui.TextColored(ImColor.Red, $"Failed to login: {loginError}");
         }
         
     }
@@ -64,7 +64,7 @@ public class OpenAiBackendUI
         }
         else if (currentVoicePreset != null)
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
         else if (currentVoicePreset == null && presets.Count > 0)
         {

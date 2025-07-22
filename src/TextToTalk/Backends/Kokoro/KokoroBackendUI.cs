@@ -7,19 +7,14 @@ using TextToTalk.UI;
 
 namespace TextToTalk.Backends.Kokoro;
 
-public class KokoroBackendUI
+public class KokoroBackendUI(PluginConfiguration config, KokoroBackend kokoroBackend)
 {
-    private readonly PluginConfiguration config;
-    private readonly KokoroBackend kokoroBackend;
-
-    public KokoroBackendUI(PluginConfiguration config, KokoroBackend kokoroBackend)
-    {
-        this.config = config;
-        this.kokoroBackend = kokoroBackend;
-    }
-
     public void DrawVoicePresetOptions()
     {
+        ImGui.TextColored(ImColor.HintColor, "This backend may cause performance issues on some systems.");
+
+        ImGui.Spacing();
+
         var currentVoicePreset = config.GetCurrentVoicePreset<KokoroVoicePreset>();
         var presets = config.GetVoicePresetsForBackend(TTSBackend.Kokoro).ToList();
 
@@ -35,7 +30,7 @@ public class KokoroBackendUI
         }
         else if (currentVoicePreset != null)
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         BackendUI.NewPresetButton<KokoroVoicePreset>($"New preset##{MemoizedId.Create()}", config);
@@ -72,7 +67,9 @@ public class KokoroBackendUI
 
             ImGui.EndCombo();
         }
-        Components.Tooltip("The built-in Kokoro voice to use for this preset. The first letter is the language/accent:\na - American, b - British, j - Japanese, ect.\nThe second latter is the gender:\nf - Female, m - Male");
+
+        Components.Tooltip(
+            "The built-in Kokoro voice to use for this preset. The first letter is the language/accent:\na - American, b - British, j - Japanese, ect.\nThe second latter is the gender:\nf - Female, m - Male");
 
         var speed = currentVoicePreset.Speed ?? 1f;
         if (ImGui.SliderFloat($"Speed##{MemoizedId.Create()}", ref speed, 0.5f, 2f, "%.2fx"))
@@ -87,9 +84,11 @@ public class KokoroBackendUI
             if (voice is not null)
             {
                 kokoroBackend.CancelSay(TextSource.Chat);
-                kokoroBackend.Say($"Hello, my name is {presetName} and I am a TTS voice preset.", currentVoicePreset, TextSource.Chat, Dalamud.Game.ClientLanguage.English);
+                kokoroBackend.Say($"Hello, my name is {presetName} and I am a TTS voice preset.", currentVoicePreset,
+                    TextSource.Chat, Dalamud.Game.ClientLanguage.English);
             }
         }
+
         Components.Tooltip("Plays a test message using the current voice preset.");
 
         ImGui.Separator();

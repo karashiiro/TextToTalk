@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
 using System.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
@@ -13,9 +12,6 @@ namespace TextToTalk.UI.Lexicons;
 
 public class LexiconComponent
 {
-    private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-    private static readonly Vector4 Red = new(1.0f, 0.0f, 0.0f, 1.0f);
-
     private readonly List<Exception?> lexiconRemoveExceptions = new();
     private Exception? lexiconAddException;
     private bool lexiconAddSucceeded;
@@ -83,7 +79,7 @@ public class LexiconComponent
 
         ImGui.Text("Lexicons");
 
-        ImGui.TextColored(HintColor, "Looking for more lexicons? Have a look at our community lexicons list!");
+        ImGui.TextColored(ImColor.HintColor, "Looking for more lexicons? Have a look at our community lexicons list!");
         if (ImGui.Button("Wiki"))
         {
             WebBrowser.Open("https://github.com/karashiiro/TextToTalk/wiki/Community-lexicons");
@@ -112,7 +108,7 @@ public class LexiconComponent
 
                 if (this.lexiconRemoveExceptions[i] != null)
                 {
-                    ImGui.TextColored(Red, this.lexiconRemoveExceptions[i]?.Message ?? "");
+                    ImGui.TextColored(ImColor.Red, this.lexiconRemoveExceptions[i]?.Message ?? "");
                 }
 
                 deferred?.Invoke();
@@ -137,7 +133,7 @@ public class LexiconComponent
 
         if (this.lexiconAddException != null)
         {
-            ImGui.TextColored(Red, this.lexiconAddException.Message);
+            ImGui.TextColored(ImColor.Red, this.lexiconAddException.Message);
         }
     }
 
