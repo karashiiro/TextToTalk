@@ -33,7 +33,7 @@ public class SoundHandler : IDisposable
     private static readonly Regex IgnoredSoundFileNameRegex = new(
         @"^(bgcommon|music|sound/(battle|foot|instruments|strm|vfx|voice/Vo_Emote|zingle))/");
 
-    private static readonly Regex VoiceLineFileNameRegex = new(@"^cut/.*/(vo_|voice)");
+    private static readonly Regex VoiceLineFileNameRegex = new(@"^(cut/.*/(vo_|voice)|sound/voice/Vo_Line/)");
     private readonly HashSet<nint> knownVoiceLinePtrs = new();
 
     private readonly IAddonTalkHandler addonTalkHandler;
