@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiFileDialog;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 
@@ -98,8 +98,7 @@ public class LexiconComponent
             // Editing options
             var lexiconPath = lexicons[i];
             var lexiconPathBuf = Encoding.UTF8.GetBytes(lexiconPath);
-            ImGui.InputText($"##{MemoizedId.Create(uniq: $"{i}")}", lexiconPathBuf, (uint)lexiconPathBuf.Length,
-                ImGuiInputTextFlags.ReadOnly);
+            ImGui.InputText($"##{MemoizedId.Create(uniq: $"{i}")}", lexiconPathBuf, ImGuiInputTextFlags.ReadOnly);
 
             if (!string.IsNullOrEmpty(lexicons[i]))
             {

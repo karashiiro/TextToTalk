@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.UI;
 using TextToTalk.UI.GoogleCloud;
 

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.Services;
 
 namespace TextToTalk.Backends.OpenAI;

@@ -58,11 +58,11 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
                 //lang=c#
                 tooltipCode = $$"""
 
-                        if (global::ImGuiNET.ImGui.IsItemHovered())
+                        if (global::Dalamud.Bindings.ImGui.ImGui.IsItemHovered())
                         {
-                            global::ImGuiNET.ImGui.BeginTooltip();
-                            global::ImGuiNET.ImGui.Text(@"{{option.Tooltip}}");
-                            global::ImGuiNET.ImGui.EndTooltip();
+                            global::Dalamud.Bindings.ImGui.ImGui.BeginTooltip();
+                            global::Dalamud.Bindings.ImGui.ImGui.Text(@"{{option.Tooltip}}");
+                            global::Dalamud.Bindings.ImGui.ImGui.EndTooltip();
                         }
                 """;
             }
@@ -79,7 +79,7 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
     public static void Toggle{option.Name}(string label, global::{data.ConfigNamespace}.{data.ConfigName} config)
     {{
         var value = config.{option.Name};
-        if (global::ImGuiNET.ImGui.Checkbox(label, ref value))
+        if (global::Dalamud.Bindings.ImGui.ImGui.Checkbox(label, ref value))
         {{
             config.{option.Name} = value;
             config.Save();

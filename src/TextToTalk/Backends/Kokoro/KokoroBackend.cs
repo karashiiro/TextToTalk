@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Game;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using KokoroSharp;
 using KokoroSharp.Core;
 using KokoroSharp.Processing;

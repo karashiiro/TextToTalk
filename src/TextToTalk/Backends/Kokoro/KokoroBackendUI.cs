@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using KokoroSharp;
 using KokoroSharp.Core;
 using TextToTalk.UI;

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace TextToTalk.UI
 {

@@ -81,7 +81,7 @@ namespace TextToTalk.UI;
     public static void ToggleOption1(string label, global::TextToTalk.Configuration.Test1Config config)
     {{
         var value = config.Option1;
-        if (global::ImGuiNET.ImGui.Checkbox(label, ref value))
+        if (global::Dalamud.Bindings.ImGui.ImGui.Checkbox(label, ref value))
         {{
             config.Option1 = value;
             config.Save();
@@ -97,16 +97,16 @@ namespace TextToTalk.UI;
     public static void ToggleOption3(string label, global::TextToTalk.Configuration.Test1Config config)
     {{
         var value = config.Option3;
-        if (global::ImGuiNET.ImGui.Checkbox(label, ref value))
+        if (global::Dalamud.Bindings.ImGui.ImGui.Checkbox(label, ref value))
         {{
             config.Option3 = value;
             config.Save();
         }}
-        if (global::ImGuiNET.ImGui.IsItemHovered())
+        if (global::Dalamud.Bindings.ImGui.ImGui.IsItemHovered())
         {{
-            global::ImGuiNET.ImGui.BeginTooltip();
-            global::ImGuiNET.ImGui.Text(@""This is the 3rd option."");
-            global::ImGuiNET.ImGui.EndTooltip();
+            global::Dalamud.Bindings.ImGui.ImGui.BeginTooltip();
+            global::Dalamud.Bindings.ImGui.ImGui.Text(@""This is the 3rd option."");
+            global::Dalamud.Bindings.ImGui.ImGui.EndTooltip();
         }}
     }}
 }}
@@ -128,7 +128,7 @@ namespace TextToTalk.UI;
     private static string ImGuiNetPath()
     {
         var appData = Environment.GetEnvironmentVariable("AppData");
-        return Path.Combine(appData!, "XIVLauncher", "addon", "Hooks", "dev", "ImGui.NET.dll");
+        return Path.Combine(appData!, "XIVLauncher", "addon", "Hooks", "dev", "Dalamud.Bindings.ImGui.dll");
     }
 
     private static string UICorePath()

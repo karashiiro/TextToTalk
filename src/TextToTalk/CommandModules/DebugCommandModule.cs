@@ -49,7 +49,7 @@ public class DebugCommandModule : CommandModule
             {
                 unsafe
                 {
-                    var ui = (UIModule*)this.gui.GetUIModule();
+                    var ui = (UIModule*)this.gui.GetUIModule().Address;
                     ui->ShowBattleTalk(name, message, 60f, 0);
                 }
             });

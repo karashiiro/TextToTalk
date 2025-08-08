@@ -7,7 +7,7 @@ using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using R3;
 using TextToTalk.Backends;
@@ -308,10 +308,10 @@ namespace TextToTalk.UI
                 () =>
                 {
                     ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
-                    ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
-                    ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
+                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}");
+                    ImGui.TableSetupColumn("Name");
+                    ImGui.TableSetupColumn("World");
+                    ImGui.TableSetupColumn("Preset");
                     ImGui.TableHeadersRow();
                 },
                 () => this.players
@@ -473,9 +473,9 @@ namespace TextToTalk.UI
                 () =>
                 {
                     ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 300f);
-                    ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 300f);
+                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}");
+                    ImGui.TableSetupColumn("Name");
+                    ImGui.TableSetupColumn("Preset");
                     ImGui.TableHeadersRow();
                 },
                 () => this.npc

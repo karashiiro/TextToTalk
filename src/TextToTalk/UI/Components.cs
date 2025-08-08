@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Interface;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace TextToTalk.UI;
 
