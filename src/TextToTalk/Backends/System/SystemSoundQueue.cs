@@ -62,7 +62,7 @@ namespace TextToTalk.Backends.System
 
             var ssml = this.lexiconManager.MakeSsml(nextItem.Text,
                 langCode: this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
-            DetailedLog.Info(ssml);
+            DetailedLog.Verbose(ssml);
 
             this.speechSynthesizer.SpeakSsmlAsync(ssml);
 

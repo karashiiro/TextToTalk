@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Bindings.ImGui;
 using System;
 using System.IO;
 using System.Linq;
@@ -34,7 +34,7 @@ public class SystemBackendUI
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
-        ImGui.TextColored(BackendUI.HintColor, "This TTS provider is only supported on Windows.");
+        ImGui.TextColored(ImColor.HintColor, "This TTS provider is only supported on Windows.");
 
         var currentVoicePreset = this.config.GetCurrentVoicePreset<SystemVoicePreset>();
 
@@ -53,7 +53,7 @@ public class SystemBackendUI
         }
         else
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         BackendUI.NewPresetButton<SystemVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
@@ -139,12 +139,12 @@ public class SystemBackendUI
     {
         if (e.InnerException != null)
         {
-            ImGui.TextColored(BackendUI.Red, $"Voice errors:\n  {e.Message}");
+            ImGui.TextColored(ImColor.Red, $"Voice errors:\n  {e.Message}");
             PrintVoiceExceptionsR(e.InnerException);
         }
         else
         {
-            ImGui.TextColored(BackendUI.Red, $"Voice error:\n  {e.Message}");
+            ImGui.TextColored(ImColor.Red, $"Voice error:\n  {e.Message}");
         }
     }
 
@@ -157,7 +157,7 @@ public class SystemBackendUI
 
         do
         {
-            ImGui.TextColored(BackendUI.Red, $"  {e.Message}");
+            ImGui.TextColored(ImColor.Red, $"  {e.Message}");
             e = e.InnerException;
         } while (e?.InnerException != null);
     }

@@ -36,7 +36,7 @@ public partial class UberduckClient
     {
         if (Voices.Count == 0) await UpdateVoices();
         return Voices
-            .GroupBy(v => v.Category)
+            .GroupBy(v => string.IsNullOrWhiteSpace(v.Category) ? "Uncategorized" : v.Category)
             .ToImmutableSortedDictionary(
                 g => g.Key,
                 g => (IList<UberduckVoice>)g.OrderByDescending(v => v.DisplayName).ToList());

@@ -145,6 +145,7 @@ namespace TextToTalk
         public bool ReadFromBattleTalkAddon { get; set; } = true;
         public bool SkipVoicedBattleText { get; set; } = true;
 
+        [Tooltip("Set specific voice presets to be used for Ungendered, Male, and Female characters.")]
         public bool UseGenderedVoicePresets { get; set; }
 
         public bool UsePlayerVoicePresets { get; set; } = true;
@@ -165,12 +166,16 @@ namespace TextToTalk
 
         public IDictionary<string, IDictionary<TTSBackend, bool>>? RemoteLexiconEnabledBackends { get; set; }
 
+        [Tooltip("Sets a rate limit for every player character.")]
         public bool UsePlayerRateLimiter { get; set; }
         public float MessagesPerSecond { get; set; } = 5;
 
         public bool SkipMessagesFromYou { get; set; }
 
         public Guid PlaybackDeviceId { get; set; } = DirectSoundOut.DSDEVID_DefaultPlayback;
+
+        [Tooltip("Use the American pronunciation for English instead of the British one. This doesn't affect the accents of the voices.")]
+        public bool KokoroUseAmericanEnglish { get; set; } = true;
 
         [JsonIgnore]
         public bool InitializedEver
@@ -311,6 +316,16 @@ namespace TextToTalk
         {
             // ReSharper disable once InconsistentlySynchronizedField
             return Path.Combine(this.pluginInterface.GetPluginConfigDirectory(), "VoicePresets.json");
+        }
+
+        public string GetPluginAssemblyDirectory()
+        {
+            return this.pluginInterface.AssemblyLocation.DirectoryName!;
+        }
+
+        public string GetPluginConfigDirectory()
+        {
+            return this.pluginInterface.GetPluginConfigDirectory();
         }
 
         public EnabledChatTypesPreset GetCurrentEnabledChatTypesPreset()

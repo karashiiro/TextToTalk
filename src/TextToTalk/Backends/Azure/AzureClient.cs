@@ -46,7 +46,7 @@ public class AzureClient : IDisposable
             langCode: "en-US",
             playbackRate: playbackRate,
             includeSpeakAttributes: true);
-        DetailedLog.Info(ssml);
+        DetailedLog.Verbose(ssml);
 
         var res = await this.synthesizer.SpeakSsmlAsync(ssml);
 

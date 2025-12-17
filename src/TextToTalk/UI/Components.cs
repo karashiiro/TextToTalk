@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using TextToTalk.Backends;
+using Dalamud.Interface;
+using Dalamud.Bindings.ImGui;
 
 namespace TextToTalk.UI;
 
@@ -44,5 +46,24 @@ public static class Components
 
             playbackDeviceProvider.SetDevice(newDevice);
         }
+    }
+
+    public static void Tooltip(string text)
+    {
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.Text(text);
+            ImGui.EndTooltip();
+        }
+    }
+
+    public static void HelpTooltip(string text)
+    {
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        ImGui.Text(FontAwesomeIcon.QuestionCircle.ToIconString());
+        ImGui.PopFont();
+        Tooltip(text);
     }
 }

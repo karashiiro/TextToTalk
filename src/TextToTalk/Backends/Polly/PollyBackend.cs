@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Net.Http;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace TextToTalk.Backends.Polly
 {

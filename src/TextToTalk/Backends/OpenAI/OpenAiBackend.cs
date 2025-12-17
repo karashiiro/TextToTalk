@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.Services;
 
 namespace TextToTalk.Backends.OpenAI;
@@ -30,8 +30,7 @@ public class OpenAiBackend : VoiceBackend
         {
             try
             {
-                await this.uiModel.OpenAi.Say(voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume,
-                    request.Source, request.Text);
+                await this.uiModel.OpenAi.Say(voicePreset, request, request.Text);
             }
             catch (OpenAiUnauthorizedException e)
             {

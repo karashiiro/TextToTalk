@@ -7,7 +7,7 @@ using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using R3;
 using TextToTalk.Backends;
@@ -19,10 +19,6 @@ namespace TextToTalk.UI
 {
     public class ConfigurationWindow : Window, IDisposable
     {
-        private static readonly Vector4 HintColor = new(0.7f, 0.7f, 0.7f, 1.0f);
-        private static readonly Vector4 Green = new(0.0f, 1.0f, 0.0f, 1.0f);
-        private static readonly Vector4 Red = new(1.0f, 0.0f, 0.0f, 1.0f);
-
         private readonly PluginConfiguration config;
         private readonly IDataManager data;
         private readonly VoiceBackendManager backendManager;
@@ -279,7 +275,7 @@ namespace TextToTalk.UI
             if (ImGui.CollapsingHeader($"Voices##{MemoizedId.Create()}", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 var backends = Enum.GetValues<TTSBackend>();
-                var backendsDisplay = backends.Select(b => b.GetFormattedName()).ToArray();
+                var backendsDisplay = backends.Select(b => b.GetFormattedName(config)).ToArray();
                 var backend = this.config.Backend;
                 var backendIndex = Array.IndexOf(backends, backend);
 
@@ -306,12 +302,13 @@ namespace TextToTalk.UI
                 ConfigComponents.ToggleRemoveStutterEnabled(
                     "Attempt to remove stutter from NPC dialogue (default: On)",
                     this.config);
+                Components.Tooltip("Removes \"stuttering\" from NPC dialogue such as \"H-hello, nice to m-meet you...\"");
             }
         }
 
         private void DrawPlayerVoiceSettings()
         {
-            ImGui.TextColored(HintColor, "Set specific voice presets for players using the options below.");
+            ImGui.TextColored(ImColor.HintColor, "Set specific voice presets for players using the options below.");
 
             ImGui.Spacing();
 
@@ -328,10 +325,10 @@ namespace TextToTalk.UI
                 () =>
                 {
                     ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 280f);
-                    ImGui.TableSetupColumn("World", ImGuiTableColumnFlags.None, 100f);
-                    ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 220f);
+                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}");
+                    ImGui.TableSetupColumn("Name");
+                    ImGui.TableSetupColumn("World");
+                    ImGui.TableSetupColumn("Preset");
                     ImGui.TableHeadersRow();
                 },
                 () => this.players
@@ -358,13 +355,7 @@ namespace TextToTalk.UI
                     }
 
                     ImGui.PopFont();
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.BeginTooltip();
-                        ImGui.Text("Delete");
-                        ImGui.EndTooltip();
-                    }
+                    Components.Tooltip("Delete");
                 },
                 row =>
                 {
@@ -413,11 +404,11 @@ namespace TextToTalk.UI
                         ImGui.PushFont(UiBuilder.IconFont);
                         if (valid)
                         {
-                            ImGui.TextColored(Green, FontAwesomeIcon.CheckCircle.ToIconString());
+                            ImGui.TextColored(ImColor.Green, FontAwesomeIcon.CheckCircle.ToIconString());
                         }
                         else
                         {
-                            ImGui.TextColored(Red, FontAwesomeIcon.MinusCircle.ToIconString());
+                            ImGui.TextColored(ImColor.Red, FontAwesomeIcon.MinusCircle.ToIconString());
                         }
 
                         ImGui.PopFont();
@@ -451,7 +442,7 @@ namespace TextToTalk.UI
             ImGui.InputText($"Player world##{MemoizedId.Create()}", ref this.playerWorld, 32);
             if (!string.IsNullOrEmpty(this.playerWorldError))
             {
-                ImGui.TextColored(Red, this.playerWorldError);
+                ImGui.TextColored(ImColor.Red, this.playerWorldError);
             }
 
             if (ImGui.Button($"Add player##{MemoizedId.Create()}"))
@@ -482,7 +473,7 @@ namespace TextToTalk.UI
 
         private void DrawNpcVoiceSettings()
         {
-            ImGui.TextColored(HintColor, "Set specific voice presets for NPCs using the options below.");
+            ImGui.TextColored(ImColor.HintColor, "Set specific voice presets for NPCs using the options below.");
 
             ImGui.Spacing();
 
@@ -499,9 +490,9 @@ namespace TextToTalk.UI
                 () =>
                 {
                     ImGui.TableSetupScrollFreeze(0, 1); // Make top row always visible
-                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}", ImGuiTableColumnFlags.None, 30f);
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 300f);
-                    ImGui.TableSetupColumn("Preset", ImGuiTableColumnFlags.None, 300f);
+                    ImGui.TableSetupColumn($"##{MemoizedId.Create()}");
+                    ImGui.TableSetupColumn("Name");
+                    ImGui.TableSetupColumn("Preset");
                     ImGui.TableHeadersRow();
                 },
                 () => this.npc
@@ -519,13 +510,7 @@ namespace TextToTalk.UI
                     }
 
                     ImGui.PopFont();
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.BeginTooltip();
-                        ImGui.Text("Delete");
-                        ImGui.EndTooltip();
-                    }
+                    Components.Tooltip("Delete");
                 },
                 row =>
                 {
@@ -573,7 +558,7 @@ namespace TextToTalk.UI
 
             if (!string.IsNullOrEmpty(this.npcError))
             {
-                ImGui.TextColored(Red, this.npcError);
+                ImGui.TextColored(ImColor.Red, this.npcError);
             }
 
             if (ImGui.Button($"Add NPC##{MemoizedId.Create()}"))

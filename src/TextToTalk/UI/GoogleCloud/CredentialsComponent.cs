@@ -1,6 +1,6 @@
 using System;
 using Dalamud.Interface.ImGuiFileDialog;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.Backends.GoogleCloud;
 
 namespace TextToTalk.UI.GoogleCloud;

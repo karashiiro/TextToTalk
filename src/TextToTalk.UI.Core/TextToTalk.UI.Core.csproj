@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <RuntimeFrameworkVersion>8.0.0</RuntimeFrameworkVersion>
+        <TargetFramework>net9.0</TargetFramework>
+        <RuntimeFrameworkVersion>9.0.0</RuntimeFrameworkVersion>
         <LangVersion>11.0</LangVersion>
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <Nullable>enable</Nullable>

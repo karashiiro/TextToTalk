@@ -52,6 +52,21 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
         // TODO: Autodetect this
         var methods = string.Join("\n\n    ", data.ConfigOptions.Select(option =>
         {
+            string? tooltipCode = null;
+            if (!string.IsNullOrEmpty(option.Tooltip))
+            {
+                //lang=c#
+                tooltipCode = $$"""
+
+                        if (global::Dalamud.Bindings.ImGui.ImGui.IsItemHovered())
+                        {
+                            global::Dalamud.Bindings.ImGui.ImGui.BeginTooltip();
+                            global::Dalamud.Bindings.ImGui.ImGui.Text(@"{{option.Tooltip}}");
+                            global::Dalamud.Bindings.ImGui.ImGui.EndTooltip();
+                        }
+                """;
+            }
+
             // ReSharper disable once ConvertToLambdaExpression
             //lang=c#
             return
@@ -64,11 +79,11 @@ public class ConfigComponentsGenerator : IIncrementalGenerator
     public static void Toggle{option.Name}(string label, global::{data.ConfigNamespace}.{data.ConfigName} config)
     {{
         var value = config.{option.Name};
-        if (global::ImGuiNET.ImGui.Checkbox(label, ref value))
+        if (global::Dalamud.Bindings.ImGui.ImGui.Checkbox(label, ref value))
         {{
             config.{option.Name} = value;
             config.Save();
-        }}
+        }}{tooltipCode}
     }}";
         }));
 
@@ -222,8 +237,13 @@ namespace {data.Namespace};
 
         var type = property.Type.ToDisplayString();
         var name = property.Name;
+        string? tooltip = null;
+        if (property.GetAttributes() is [{ AttributeClass.Name: "TooltipAttribute" } attr])
+        {
+            tooltip = attr.ConstructorArguments.FirstOrDefault().Value as string;
+        }
 
-        return new ConfigComponentsContext.Option(name, type);
+        return new ConfigComponentsContext.Option(name, type, tooltip);
     }
 
     /// <summary>

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
@@ -54,12 +54,12 @@ public class AzureBackendUI
                 "https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/index-text-to-speech");
         }
 
-        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+        ImGui.TextColored(ImColor.HintColor, "Credentials secured with Windows Credential Manager");
 
         var loginError = this.model.AzureLoginException?.Message;
         if (loginError != null)
         {
-            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+            ImGui.TextColored(ImColor.Red, $"Failed to login: {loginError}");
         }
 
         ImGui.Spacing();
@@ -80,7 +80,7 @@ public class AzureBackendUI
         }
         else if (currentVoicePreset != null)
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         BackendUI.NewPresetButton<AzureVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
@@ -117,7 +117,7 @@ public class AzureBackendUI
             switch (voices.Count)
             {
                 case 0:
-                    ImGui.TextColored(BackendUI.Red,
+                    ImGui.TextColored(ImColor.Red,
                         "No voices are available on this voice engine for the current region.\n" +
                         "Please log in using a different region.");
                     break;

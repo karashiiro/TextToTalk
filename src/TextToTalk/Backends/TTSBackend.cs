@@ -1,4 +1,5 @@
 ﻿using System;
+using TextToTalk.Backends.Kokoro;
 
 namespace TextToTalk.Backends
 {
@@ -12,11 +13,12 @@ namespace TextToTalk.Backends
         ElevenLabs,
         OpenAi,
         GoogleCloud,
+        Kokoro,
     }
 
     public static class TTSBackendExtensions
     {
-        public static string GetFormattedName(this TTSBackend backend)
+        public static string GetFormattedName(this TTSBackend backend, PluginConfiguration? config = null)
         {
             return backend switch
             {
@@ -28,6 +30,8 @@ namespace TextToTalk.Backends
                 TTSBackend.ElevenLabs => "ElevenLabs",
                 TTSBackend.OpenAi => "OpenAI",
                 TTSBackend.GoogleCloud => "Google Cloud",
+                TTSBackend.Kokoro when config != null && KokoroBackend.IsModelFileDownloaded(config) => "Kokoro",
+                TTSBackend.Kokoro => "Kokoro (169MB download required)",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
@@ -44,6 +48,7 @@ namespace TextToTalk.Backends
                 TTSBackend.ElevenLabs => false,
                 TTSBackend.OpenAi => false,
                 TTSBackend.GoogleCloud => false,
+                TTSBackend.Kokoro => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }

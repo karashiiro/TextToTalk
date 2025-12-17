@@ -1,5 +1,5 @@
 ﻿using Amazon.Polly;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.IO;
 using System.Linq;
@@ -63,12 +63,12 @@ public class PollyBackendUI
             WebBrowser.Open("https://docs.aws.amazon.com/polly/latest/dg/getting-started.html");
         }
 
-        ImGui.TextColored(BackendUI.HintColor, "Credentials secured with Windows Credential Manager");
+        ImGui.TextColored(ImColor.HintColor, "Credentials secured with Windows Credential Manager");
 
         var loginError = this.model.PollyLoginException?.Message;
         if (loginError != null)
         {
-            ImGui.TextColored(BackendUI.Red, $"Failed to login: {loginError}");
+            ImGui.TextColored(ImColor.Red, $"Failed to login: {loginError}");
         }
 
         ImGui.Spacing();
@@ -89,7 +89,7 @@ public class PollyBackendUI
         }
         else if (currentVoicePreset != null)
         {
-            ImGui.TextColored(BackendUI.Red, "You have no presets. Please create one using the \"New preset\" button.");
+            ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
 
         BackendUI.NewPresetButton<PollyVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
@@ -135,7 +135,7 @@ public class PollyBackendUI
             switch (voices.Count)
             {
                 case 0:
-                    ImGui.TextColored(BackendUI.Red,
+                    ImGui.TextColored(ImColor.Red,
                         "No voices are available on this voice engine for the current region.\n" +
                         "Please log in using a different region.");
                     break;

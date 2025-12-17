@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using TextToTalk.Backends;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
@@ -67,9 +67,9 @@ public class LexiconRepositorySubwindow
         }
         else if (ImGui.BeginTable("##TTTLexiconRepoList", 3, ImGuiTableFlags.Borders))
         {
-            ImGui.TableSetupColumn("Lexicon", ImGuiTableColumnFlags.None, 280f);
-            ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 100f);
-            ImGui.TableSetupColumn("Authors", ImGuiTableColumnFlags.None, 220f);
+            ImGui.TableSetupColumn("Lexicon");
+            ImGui.TableSetupColumn("Status");
+            ImGui.TableSetupColumn("Authors");
             ImGui.TableHeadersRow();
 
             if (this.remotePackages != null)

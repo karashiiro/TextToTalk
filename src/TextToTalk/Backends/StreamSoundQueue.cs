@@ -8,6 +8,7 @@ namespace TextToTalk.Backends
 {
     public class StreamSoundQueue(IPlaybackDeviceProvider playbackDeviceProvider) : SoundQueue<StreamSoundQueueItem>
     {
+        private static readonly WaveFormat waveFormat = new(24000, 16, 1);
         private readonly AutoResetEvent speechCompleted = new(false);
         private readonly object soundLock = true;
         private DirectSoundOut? soundOut;
@@ -18,6 +19,7 @@ namespace TextToTalk.Backends
             {
                 StreamFormat.Mp3 => new Mp3FileReader(nextItem.Data),
                 StreamFormat.Wave => new WaveFileReader(nextItem.Data),
+                StreamFormat.Raw => new RawSourceWaveStream(nextItem.Data, waveFormat),
                 _ => throw new NotSupportedException(),
             };
 

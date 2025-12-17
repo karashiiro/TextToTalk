@@ -5,6 +5,7 @@ using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -19,6 +20,7 @@ using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
+using TextToTalk.Backends.Kokoro;
 using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -372,28 +374,46 @@ namespace TextToTalk
         private unsafe string GetSpeakerRace(GameObject? speaker)
         {
             var race = this.data.GetExcelSheet<Race>();
-            if (race is null || speaker is null || speaker.Address == nint.Zero)
+            if (!TryGetCharacter(speaker, out var charaStruct))
             {
                 return "Unknown";
             }
 
-            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
             var speakerRace = charaStruct->DrawData.CustomizeData.Race;
-            var row = race.GetRow(speakerRace);
+
+            if (!race.TryGetRow(speakerRace, out var row))
+            {
+                return "Unknown";
+            }
 
             return row.Masculine.ToString();
         }
 
-        private unsafe BodyType GetSpeakerBodyType(GameObject? speaker)
+        private static unsafe BodyType GetSpeakerBodyType(GameObject? speaker)
         {
-            if (speaker is null || speaker.Address == nint.Zero)
+            if (!TryGetCharacter(speaker, out var charaStruct))
             {
                 return BodyType.Unknown;
             }
 
-            var charaStruct = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
             var speakerBodyType = charaStruct->DrawData.CustomizeData.BodyType;
             return (BodyType)speakerBodyType;
+        }
+
+        private static unsafe bool TryGetCharacter(GameObject? speaker, [NotNullWhen(true)] out FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character)
+        {
+            character = null;
+            if (speaker is null || speaker.Address == nint.Zero)
+            {
+                return false;
+            }
+            var objectStruct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)speaker.Address;
+            if (!objectStruct->IsCharacter())
+            {
+                return false;
+            }
+            character = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
+            return true;
         }
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
@@ -416,7 +436,7 @@ namespace TextToTalk
             }
 
             // Get the speaker's gender, if possible
-            var gender = this.config.UseGenderedVoicePresets
+            var gender = this.config.Backend == TTSBackend.Websocket || this.config.UseGenderedVoicePresets
                 ? CharacterGenderUtils.GetCharacterGender(speaker, this.ungenderedOverrides)
                 : Gender.None;
 
@@ -440,6 +460,7 @@ namespace TextToTalk
                 ElevenLabsBackend => GetVoiceForSpeaker<ElevenLabsVoicePreset>(name, gender),
                 OpenAiBackend => GetVoiceForSpeaker<OpenAiVoicePreset>(name, gender),
                 GoogleCloudBackend => GetVoiceForSpeaker<GoogleCloudVoicePreset>(name, gender),
+                KokoroBackend => GetVoiceForSpeaker<KokoroVoicePreset>(name, gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };
         }

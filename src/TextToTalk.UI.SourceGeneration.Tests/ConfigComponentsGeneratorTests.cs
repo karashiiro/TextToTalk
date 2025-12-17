@@ -13,9 +13,9 @@ namespace TextToTalk.UI.SourceGeneration.Tests;
 
 public class ConfigComponentsGeneratorTests
 {
-    private static readonly ReferenceAssemblies Net80Windows = new("net8.0-windows",
-        new PackageIdentity("Microsoft.NETCore.App.Ref", "8.0.0"),
-        Path.Combine("ref", "net8.0-windows"));
+    private static readonly ReferenceAssemblies Net90Windows = new("net9.0-windows",
+        new PackageIdentity("Microsoft.NETCore.App.Ref", "9.0.0"),
+        Path.Combine("ref", "net9.0-windows"));
 
     private static string GetTargetConfigSourceCode(string configInterfaces)
     {
@@ -32,6 +32,7 @@ namespace TextToTalk.Configuration
 
         private bool Option2 {{ get; set; }}
 
+        [Tooltip(""This is the 3rd option."")]
         public bool Option3 {{ get; set; }}
 
         public void Save()
@@ -80,7 +81,7 @@ namespace TextToTalk.UI;
     public static void ToggleOption1(string label, global::TextToTalk.Configuration.Test1Config config)
     {{
         var value = config.Option1;
-        if (global::ImGuiNET.ImGui.Checkbox(label, ref value))
+        if (global::Dalamud.Bindings.ImGui.ImGui.Checkbox(label, ref value))
         {{
             config.Option1 = value;
             config.Save();
@@ -96,10 +97,16 @@ namespace TextToTalk.UI;
     public static void ToggleOption3(string label, global::TextToTalk.Configuration.Test1Config config)
     {{
         var value = config.Option3;
-        if (global::ImGuiNET.ImGui.Checkbox(label, ref value))
+        if (global::Dalamud.Bindings.ImGui.ImGui.Checkbox(label, ref value))
         {{
             config.Option3 = value;
             config.Save();
+        }}
+        if (global::Dalamud.Bindings.ImGui.ImGui.IsItemHovered())
+        {{
+            global::Dalamud.Bindings.ImGui.ImGui.BeginTooltip();
+            global::Dalamud.Bindings.ImGui.ImGui.Text(@""This is the 3rd option."");
+            global::Dalamud.Bindings.ImGui.ImGui.EndTooltip();
         }}
     }}
 }}
@@ -121,13 +128,13 @@ namespace TextToTalk.UI;
     private static string ImGuiNetPath()
     {
         var appData = Environment.GetEnvironmentVariable("AppData");
-        return Path.Combine(appData!, "XIVLauncher", "addon", "Hooks", "dev", "ImGui.NET.dll");
+        return Path.Combine(appData!, "XIVLauncher", "addon", "Hooks", "dev", "Dalamud.Bindings.ImGui.dll");
     }
 
     private static string UICorePath()
     {
         var thisAssembly = Assembly.GetExecutingAssembly().Location;
-        return Path.Combine(thisAssembly, "..", "..", "..", "..", "..", "TextToTalk.UI.Core", "bin", "Debug", "net8.0",
+        return Path.Combine(thisAssembly, "..", "..", "..", "..", "..", "TextToTalk.UI.Core", "bin", "Debug", "net9.0",
             "TextToTalk.UI.Core.dll");
     }
 
@@ -138,7 +145,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
@@ -165,7 +172,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
@@ -192,7 +199,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
@@ -219,7 +226,7 @@ namespace TextToTalk.UI;
         {
             TestState =
             {
-                ReferenceAssemblies = Net80Windows,
+                ReferenceAssemblies = Net90Windows,
                 AdditionalReferences =
                 {
                     MetadataReference.CreateFromFile(UICorePath()),
