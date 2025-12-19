@@ -46,7 +46,7 @@
         <PackageReference Include="System.Memory" Version="4.5.5" />
         <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
         <PackageReference Include="System.Speech" Version="9.0.0" />
-        <PackageReference Update="DalamudPackager" Version="13.0.0" />
+        <PackageReference Update="DalamudPackager" Version="14.0.1" />
     </ItemGroup>
 
     <ItemGroup>
