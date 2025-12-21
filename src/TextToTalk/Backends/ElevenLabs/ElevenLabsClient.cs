@@ -37,7 +37,7 @@ public class ElevenLabsClient
         var args = new ElevenLabsTextToSpeechRequest
         {
             Text = text,
-            ModelId = "eleven_monolingual_v1",
+            ModelId = "eleven_flash_v2_5",
             VoiceSettings = new ElevenLabsVoiceSettings
             {
                 SimilarityBoost = similarityBoost,
