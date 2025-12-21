@@ -1,34 +1,76 @@
-﻿using System;
+﻿//using Microsoft.CognitiveServices.Speech;
+using NAudio.SoundFont;
+using NAudio.Wave;
+using R3;
+using Serilog;
+using System;
+using System.IO;
 using System.Speech.Synthesis;
 using System.Threading;
-using R3;
+using System.Threading.Tasks;
 using TextToTalk.Lexicons;
+using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace TextToTalk.Backends.System
 {
+    
+
     public class SystemSoundQueue : SoundQueue<SystemSoundQueueItem>
     {
+
+        private readonly MemoryStream stream;
         private readonly SpeechSynthesizer speechSynthesizer;
         private readonly LexiconManager lexiconManager;
         private readonly AutoResetEvent speechCompleted;
+        private readonly StreamSoundQueue streamSoundQueue;
+        private readonly SystemBackend backend;
+
 
         public Observable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
         private readonly Subject<SelectVoiceFailedException> selectVoiceFailed;
 
+        public async Task PlayWaveStream(Stream waveStream)
+        {
+            // NAudio uses IWaveProvider or similar interfaces to read from streams
+            using (var waveReader = new WaveFileReader(waveStream))
+            {
+                // Use WaveOutEvent for playback, as it runs on a separate thread and is non-blocking
+                using (var outputDevice = new WaveOutEvent())
+                {
+                    outputDevice.DeviceNumber = SelectedAudioDevice.selectedAudioDeviceIndex;
+                    outputDevice.Init(waveReader);
+                    Log.Information("Playing via Narrator");
+                    outputDevice.Play();
+
+                    // Wait for playback to complete (can be adapted for full async/await using events)
+                    while (outputDevice.PlaybackState == PlaybackState.Playing)
+                    {
+                        await Task.Delay(100);
+                    }
+                }
+            }
+        }
+
+        public async Task ASyncSpeak(SpeechSynthesizer synth, string textToSpeak)
+        {
+           synth.SpeakSsml(textToSpeak);
+        }
+
         public SystemSoundQueue(LexiconManager lexiconManager)
         {
-            this.speechCompleted = new AutoResetEvent(false);
+            this.stream = new MemoryStream();
+            //this.speechCompleted = new AutoResetEvent(false);
             this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
-            this.speechSynthesizer.SetOutputToDefaultAudioDevice();
+            this.speechSynthesizer.SetOutputToWaveStream(this.stream);
 
             this.selectVoiceFailed = new Subject<SelectVoiceFailedException>();
 
-            this.speechSynthesizer.SpeakCompleted += (_, _) =>
-            {
+            //this.speechSynthesizer.SpeakCompleted += (_, _) =>
+            //{
                 // Allows PlaySoundLoop to continue.
-                this.speechCompleted.Set();
-            };
+                //this.speechCompleted.Set();
+            //};
         }
 
         public void EnqueueSound(VoicePreset preset, TextSource source, string text)
@@ -41,7 +83,7 @@ namespace TextToTalk.Backends.System
             });
         }
 
-        protected override void OnSoundLoop(SystemSoundQueueItem nextItem)
+        protected override async void OnSoundLoop(SystemSoundQueueItem nextItem)
         {
             if (nextItem.Preset is not SystemVoicePreset systemVoicePreset)
             {
@@ -62,10 +104,21 @@ namespace TextToTalk.Backends.System
                 langCode: this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
             DetailedLog.Verbose(ssml);
 
-            this.speechSynthesizer.SpeakSsmlAsync(ssml);
+            await ASyncSpeak(this.speechSynthesizer, ssml);
+            this.stream.Seek(0, SeekOrigin.Begin);
+            Log.Information($"Stream Length = {this.stream.Length}");
+            //IT KEEPS CRASHING HERE.  WHY?????
+            await PlayWaveStream(this.stream);
+            this.stream.SetLength(0);
+            
+
 
             // Waits for the AutoResetEvent lock in the callback to fire.
-            this.speechCompleted.WaitOne();
+            //streamSoundQueue.EnqueueSound(stream, nextItem.Source, StreamFormat.Raw, 1f);
+            //this.speechCompleted.WaitOne();
+            //this.stream.Dispose();
+            //this.speechSynthesizer.Dispose();
+
         }
 
         protected override void OnSoundCancelled()

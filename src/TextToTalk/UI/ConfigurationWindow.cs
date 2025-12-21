@@ -14,6 +14,7 @@ using TextToTalk.Backends;
 using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
 using TextToTalk.Services;
+using TextToTalk;
 
 namespace TextToTalk.UI
 {
@@ -130,8 +131,26 @@ namespace TextToTalk.UI
             ImGui.EndTabBar();
         }
 
+
         private void DrawSynthesizerSettings()
         {
+
+            List<string> audiodevices = [];
+            foreach (var devname in AudioDevices.deviceList) { audiodevices.Add(devname.Description); }
+            var selectedAudioDeviceIndex = config.SelectedAudioDeviceIndex; // State variable to track the selected index
+            var previewValue = string.Join("\0", audiodevices);
+            if (ImGui.Combo("##AudioDevices", ref selectedAudioDeviceIndex, previewValue, audiodevices.Count))
+            {   // Action to perform when a new option is selected
+                config.SelectedAudioDeviceIndex = selectedAudioDeviceIndex;
+                SelectedAudioDevice.selectedAudioDevice = AudioDevices.deviceList.ElementAt(selectedAudioDeviceIndex).Guid;
+                SelectedAudioDevice.selectedAudioDeviceIndex = selectedAudioDeviceIndex - 1;
+                DetailedLog.Info($"Selected Audio Device: {config.SelectedAudioDeviceIndex} -- {AudioDevices.deviceList.ElementAt(selectedAudioDeviceIndex).Guid}");
+                // You can add further logic here to update plugin settings etc.}
+            }
+            ImGui.Text($"Audio Output Device selected: {AudioDevices.deviceList.ElementAt(selectedAudioDeviceIndex).Description}");
+        
+
+
             if (ImGui.CollapsingHeader($"Keybinds##{MemoizedId.Create()}"))
             {
                 ConfigComponents.ToggleUseKeybind($"Enable Keybind##{MemoizedId.Create()}", this.config);

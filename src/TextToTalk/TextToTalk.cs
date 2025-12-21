@@ -42,8 +42,15 @@ using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace TextToTalk
 {
+
+    public static class SelectedAudioDevice
+    {
+        public static Guid selectedAudioDevice = Guid.Empty;
+        public static int selectedAudioDeviceIndex = 0;
+    }
     public partial class TextToTalk : IDalamudPlugin
     {
+
 #if DEBUG
         private const bool InitiallyVisible = true;
 #else
@@ -86,6 +93,8 @@ namespace TextToTalk
         private TextEventLogCollection? textEventLog;
 
         public string Name => "TextToTalk";
+
+
 
         public TextToTalk(
             IDalamudPluginInterface pi,
