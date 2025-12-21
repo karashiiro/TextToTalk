@@ -34,8 +34,11 @@ public class MessageHandlerFilters
 
     public bool ShouldProcessSpeaker(string? speaker)
     {
+
         if (!string.IsNullOrEmpty(speaker) && ShouldSaySender())
         {
+
+
             // Only if we allow the speaker's name to be repeated each time they speak,
             // or the speaker has actually changed.
             if (!this.config.DisallowMultipleSay || !IsSameSpeaker(speaker))
@@ -62,5 +65,16 @@ public class MessageHandlerFilters
 
         return !this.config.SkipMessagesFromYou ||
                !speaker.Contains(this.clientState.LocalPlayer?.Name.TextValue ?? "");
+    }
+
+    public bool OnlyMessagesFromYou(string? speaker)
+    {
+        if (string.IsNullOrEmpty(speaker))
+        {
+            return true;
+        }
+
+        return !this.config.OnlyMessagesFromYou ||
+            speaker.Contains(this.clientState.LocalPlayer?.Name.TextValue ?? "");
     }
 }

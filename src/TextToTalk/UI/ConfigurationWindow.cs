@@ -217,6 +217,9 @@ namespace TextToTalk.UI
                 ConfigComponents.ToggleSkipMessagesFromYou("Skip messages from you", this.config);
 
                 ImGui.Spacing();
+                ConfigComponents.ToggleOnlyMessagesFromYou("Only read messages from you", this.config);
+
+                ImGui.Spacing();
                 ConfigComponents.ToggleEnableNameWithSay("Enable \"X says:\" when people speak", this.config);
 
                 if (this.config.EnableNameWithSay)

@@ -1,9 +1,14 @@
 ﻿using System;
+using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Drawing.Text;
+using System.Reflection.Metadata.Ecma335;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Plugin.Services;
 using R3;
+using Serilog;
 using TextToTalk.Events;
 using TextToTalk.Middleware;
 using TextToTalk.Talk;
@@ -22,6 +27,7 @@ public class ChatMessageHandler : IChatMessageHandler
     private readonly PluginConfiguration config;
     private readonly IChatGui chat;
     private readonly IDisposable subscription;
+    private readonly IClientState clientState;
 
     public Action<ChatTextEmitEvent> OnTextEmit { get; set; }
 
@@ -34,6 +40,7 @@ public class ChatMessageHandler : IChatMessageHandler
         this.objects = objects;
         this.config = config;
         this.chat = chat;
+
 
         this.subscription = HandleChatMessage();
 
@@ -67,6 +74,7 @@ public class ChatMessageHandler : IChatMessageHandler
     {
         var (type, sender, message) = chatMessage;
         var textValue = message.TextValue;
+
 
         if (!this.config.SayPlayerWorldName)
         {
@@ -115,6 +123,9 @@ public class ChatMessageHandler : IChatMessageHandler
 
         // Find the game object this speaker represents
         var speaker = ObjectTableUtils.GetGameObjectByName(this.objects, sender);
+
+        if (!this.filters.OnlyMessagesFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
+
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
         OnTextEmit.Invoke(new ChatTextEmitEvent(
