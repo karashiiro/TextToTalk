@@ -49,12 +49,6 @@
           "Microsoft.ML.OnnxRuntime": "1.22.0"
         }
       },
-      "LiteDB": {
-        "type": "Direct",
-        "requested": "[5.0.20, )",
-        "resolved": "5.0.20",
-        "contentHash": "/tUhRpJvx1sXJni7cbXPpctFHH1vifoJlg/QB+Cw22IYWqzbC3MAMOy/11limMHmZSPk6NU6JRA+lwqLy2f1Xw=="
-      },
       "Microsoft.CognitiveServices.Speech": {
         "type": "Direct",
         "requested": "[1.41.1, )",
@@ -252,6 +246,11 @@
           "System.Numerics.Tensors": "9.0.5"
         }
       },
+      "LiteDB": {
+        "type": "Transitive",
+        "resolved": "5.0.20",
+        "contentHash": "/tUhRpJvx1sXJni7cbXPpctFHH1vifoJlg/QB+Cw22IYWqzbC3MAMOy/11limMHmZSPk6NU6JRA+lwqLy2f1Xw=="
+      },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
         "resolved": "6.0.0",
@@ -385,7 +384,6 @@
       "texttotalk.data": {
         "type": "Project",
         "dependencies": {
-          "DalamudPackager": "[14.0.0, )",
           "LiteDB": "[5.0.20, )"
         }
       },
