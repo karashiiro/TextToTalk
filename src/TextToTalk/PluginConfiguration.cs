@@ -107,8 +107,7 @@ namespace TextToTalk
 
         #endregion
 
-        public int SelectedAudioDeviceIndex { get; set; } = 0;
-        public Guid SelectedAudioDeviceGuid { get; set; } = Guid.Empty;
+        public int SelectedAudioDeviceIndex { get; set; }
 
         public int Version { get; set; }
 

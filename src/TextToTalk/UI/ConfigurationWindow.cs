@@ -20,7 +20,7 @@ namespace TextToTalk.UI
 {
     public class ConfigurationWindow : Window, IDisposable
     {
-        private readonly PluginConfiguration config;
+        private PluginConfiguration config;
         private readonly IDataManager data;
         private readonly VoiceBackendManager backendManager;
         private readonly PlayerService players;
@@ -132,7 +132,7 @@ namespace TextToTalk.UI
         }
 
 
-        private void DrawSynthesizerSettings()
+        private void DrawSynthesizerSettings() // I'm sure there's a cleaner method to create a dropdown box ¯\_(ツ)_/¯
         {
 
             List<string> audiodevices = [];
@@ -141,13 +141,12 @@ namespace TextToTalk.UI
             var previewValue = string.Join("\0", audiodevices);
             if (ImGui.Combo("##AudioDevices", ref selectedAudioDeviceIndex, previewValue, audiodevices.Count))
             {   // Action to perform when a new option is selected
-                config.SelectedAudioDeviceIndex = selectedAudioDeviceIndex;
+                SelectedAudioDevice.selectedAudioDeviceIndex = selectedAudioDeviceIndex;
                 SelectedAudioDevice.selectedAudioDevice = AudioDevices.deviceList.ElementAt(selectedAudioDeviceIndex).Guid;
-                SelectedAudioDevice.selectedAudioDeviceIndex = selectedAudioDeviceIndex - 1;
-                DetailedLog.Info($"Selected Audio Device: {config.SelectedAudioDeviceIndex} -- {AudioDevices.deviceList.ElementAt(selectedAudioDeviceIndex).Guid}");
+                DetailedLog.Info($"Selected Audio Device: {SelectedAudioDevice.selectedAudioDeviceIndex} -- {SelectedAudioDevice.selectedAudioDevice}");
                 // You can add further logic here to update plugin settings etc.}
             }
-            ImGui.Text($"Audio Output Device selected: {AudioDevices.deviceList.ElementAt(selectedAudioDeviceIndex).Description}");
+            ImGui.Text($"Audio Output Device selected: {SelectedAudioDevice.selectedAudioDevice}");
         
 
 

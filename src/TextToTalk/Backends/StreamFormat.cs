@@ -5,5 +5,5 @@ public enum StreamFormat
     Mp3,
     Wave,
     Raw,
-    Narrator,
+
 }
