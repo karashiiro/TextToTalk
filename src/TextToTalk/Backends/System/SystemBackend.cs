@@ -12,21 +12,16 @@ using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace TextToTalk.Backends.System
 {
-        public static class AudioDevices
-    {
-        public static IEnumerable<DirectSoundDeviceInfo> deviceList = DirectSoundOut.Devices;
-
-    }
     public class SystemBackend : VoiceBackend
     {
         private readonly SystemBackendUIModel uiModel;
         private readonly SystemBackendUI ui;
         private readonly SystemSoundQueue soundQueue;
         private readonly StreamSoundQueue streamSoundQueue;
-        private DirectSoundOut? soundOut;
         private readonly AutoResetEvent speechCompleted;
-
         private readonly IDisposable voiceExceptions;
+
+        
 
         public SystemBackend(PluginConfiguration config, HttpClient http)
         {
@@ -36,7 +31,7 @@ namespace TextToTalk.Backends.System
             this.uiModel = new SystemBackendUIModel();
             this.ui = new SystemBackendUI(this.uiModel, config, lexiconManager, http);
 
-            this.soundQueue = new SystemSoundQueue(lexiconManager);
+            this.soundQueue = new SystemSoundQueue(lexiconManager, config);
             this.voiceExceptions = this.uiModel.SubscribeToVoiceExceptions(this.soundQueue.SelectVoiceFailed);
         }
 

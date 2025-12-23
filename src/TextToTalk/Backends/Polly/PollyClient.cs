@@ -15,12 +15,13 @@ namespace TextToTalk.Backends.Polly
         private readonly AmazonPollyClient client;
         private readonly StreamSoundQueue soundQueue;
         private readonly LexiconManager lexiconManager;
+        private readonly PluginConfiguration config;
 
-        public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager)
+        public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager, PluginConfiguration config)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
-            this.soundQueue = new StreamSoundQueue();
+            this.soundQueue = new StreamSoundQueue(config);
             this.lexiconManager = lexiconManager;
         }
 

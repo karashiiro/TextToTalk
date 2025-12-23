@@ -96,7 +96,7 @@ public class AzureBackendUIModel
         try
         {
             DetailedLog.Info($"Logging into Azure region {this.loginInfo.Region}");
-            Azure = new AzureClient(this.loginInfo.SubscriptionKey, this.loginInfo.Region, this.lexiconManager);
+            Azure = new AzureClient(this.loginInfo.SubscriptionKey, this.loginInfo.Region, this.lexiconManager, this.config);
             // This should throw an exception if the login failed
             this.voices = Azure.GetVoices();
             return true;

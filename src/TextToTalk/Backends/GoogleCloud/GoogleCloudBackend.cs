@@ -11,7 +11,7 @@ public class GoogleCloudBackend : VoiceBackend
 
     public GoogleCloudBackend(PluginConfiguration config)
     {
-        soundQueue = new StreamSoundQueue();
+        soundQueue = new StreamSoundQueue(config);
         client = new GoogleCloudClient(soundQueue, config.GoogleCreds);
         ui = new GoogleCloudBackendUI(config, client);
     }

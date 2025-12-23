@@ -11,14 +11,15 @@ namespace TextToTalk.Backends.Kokoro;
 public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
 {
     private readonly KokoroPlayback playback = new();
-    private readonly StreamSoundQueue streamSoundQueue = new();
-    private readonly Task<KokoroModel> modelTask;
+    private readonly StreamSoundQueue streamSoundQueue;
     private readonly PluginConfiguration config;
+    private readonly Task<KokoroModel> modelTask;
 
     public KokoroSoundQueue(PluginConfiguration config, Task<KokoroModel> modelTask)
     {
         this.config = config;
         this.modelTask = modelTask;
+        this.streamSoundQueue = new StreamSoundQueue(config);
     }
 
     private bool TryGetModel([NotNullWhen(true)] out KokoroModel? model)

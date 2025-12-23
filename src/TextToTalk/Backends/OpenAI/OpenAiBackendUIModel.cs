@@ -36,7 +36,7 @@ public class OpenAiBackendUIModel
 
     public OpenAiBackendUIModel(PluginConfiguration config, HttpClient http)
     {
-        SoundQueue = new StreamSoundQueue();
+        SoundQueue = new StreamSoundQueue(config);
         OpenAi = new OpenAiClient(SoundQueue, http);
         this.config = config;
         this.apiKey = "";

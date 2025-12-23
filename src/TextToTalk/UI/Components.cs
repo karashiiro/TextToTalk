@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
+﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Bindings.ImGui;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 
 namespace TextToTalk.UI;
 
@@ -48,4 +49,21 @@ public static class Components
         ImGui.PopFont();
         Tooltip(text);
     }
+    public static void ChooseOutputAudioDevice(string label, PluginConfiguration config)
+    {
+        var audiodevices = new List<string>();
+        foreach (var devname in AudioDevices.deviceList)
+        {
+            audiodevices.Add(devname.Description);
+        }
+        var selectedAudioDeviceIndex = config.SelectedAudioDeviceIndex;
+        var previewValue = string.Join("\0", audiodevices);
+        if (ImGui.Combo("##AudioDevices", ref selectedAudioDeviceIndex, previewValue, audiodevices.Count))
+        {   
+            config.SelectedAudioDeviceIndex = selectedAudioDeviceIndex;
+            config.Save();
+        }
+    }
+
+
 }

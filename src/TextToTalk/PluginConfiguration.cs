@@ -107,7 +107,11 @@ namespace TextToTalk
 
         #endregion
 
+
+
         public int SelectedAudioDeviceIndex { get; set; }
+
+        public Guid SelectedAudioDeviceGuid => AudioDevices.deviceList.ElementAt(SelectedAudioDeviceIndex).Guid;
 
         public int Version { get; set; }
 
@@ -196,6 +200,7 @@ namespace TextToTalk
         [JsonIgnore] private object cfgLock;
 
         [JsonIgnore] private VoicePresetConfiguration voicePresetConfig;
+        private Guid selectedAudioDeviceGuid;
 
         public PluginConfiguration()
         {

@@ -36,11 +36,14 @@ namespace TextToTalk.UI
         private string npcName = string.Empty;
         private string npcError = string.Empty;
 
+
+
         public ConfigurationWindow(PluginConfiguration config, IDataManager data, VoiceBackendManager backendManager,
             PlayerService players, NpcService npc, Window voiceUnlockerWindow) : base(
             "TextToTalk Configuration###TextToTalkConfig")
         {
             this.config = config;
+
             this.data = data;
             this.backendManager = backendManager;
             this.players = players;
@@ -135,19 +138,7 @@ namespace TextToTalk.UI
         private void DrawSynthesizerSettings() // I'm sure there's a cleaner method to create a dropdown box ¯\_(ツ)_/¯
         {
 
-            List<string> audiodevices = [];
-            foreach (var devname in AudioDevices.deviceList) { audiodevices.Add(devname.Description); }
-            var selectedAudioDeviceIndex = config.SelectedAudioDeviceIndex; // State variable to track the selected index
-            var previewValue = string.Join("\0", audiodevices);
-            if (ImGui.Combo("##AudioDevices", ref selectedAudioDeviceIndex, previewValue, audiodevices.Count))
-            {   // Action to perform when a new option is selected
-                SelectedAudioDevice.selectedAudioDeviceIndex = selectedAudioDeviceIndex;
-                SelectedAudioDevice.selectedAudioDevice = AudioDevices.deviceList.ElementAt(selectedAudioDeviceIndex).Guid;
-                DetailedLog.Info($"Selected Audio Device: {SelectedAudioDevice.selectedAudioDeviceIndex} -- {SelectedAudioDevice.selectedAudioDevice}");
-                // You can add further logic here to update plugin settings etc.}
-            }
-            ImGui.Text($"Audio Output Device selected: {SelectedAudioDevice.selectedAudioDevice}");
-        
+            
 
 
             if (ImGui.CollapsingHeader($"Keybinds##{MemoizedId.Create()}"))
@@ -176,6 +167,8 @@ namespace TextToTalk.UI
 
             if (ImGui.CollapsingHeader("General"))
             {
+                Components.ChooseOutputAudioDevice($"Audio Output Device##{MemoizedId.Create()}", this.config);
+
                 ConfigComponents.ToggleReadFromQuestTalkAddon(
                     "Read NPC dialogue from the dialogue window",
                     this.config);

@@ -19,7 +19,7 @@ public class UberduckBackend : VoiceBackend
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFDE7312);
 
-        this.soundQueue = new StreamSoundQueue();
+        this.soundQueue = new StreamSoundQueue(config);
         this.uberduck = new UberduckClient(this.soundQueue, http);
 
         var voices = this.uberduck.GetVoices().GetAwaiter().GetResult();

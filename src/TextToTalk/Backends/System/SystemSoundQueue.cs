@@ -24,6 +24,7 @@ namespace TextToTalk.Backends.System
         //private readonly AutoResetEvent speechCompleted; //removed as the async task method takes care of threading
         private readonly StreamSoundQueue streamSoundQueue;
         private readonly SystemBackend backend;
+        private readonly PluginConfiguration config;
 
 
         public Observable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
@@ -35,22 +36,13 @@ namespace TextToTalk.Backends.System
            synth.SpeakSsml(textToSpeak);
         }
 
-        public SystemSoundQueue(LexiconManager lexiconManager)
+        public SystemSoundQueue(LexiconManager lexiconManager, PluginConfiguration config)
         {
 
-            //this.stream = new MemoryStream();   // Moved this to OnSoundLoop as MemoryStream will be Disposed after processing.  Keeping it static here will cause crashes after the 1st message
-            //this.speechSynthesizer.SetOutputToWaveStream(this.stream); // Paired with the above
-            this.streamSoundQueue = new StreamSoundQueue(); // Opening instance to feed MemoryStream to StreamSoundQueue
-            //this.speechCompleted = new AutoResetEvent(false);  // removed as the async task method takes care of threading
+            this.streamSoundQueue = new StreamSoundQueue(config); // This wasn't passing the config originally which is why it was breaking for System Backend
             this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
             this.selectVoiceFailed = new Subject<SelectVoiceFailedException>();
-
-            //this.speechSynthesizer.SpeakCompleted += (_, _) => // removed as the async task method takes care of threading
-            //{
-            // Allows PlaySoundLoop to continue.
-            //this.speechCompleted.Set();
-            //};
         }
 
         public void EnqueueSound(VoicePreset preset, TextSource source, string text)

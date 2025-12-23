@@ -1,48 +1,24 @@
-﻿using FFXIVClientStructs;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
-using TextToTalk.UI;
-using TextToTalk;
+
 
 namespace TextToTalk.Backends
 {
-    public static class AudioDevices
-    {
-        public static IEnumerable<DirectSoundDeviceInfo> deviceList = DirectSoundOut.Devices;
-        
-    }
-   
-    
 
-    public class StreamSoundQueue : SoundQueue<StreamSoundQueueItem>
+    public class StreamSoundQueue(PluginConfiguration config) : SoundQueue<StreamSoundQueueItem>
     {
-
         private static readonly WaveFormat waveFormat = new(24000, 16, 1);
-        private readonly AutoResetEvent speechCompleted;
-        private readonly object soundLock;
+        private readonly AutoResetEvent speechCompleted = new(false);
+        private readonly object soundLock = true;
         private DirectSoundOut? soundOut;
-
-
-
-        public StreamSoundQueue()
-        {
-            this.speechCompleted = new AutoResetEvent(false);
-            this.soundLock = true;
-            
-            
-            
-        }
 
         protected override void OnSoundLoop(StreamSoundQueueItem nextItem)
         {
-        
+            
             using WaveStream reader = nextItem.Format switch
             {
                 StreamFormat.Mp3 => new Mp3FileReader(nextItem.Data),
@@ -52,18 +28,15 @@ namespace TextToTalk.Backends
             };
 
             // Adjust the volume of the audio data
-            
             var sampleProvider = reader.ToSampleProvider();
             var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
-            
+            var playbackDeviceId = config.SelectedAudioDeviceGuid;
 
             // Play the sound
-
             lock (this.soundLock)
             {
-                var deviceGuid = SelectedAudioDevice.selectedAudioDevice;
-                DetailedLog.Info($"Selected Audio Device: {deviceGuid}");
-                this.soundOut = new DirectSoundOut(deviceGuid);
+                //Log.Information($"{playbackDeviceId}");
+                this.soundOut = new DirectSoundOut(playbackDeviceId);
                 this.soundOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
                 this.soundOut.Init(volumeSampleProvider);
                 this.soundOut.Play();

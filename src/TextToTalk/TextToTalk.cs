@@ -1,21 +1,27 @@
 ﻿using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs;
+using LiteDB;
+using Lumina.Excel.Sheets;
+using NAudio.Wave;
+using R3;
+using Standart.Hash.xxHash;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
-using LiteDB;
-using Lumina.Excel.Sheets;
-using R3;
-using Standart.Hash.xxHash;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
@@ -38,16 +44,17 @@ using TextToTalk.TextProviders;
 using TextToTalk.UI;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
+using static FFXIVClientStructs.FFXIV.Client.Game.InventoryManager.Delegates;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace TextToTalk
 {
 
-    public static class SelectedAudioDevice
+    public class AudioDevices
     {
-        public static Guid selectedAudioDevice = Guid.Empty;
-        public static int selectedAudioDeviceIndex = 0;
+        public static IEnumerable<DirectSoundDeviceInfo> deviceList = DirectSoundOut.Devices;
     }
+
     public partial class TextToTalk : IDalamudPlugin
     {
 
@@ -188,14 +195,20 @@ namespace TextToTalk
                 this.configurationWindow);
             this.debugCommandModule = new DebugCommandModule(commandManager, chat, gui, framework);
 
+
             RegisterCallbacks();
 
             var handleTextCancel = HandleTextCancel();
             var handleTextEmit = HandleTextEmit();
 
+         
+         
+          
             this.unsubscribeAll = Disposable.Combine(handleTextCancel, handleTextEmit, handleUnlockerResult,
                 handlePresetOpenRequested);
+
         }
+
 
         private void CreateDatabasePath()
         {
