@@ -2,6 +2,7 @@
 using Dalamud.Interface;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace TextToTalk.UI;
@@ -52,15 +53,10 @@ public static class Components
 
     public static void ChooseOutputAudioDevice(string label, PluginConfiguration config)
     {
-        var audiodevices = new List<string>();
-        foreach (var devname in AudioDevices.DeviceList)
-        {
-            audiodevices.Add(devname.Description);
-        }
-
+        var audioDevices = AudioDevices.DeviceList.Select(devName => devName.Description).ToList();
         var selectedAudioDeviceIndex = config.SelectedAudioDeviceIndex;
-        var previewValue = string.Join("\0", audiodevices);
-        if (ImGui.Combo("##AudioDevices", ref selectedAudioDeviceIndex, previewValue, audiodevices.Count))
+        var previewValue = string.Join("\0", audioDevices);
+        if (ImGui.Combo($"{label}##AudioDevices", ref selectedAudioDeviceIndex, previewValue, audioDevices.Count))
         {
             config.SelectedAudioDeviceIndex = selectedAudioDeviceIndex;
             config.Save();
