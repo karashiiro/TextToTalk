@@ -2,14 +2,14 @@
 using Dalamud.Interface;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace TextToTalk.UI;
 
 public static class Components
 {
-    public static void Table<TRow>(string label, Vector2 size, ImGuiTableFlags flags, Action header, Func<IEnumerable<TRow>> rows,
+    public static void Table<TRow>(string label, Vector2 size, ImGuiTableFlags flags, Action header,
+        Func<IEnumerable<TRow>> rows,
         params Action<TRow>[] columns)
     {
         if (ImGui.BeginTable(label, columns.Length, flags, size))
@@ -49,6 +49,7 @@ public static class Components
         ImGui.PopFont();
         Tooltip(text);
     }
+
     public static void ChooseOutputAudioDevice(string label, PluginConfiguration config)
     {
         var audiodevices = new List<string>();
@@ -56,14 +57,13 @@ public static class Components
         {
             audiodevices.Add(devname.Description);
         }
+
         var selectedAudioDeviceIndex = config.SelectedAudioDeviceIndex;
         var previewValue = string.Join("\0", audiodevices);
         if (ImGui.Combo("##AudioDevices", ref selectedAudioDeviceIndex, previewValue, audiodevices.Count))
-        {   
+        {
             config.SelectedAudioDeviceIndex = selectedAudioDeviceIndex;
             config.Save();
         }
     }
-
-
 }

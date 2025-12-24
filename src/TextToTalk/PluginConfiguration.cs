@@ -2,7 +2,6 @@
 using Dalamud.Configuration;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
-using NAudio.Wave;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -108,7 +107,6 @@ namespace TextToTalk
         #endregion
 
 
-
         public int SelectedAudioDeviceIndex { get; set; }
 
         public Guid SelectedAudioDeviceGuid => AudioDevices.deviceList.ElementAt(SelectedAudioDeviceIndex).Guid;
@@ -174,19 +172,18 @@ namespace TextToTalk
 
         [Tooltip("Sets a rate limit for every player character.")]
         public bool UsePlayerRateLimiter { get; set; }
+
         public float MessagesPerSecond { get; set; } = 5;
 
         public bool SkipMessagesFromYou { get; set; }
 
         public bool OnlyMessagesFromYou { get; set; }
 
-        [Tooltip("Use the American pronunciation for English instead of the British one. This doesn't affect the accents of the voices.")]
+        [Tooltip(
+            "Use the American pronunciation for English instead of the British one. This doesn't affect the accents of the voices.")]
         public bool KokoroUseAmericanEnglish { get; set; } = true;
 
         [JsonIgnore]
-
-        
-
         public bool InitializedEver
         {
 #pragma warning disable 618

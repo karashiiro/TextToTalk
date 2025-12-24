@@ -1,6 +1,5 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using Serilog;
 using System;
 using System.IO;
 using System.Threading;
@@ -8,7 +7,6 @@ using System.Threading;
 
 namespace TextToTalk.Backends
 {
-
     public class StreamSoundQueue(PluginConfiguration config) : SoundQueue<StreamSoundQueueItem>
     {
         private static readonly WaveFormat waveFormat = new(24000, 16, 1);
@@ -18,7 +16,6 @@ namespace TextToTalk.Backends
 
         protected override void OnSoundLoop(StreamSoundQueueItem nextItem)
         {
-            
             using WaveStream reader = nextItem.Format switch
             {
                 StreamFormat.Mp3 => new Mp3FileReader(nextItem.Data),
@@ -35,7 +32,6 @@ namespace TextToTalk.Backends
             // Play the sound
             lock (this.soundLock)
             {
-                //Log.Information($"{playbackDeviceId}");
                 this.soundOut = new DirectSoundOut(playbackDeviceId);
                 this.soundOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
                 this.soundOut.Init(volumeSampleProvider);
@@ -77,7 +73,9 @@ namespace TextToTalk.Backends
                     this.soundOut?.Stop();
                 }
             }
-            catch (ObjectDisposedException) { }
+            catch (ObjectDisposedException)
+            {
+            }
         }
 
         protected override void Dispose(bool disposing)

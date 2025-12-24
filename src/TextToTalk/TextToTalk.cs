@@ -1,11 +1,9 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs;
 using LiteDB;
 using Lumina.Excel.Sheets;
 using NAudio.Wave;
@@ -13,15 +11,11 @@ using R3;
 using Standart.Hash.xxHash;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.NetworkInformation;
-using System.Threading.Tasks;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
@@ -44,12 +38,10 @@ using TextToTalk.TextProviders;
 using TextToTalk.UI;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
-using static FFXIVClientStructs.FFXIV.Client.Game.InventoryManager.Delegates;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace TextToTalk
 {
-
     public class AudioDevices
     {
         public static IEnumerable<DirectSoundDeviceInfo> deviceList = DirectSoundOut.Devices;
@@ -57,7 +49,6 @@ namespace TextToTalk
 
     public partial class TextToTalk : IDalamudPlugin
     {
-
 #if DEBUG
         private const bool InitiallyVisible = true;
 #else
@@ -100,7 +91,6 @@ namespace TextToTalk
         private TextEventLogCollection? textEventLog;
 
         public string Name => "TextToTalk";
-
 
 
         public TextToTalk(
@@ -201,12 +191,9 @@ namespace TextToTalk
             var handleTextCancel = HandleTextCancel();
             var handleTextEmit = HandleTextEmit();
 
-         
-         
-          
+
             this.unsubscribeAll = Disposable.Combine(handleTextCancel, handleTextEmit, handleUnlockerResult,
                 handlePresetOpenRequested);
-
         }
 
 
@@ -422,18 +409,21 @@ namespace TextToTalk
             return (BodyType)speakerBodyType;
         }
 
-        private static unsafe bool TryGetCharacter(GameObject? speaker, [NotNullWhen(true)] out FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character)
+        private static unsafe bool TryGetCharacter(GameObject? speaker,
+            [NotNullWhen(true)] out FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character)
         {
             character = null;
             if (speaker is null || speaker.Address == nint.Zero)
             {
                 return false;
             }
+
             var objectStruct = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)speaker.Address;
             if (!objectStruct->IsCharacter())
             {
                 return false;
             }
+
             character = (FFXIVClientStructs.FFXIV.Client.Game.Character.Character*)speaker.Address;
             return true;
         }

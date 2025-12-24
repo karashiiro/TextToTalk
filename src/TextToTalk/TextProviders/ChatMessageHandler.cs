@@ -55,12 +55,12 @@ public class ChatMessageHandler : IChatMessageHandler
             cmh.chat.ChatMessage += handler;
             return Disposable.Create(() => { cmh.chat.ChatMessage -= handler; });
 
-            void HandleMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool handled)
+            void HandleMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message,
+                ref bool handled)
             {
                 if (!cmh.config.Enabled) return;
                 observer.OnNext(new ChatMessage(type, sender, message));
             }
-
         });
     }
 

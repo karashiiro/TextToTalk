@@ -1,14 +1,6 @@
-﻿using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System;
 using System.Net.Http;
-using System.Speech.Synthesis;
 using System.Threading;
-using System.Threading.Tasks;
-using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace TextToTalk.Backends.System
 {
@@ -21,7 +13,6 @@ namespace TextToTalk.Backends.System
         private readonly AutoResetEvent speechCompleted;
         private readonly IDisposable voiceExceptions;
 
-        
 
         public SystemBackend(PluginConfiguration config, HttpClient http)
         {
@@ -38,7 +29,6 @@ namespace TextToTalk.Backends.System
         public override void Say(SayRequest request)
         {
             this.soundQueue.EnqueueSound(request.Voice, request.Source, request.Text);
-
         }
 
         public override void CancelAllSpeech()

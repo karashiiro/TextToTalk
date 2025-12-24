@@ -14,7 +14,6 @@ using TextToTalk.Backends;
 using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
 using TextToTalk.Services;
-using TextToTalk;
 
 namespace TextToTalk.UI
 {
@@ -35,7 +34,6 @@ namespace TextToTalk.UI
         private string playerWorldError = string.Empty;
         private string npcName = string.Empty;
         private string npcError = string.Empty;
-
 
 
         public ConfigurationWindow(PluginConfiguration config, IDataManager data, VoiceBackendManager backendManager,
@@ -137,10 +135,6 @@ namespace TextToTalk.UI
 
         private void DrawSynthesizerSettings() // I'm sure there's a cleaner method to create a dropdown box ¯\_(ツ)_/¯
         {
-
-            
-
-
             if (ImGui.CollapsingHeader($"Keybinds##{MemoizedId.Create()}"))
             {
                 ConfigComponents.ToggleUseKeybind($"Enable Keybind##{MemoizedId.Create()}", this.config);
@@ -299,7 +293,8 @@ namespace TextToTalk.UI
                 ConfigComponents.ToggleRemoveStutterEnabled(
                     "Attempt to remove stutter from NPC dialogue (default: On)",
                     this.config);
-                Components.Tooltip("Removes \"stuttering\" from NPC dialogue such as \"H-hello, nice to m-meet you...\"");
+                Components.Tooltip(
+                    "Removes \"stuttering\" from NPC dialogue such as \"H-hello, nice to m-meet you...\"");
             }
         }
 
