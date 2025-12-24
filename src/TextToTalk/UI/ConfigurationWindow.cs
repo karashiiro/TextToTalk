@@ -14,12 +14,13 @@ using TextToTalk.Backends;
 using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
 using TextToTalk.Services;
+using TextToTalk;
 
 namespace TextToTalk.UI
 {
     public class ConfigurationWindow : Window, IDisposable
     {
-        private readonly PluginConfiguration config;
+        private PluginConfiguration config;
         private readonly IDataManager data;
         private readonly VoiceBackendManager backendManager;
         private readonly PlayerService players;
@@ -35,11 +36,14 @@ namespace TextToTalk.UI
         private string npcName = string.Empty;
         private string npcError = string.Empty;
 
+
+
         public ConfigurationWindow(PluginConfiguration config, IDataManager data, VoiceBackendManager backendManager,
             PlayerService players, NpcService npc, Window voiceUnlockerWindow) : base(
             "TextToTalk Configuration###TextToTalkConfig")
         {
             this.config = config;
+
             this.data = data;
             this.backendManager = backendManager;
             this.players = players;
@@ -130,8 +134,13 @@ namespace TextToTalk.UI
             ImGui.EndTabBar();
         }
 
-        private void DrawSynthesizerSettings()
+
+        private void DrawSynthesizerSettings() // I'm sure there's a cleaner method to create a dropdown box ¯\_(ツ)_/¯
         {
+
+            
+
+
             if (ImGui.CollapsingHeader($"Keybinds##{MemoizedId.Create()}"))
             {
                 ConfigComponents.ToggleUseKeybind($"Enable Keybind##{MemoizedId.Create()}", this.config);
@@ -158,6 +167,8 @@ namespace TextToTalk.UI
 
             if (ImGui.CollapsingHeader("General"))
             {
+                Components.ChooseOutputAudioDevice($"Audio Output Device##{MemoizedId.Create()}", this.config);
+
                 ConfigComponents.ToggleReadFromQuestTalkAddon(
                     "Read NPC dialogue from the dialogue window",
                     this.config);
@@ -196,6 +207,9 @@ namespace TextToTalk.UI
 
                 ImGui.Spacing();
                 ConfigComponents.ToggleSkipMessagesFromYou("Skip messages from you", this.config);
+
+                ImGui.Spacing();
+                ConfigComponents.ToggleOnlyMessagesFromYou("Only read messages from you", this.config);
 
                 ImGui.Spacing();
                 ConfigComponents.ToggleEnableNameWithSay("Enable \"X says:\" when people speak", this.config);

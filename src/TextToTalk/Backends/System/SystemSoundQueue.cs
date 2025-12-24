@@ -1,34 +1,48 @@
-﻿using System;
+﻿//using Microsoft.CognitiveServices.Speech;
+using NAudio.SoundFont;
+using NAudio.Wave;
+using R3;
+using Serilog;
+using System;
+using System.IO;
 using System.Speech.Synthesis;
 using System.Threading;
-using R3;
+using System.Threading.Tasks;
 using TextToTalk.Lexicons;
+using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace TextToTalk.Backends.System
 {
+    
+
     public class SystemSoundQueue : SoundQueue<SystemSoundQueueItem>
     {
+
+        private MemoryStream stream;
         private readonly SpeechSynthesizer speechSynthesizer;
         private readonly LexiconManager lexiconManager;
-        private readonly AutoResetEvent speechCompleted;
+        //private readonly AutoResetEvent speechCompleted; //removed as the async task method takes care of threading
+        private readonly StreamSoundQueue streamSoundQueue;
+        private readonly SystemBackend backend;
+        private readonly PluginConfiguration config;
+
 
         public Observable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
         private readonly Subject<SelectVoiceFailedException> selectVoiceFailed;
 
-        public SystemSoundQueue(LexiconManager lexiconManager)
+
+        public async Task ASyncSpeak(SpeechSynthesizer synth, string textToSpeak) // added to work around speakssmlasync limitation for MemoryStream output
         {
-            this.speechCompleted = new AutoResetEvent(false);
+           synth.SpeakSsml(textToSpeak);
+        }
+
+        public SystemSoundQueue(LexiconManager lexiconManager, PluginConfiguration config)
+        {
+
+            this.streamSoundQueue = new StreamSoundQueue(config); // This wasn't passing the config originally which is why it was breaking for System Backend
             this.lexiconManager = lexiconManager;
             this.speechSynthesizer = new SpeechSynthesizer();
-            this.speechSynthesizer.SetOutputToDefaultAudioDevice();
-
             this.selectVoiceFailed = new Subject<SelectVoiceFailedException>();
-
-            this.speechSynthesizer.SpeakCompleted += (_, _) =>
-            {
-                // Allows PlaySoundLoop to continue.
-                this.speechCompleted.Set();
-            };
         }
 
         public void EnqueueSound(VoicePreset preset, TextSource source, string text)
@@ -41,7 +55,7 @@ namespace TextToTalk.Backends.System
             });
         }
 
-        protected override void OnSoundLoop(SystemSoundQueueItem nextItem)
+        protected override async void OnSoundLoop(SystemSoundQueueItem nextItem)
         {
             if (nextItem.Preset is not SystemVoicePreset systemVoicePreset)
             {
@@ -62,10 +76,21 @@ namespace TextToTalk.Backends.System
                 langCode: this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
             DetailedLog.Verbose(ssml);
 
-            this.speechSynthesizer.SpeakSsmlAsync(ssml);
+            this.stream = new MemoryStream();
+            this.speechSynthesizer.SetOutputToWaveStream(this.stream);
 
-            // Waits for the AutoResetEvent lock in the callback to fire.
-            this.speechCompleted.WaitOne();
+            await ASyncSpeak(this.speechSynthesizer, ssml); // Wrapped Synchronous Speech Synthesis in an async Task.  This is because the SpeakAsync and SpeakSsmlAsync methods do not output a useable MemoryStream.
+            
+            this.stream.Seek(0, SeekOrigin.Begin);
+            DetailedLog.Debug($"Stream Length = {this.stream.Length}");
+            this.streamSoundQueue.EnqueueSound(stream, nextItem.Source, StreamFormat.Wave, 1f); // Hard coded 1f for volume float as ssml already takes care of user volume input
+
+
+
+
+            // Waits for the AutoResetEvent lock in the callback to fire.   removed as the async task method takes care of threading
+            //this.speechCompleted.WaitOne(); removed as the async task method takes care of threading
+
         }
 
         protected override void OnSoundCancelled()

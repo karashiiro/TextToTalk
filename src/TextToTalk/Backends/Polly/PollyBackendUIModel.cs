@@ -181,7 +181,7 @@ public class PollyBackendUIModel : IDisposable
         {
             DetailedLog.Info($"Logging into AWS region {regionEndpoint}");
             Polly = new PollyClient(this.keyPair.AccessKey, this.keyPair.SecretKey, regionEndpoint,
-                this.lexiconManager);
+                this.lexiconManager, this.config);
             var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
             // This should throw an exception if the login credentials were incorrect
             this.voices = Polly.GetVoicesForEngine(currentVoicePreset?.VoiceEngine ?? Engine.Neural);

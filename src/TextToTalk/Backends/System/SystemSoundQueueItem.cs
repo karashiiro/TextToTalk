@@ -1,4 +1,5 @@
-﻿namespace TextToTalk.Backends.System
+﻿
+namespace TextToTalk.Backends.System
 {
     public class SystemSoundQueueItem : SoundQueueItem
     {

@@ -44,7 +44,7 @@ public class ElevenLabsBackendUIModel : IDisposable
 
     public ElevenLabsBackendUIModel(PluginConfiguration config, HttpClient http)
     {
-        SoundQueue = new StreamSoundQueue();
+        SoundQueue = new StreamSoundQueue(config);
         ElevenLabs = new ElevenLabsClient(SoundQueue, http);
         this.config = config;
         this.getUserSubscriptionInfoImmediately = new ReactiveProperty<long>(0);

@@ -1,26 +1,24 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Serilog;
 using System;
 using System.IO;
 using System.Threading;
 
+
 namespace TextToTalk.Backends
 {
-    public class StreamSoundQueue : SoundQueue<StreamSoundQueueItem>
+
+    public class StreamSoundQueue(PluginConfiguration config) : SoundQueue<StreamSoundQueueItem>
     {
         private static readonly WaveFormat waveFormat = new(24000, 16, 1);
-        private readonly AutoResetEvent speechCompleted;
-        private readonly object soundLock;
+        private readonly AutoResetEvent speechCompleted = new(false);
+        private readonly object soundLock = true;
         private DirectSoundOut? soundOut;
-
-        public StreamSoundQueue()
-        {
-            this.speechCompleted = new AutoResetEvent(false);
-            this.soundLock = true;
-        }
 
         protected override void OnSoundLoop(StreamSoundQueueItem nextItem)
         {
+            
             using WaveStream reader = nextItem.Format switch
             {
                 StreamFormat.Mp3 => new Mp3FileReader(nextItem.Data),
@@ -32,11 +30,13 @@ namespace TextToTalk.Backends
             // Adjust the volume of the audio data
             var sampleProvider = reader.ToSampleProvider();
             var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = nextItem.Volume };
+            var playbackDeviceId = config.SelectedAudioDeviceGuid;
 
             // Play the sound
             lock (this.soundLock)
             {
-                this.soundOut = new DirectSoundOut();
+                //Log.Information($"{playbackDeviceId}");
+                this.soundOut = new DirectSoundOut(playbackDeviceId);
                 this.soundOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
                 this.soundOut.Init(volumeSampleProvider);
                 this.soundOut.Play();

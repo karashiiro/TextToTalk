@@ -15,13 +15,14 @@ public class AzureClient : IDisposable
     private readonly SpeechSynthesizer synthesizer;
     private readonly StreamSoundQueue soundQueue;
     private readonly LexiconManager lexiconManager;
+    private readonly PluginConfiguration config;
 
-    public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager)
+    public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager, PluginConfiguration config)
     {
         var audioConfig = AudioConfig.FromWavFileOutput("NUL");
         this.speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
         this.synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
-        this.soundQueue = new StreamSoundQueue();
+        this.soundQueue = new StreamSoundQueue(config);
         this.lexiconManager = lexiconManager;
     }
 
