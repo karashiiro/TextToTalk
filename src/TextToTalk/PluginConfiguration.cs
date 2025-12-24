@@ -109,7 +109,7 @@ namespace TextToTalk
 
         public int SelectedAudioDeviceIndex { get; set; }
 
-        public Guid SelectedAudioDeviceGuid => AudioDevices.deviceList.ElementAt(SelectedAudioDeviceIndex).Guid;
+        public Guid SelectedAudioDeviceGuid => AudioDevices.DeviceList.ElementAt(SelectedAudioDeviceIndex).Guid;
 
         public int Version { get; set; }
 

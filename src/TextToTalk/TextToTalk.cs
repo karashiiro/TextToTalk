@@ -42,11 +42,6 @@ using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace TextToTalk
 {
-    public class AudioDevices
-    {
-        public static IEnumerable<DirectSoundDeviceInfo> deviceList = DirectSoundOut.Devices;
-    }
-
     public partial class TextToTalk : IDalamudPlugin
     {
 #if DEBUG

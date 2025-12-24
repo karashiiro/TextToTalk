@@ -53,7 +53,7 @@ public static class Components
     public static void ChooseOutputAudioDevice(string label, PluginConfiguration config)
     {
         var audiodevices = new List<string>();
-        foreach (var devname in AudioDevices.deviceList)
+        foreach (var devname in AudioDevices.DeviceList)
         {
             audiodevices.Add(devname.Description);
         }
