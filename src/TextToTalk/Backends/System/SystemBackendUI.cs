@@ -1,4 +1,7 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Game;
+using Dalamud.Game.Text;
+using Google.Api;
 using System;
 using System.IO;
 using System.Linq;
@@ -17,9 +20,10 @@ public class SystemBackendUI
     private readonly SystemBackendUIModel model;
     private readonly PluginConfiguration config;
     private readonly LexiconComponent lexiconComponent;
+    private readonly SystemBackend backend;
 
     public SystemBackendUI(SystemBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
-        HttpClient http)
+        HttpClient http, SystemBackend backend)
     {
         // TODO: Make this configurable
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -27,6 +31,7 @@ public class SystemBackendUI
 
         var lexiconRepository = new LexiconRepository(http, downloadPath);
 
+        this.backend = backend;
         this.model = model;
         this.config = config;
         this.lexiconComponent = new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.Lexicons);
@@ -119,6 +124,27 @@ public class SystemBackendUI
         if (ImGui.Button($"Also check out NaturalVoiceSAPIAdapter!##{MemoizedId.Create()}"))
         {
             WebBrowser.Open("https://github.com/gexgd0419/NaturalVoiceSAPIAdapter");
+        }
+        if (ImGui.Button($"Test##{MemoizedId.Create()}"))
+        {
+            var voice = currentVoicePreset;
+            if (voice is not null)
+            {
+                var request = new SayRequest
+                {
+                    Source = TextSource.Chat,
+                    Voice = currentVoicePreset,
+                    Speaker = "Speaker",
+                    Text = $"Hello from Windows Narrator, this is a test message",
+                    TextTemplate = "Hello from Windows Narrator, this is a test message",
+                    Race = "Hyur",
+                    BodyType = GameEnums.BodyType.Adult,
+                    ChatType = XivChatType.Say,
+                    Language = ClientLanguage.English,
+                };
+                backend.CancelSay(TextSource.Chat);
+                backend.Say(request);
+            }
         }
 
         this.lexiconComponent.Draw();

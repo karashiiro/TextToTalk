@@ -1,6 +1,8 @@
+using Dalamud.Bindings.ImGui;
+using Dalamud.Game;
+using Dalamud.Game.Text;
 using System;
 using System.Linq;
-using Dalamud.Bindings.ImGui;
 using TextToTalk.UI;
 using TextToTalk.UI.GoogleCloud;
 
@@ -11,9 +13,11 @@ public class GoogleCloudBackendUI
     private readonly PluginConfiguration config;
     private readonly GoogleCloudClient client;
     private readonly CredentialsComponent credentialsComponent;
+    private readonly GoogleCloudBackend backend;
 
-    public GoogleCloudBackendUI(PluginConfiguration config, GoogleCloudClient client)
+    public GoogleCloudBackendUI(PluginConfiguration config, GoogleCloudClient client, GoogleCloudBackend backend)
     {
+        this.backend = backend;
         this.client = client;
         this.config = config;
         this.credentialsComponent = new CredentialsComponent(client, config);
@@ -120,6 +124,27 @@ public class GoogleCloudBackendUI
         {
             currentVoicePreset.Volume = (float)Math.Round(volume / 100f, 2);
             config.Save();
+        }
+        if (ImGui.Button($"Test##{MemoizedId.Create()}"))
+        {
+            var voice = currentVoicePreset;
+            if (voice is not null)
+            {
+                var request = new SayRequest
+                {
+                    Source = TextSource.Chat,
+                    Voice = currentVoicePreset,
+                    Speaker = "Speaker",
+                    Text = $"Hello from Google Cloud, this is a test message",
+                    TextTemplate = "Hello from Google Cloud, this is a test message",
+                    Race = "Hyur",
+                    BodyType = GameEnums.BodyType.Adult,
+                    ChatType = XivChatType.Say,
+                    Language = ClientLanguage.English,
+                };
+                backend.CancelSay(TextSource.Chat);
+                backend.Say(request);
+            }
         }
 
         ConfigComponents.ToggleUseGenderedVoicePresets($"Use gendered voices##{MemoizedId.Create()}", config);

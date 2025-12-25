@@ -18,7 +18,7 @@ namespace TextToTalk.Backends.Polly
 
             LexiconUtils.LoadFromConfigPolly(lexiconManager, config);
 
-            this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http);
+            this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http, this);
         }
 
         public override void Say(SayRequest request)

@@ -1,5 +1,7 @@
 ﻿using Amazon.Polly;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Game;
+using Dalamud.Game.Text;
 using System;
 using System.IO;
 using System.Linq;
@@ -16,12 +18,13 @@ public class PollyBackendUI
     private readonly PluginConfiguration config;
     private readonly LexiconComponent lexiconComponent;
     private readonly PollyBackendUIModel model;
+    private readonly PollyBackend backend;
 
     private string accessKey;
     private string secretKey;
 
     public PollyBackendUI(PollyBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
-        HttpClient http)
+        HttpClient http, PollyBackend backend)
     {
         this.model = model;
 
@@ -30,6 +33,7 @@ public class PollyBackendUI
         var downloadPath = Path.Join(appData, "TextToTalk");
         var lexiconRepository = new LexiconRepository(http, downloadPath);
 
+        this.backend = backend;
         this.config = config;
         this.lexiconComponent =
             new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.PollyLexiconFiles);
@@ -181,6 +185,27 @@ public class PollyBackendUI
             {
                 currentVoicePreset.AmazonDomainName = newscaster ? "news" : "";
                 this.config.Save();
+            }
+        }
+        if (ImGui.Button($"Test##{MemoizedId.Create()}"))
+        {
+            var voice = currentVoicePreset;
+            if (voice is not null)
+            {
+                var request = new SayRequest
+                {
+                    Source = TextSource.Chat,
+                    Voice = currentVoicePreset,
+                    Speaker = "Speaker",
+                    Text = $"Hello from Amazon Polly, this is a test message",
+                    TextTemplate = "Hello from Amazon Polly, this is a test message",
+                    Race = "Hyur",
+                    BodyType = GameEnums.BodyType.Adult,
+                    ChatType = XivChatType.Say,
+                    Language = ClientLanguage.English,
+                };
+                backend.CancelSay(TextSource.Chat);
+                backend.Say(request);
             }
         }
 

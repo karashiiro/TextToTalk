@@ -17,7 +17,7 @@ public class AzureBackend : VoiceBackend
         LexiconUtils.LoadFromConfigAzure(lexiconManager, config);
 
         this.uiModel = new AzureBackendUIModel(config, lexiconManager);
-        this.ui = new AzureBackendUI(this.uiModel, config, lexiconManager, http);
+        this.ui = new AzureBackendUI(this.uiModel, config, lexiconManager, http, this);
     }
 
     public override void Say(SayRequest request)

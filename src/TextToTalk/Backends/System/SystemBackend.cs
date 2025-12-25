@@ -20,7 +20,7 @@ namespace TextToTalk.Backends.System
             LexiconUtils.LoadFromConfigSystem(lexiconManager, config);
 
             this.uiModel = new SystemBackendUIModel();
-            this.ui = new SystemBackendUI(this.uiModel, config, lexiconManager, http);
+            this.ui = new SystemBackendUI(this.uiModel, config, lexiconManager, http, this);
 
             this.soundQueue = new SystemSoundQueue(lexiconManager, config);
             this.voiceExceptions = this.uiModel.SubscribeToVoiceExceptions(this.soundQueue.SelectVoiceFailed);
