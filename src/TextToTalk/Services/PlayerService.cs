@@ -49,6 +49,11 @@ public class PlayerService(PlayerCollection collection, IList<VoicePreset> voice
         return voice != null;
     }
 
+    public bool TryGetPlayerOtherZone(string name, [NotNullWhen(true)] out Player? info)
+    {
+        return collection.TryFetchPlayerByName(name, out info);
+    }
+
     public bool SetPlayerVoice(Player info, VoicePreset voice)
     {
         if (info.Name is null || !TryGetPlayer(info.Name, info.WorldId, out _))

@@ -425,6 +425,14 @@ namespace TextToTalk
 
         private VoicePreset? GetVoicePreset(GameObject? speaker, string speakerName)
         {
+            // speaker will be null if the player is in another zone.  i.e. chatting across link-shells or FC chat.
+            if (speaker is null &&
+                this.config.UsePlayerVoicePresets &&
+                this.playerService.TryGetPlayerOtherZone(speakerName, out var otherPlayerInfo) &&
+                this.playerService.TryGetPlayerVoice(otherPlayerInfo, out var otherPlayerVoice))
+            {
+                return otherPlayerVoice;
+            }
             // Check if the speaker is a player and we have a custom voice for this speaker
             if (speaker is IPlayerCharacter pc &&
                 this.config.UsePlayerVoicePresets &&
