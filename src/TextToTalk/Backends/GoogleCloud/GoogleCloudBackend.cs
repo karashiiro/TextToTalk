@@ -13,7 +13,7 @@ public class GoogleCloudBackend : VoiceBackend
     {
         soundQueue = new StreamSoundQueue(config);
         client = new GoogleCloudClient(soundQueue, config.GoogleCreds);
-        ui = new GoogleCloudBackendUI(config, client);
+        ui = new GoogleCloudBackendUI(config, client, this);
     }
 
     public override void Say(SayRequest request)

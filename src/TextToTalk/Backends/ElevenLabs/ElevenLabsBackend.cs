@@ -15,7 +15,7 @@ public class ElevenLabsBackend : VoiceBackend
     public ElevenLabsBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
     {
         this.uiModel = new ElevenLabsBackendUIModel(config, http);
-        this.ui = new ElevenLabsBackendUI(uiModel, config);
+        this.ui = new ElevenLabsBackendUI(uiModel, config, this);
         this.notificationService = notificationService;
     }
 

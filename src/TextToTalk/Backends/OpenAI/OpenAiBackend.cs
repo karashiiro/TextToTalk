@@ -16,7 +16,7 @@ public class OpenAiBackend : VoiceBackend
     public OpenAiBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
     {
         this.uiModel = new OpenAiBackendUIModel(config, http);
-        this.ui = new OpenAiBackendUI(uiModel, config);
+        this.ui = new OpenAiBackendUI(uiModel, config, this);
         this.notificationService = notificationService;
     }
 

@@ -23,7 +23,7 @@ public class UberduckBackend : VoiceBackend
         this.uberduck = new UberduckClient(this.soundQueue, http);
 
         var voices = this.uberduck.GetVoices().GetAwaiter().GetResult();
-        this.ui = new UberduckBackendUI(config, this.uberduck, () => voices);
+        this.ui = new UberduckBackendUI(config, this.uberduck, () => voices, this);
     }
 
     public override void Say(SayRequest request)

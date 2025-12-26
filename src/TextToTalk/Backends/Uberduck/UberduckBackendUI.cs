@@ -1,4 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Game;
+using Dalamud.Game.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +14,13 @@ public class UberduckBackendUI
     private readonly PluginConfiguration config;
     private readonly UberduckClient uberduck;
     private readonly Func<IDictionary<string, IList<UberduckVoice>>> getVoices;
+    private readonly UberduckBackend backend;
 
     private string apiKey = string.Empty;
     private string apiSecret = string.Empty;
 
     public UberduckBackendUI(PluginConfiguration config, UberduckClient uberduck,
-        Func<IDictionary<string, IList<UberduckVoice>>> getVoices)
+        Func<IDictionary<string, IList<UberduckVoice>>> getVoices, UberduckBackend backend)
     {
         this.config = config;
         this.uberduck = uberduck;
@@ -32,6 +35,7 @@ public class UberduckBackendUI
 
         this.uberduck.ApiKey = this.apiKey;
         this.uberduck.ApiSecret = this.apiSecret;
+        this.backend = backend;
     }
 
     private static readonly Regex Whitespace = new(@"\s+", RegexOptions.Compiled);
@@ -155,6 +159,27 @@ public class UberduckBackendUI
         {
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
+        }
+        if (ImGui.Button($"Test##{MemoizedId.Create()}"))
+        {
+            var voice = currentVoicePreset;
+            if (voice is not null)
+            {
+                var request = new SayRequest
+                {
+                    Source = TextSource.Chat,
+                    Voice = currentVoicePreset,
+                    Speaker = "Speaker",
+                    Text = $"Hello from Uberduck, this is a test message",
+                    TextTemplate = "Hello from Uberduck, this is a test message",
+                    Race = "Hyur",
+                    BodyType = GameEnums.BodyType.Adult,
+                    ChatType = XivChatType.Say,
+                    Language = ClientLanguage.English,
+                };
+                backend.CancelSay(TextSource.Chat);
+                backend.Say(request);
+            }
         }
 
         ImGui.Text("Lexicons");

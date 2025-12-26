@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Game;
+using Dalamud.Game.Text;
+using Google.Api;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using Dalamud.Bindings.ImGui;
 using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
@@ -15,12 +18,13 @@ public class AzureBackendUI
     private readonly PluginConfiguration config;
     private readonly LexiconComponent lexiconComponent;
     private readonly AzureBackendUIModel model;
+    private readonly AzureBackend backend;
 
     private string region;
     private string subscriptionKey;
 
     public AzureBackendUI(AzureBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
-        HttpClient http)
+        HttpClient http, AzureBackend backend)
     {
         this.model = model;
 
@@ -29,6 +33,7 @@ public class AzureBackendUI
         var downloadPath = Path.Join(appData, "TextToTalk");
         var lexiconRepository = new LexiconRepository(http, downloadPath);
 
+        this.backend = backend;
         this.config = config;
         this.lexiconComponent =
             new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.AzureLexiconFiles);
@@ -140,6 +145,27 @@ public class AzureBackendUI
         {
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
+        }
+        if (ImGui.Button($"Test##{MemoizedId.Create()}"))
+        {
+            var voice = currentVoicePreset;
+            if (voice is not null)
+            {
+                var request = new SayRequest
+                {
+                    Source = TextSource.Chat,
+                    Voice = currentVoicePreset,
+                    Speaker = "Speaker",
+                    Text = $"Hello from Azure Cognitive Services, this is a test message",
+                    TextTemplate = "Hello from Azure Cognitive Services, this is a test message",
+                    Race = "Hyur",
+                    BodyType = GameEnums.BodyType.Adult,
+                    ChatType = XivChatType.Say,
+                    Language = ClientLanguage.English,
+                };
+                backend.CancelSay(TextSource.Chat);
+                backend.Say(request);
+            }
         }
 
         this.lexiconComponent.Draw();

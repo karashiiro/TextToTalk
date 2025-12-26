@@ -50,6 +50,21 @@ public class PlayerCollection(ILiteDatabase db)
     }
 
     /// <summary>
+    /// Fetches a player from the database using their name only.
+    /// </summary>
+    /// <param name="name">The player's name.</param>
+    /// <param name="player">The player, or null if they couldn't be found.</param>
+    /// <returns>If the player could be found.</returns>
+    public bool TryFetchPlayerByName(string name, [NotNullWhen(true)] out Player? player)
+    {
+        var collection = GetPlayerCollection();
+        player = collection.Query()
+            .Where(p => p.Name == name)
+            .FirstOrDefault();
+        return player != null;
+    }
+
+    /// <summary>
     /// Stores a player in the database.
     /// </summary>
     /// <param name="player">The player to store.</param>

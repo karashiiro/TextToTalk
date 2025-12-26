@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Game;
+using Dalamud.Game.Text;
+using NAudio.SoundFont;
+using System;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Bindings.ImGui;
 using TextToTalk.UI;
 
 namespace TextToTalk.Backends.ElevenLabs;
@@ -10,14 +13,16 @@ public class ElevenLabsBackendUI
 {
     private readonly ElevenLabsBackendUIModel model;
     private readonly PluginConfiguration config;
+    private readonly ElevenLabsBackend backend;
 
     private string apiKey;
 
-    public ElevenLabsBackendUI(ElevenLabsBackendUIModel model, PluginConfiguration config)
+    public ElevenLabsBackendUI(ElevenLabsBackendUIModel model, PluginConfiguration config, ElevenLabsBackend backend)
     {
         this.model = model;
         this.config = config;
         this.apiKey = this.model.GetApiKey();
+        this.backend = backend;
     }
 
     public void DrawSettings()
@@ -179,6 +184,27 @@ public class ElevenLabsBackendUI
             if (this.config.UseGenderedVoicePresets)
             {
                 BackendUI.GenderedPresetConfig("Polly", TTSBackend.ElevenLabs, this.config, presets);
+            }
+        }
+        if (ImGui.Button($"Test##{MemoizedId.Create()}"))
+        {
+            var voice = currentVoicePreset;
+            if (voice is not null)
+            {
+                var request = new SayRequest
+                {
+                    Source = TextSource.Chat,
+                    Voice = currentVoicePreset,
+                    Speaker = "Speaker",
+                    Text = $"Hello from ElevenLabs, this is a test message",
+                    TextTemplate = "Hello from ElevenLabs, this is a test message",
+                    Race = "Hyur",
+                    BodyType = GameEnums.BodyType.Adult,
+                    ChatType = XivChatType.Say,
+                    Language = ClientLanguage.English,
+                };
+                backend.CancelSay(TextSource.Chat);
+                backend.Say(request);
             }
         }
     }
