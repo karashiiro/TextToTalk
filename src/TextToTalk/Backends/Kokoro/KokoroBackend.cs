@@ -117,7 +117,7 @@ public class KokoroBackend : VoiceBackend
         }
 
         // TODO: apply lexicon once KokoroSharp supports it
-        soundQueue.EnqueueSound(new(text, voice, voicePreset.Speed ?? 1f, source, language));
+        soundQueue.EnqueueSound(new(text, voice, voicePreset.Speed ?? 1f, voicePreset.Volume ?? 0.6f, source, language));
     }
 
     public override void CancelAllSpeech()

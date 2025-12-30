@@ -77,6 +77,13 @@ public class KokoroBackendUI(PluginConfiguration config, KokoroBackend kokoroBac
             currentVoicePreset.Speed = speed;
             config.Save();
         }
+        
+        var volume = (int)((currentVoicePreset.Volume ?? 0.6f) * 100);
+        if (ImGui.SliderInt($"Volume##{MemoizedId.Create()}", ref volume, 0, 200, "%d%%"))
+        {
+            currentVoicePreset.Volume = MathF.Round((float)volume / 100, 2);
+            config.Save();
+        }
 
         if (ImGui.Button($"Test##{MemoizedId.Create()}"))
         {
