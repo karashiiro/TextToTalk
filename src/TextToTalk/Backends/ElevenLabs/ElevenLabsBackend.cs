@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,12 +12,19 @@ public class ElevenLabsBackend : VoiceBackend
     private readonly ElevenLabsBackendUI ui;
     private readonly ElevenLabsBackendUIModel uiModel;
     private readonly INotificationService notificationService;
+    private readonly PluginConfiguration config;
 
     public ElevenLabsBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
     {
         this.uiModel = new ElevenLabsBackendUIModel(config, http);
         this.ui = new ElevenLabsBackendUI(uiModel, config, this);
         this.notificationService = notificationService;
+        this.config = config;
+    }
+
+    public override void DrawStyles(IConfigUIDelegates helpers)
+    {
+        helpers.OpenVoiceStylesConfig();
     }
 
     public override void Say(SayRequest request)
@@ -32,7 +40,7 @@ public class ElevenLabsBackend : VoiceBackend
             {
                 await this.uiModel.ElevenLabs.Say(elevenLabsVoicePreset.VoiceId, elevenLabsVoicePreset.PlaybackRate,
                     elevenLabsVoicePreset.Volume, elevenLabsVoicePreset.SimilarityBoost,
-                    elevenLabsVoicePreset.Stability, request.Source, request.Text);
+                    elevenLabsVoicePreset.Stability, request.Source, request.Text, elevenLabsVoicePreset.ModelId);
                 this.uiModel.UpdateUserSubscriptionInfo();
             }
             catch (ElevenLabsUnauthorizedException e)

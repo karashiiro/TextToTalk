@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -27,21 +28,27 @@ public class ElevenLabsClient
     }
 
     public async Task Say(string? voice, int playbackRate, float volume, float similarityBoost, float stability,
-        TextSource source, string text)
+        TextSource source, string text, string? model)
     {
         if (!IsAuthorizationSet())
         {
             throw new ElevenLabsMissingCredentialsException("No ElevenLabs authorization keys have been configured.");
         }
-
+        var modelId = (text.Contains("[") && text.Contains("]")) ? "eleven_v3" : model; //if user uses SSML tags, force eleven_v3 model
+        float finalStability = stability;
+        if (modelId == "eleven_v3") // eleven_v3 only supports stability float values 0.0, 0.5, 1.0
+        {
+            finalStability = (float)Math.Round(stability * 2.0f, MidpointRounding.AwayFromZero) / 2.0f;
+        }
+        
         var args = new ElevenLabsTextToSpeechRequest
         {
             Text = text,
-            ModelId = "eleven_flash_v2_5",
+            ModelId = modelId,
             VoiceSettings = new ElevenLabsVoiceSettings
             {
                 SimilarityBoost = similarityBoost,
-                Stability = stability,
+                Stability = finalStability,
             },
         };
 
@@ -55,7 +62,7 @@ public class ElevenLabsClient
         using var content = new StringContent(JsonConvert.SerializeObject(args));
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
         req.Content = content;
-
+        
         var res = await this.http.SendAsync(req);
         EnsureSuccessStatusCode(res);
 
@@ -104,6 +111,21 @@ public class ElevenLabsClient
                 g => (IList<ElevenLabsVoice>)g.OrderByDescending(v => v.Name).ToList());
     }
 
+    public async Task<IList<ElevenLabsModel>> GetModels()
+    {
+        if (!IsAuthorizationSet())
+        {
+            throw new ElevenLabsMissingCredentialsException("No ElevenLabs authorization keys have been configured.");
+        }
+        var res = await SendRequest<List<ElevenLabsModel>>("/v1/models");
+        if (res == null)
+        {
+            throw new InvalidOperationException("Models endpoint returned null.");
+        }
+        return res.OrderByDescending(v => v.ModelId).ToList();
+    }
+
+
     private async Task<TResponse?> SendRequest<TResponse>(string endpoint, string query = "",
         HttpContent? reqContent = null) where TResponse : class
     {
@@ -126,7 +148,6 @@ public class ElevenLabsClient
         EnsureSuccessStatusCode(res);
 
         var resContent = await res.Content.ReadAsStringAsync();
-
         return JsonConvert.DeserializeObject<TResponse>(resContent);
     }
 

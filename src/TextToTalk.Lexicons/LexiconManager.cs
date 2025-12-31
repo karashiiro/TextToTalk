@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace TextToTalk.Lexicons;
@@ -109,6 +110,19 @@ public class LexiconManager
                 }
             }
         }
+        bool hasStyles = text.Contains("[") && text.Contains("]");
+        if (hasStyles)
+        {
+            // This regex captures the style name in group 1 and the text in group 2.
+            // It replaces the whole match with the SSML tag, effectively removing 
+            // the [styleName] text from the spoken output.
+            text = Regex.Replace(text, @"\[([^\]]+)\]([^\[]*)", m =>
+            {
+                var styleName = m.Groups[1].Value.Trim();
+                var content = m.Groups[2].Value; // Captured text after the bracket
+                return $"<mstts:express-as style=\"{styleName}\" styledegree=\"1.5\">{content}</mstts:express-as>";
+            });
+        }
 
         if (playbackRate >= 0)
         {
@@ -125,7 +139,10 @@ public class LexiconManager
         var speakTag = "<speak";
         if (includeSpeakAttributes)
         {
-            speakTag += " version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\"";
+            // Correctly define both the default SSML namespace and the Microsoft-specific namespace
+            speakTag += " version=\"1.0\" " +
+                        "xmlns=\"http://www.w3.org/2001/10/synthesis\" " +
+                        "xmlns:mstts=\"http://www.w3.org/2001/mstts\""; // Fixed URI
 
             if (langCode != null)
             {

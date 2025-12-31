@@ -14,6 +14,8 @@ public class ElevenLabsVoicePreset : VoicePreset
 
     public float Stability { get; set; }
 
+    public string? ModelId { get; set; }
+
     public override bool TrySetDefaultValues()
     {
         Volume = 1.0f;

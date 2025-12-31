@@ -106,6 +106,9 @@ namespace TextToTalk
 
         #endregion
 
+        public List<string> ElevenLabsVoiceStyles { get; set; }
+
+        public int ElevenLabsModelIndex { get; set; }
 
         public int SelectedAudioDeviceIndex { get; set; }
 

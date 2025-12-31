@@ -30,6 +30,25 @@ public class AzureClient : IDisposable
     {
         return this.soundQueue.GetCurrentlySpokenTextSource();
     }
+    public List<VoiceDetails> GetVoicesWithStyles()
+    {
+        // Fetches the voice result asynchronously and waits for completion
+        var res = this.synthesizer.GetVoicesAsync().GetAwaiter().GetResult();
+        HandleResult(res);
+
+        // Maps each voice to a custom object containing Name and StyleList
+        return res.Voices.Select(voice => new VoiceDetails
+        {
+            Name = voice.Name,
+            Styles = voice.StyleList.ToList() // StyleList is a string[]
+        }).ToList();
+    }
+
+    public class VoiceDetails
+    {
+        public string Name { get; set; }
+        public List<string> Styles { get; set; }
+    }
 
     public List<string> GetVoices()
     {

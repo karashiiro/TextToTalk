@@ -3,6 +3,7 @@ using Dalamud.Game;
 using Dalamud.Game.Text;
 using NAudio.SoundFont;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using TextToTalk.UI;
@@ -137,10 +138,39 @@ public class ElevenLabsBackendUI
                 ImGui.EndCombo();
             }
 
-            if (voiceCategoriesFlat.Count == 0)
+            var modelDescriptions = this.model.Models;
+            var modelIdList = modelDescriptions.Keys.ToList();
+            var modelDescriptionsList = modelDescriptions.Values.Select(v => v.Items.First()).ToList();
+            var selectedItemIndex = modelIdList.IndexOf(currentVoicePreset.ModelId);
+            string modelPreviewName = "";
+            if (selectedItemIndex != -1)
             {
-                ImGui.TextColored(ImColor.Red,
-                    "No voices were found. This might indicate a temporary service outage.");
+                modelPreviewName = modelDescriptionsList[selectedItemIndex].ModelId;
+            }
+
+            if (ImGui.BeginCombo($"Models##{MemoizedId.Create()}", modelPreviewName))
+            {
+                for (int i = 0; i < modelDescriptionsList.Count; i++)
+                {
+                    var item = modelDescriptionsList[i];
+                    bool isSelected = (selectedItemIndex == i);
+
+                    ImGui.Selectable(item.ModelDescription, false, ImGuiSelectableFlags.Disabled);
+
+                    if (ImGui.Selectable($"  {item.ModelId} || Cost Multiplier: {item.ModelRates["character_cost_multiplier"]}##{i}", isSelected))
+                    {
+                        currentVoicePreset.ModelId = item.ModelId;
+                        // Snaps to nearest 0.5 for eleven_v3 compatibility
+                        currentVoicePreset.Stability = (float)Math.Round(currentVoicePreset.Stability / 0.5f) * 0.5f;
+                        this.config.Save();
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui.SetItemDefaultFocus();
+                    }
+                }
+                ImGui.EndCombo();
             }
         }
 
@@ -156,8 +186,16 @@ public class ElevenLabsBackendUI
         if (ImGui.SliderFloat($"Stability##{MemoizedId.Create()}", ref stability, 0, 1, "%.2f",
                 ImGuiSliderFlags.AlwaysClamp))
         {
-            currentVoicePreset.Stability = stability;
-            this.config.Save();
+            if (currentVoicePreset.ModelId == "eleven_v3")
+            {
+                currentVoicePreset.Stability = (float)Math.Round(stability / 0.5f) * 0.5f; // eleven_v3 only supports 0.0, 0.5, 1.0, any other float values will return "Bad Request"
+                this.config.Save();
+            }
+            else
+            {
+                currentVoicePreset.Stability = stability;
+                this.config.Save();
+            }
         }
 
         var playbackRate = currentVoicePreset.PlaybackRate;

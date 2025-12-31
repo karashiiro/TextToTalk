@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TextToTalk.Lexicons;
+using static TextToTalk.Backends.Azure.AzureClient;
 
 namespace TextToTalk.Backends.Azure;
 
@@ -12,7 +13,7 @@ public class AzureBackendUIModel
     private readonly PluginConfiguration config;
     private readonly LexiconManager lexiconManager;
 
-    private List<string> voices;
+    public List<VoiceDetails> voices;
     private AzureLoginInfo loginInfo;
 
     /// <summary>
@@ -28,13 +29,13 @@ public class AzureBackendUIModel
     /// <summary>
     /// Gets the available voices.
     /// </summary>
-    public IReadOnlyList<string> Voices => this.voices;
+    public IReadOnlyList<VoiceDetails> Voices => this.voices;
 
     public AzureBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager)
     {
         this.config = config;
         this.lexiconManager = lexiconManager;
-        this.voices = new List<string>();
+        this.voices = new List<VoiceDetails>();
 
         this.loginInfo = new AzureLoginInfo();
         var credentials = AzureCredentialManager.LoadCredentials();
@@ -98,7 +99,7 @@ public class AzureBackendUIModel
             DetailedLog.Info($"Logging into Azure region {this.loginInfo.Region}");
             Azure = new AzureClient(this.loginInfo.SubscriptionKey, this.loginInfo.Region, this.lexiconManager, this.config);
             // This should throw an exception if the login failed
-            this.voices = Azure.GetVoices();
+            this.voices = Azure.GetVoicesWithStyles();
             return true;
         }
         catch (Exception e)

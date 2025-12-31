@@ -57,6 +57,10 @@ namespace TextToTalk.Backends
         {
             Backend?.DrawSettings(helpers);
         }
+        public override void DrawStyles(IConfigUIDelegates helpers)
+        {
+            Backend?.DrawStyles(helpers);
+        }
 
         public override TextSource GetCurrentlySpokenTextSource()
         {

@@ -1,7 +1,7 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
 using Dalamud.Game.Text;
-using Google.Api;
+using Dalamud.Plugin.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -111,7 +111,7 @@ public class AzureBackendUI
 
         {
             var voices = this.model.Voices;
-            string?[] voiceArray = voices.ToArray();
+            string?[] voiceArray = voices.Where(v => v != null && !string.IsNullOrEmpty(v.Name)).Select(v => v.Name).ToArray();
             var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
             if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))
             {
@@ -126,7 +126,7 @@ public class AzureBackendUI
                         "No voices are available on this voice engine for the current region.\n" +
                         "Please log in using a different region.");
                     break;
-                case > 0 when !voices.Any(v => v == currentVoicePreset.VoiceName):
+                case > 0 when !voiceArray.Any(v => v == currentVoicePreset.VoiceName):
                     BackendUI.ImGuiVoiceNotSelected();
                     break;
             }

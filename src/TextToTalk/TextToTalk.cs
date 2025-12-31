@@ -36,6 +36,7 @@ using TextToTalk.Services;
 using TextToTalk.Talk;
 using TextToTalk.TextProviders;
 using TextToTalk.UI;
+using TextToTalk.UI.Windows;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
@@ -84,6 +85,8 @@ namespace TextToTalk
 
         private ILiteDatabase? textEventLogDatabase;
         private TextEventLogCollection? textEventLog;
+        private readonly IConfigUIDelegates configUIDelegates;
+        private readonly VoiceStyles StylesWindow;
 
         public string Name => "TextToTalk";
 
@@ -128,13 +131,15 @@ namespace TextToTalk
 
             this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, gui);
             this.addonBattleTalkManager = new AddonBattleTalkManager(framework, clientState, condition, gui);
+            this.configUIDelegates = new ConfigUIDelegates();
+            
 
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
             this.backendManager =
                 new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
-
+            this.StylesWindow = new VoiceStyles(this.backendManager, this.configUIDelegates, this.config);
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
             this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);
 
@@ -160,6 +165,7 @@ namespace TextToTalk
             this.windows.AddWindow(this.voiceUnlockerWindow);
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
+            this.windows.AddWindow(this.StylesWindow);
 
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler =
@@ -176,8 +182,9 @@ namespace TextToTalk
 
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
+            
             this.commandModule = new MainCommandModule(commandManager, chat, this.config, this.backendManager,
-                this.configurationWindow);
+                this.configurationWindow, this.configUIDelegates, this.StylesWindow);
             this.debugCommandModule = new DebugCommandModule(commandManager, chat, gui, framework);
 
 

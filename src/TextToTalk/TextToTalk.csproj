@@ -10,7 +10,7 @@
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <PlatformTarget>x64</PlatformTarget>
         <Nullable>enable</Nullable>
-    </PropertyGroup>
+	</PropertyGroup>
 
     <PropertyGroup>
         <WarningsAsErrors>CS8785</WarningsAsErrors>
@@ -21,6 +21,15 @@
         <PathMap>$(AppOutputBase)=K:\arashiiro\</PathMap>
         <Deterministic>true</Deterministic>
     </PropertyGroup>
+
+    <ItemGroup>
+      <COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
+        <WrapperTool>tlbimp</WrapperTool>
+        <VersionMinor>4</VersionMinor>
+        <VersionMajor>2</VersionMajor>
+        <Guid>215d64d2-031c-33c7-96e3-61794cd1ee61</Guid>
+      </COMReference>
+    </ItemGroup>
 
     <ItemGroup>
         <Content Include="..\..\images\icon.png" Link="images\icon.png">
