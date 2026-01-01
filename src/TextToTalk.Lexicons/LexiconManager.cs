@@ -120,7 +120,14 @@ public class LexiconManager
             {
                 var styleName = m.Groups[1].Value.Trim();
                 var content = m.Groups[2].Value; // Captured text after the bracket
-                return $"<mstts:express-as style=\"{styleName}\" styledegree=\"1.5\">{content}</mstts:express-as>";
+                if (voice != null)
+                {
+                    return $"<mstts:express-as style=\"{styleName}\" styledegree=\"1.5\">{content}</mstts:express-as>";
+                }
+                else
+                {
+                    return content; // If no voice is specified, just return the content without styling.  This ensures System.Speech compatibility.
+                }
             });
         }
 
