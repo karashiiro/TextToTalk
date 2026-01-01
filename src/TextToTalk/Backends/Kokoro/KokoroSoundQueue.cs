@@ -104,19 +104,20 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
 
             var bytes = KokoroPlayback.GetBytes(samples);
             var ms = new MemoryStream(bytes);
-            streamSoundQueue.EnqueueSound(ms, nextItem.Source, StreamFormat.Raw, 1f);
+            streamSoundQueue.EnqueueSound(ms, nextItem.Source, StreamFormat.Raw, nextItem.Volume);
         }
     }
 }
 
 public class KokoroSourceQueueItem : SoundQueueItem
 {
-    public KokoroSourceQueueItem(string text, KokoroVoice voice, float speed, TextSource source, ClientLanguage language)
+    public KokoroSourceQueueItem(string text, KokoroVoice voice, float speed, float volume, TextSource source, ClientLanguage language)
     {
         Source = source;
         Text = text;
         Voice = voice;
         Speed = speed;
+        Volume = volume;
         Source = source;
         Language = language;
     }
@@ -124,6 +125,7 @@ public class KokoroSourceQueueItem : SoundQueueItem
     public string Text { get; }
     public KokoroVoice Voice { get; }
     public float Speed { get; }
+    public float Volume { get; }
     public bool Aborted { get; private set; }
     public ClientLanguage Language { get; }
 

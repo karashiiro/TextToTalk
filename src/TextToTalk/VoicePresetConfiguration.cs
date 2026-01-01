@@ -262,6 +262,7 @@ public class VoicePresetConfiguration
             {
                 Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
                 Speed = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Speed")),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
                 Name = GetNullableValue<string?>(corrupted, "Name"),
                 InternalName = GetNullableValue<string?>(corrupted, "InternalName"),
                 EnabledBackend = TTSBackend.Kokoro
