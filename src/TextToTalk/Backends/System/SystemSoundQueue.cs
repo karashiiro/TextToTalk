@@ -76,15 +76,20 @@ namespace TextToTalk.Backends.System
                 1f); // Hard coded 1f for volume float as ssml already takes care of user volume input
         }
 
+        public override void CancelAllSounds()
+        {
+            base.CancelAllSounds();
+            this.streamSoundQueue.CancelAllSounds();
+        }
+
+        public override void CancelFromSource(TextSource source)
+        {
+            base.CancelFromSource(source);
+            this.streamSoundQueue.CancelFromSource(source);
+        }
+
         protected override void OnSoundCancelled()
         {
-            try
-            {
-                this.speechSynthesizer.SpeakAsyncCancelAll();
-            }
-            catch (ObjectDisposedException)
-            {
-            }
         }
 
         protected override void Dispose(bool disposing)

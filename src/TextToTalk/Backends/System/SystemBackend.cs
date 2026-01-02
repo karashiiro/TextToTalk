@@ -9,8 +9,6 @@ namespace TextToTalk.Backends.System
         private readonly SystemBackendUIModel uiModel;
         private readonly SystemBackendUI ui;
         private readonly SystemSoundQueue soundQueue;
-        private readonly StreamSoundQueue streamSoundQueue;
-        private readonly AutoResetEvent speechCompleted;
         private readonly IDisposable voiceExceptions;
 
 
