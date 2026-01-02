@@ -151,7 +151,7 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         string instructions = string.Join(", ", matches.Select(m => m.Groups[1].Value));
 
         // 2. Remove the brackets and their contents from the original text
-        text = Regex.Replace(text, @"\s*\[.*?\]", "").Trim();
+        text = Regex.Replace(text, @"\s*\[\[.*?\]\]", "").Trim();
 
         // 3. Update your arguments dictionary
         Dictionary<string, object> args = new()

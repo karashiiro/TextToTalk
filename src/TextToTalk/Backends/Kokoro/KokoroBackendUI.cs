@@ -18,7 +18,7 @@ public class KokoroBackendUI(PluginConfiguration config, KokoroBackend kokoroBac
         var currentVoicePreset = config.GetCurrentVoicePreset<KokoroVoicePreset>();
         var presets = config.GetVoicePresetsForBackend(TTSBackend.Kokoro).ToList();
 
-        if (presets.Count > 0)
+        if (presets.Count > 0 && currentVoicePreset != null)
         {
             var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
             if (ImGui.Combo($"Voice preset##{MemoizedId.Create()}", ref presetIndex,
@@ -31,6 +31,10 @@ public class KokoroBackendUI(PluginConfiguration config, KokoroBackend kokoroBac
         else if (currentVoicePreset != null)
         {
             ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
+        }
+        else if (currentVoicePreset == null && presets.Count > 0)
+        {
+            config.SetCurrentVoicePreset(presets.First().Id);
         }
 
         BackendUI.NewPresetButton<KokoroVoicePreset>($"New preset##{MemoizedId.Create()}", config);

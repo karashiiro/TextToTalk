@@ -74,7 +74,7 @@ public class ElevenLabsBackendUI
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.ElevenLabs).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
 
-        if (presets.Any())
+        if (presets.Any() && currentVoicePreset != null)
         {
             var presetIndex = presets.IndexOf(currentVoicePreset);
             if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
@@ -83,9 +83,13 @@ public class ElevenLabsBackendUI
                 this.model.SetCurrentVoicePreset(presets[presetIndex].Id);
             }
         }
-        else if (currentVoicePreset == null)
+        else if (currentVoicePreset != null)
         {
             ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
+        }
+        else if (currentVoicePreset == null && presets.Count > 0)
+        {
+            config.SetCurrentVoicePreset(presets.First().Id);
         }
 
         BackendUI.NewPresetButton<ElevenLabsVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
