@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Speech.Synthesis;
+using System.Threading;
 using System.Threading.Tasks;
 using TextToTalk.Lexicons;
 
@@ -15,6 +16,7 @@ namespace TextToTalk.Backends.System
         private readonly StreamSoundQueue streamSoundQueue;
         private readonly SystemBackend backend;
         private readonly PluginConfiguration config;
+        private int soundLock;
 
         public Observable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
         private readonly Subject<SelectVoiceFailedException> selectVoiceFailed;
@@ -90,6 +92,14 @@ namespace TextToTalk.Backends.System
 
         protected override void OnSoundCancelled()
         {
+            try
+            {
+                this.speechSynthesizer.SetOutputToNull();
+            }
+            catch (ObjectDisposedException)
+            {
+                // ignored
+            }
         }
 
         protected override void Dispose(bool disposing)
