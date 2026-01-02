@@ -34,7 +34,7 @@ public class ElevenLabsClient
         {
             throw new ElevenLabsMissingCredentialsException("No ElevenLabs authorization keys have been configured.");
         }
-        var modelId = (text.Contains("[") && text.Contains("]")) ? "eleven_v3" : model; //if user uses SSML tags, force eleven_v3 model
+        var modelId = (text.Contains("[[") && text.Contains("]]")) ? "eleven_v3" : model; //if user uses SSML tags, force eleven_v3 model
         float finalStability = stability;
         if (modelId == "eleven_v3") // eleven_v3 only supports stability float values 0.0, 0.5, 1.0
         {

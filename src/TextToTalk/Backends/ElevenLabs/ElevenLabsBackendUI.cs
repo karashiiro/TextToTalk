@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using TextToTalk.UI;
+using TextToTalk.UI.Windows;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -73,7 +74,7 @@ public class ElevenLabsBackendUI
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.ElevenLabs).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
 
-        if (presets.Any() && currentVoicePreset != null)
+        if (presets.Any())
         {
             var presetIndex = presets.IndexOf(currentVoicePreset);
             if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
@@ -82,7 +83,7 @@ public class ElevenLabsBackendUI
                 this.model.SetCurrentVoicePreset(presets[presetIndex].Id);
             }
         }
-        else if (currentVoicePreset != null)
+        else if (currentVoicePreset == null)
         {
             ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
@@ -244,6 +245,15 @@ public class ElevenLabsBackendUI
                 backend.CancelSay(TextSource.Chat);
                 backend.Say(request);
             }
+        }
+        ImGui.SameLine();
+        if (ImGui.Button($"Voice Styles##{MemoizedId.Create()}"))
+        {
+            VoiceStyles.Instance?.ToggleStyle();
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Use Tags like \"Shout\" or \"Whisper\" to direct your voices");
         }
     }
 }

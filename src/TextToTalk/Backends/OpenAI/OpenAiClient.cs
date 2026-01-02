@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.OpenAI;
@@ -144,6 +145,15 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             voice = modelConfig.Voices.First();
         }
 
+        // 1. Extract content from brackets (e.g., "[English accent]")
+        // Matches everything between [[ and ]] using non-greedy matching .*?
+        var matches = Regex.Matches(text, @"\[\[(.*?)\]\]");
+        string instructions = string.Join(", ", matches.Select(m => m.Groups[1].Value));
+
+        // 2. Remove the brackets and their contents from the original text
+        text = Regex.Replace(text, @"\s*\[.*?\]", "").Trim();
+
+        // 3. Update your arguments dictionary
         Dictionary<string, object> args = new()
         {
             ["model"] = model,
@@ -152,13 +162,17 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             ["response_format"] = "mp3",
             ["speed"] = modelConfig.SpeedSupported ? preset.PlaybackRate ?? 1.0f : 1.0f
         };
-        
+
         if (modelConfig.InstructionsSupported)
         {
-            string? instructions = GetInstructionsForRequest(request, preset);
-            if (instructions != null)
+            string? configinstructions = GetInstructionsForRequest(request, preset);
+            if (instructions != "")
             {
                 args["instructions"] = instructions;
+            }
+            else if (configinstructions != null)
+            {
+                args["instructions"] = configinstructions;
             }
         }
 

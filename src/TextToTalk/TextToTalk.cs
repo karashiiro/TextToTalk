@@ -75,7 +75,6 @@ namespace TextToTalk
         private readonly WindowSystem windows;
         private readonly IDataManager data;
         private readonly NotificationService notificationService;
-
         private readonly ConfigurationWindow configurationWindow;
         private readonly VoiceUnlockerWindow voiceUnlockerWindow;
 
@@ -137,8 +136,7 @@ namespace TextToTalk
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager =
-                new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
+            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
             this.StylesWindow = new VoiceStyles(this.backendManager, this.configUIDelegates, this.config);
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
             this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);

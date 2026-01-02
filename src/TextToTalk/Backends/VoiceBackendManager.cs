@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Dalamud.Interface;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Numerics;
 using System.Threading.Tasks;
-using Dalamud.Interface;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
@@ -35,7 +35,7 @@ namespace TextToTalk.Backends
             this.uiBuilder = uiBuilder;
             this.notificationService = notificationService;
 
-            SetBackend(this.config.Backend);
+            SetBackend(this.config.Backend);           
         }
 
         public override void Say(SayRequest request)

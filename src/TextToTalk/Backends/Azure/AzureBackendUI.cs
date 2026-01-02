@@ -1,7 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
 using Dalamud.Game.Text;
-using Dalamud.Plugin.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -10,6 +9,7 @@ using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
 using TextToTalk.UI.Lexicons;
+using TextToTalk.UI.Windows;
 
 namespace TextToTalk.Backends.Azure;
 
@@ -166,6 +166,11 @@ public class AzureBackendUI
                 backend.CancelSay(TextSource.Chat);
                 backend.Say(request);
             }
+        }
+        ImGui.SameLine();
+        if (ImGui.Button($"Voice Styles##{MemoizedId.Create()}"))
+        {
+            VoiceStyles.Instance?.ToggleStyle();
         }
 
         this.lexiconComponent.Draw();

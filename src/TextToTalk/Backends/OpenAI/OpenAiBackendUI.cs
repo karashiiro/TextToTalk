@@ -4,6 +4,7 @@ using Dalamud.Game.Text;
 using System;
 using System.Linq;
 using TextToTalk.UI;
+using TextToTalk.UI.Windows;
 
 namespace TextToTalk.Backends.OpenAI;
 
@@ -190,6 +191,15 @@ public class OpenAiBackendUI
                 backend.CancelSay(TextSource.Chat);
                 backend.Say(request);
             }
+        }
+        ImGui.SameLine();
+        if (ImGui.Button($"Voice Styles##{MemoizedId.Create()}"))
+        {
+            VoiceStyles.Instance?.ToggleStyle();
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Use Tags like \"Shout\" or \"Whisper\" to direct your voices");
         }
 
         ImGui.Separator();

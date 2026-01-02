@@ -116,7 +116,7 @@ public class LexiconManager
             // This regex captures the style name in group 1 and the text in group 2.
             // It replaces the whole match with the SSML tag, effectively removing 
             // the [styleName] text from the spoken output.
-            text = Regex.Replace(text, @"\[([^\]]+)\]([^\[]*)", m =>
+            text = Regex.Replace(text, @"\[\[(.*?)\]\]", m =>
             {
                 var styleName = m.Groups[1].Value.Trim();
                 var content = m.Groups[2].Value; // Captured text after the bracket
