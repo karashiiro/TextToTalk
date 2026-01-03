@@ -40,7 +40,7 @@ public class ElevenLabsBackend : VoiceBackend
             {
                 await this.uiModel.ElevenLabs.Say(elevenLabsVoicePreset.VoiceId, elevenLabsVoicePreset.PlaybackRate,
                     elevenLabsVoicePreset.Volume, elevenLabsVoicePreset.SimilarityBoost,
-                    elevenLabsVoicePreset.Stability, request.Source, request.Text, elevenLabsVoicePreset.ModelId);
+                    elevenLabsVoicePreset.Stability, request.Source, request.Text, elevenLabsVoicePreset.ModelId, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : elevenLabsVoicePreset.Style);
                 this.uiModel.UpdateUserSubscriptionInfo();
             }
             catch (ElevenLabsUnauthorizedException e)

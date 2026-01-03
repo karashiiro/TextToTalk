@@ -8,6 +8,7 @@ using System.Linq;
 using System.Numerics;
 using TextToTalk.UI;
 using TextToTalk.UI.Windows;
+using static TextToTalk.Backends.Azure.AzureClient;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -217,17 +218,39 @@ public class ElevenLabsBackendUI
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
         }
-
+        if (currentVoicePreset.ModelId == "eleven_v3")
         {
-            ConfigComponents.ToggleUseGenderedVoicePresets(
-                $"Use gendered voices##{MemoizedId.Create()}",
-                this.config);
-
-            ImGui.Spacing();
-            if (this.config.UseGenderedVoicePresets)
+            var voiceStyles = config.CustomVoiceStyles.ToList();
+            if (voiceStyles == null || voiceStyles.Count == 0)
             {
-                BackendUI.GenderedPresetConfig("Polly", TTSBackend.ElevenLabs, this.config, presets);
+                ImGui.BeginDisabled();
+                if (ImGui.BeginCombo("Style", "No styles have been configured"))
+                {
+                    ImGui.EndCombo();
+                }
+                ImGui.EndDisabled();
             }
+            else
+            {
+                var style = currentVoicePreset.Style;
+                voiceStyles.Insert(0, "");
+                var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
+                if (ImGui.Combo($"Voice Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+                {
+                    currentVoicePreset.Style = voiceStyles[styleIndex];
+                    this.config.Save();
+                }
+            }
+        }
+        else 
+        {
+            ImGui.BeginDisabled();
+            if (ImGui.BeginCombo("Style", "Voice Styles only available on model: eleven_v3"))
+            {
+                ImGui.EndCombo();
+            }
+            ImGui.EndDisabled();
+            currentVoicePreset.Style = string.Empty; 
         }
         if (ImGui.Button($"Test##{MemoizedId.Create()}"))
         {
@@ -238,6 +261,7 @@ public class ElevenLabsBackendUI
                 {
                     Source = TextSource.Chat,
                     Voice = currentVoicePreset,
+                    Style = currentVoicePreset.Style,
                     Speaker = "Speaker",
                     Text = $"Hello from ElevenLabs, this is a test message",
                     TextTemplate = "Hello from ElevenLabs, this is a test message",
@@ -251,7 +275,7 @@ public class ElevenLabsBackendUI
             }
         }
         ImGui.SameLine();
-        if (ImGui.Button($"Voice Styles##{MemoizedId.Create()}"))
+        if (ImGui.Button($"Configure Voice Styles##{MemoizedId.Create()}"))
         {
             VoiceStyles.Instance?.ToggleStyle();
         }
@@ -259,5 +283,19 @@ public class ElevenLabsBackendUI
         {
             ImGui.SetTooltip("Use Tags like \"Shout\" or \"Whisper\" to direct your voices");
         }
+
+        {
+            ConfigComponents.ToggleUseGenderedVoicePresets(
+                $"Use gendered voices##{MemoizedId.Create()}",
+                this.config);
+
+            ImGui.Spacing();
+            if (this.config.UseGenderedVoicePresets)
+            {
+                BackendUI.GenderedPresetConfig("Polly", TTSBackend.ElevenLabs, this.config, presets);
+            }
+        }
+
+
     }
 }

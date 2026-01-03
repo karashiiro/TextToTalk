@@ -57,10 +57,11 @@ public class AzureClient : IDisposable
         return res.Voices.Select(voice => voice.Name).ToList();
     }
 
-    public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text)
+    public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text, string style)
     {
         var ssml = this.lexiconManager.MakeSsml(
             text,
+            style,
             voice: voice,
             langCode: "en-US",
             playbackRate: playbackRate,

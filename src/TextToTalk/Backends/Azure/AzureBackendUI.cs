@@ -2,6 +2,7 @@
 using Dalamud.Game;
 using Dalamud.Game.Text;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -150,6 +151,32 @@ public class AzureBackendUI
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
         }
+
+        var voiceStyles = new List<string>();
+        var voiceDetails = this.backend?.voices?.OrderBy(v => v.Name).FirstOrDefault(v => v?.Name == currentVoicePreset?.VoiceName);
+        if (voiceStyles == null || (voiceDetails?.Styles?.Count ?? 0) == 1) // the styles list will always contain at least 1 empty string if there are no styles available
+        {
+            ImGui.BeginDisabled();
+            if (ImGui.BeginCombo("Style", "No styles available for this voice"))
+            {
+                ImGui.EndCombo();
+            }
+
+            ImGui.EndDisabled();
+        }
+        else if (voiceDetails?.Styles != null && voiceDetails.Styles.Count > 0)
+        {
+            voiceStyles.Add("");
+            voiceStyles.AddRange(voiceDetails.Styles);
+            var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
+            if (ImGui.Combo($"Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+            {
+                currentVoicePreset.Style = voiceStyles[styleIndex];
+                this.config.Save();
+            }
+        }
+        ImGui.Separator();
+
         if (ImGui.Button($"Test##{MemoizedId.Create()}"))
         {
             var voice = currentVoicePreset;
@@ -172,7 +199,7 @@ public class AzureBackendUI
             }
         }
         ImGui.SameLine();
-        if (ImGui.Button($"Voice Styles##{MemoizedId.Create()}"))
+        if (ImGui.Button($"Configure Voice Styles##{MemoizedId.Create()}"))
         {
             VoiceStyles.Instance?.ToggleStyle();
         }

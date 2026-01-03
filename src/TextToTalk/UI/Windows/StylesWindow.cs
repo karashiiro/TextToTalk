@@ -20,6 +20,7 @@ using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
 using TextToTalk.Services;
 using static TextToTalk.Backends.Azure.AzureClient;
+using System.Text.RegularExpressions;
 
 namespace TextToTalk.UI.Windows
 {
@@ -40,8 +41,21 @@ namespace TextToTalk.UI.Windows
         private readonly PluginConfiguration config;
         private readonly Dictionary<Type, IVoiceStylesWindow> componentCache = new();
         public static VoiceStyles? Instance { get; private set; }
+        private string currentPreview = "";
+
+        public string BuildWrappedPattern(string delimiter)
+        {
+            // Regex.Escape ensures characters like '$' or '*' don't break the pattern
+            string escapedDelimiter = Regex.Escape(delimiter);
+
+            // Using string interpolation to build: \$(.*?)\$
+            return $"{escapedDelimiter}(.*?){escapedDelimiter}";
+        }
+
+
         public VoiceStyles(VoiceBackendManager backendManager, IConfigUIDelegates helpers, PluginConfiguration config)
             : base("Voice Styles", ImGuiWindowFlags.None)
+
         {
             Instance = this;
 
@@ -57,7 +71,7 @@ namespace TextToTalk.UI.Windows
 
         public void CopyStyleToClipboard(string style)
         {
-            ImGui.SetClipboardText($"[[{style}]]");
+            ImGui.SetClipboardText($"{config.StyleTag}{style}{config.StyleTag}");
         }
 
         public void ToggleStyle()
@@ -66,11 +80,34 @@ namespace TextToTalk.UI.Windows
         }
         public override void Draw()
         {
+            var stylesTag = config.StyleTag;
             var activeBackend = backendManager.Backend;
             if (activeBackend == null) return;
             var component = GetOrCreateComponent(activeBackend, config);
             if (component != null)
             {
+                if (ImGui.CollapsingHeader($"Configure ad-hoc style tags##{MemoizedId.Create()}"))
+                {
+                    ConfigComponents.ToggleAdHocStyleTagsEnabled("Enable Ad-hoc Style Tags", this.config);
+                    Components.HelpTooltip("""
+                If checked, chat messages containing a style tag will be synthesized in that style. This overrides any styles configured in the voice preset.
+                """);
+                    if (config.AdHocStyleTagsEnabled == true)
+                    {
+                        ImGui.Text($"Style Tag Delimiter");
+                        ImGui.SetNextItemWidth(35.0f);
+                        if (ImGui.InputTextWithHint("##DynamicInput", "Style Tag", ref stylesTag, 30))
+                        {
+                            config.StyleTag = stylesTag;
+                            config.StyleRegex = BuildWrappedPattern(stylesTag);
+                            config.Save();
+                        }
+                        ImGui.SameLine();
+
+                        ImGui.Text($"Example:   {stylesTag}Whispering{stylesTag} Hello World");
+                    }
+
+                }
                 component.Draw(helpers);
             }
             else

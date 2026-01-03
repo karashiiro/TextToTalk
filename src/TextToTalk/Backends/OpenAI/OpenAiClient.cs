@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using TextToTalk.GameEnums;
+using Serilog;
 
 namespace TextToTalk.Backends.OpenAI;
 
@@ -102,9 +103,9 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             instructionBuilder.AppendLine($"BodyType: {request.BodyType}");
         }
 
-        if (preset.Instructions is {Length: > 0})
+        if (preset.Style is {Length: > 0})
         {
-            instructionBuilder.AppendLine($"Instructions: {preset.Instructions}");
+            instructionBuilder.AppendLine($"Instructions: {preset.Style}");
         }
 
         var instructions = instructionBuilder.ToString()
@@ -113,7 +114,7 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         return instructions.Length > 0 ? instructions : null;
     }
 
-    public async Task Say(OpenAiVoicePreset preset, SayRequest request, string text)
+    public async Task Say(OpenAiVoicePreset preset, SayRequest request, string text, string style)
     {
         if (!IsAuthorizationSet())
         {
@@ -145,15 +146,6 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             voice = modelConfig.Voices.First();
         }
 
-        // 1. Extract content from brackets (e.g., "[English accent]")
-        // Matches everything between [[ and ]] using non-greedy matching .*?
-        var matches = Regex.Matches(text, @"\[\[(.*?)\]\]");
-        string instructions = string.Join(", ", matches.Select(m => m.Groups[1].Value));
-
-        // 2. Remove the brackets and their contents from the original text
-        text = Regex.Replace(text, @"\s*\[\[.*?\]\]", "").Trim();
-
-        // 3. Update your arguments dictionary
         Dictionary<string, object> args = new()
         {
             ["model"] = model,
@@ -166,16 +158,16 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         if (modelConfig.InstructionsSupported)
         {
             string? configinstructions = GetInstructionsForRequest(request, preset);
-            if (instructions != "")
+            if (style != "")
             {
-                args["instructions"] = instructions;
+                args["instructions"] = style;
             }
-            else if (configinstructions != null)
-            {
-                args["instructions"] = configinstructions;
-            }
-        }
-
+            //// Instructions from style take precedence over preset instructions.
+            //else if (configinstructions != null)
+            //{
+            //    args["instructions"] = configinstructions;
+            //}
+        }   //
         var json = JsonSerializer.Serialize(args);
         DetailedLog.Verbose(json);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");

@@ -16,6 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
@@ -39,6 +40,7 @@ using TextToTalk.UI;
 using TextToTalk.UI.Windows;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
+using static System.Net.Mime.MediaTypeNames;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace TextToTalk
@@ -307,14 +309,37 @@ namespace TextToTalk
                 return;
             }
 
-            // Run a preprocessing pipeline to clean the text for the speech synthesizer
-            var cleanText = FunctionalUtils.Pipe(
-                textValue,
-                TalkUtils.StripAngleBracketedText,
-                TalkUtils.ReplaceSsmlTokens,
-                TalkUtils.NormalizePunctuation,
-                t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
-                x => x.Trim());
+            string textContent = textValue; // Default to original text
+            string textStyle = "";
+
+            if (config.AdHocStyleTagsEnabled == true)
+            {
+                var match = Regex.Match(textValue, config.StyleRegex);
+
+                if (match.Success)
+                {
+                    textStyle = match.Groups[1].Value.Trim();
+                    // Replace the tagged portion with just the inner content for the final output
+                    textContent = Regex.Replace(textValue, config.StyleRegex, m => m.Groups[2].Value);
+                }
+                else
+                {
+                    textContent = textValue;
+                }
+            }
+            else 
+            { 
+                textContent = textValue; 
+            }
+
+                // Run a preprocessing pipeline to clean the text for the speech synthesizer
+                var cleanText = FunctionalUtils.Pipe(
+                        textContent,
+                        TalkUtils.StripAngleBracketedText,
+                        TalkUtils.ReplaceSsmlTokens,
+                        TalkUtils.NormalizePunctuation,
+                        t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
+                        x => x.Trim());
 
             // Ensure that the result is clean; ignore it otherwise
             if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))
@@ -357,6 +382,7 @@ namespace TextToTalk
                 Source = source,
                 Speaker = cleanSpeakerName,
                 Text = cleanText,
+                Style = textStyle,
                 TextTemplate = textTemplate,
                 Voice = preset,
                 ChatType = chatType,

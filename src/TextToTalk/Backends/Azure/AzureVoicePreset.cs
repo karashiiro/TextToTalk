@@ -17,6 +17,8 @@ public class AzureVoicePreset : VoicePreset
 
     [JsonProperty("AzureVoiceName")] public string? VoiceName { get; set; }
 
+    public string? Style { get; set; }
+
     public override bool TrySetDefaultValues()
     {
         Volume = 1.0f;

@@ -1,7 +1,9 @@
 ﻿using Dalamud.Bindings.ImGui;
+
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Numerics;
 using TextToTalk.UI.Windows;
 
 namespace TextToTalk.Backends.ElevenLabs
@@ -23,8 +25,12 @@ namespace TextToTalk.Backends.ElevenLabs
         public void Draw(IConfigUIDelegates helpers)
         {
             bool shouldAdd = false;
-            ImGui.TextDisabled("Elevenlabs V3 allows for custom voice styles.");
+            ImGui.Spacing();
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.8f, 0.0f, 1.0f));
+            ImGui.TextWrapped("Note: ElevenLabs ad-hoc styles require \"eleven_v3\" and will force the V3 model for messages containing the ad-hoc tags.");
+            ImGui.PopStyleColor();
             ImGui.TextDisabled("Experiment and have fun!");
+
 
             if (ImGui.InputText("##StyleInput", ref newStyleBuffer, 100, ImGuiInputTextFlags.EnterReturnsTrue))
             {
@@ -44,46 +50,48 @@ namespace TextToTalk.Backends.ElevenLabs
                 config.CustomVoiceStyles.Sort();
                 newStyleBuffer = string.Empty;
             }
-
-            ImGui.Separator();
-
-            if (config.CustomVoiceStyles == null || config.CustomVoiceStyles.Count == 0)
+            if (config.AdHocStyleTagsEnabled)
             {
-                ImGui.TextDisabled("No voice styles have been added yet.");
+                ImGui.Separator();
+                ImGui.Text("Click a style to copy its tag to clipboard:");
+                ImGui.Separator();
             }
-            else
+
+            if (config.CustomVoiceStyles?.Count > 0)
             {
+                int indexToRemove = -1;
+
                 for (int i = 0; i < config.CustomVoiceStyles.Count; i++)
                 {
                     string style = config.CustomVoiceStyles[i];
-                    if (ImGui.Selectable($"{style}##{i}"))
+                    bool isLastCopied = lastCopiedStyle == style && (ImGui.GetTime() - lastCopyTime < 1.0);
+
+                    if (ImGui.Selectable($"{style}##{i}") && config.AdHocStyleTagsEnabled)
                     {
                         VoiceStyles.Instance?.CopyStyleToClipboard(style);
                         lastCopyTime = ImGui.GetTime();
                         lastCopiedStyle = style;
                     }
-
-                    if (lastCopiedStyle == style && (ImGui.GetTime() - lastCopyTime < 1.0))
-                    {
+                    if (isLastCopied)
                         ImGui.SetTooltip("Copied!");
-                    }
-                    else if (ImGui.IsItemHovered())
-                    {
-                        ImGui.SetTooltip($"Click to copy");
-                    }
+                    else if (ImGui.IsItemHovered() && config.AdHocStyleTagsEnabled)
+                        ImGui.SetTooltip("Click to copy");
 
                     if (ImGui.BeginPopupContextItem($"context_{i}"))
                     {
                         if (ImGui.MenuItem("Remove Style"))
-                        {
-                            config.CustomVoiceStyles.RemoveAt(i);
-                            ImGui.EndPopup();
-                            break;
-                        }
+                            indexToRemove = i;
+
                         ImGui.EndPopup();
                     }
                 }
 
+                if (indexToRemove != -1)
+                    config.CustomVoiceStyles.RemoveAt(indexToRemove);
+            }
+            else
+            {
+                ImGui.TextDisabled("No voice styles have been added yet.");
             }
         }
     }

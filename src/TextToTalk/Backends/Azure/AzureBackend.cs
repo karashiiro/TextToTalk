@@ -3,6 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using TextToTalk.Backends.ElevenLabs;
 using static TextToTalk.Backends.Azure.AzureClient;
 
 namespace TextToTalk.Backends.Azure;
@@ -45,7 +46,7 @@ public class AzureBackend : VoiceBackend
         }
 
         _ = this.uiModel.Azure.Say(azureVoicePreset.VoiceName,
-            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, request.Source, request.Text);
+            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, request.Source, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : azureVoicePreset.Style);
     }
 
     public override void CancelAllSpeech()

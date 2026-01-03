@@ -14,7 +14,7 @@ public class OpenAiVoicePreset : VoicePreset
 
     [JsonPropertyName("OpenAIVoiceName")] public string? VoiceName { get; set; }
     
-    public string? Instructions { get; set; }
+    public string? Style { get; set; }
 
     public override bool TrySetDefaultValues()
     {

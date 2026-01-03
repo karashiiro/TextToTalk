@@ -28,23 +28,29 @@ public class ElevenLabsClient
     }
 
     public async Task Say(string? voice, int playbackRate, float volume, float similarityBoost, float stability,
-        TextSource source, string text, string? model)
+        TextSource source, string text, string? model, string? style)
     {
         if (!IsAuthorizationSet())
         {
             throw new ElevenLabsMissingCredentialsException("No ElevenLabs authorization keys have been configured.");
         }
-        var modelId = (text.Contains("[[") && text.Contains("]]")) ? "eleven_v3" : model; //if user uses SSML tags, force eleven_v3 model
+        Log.Information($"Style String = {style}");
+        if (style != "")
+        {
+            model = "eleven_v3"; //force eleven_v3 model for styles
+            text = $"[{style}] " + text; //append style tag to text
+        }
         float finalStability = stability;
-        if (modelId == "eleven_v3") // eleven_v3 only supports stability float values 0.0, 0.5, 1.0
+        if (model == "eleven_v3") // eleven_v3 only supports stability float values 0.0, 0.5, 1.0
         {
             finalStability = (float)Math.Round(stability * 2.0f, MidpointRounding.AwayFromZero) / 2.0f;
         }
-        
+        Log.Information($"Message String = {text}");
+        Log.Information($"Model String = {model}");
         var args = new ElevenLabsTextToSpeechRequest
         {
             Text = text,
-            ModelId = modelId,
+            ModelId = model,
             VoiceSettings = new ElevenLabsVoiceSettings
             {
                 SimilarityBoost = similarityBoost,

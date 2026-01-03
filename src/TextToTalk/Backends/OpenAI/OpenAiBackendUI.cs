@@ -156,17 +156,30 @@ public class OpenAiBackendUI
 
         if (currentModel.InstructionsSupported)
         {
-            var instructions = currentVoicePreset.Instructions ?? "";
-            if (ImGui.InputTextWithHint($"Instructions##{MemoizedId.Create()}",
-                    "Enter instructions to direct the tone, style, pacing, pronunciation, etc.",
-                    ref instructions, 1024))
+            var voiceStyles = config.CustomVoiceStyles.ToList();
+            if (voiceStyles == null || voiceStyles.Count == 0)
             {
-                currentVoicePreset.Instructions = instructions;
-                config.Save();
+                ImGui.BeginDisabled();
+                if (ImGui.BeginCombo("Style", "No styles have been configured"))
+                {
+                    ImGui.EndCombo();
+                }
+                ImGui.EndDisabled();
+            }
+            else
+            {
+                var style = currentVoicePreset.Style;
+                voiceStyles.Insert(0, "");
+                var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
+                if (ImGui.Combo($"Voice Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+                {
+                    currentVoicePreset.Style = voiceStyles[styleIndex];
+                    this.config.Save();
+                }
             }
 
             Components.HelpTooltip("""
-                Instructions are additional information that can be provided to the model to help it generate more accurate speech.
+                Styles are additional information that can be provided to the model to help it generate more accurate speech.
                 This can include things like emphasis, pronunciation, pauses, tone, pacing, voice affect, inflections, word choice etc.
                 Examples can be found at https://openai.fm
                 """);
@@ -193,7 +206,7 @@ public class OpenAiBackendUI
             }
         }
         ImGui.SameLine();
-        if (ImGui.Button($"Voice Styles##{MemoizedId.Create()}"))
+        if (ImGui.Button($"Configure Voice Styles##{MemoizedId.Create()}"))
         {
             VoiceStyles.Instance?.ToggleStyle();
         }

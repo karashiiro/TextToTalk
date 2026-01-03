@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -89,10 +90,12 @@ public class LexiconManager
 
     public string MakeSsml(
         string text,
+        string style = "",
         string? voice = null,
         string? langCode = null,
         int playbackRate = -1,
         bool includeSpeakAttributes = true)
+
     {
         foreach (var (_, lexicon) in this.lexicons)
         {
@@ -110,25 +113,9 @@ public class LexiconManager
                 }
             }
         }
-        bool hasStyles = text.Contains("[") && text.Contains("]");
-        if (hasStyles)
+        if (!string.IsNullOrEmpty(style) && voice != null)
         {
-            // This regex captures the style name in group 1 and the text in group 2.
-            // It replaces the whole match with the SSML tag, effectively removing 
-            // the [styleName] text from the spoken output.
-            text = Regex.Replace(text, @"\[\[(.*?)\]\]", m =>
-            {
-                var styleName = m.Groups[1].Value.Trim();
-                var content = m.Groups[2].Value; // Captured text after the bracket
-                if (voice != null)
-                {
-                    return $"<mstts:express-as style=\"{styleName}\" styledegree=\"1.5\">{content}</mstts:express-as>";
-                }
-                else
-                {
-                    return content; // If no voice is specified, just return the content without styling.  This ensures System.Speech compatibility.
-                }
-            });
+            text = $"<mstts:express-as style=\"{style}\" styledegree=\"1.5\">{text}</mstts:express-as>";
         }
 
         if (playbackRate >= 0)

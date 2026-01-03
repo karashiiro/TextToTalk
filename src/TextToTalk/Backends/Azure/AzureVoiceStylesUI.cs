@@ -1,5 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
 using System.Linq;
+using System.Numerics;
 using TextToTalk;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
@@ -34,30 +35,37 @@ public class AzureVoiceStyles : IVoiceStylesWindow
             ImGui.TextDisabled("No styles available for this voice.");
             return;
         }
-
-        ImGui.Text("Click a style to copy its tag to clipboard:");
-        ImGui.Separator();
-
-        foreach (var style in voiceDetails.Styles)
+        ImGui.Spacing();
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.8f, 0.8f, 1.0f, 1.0f));
+        ImGui.TextWrapped("Note: Azure voice styles are pre-determined and specific to the voice selected");
+        ImGui.PopStyleColor();
+        if (config.AdHocStyleTagsEnabled)
         {
-            if (string.IsNullOrEmpty(style)) continue;
+            ImGui.Separator();
+            ImGui.Text("Click a style to copy its tag to clipboard:");
+            ImGui.Separator();
+        }
 
-            if (ImGui.Selectable(style))
+            foreach (var style in voiceDetails.Styles)
+        {
+            if (config.AdHocStyleTagsEnabled)
             {
-                VoiceStyles.Instance?.CopyStyleToClipboard(style);
-                lastCopyTime = ImGui.GetTime();
-                lastCopiedStyle = style;
-            }
+                if (ImGui.Selectable($"{style}##{voiceDetails.Styles.IndexOf(style)}"))
+                {
+                    VoiceStyles.Instance?.CopyStyleToClipboard(style);
+                    lastCopyTime = ImGui.GetTime();
+                    lastCopiedStyle = style;
+                }
 
-            if (lastCopiedStyle == style && (ImGui.GetTime() - lastCopyTime < 1.0))
-            {
-                ImGui.SetTooltip("Copied!");
+                if (lastCopiedStyle == style && (ImGui.GetTime() - lastCopyTime < 1.0))
+                {
+                    ImGui.SetTooltip("Copied!");
+                }
+                else if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Click to copy");
+                }
             }
-            else if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip($"Click to copy");
-            }
-
         }
     }
 }

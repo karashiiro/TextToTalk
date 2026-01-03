@@ -31,6 +31,11 @@ namespace TextToTalk
     {
         private const string DefaultPreset = "Default";
 
+        //public string PersistentStyleTag { get; set; } = "";
+        public string StyleTag { get; set; } = "|";
+
+        public string StyleRegex { get; set; } = "";
+
         #region Obsolete Members
 
         [Obsolete("Use EnabledChatTypesPresets.")]
@@ -182,6 +187,12 @@ namespace TextToTalk
         public bool SkipMessagesFromYou { get; set; }
 
         public bool OnlyMessagesFromYou { get; set; }
+
+        //public bool PersistentStyleTagEnabled { get; set; }
+
+        //public bool PersistentPersonalStyleTagEnabled { get; set; }
+
+        public bool AdHocStyleTagsEnabled { get; set; }
 
         [Tooltip(
             "Use the American pronunciation for English instead of the British one. This doesn't affect the accents of the voices.")]
