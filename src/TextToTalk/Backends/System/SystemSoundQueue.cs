@@ -90,15 +90,17 @@ namespace TextToTalk.Backends.System
             this.streamSoundQueue.CancelFromSource(source);
         }
 
+
         protected override void OnSoundCancelled()
         {
-            try
-            {
-                this.speechSynthesizer.SetOutputToNull();
+            try 
+            { 
+                this.speechSynthesizer.SetOutputToNull(); 
             }
+
             catch (ObjectDisposedException)
             {
-                // ignored
+
             }
         }
 

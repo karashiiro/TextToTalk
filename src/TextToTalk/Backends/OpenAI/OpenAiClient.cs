@@ -7,7 +7,9 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using TextToTalk.GameEnums;
+using Serilog;
 
 namespace TextToTalk.Backends.OpenAI;
 
@@ -101,9 +103,9 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             instructionBuilder.AppendLine($"BodyType: {request.BodyType}");
         }
 
-        if (preset.Instructions is {Length: > 0})
+        if (preset.Style is {Length: > 0})
         {
-            instructionBuilder.AppendLine($"Instructions: {preset.Instructions}");
+            instructionBuilder.AppendLine($"Instructions: {preset.Style}");
         }
 
         var instructions = instructionBuilder.ToString()
@@ -112,7 +114,7 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         return instructions.Length > 0 ? instructions : null;
     }
 
-    public async Task Say(OpenAiVoicePreset preset, SayRequest request, string text)
+    public async Task Say(OpenAiVoicePreset preset, SayRequest request, string text, string style)
     {
         if (!IsAuthorizationSet())
         {
@@ -152,16 +154,20 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             ["response_format"] = "mp3",
             ["speed"] = modelConfig.SpeedSupported ? preset.PlaybackRate ?? 1.0f : 1.0f
         };
-        
+
         if (modelConfig.InstructionsSupported)
         {
-            string? instructions = GetInstructionsForRequest(request, preset);
-            if (instructions != null)
+            string? configinstructions = GetInstructionsForRequest(request, preset);
+            if (style != "")
             {
-                args["instructions"] = instructions;
+                args["instructions"] = style;
             }
-        }
-
+            //// Instructions from style take precedence over preset instructions.
+            //else if (configinstructions != null)
+            //{
+            //    args["instructions"] = configinstructions;
+            //}
+        }   //
         var json = JsonSerializer.Serialize(args);
         DetailedLog.Verbose(json);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");

@@ -1,8 +1,8 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
 using Dalamud.Game.Text;
-using Google.Api;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -10,6 +10,7 @@ using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
 using TextToTalk.UI.Lexicons;
+using TextToTalk.UI.Windows;
 
 namespace TextToTalk.Backends.Azure;
 
@@ -87,6 +88,10 @@ public class AzureBackendUI
         {
             ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
+        else if (currentVoicePreset == null && presets.Count > 0)
+        {
+            config.SetCurrentVoicePreset(presets.First().Id);
+        }
 
         BackendUI.NewPresetButton<AzureVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
 
@@ -111,7 +116,7 @@ public class AzureBackendUI
 
         {
             var voices = this.model.Voices;
-            string?[] voiceArray = voices.ToArray();
+            string?[] voiceArray = voices.Where(v => v != null && !string.IsNullOrEmpty(v.Name)).Select(v => v.Name).ToArray();
             var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
             if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))
             {
@@ -126,7 +131,7 @@ public class AzureBackendUI
                         "No voices are available on this voice engine for the current region.\n" +
                         "Please log in using a different region.");
                     break;
-                case > 0 when !voices.Any(v => v == currentVoicePreset.VoiceName):
+                case > 0 when !voiceArray.Any(v => v == currentVoicePreset.VoiceName):
                     BackendUI.ImGuiVoiceNotSelected();
                     break;
             }
@@ -146,6 +151,32 @@ public class AzureBackendUI
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
         }
+
+        var voiceStyles = new List<string>();
+        var voiceDetails = this.backend?.voices?.OrderBy(v => v.Name).FirstOrDefault(v => v?.Name == currentVoicePreset?.VoiceName);
+        if (voiceStyles == null || (voiceDetails?.Styles?.Count ?? 0) == 1) // the styles list will always contain at least 1 empty string if there are no styles available
+        {
+            ImGui.BeginDisabled();
+            if (ImGui.BeginCombo("Style", "No styles available for this voice"))
+            {
+                ImGui.EndCombo();
+            }
+
+            ImGui.EndDisabled();
+        }
+        else if (voiceDetails?.Styles != null && voiceDetails.Styles.Count > 0)
+        {
+            voiceStyles.Add("");
+            voiceStyles.AddRange(voiceDetails.Styles);
+            var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
+            if (ImGui.Combo($"Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+            {
+                currentVoicePreset.Style = voiceStyles[styleIndex];
+                this.config.Save();
+            }
+        }
+        ImGui.Separator();
+
         if (ImGui.Button($"Test##{MemoizedId.Create()}"))
         {
             var voice = currentVoicePreset;
@@ -166,6 +197,11 @@ public class AzureBackendUI
                 backend.CancelSay(TextSource.Chat);
                 backend.Say(request);
             }
+        }
+        ImGui.SameLine();
+        if (ImGui.Button($"Configure Voice Styles##{MemoizedId.Create()}"))
+        {
+            VoiceStyles.Instance?.ToggleStyle();
         }
 
         this.lexiconComponent.Draw();

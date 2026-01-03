@@ -74,7 +74,7 @@ public class UberduckBackendUI
         var presets = this.config.GetVoicePresetsForBackend(TTSBackend.Uberduck).ToList();
         presets.Sort((a, b) => a.Id - b.Id);
 
-        if (presets.Any())
+        if (presets.Any() && currentVoicePreset != null)
         {
             var presetIndex = currentVoicePreset is not null ? presets.IndexOf(currentVoicePreset) : -1;
             if (ImGui.Combo($"Preset##{MemoizedId.Create()}", ref presetIndex, presets.Select(p => p.Name).ToArray(),
@@ -84,9 +84,13 @@ public class UberduckBackendUI
                 this.config.Save();
             }
         }
-        else
+        else if (currentVoicePreset != null)
         {
             ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
+        }
+        else if (currentVoicePreset == null && presets.Count > 0)
+        {
+            config.SetCurrentVoicePreset(presets.First().Id);
         }
 
         BackendUI.NewPresetButton<UberduckVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using Lumina.Excel.Sheets;
 using R3;
 
 namespace TextToTalk.Backends.ElevenLabs;
@@ -42,6 +43,7 @@ public class ElevenLabsBackendUIModel : IDisposable
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<ElevenLabsVoice>> Voices { get; private set; }
 
+    public IReadOnlyDictionary<string, (IReadOnlyList<ElevenLabsModel> Items, Dictionary<string, double>? Rates)> Models { get; private set; }
     public ElevenLabsBackendUIModel(PluginConfiguration config, HttpClient http)
     {
         SoundQueue = new StreamSoundQueue(config);
@@ -52,6 +54,7 @@ public class ElevenLabsBackendUIModel : IDisposable
         this.apiKey = "";
 
         this.Voices = new Dictionary<string, IReadOnlyList<ElevenLabsVoice>>();
+        this.Models = new Dictionary<string, (IReadOnlyList<ElevenLabsModel> Items, Dictionary<string, double>? Rates)>();
 
         var credentials = ElevenLabsCredentialManager.LoadCredentials();
         if (credentials != null)
@@ -142,10 +145,23 @@ public class ElevenLabsBackendUIModel : IDisposable
             ElevenLabs.ApiKey = testApiKey;
             // This should throw an exception if the API key was incorrect
             var voices = ElevenLabs.GetVoices().GetAwaiter().GetResult();
+            var models = ElevenLabs.GetModels().GetAwaiter().GetResult();
             Voices = voices
-                .Select(kvp =>
+                                .Select(kvp =>
                     new KeyValuePair<string, IReadOnlyList<ElevenLabsVoice>>(kvp.Key, kvp.Value.AsReadOnly()))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            Models = models
+            .Where(m => m.CanDoTts)
+            .GroupBy(m => m.ModelId)
+            .ToDictionary(
+                g => g.Key!,
+                g => (
+                    Items: (IReadOnlyList<ElevenLabsModel>)g.ToList().AsReadOnly(),
+                    Rates: g.First().ModelRates
+                    )
+            );
+
             DetailedLog.Info("ElevenLabs authorization successful");
             return true;
         }

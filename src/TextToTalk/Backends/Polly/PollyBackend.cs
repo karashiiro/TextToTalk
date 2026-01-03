@@ -21,6 +21,10 @@ namespace TextToTalk.Backends.Polly
             this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http, this);
         }
 
+        public override void DrawStyles(IConfigUIDelegates helpers)
+        {
+            helpers.OpenVoiceStylesConfig();
+        }
         public override void Say(SayRequest request)
         {
             if (request.Voice is not PollyVoicePreset pollyVoicePreset)

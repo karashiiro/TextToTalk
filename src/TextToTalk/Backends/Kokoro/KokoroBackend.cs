@@ -92,7 +92,10 @@ public class KokoroBackend : VoiceBackend
         DetailedLog.Debug("Kokoro model downloaded successfully.");
         return new KokoroModel(path);
     }
-
+    public override void DrawStyles(IConfigUIDelegates helpers)
+    {
+        helpers.OpenVoiceStylesConfig();
+    }
     public override void Say(SayRequest request)
     {
         if (request.Voice is not KokoroVoicePreset voicePreset)

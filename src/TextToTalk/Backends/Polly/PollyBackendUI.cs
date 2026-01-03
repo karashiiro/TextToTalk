@@ -95,6 +95,10 @@ public class PollyBackendUI
         {
             ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
+        else if (currentVoicePreset == null && presets.Count > 0)
+        {
+            config.SetCurrentVoicePreset(presets.First().Id);
+        }
 
         BackendUI.NewPresetButton<PollyVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
 

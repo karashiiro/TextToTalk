@@ -10,7 +10,7 @@
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <PlatformTarget>x64</PlatformTarget>
         <Nullable>enable</Nullable>
-    </PropertyGroup>
+	</PropertyGroup>
 
     <PropertyGroup>
         <WarningsAsErrors>CS8785</WarningsAsErrors>

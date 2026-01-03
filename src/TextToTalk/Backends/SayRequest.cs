@@ -47,6 +47,11 @@ public record SayRequest
     public required string Text { get; init; }
 
     /// <summary>
+    /// Any Voice Style tags associated with the message.
+    /// </summary>
+    public string? Style { get; init; }
+
+    /// <summary>
     /// The message, with the player name replaced with a token.
     ///
     /// Full names are replaced with "{{FULL_NAME}}", first names are replaced with "{{FIRST_NAME}}", and last names
