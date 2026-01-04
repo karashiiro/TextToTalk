@@ -136,6 +136,11 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             model = Models.First().ModelName;
         }
         
+        if (request.Style is {Length: > 0 }) 
+        {
+            model = "gpt-4o-mini-tts"; // Force Say request to model that can handle Voice Styles if user has embedded a style tag into their message
+        }
+
         var modelConfig = Models.First(m => m.ModelName == model);
         if (preset.VoiceName != null && modelConfig.Voices.Contains(preset.VoiceName))
         {
