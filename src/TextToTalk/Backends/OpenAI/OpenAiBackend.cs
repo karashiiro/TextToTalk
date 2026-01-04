@@ -35,7 +35,7 @@ public class OpenAiBackend : VoiceBackend
         {
             try
             {
-                await this.uiModel.OpenAi.Say(voicePreset, request, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : voicePreset.Style);
+                await this.uiModel.OpenAi.Say(voicePreset, request, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (voicePreset.Style ?? string.Empty));
             }
             catch (OpenAiUnauthorizedException e)
             {

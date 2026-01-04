@@ -24,6 +24,7 @@ public class AzureVoicePreset : VoicePreset
         Volume = 1.0f;
         PlaybackRate = 0;
         VoiceName = "en-US-JennyNeural";
+        Style = string.Empty;
         EnabledBackend = TTSBackend.Azure;
         return true;
     }

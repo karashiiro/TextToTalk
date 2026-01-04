@@ -24,7 +24,7 @@ public class ElevenLabsVoicePreset : VoicePreset
         PlaybackRate = 100;
         VoiceId = "21m00Tcm4TlvDq8ikWAM";
         ModelId = "eleven_flash_v2_5";
-        Style = "";
+        Style = string.Empty;
         SimilarityBoost = 0.5f;
         Stability = 0.5f;
         EnabledBackend = TTSBackend.ElevenLabs;

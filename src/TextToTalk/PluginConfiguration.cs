@@ -236,12 +236,14 @@ namespace TextToTalk
             this.voicePresetConfig = VoicePresetConfiguration.LoadFromFile(GetVoicePresetsConfigPath());
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
+           
 
             foreach (var preset in EnabledChatTypesPresets)
             {
                 preset.Initialize(this);
             }
 
+            CustomVoiceStyles ??= new List<string>();
             AzureLexiconFiles ??= new List<string>();
             PollyLexiconFiles ??= new List<string>();
             Lexicons ??= new List<string>();

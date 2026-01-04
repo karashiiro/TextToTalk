@@ -105,7 +105,7 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
 
         if (preset.Style is {Length: > 0})
         {
-            instructionBuilder.AppendLine($"Instructions: {preset.Style}");
+            instructionBuilder.AppendLine($"Instructions: {(!string.IsNullOrEmpty(request.Style) ? request.Style : preset.Style)}"); // Style tags from Say Request take precedence over Style tags from voice preset.
         }
 
         var instructions = instructionBuilder.ToString()
@@ -158,16 +158,16 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         if (modelConfig.InstructionsSupported)
         {
             string? configinstructions = GetInstructionsForRequest(request, preset);
-            if (style != "")
-            {
-                args["instructions"] = style;
-            }
-            //// Instructions from style take precedence over preset instructions.
-            //else if (configinstructions != null)
+            //if (style != "")
             //{
-            //    args["instructions"] = configinstructions;
+            //    args["instructions"] = style;
             //}
-        }   //
+            // Instructions from style take precedence over preset instructions.
+            if (configinstructions != null)
+            {
+                args["instructions"] = configinstructions;
+            }
+        }   
         var json = JsonSerializer.Serialize(args);
         DetailedLog.Verbose(json);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");

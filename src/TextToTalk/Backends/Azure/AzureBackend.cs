@@ -46,7 +46,7 @@ public class AzureBackend : VoiceBackend
         }
 
         _ = this.uiModel.Azure.Say(azureVoicePreset.VoiceName,
-            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, request.Source, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : azureVoicePreset.Style);
+            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, request.Source, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (azureVoicePreset.Style ?? string.Empty));
     }
 
     public override void CancelAllSpeech()
