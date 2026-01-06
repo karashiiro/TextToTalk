@@ -33,7 +33,7 @@
     <lexeme>
         <grapheme>Aether</grapheme>
         <grapheme>aether</grapheme>
-        <phoneme>ˈi.θɚ</phoneme>
+        <phoneme>ˈiθɛr</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Aetherial</grapheme>
@@ -48,12 +48,12 @@
     <lexeme>
         <grapheme>Aetheryte</grapheme>
         <grapheme>aetheryte</grapheme>
-        <phoneme>ˈi.θɚraɪt</phoneme>
+        <phoneme>ˈiθɛraɪt</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Aetherytes</grapheme>
         <grapheme>aetherytes</grapheme>
-        <phoneme>ˈi.θɚraɪtz</phoneme>
+        <phoneme>ˈiθɛraɪtz</phoneme>
     </lexeme>
     <lexeme>
         <grapheme>Ahm Araeng</grapheme>

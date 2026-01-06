@@ -460,7 +460,7 @@ namespace TextToTalk
             if (speaker is null &&
                 this.config.UsePlayerVoicePresets &&
                 this.playerService.TryGetPlayerOtherZone(speakerName, out var otherPlayerInfo) &&
-                this.playerService.TryGetPlayerVoice(otherPlayerInfo, out var otherPlayerVoice))
+                this.playerService.TryGetPlayerVoice(otherPlayerInfo, out var otherPlayerVoice, config.Backend.ToString()))
             {
                 return otherPlayerVoice;
             }
@@ -468,7 +468,7 @@ namespace TextToTalk
             if (speaker is IPlayerCharacter pc &&
                 this.config.UsePlayerVoicePresets &&
                 this.playerService.TryGetPlayer(speakerName, pc.HomeWorld.RowId, out var playerInfo) &&
-                this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
+                this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice, config.Backend.ToString()))
             {
                 return playerVoice;
             }
@@ -476,7 +476,7 @@ namespace TextToTalk
             if (speaker is not null &&
                 this.config.UseNpcVoicePresets &&
                 this.npcService.TryGetNpc(speakerName, out var npcInfo) &&
-                this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
+                this.npcService.TryGetNpcVoice(npcInfo, this.config.Backend.ToString(), out var npcVoice))
             {
                 return npcVoice;
             }

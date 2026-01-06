@@ -197,7 +197,9 @@ public class SystemBackendUI
         var line = new StringBuilder(iv.VoiceInfo?.Name ?? "");
         line.Append(" (")
             .Append(iv.VoiceInfo?.Culture?.TwoLetterISOLanguageName.ToUpperInvariant() ?? "Unknown Language")
-            .Append(")");
+            .Append(")")
+            .Append(" - ")
+            .Append(iv.VoiceInfo?.Gender.ToString());
 
         if (iv.VoiceInfo?.Name?.Contains("Zira") ?? false)
         {

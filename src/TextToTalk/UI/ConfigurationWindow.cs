@@ -410,15 +410,24 @@ namespace TextToTalk.UI
                 {
                     var (id, playerInfo, worldName) = row;
                     var name = playerInfo.Name;
-
-                    // Player voice dropdown
-                    var presetIndex = this.players.TryGetPlayerVoice(playerInfo, out var v) ? presets.IndexOf(v) : 0;
-                    if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray,
-                            presets.Count))
+                    var currentBackend = this.config.Backend.ToString();
+                
+                    // Pass currentBackend to fetch the preset specific to this backend
+                    var presetIndex = this.players.TryGetPlayerVoice(playerInfo, out var v, currentBackend)
+                        ? presets.IndexOf(v)
+                        : 0;
+                
+                    if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray, presets.Count))
                     {
-                        this.players.SetPlayerVoice(playerInfo, presets[presetIndex]);
-                        this.players.UpdatePlayer(playerInfo);
-                        DetailedLog.Debug($"Updated voice for {name}@{worldName}: {presets[presetIndex].Name}");
+                        // SetPlayerVoice now handles the backend-specific composite record
+                        if (this.players.SetPlayerVoice(playerInfo, presets[presetIndex]))
+                        {
+                            DetailedLog.Debug($"Updated voice for {name}@{worldName} on {currentBackend}: {presets[presetIndex].Name}");
+                        }
+                        else
+                        {
+                            DetailedLog.Warn($"Failed to update voice for {name}@{worldName}");
+                        }
                     }
                 });
 
@@ -522,18 +531,22 @@ namespace TextToTalk.UI
                     var (id, npcInfo) = row;
                     var name = npcInfo.Name;
 
-                    // NPC voice dropdown
-                    var presetIndex = this.npc.TryGetNpcVoice(npcInfo, out var v) ? presets.IndexOf(v) : 0;
-                    if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray,
-                            presets.Count))
+                    var currentBackend = this.config.Backend.ToString();
+                
+                    // Pass currentBackend to find the preset specifically for this backend
+                    var presetIndex = this.npc.TryGetNpcVoice(npcInfo, currentBackend, out var v)
+                        ? presets.IndexOf(v)
+                        : -1; // Use -1 or a "None" index if no voice is set for this backend
+                
+                    if (ImGui.Combo($"##{MemoizedId.Create(uniq: id.ToString())}", ref presetIndex, presetArray, presets.Count))
                     {
-                        if (this.npc.SetNpcVoice(npcInfo, presets[presetIndex]))
+                        if (presetIndex >= 0 && this.npc.SetNpcVoice(npcInfo, presets[presetIndex]))
                         {
-                            DetailedLog.Debug($"Updated voice for {name}: {presets[presetIndex].Name}");
+                            DetailedLog.Debug($"Updated voice for {name} on {currentBackend}: {presets[presetIndex].Name}");
                         }
                         else
                         {
-                            DetailedLog.Warn($"Failed to update voice for {name} ({{id}})");
+                            DetailedLog.Warn($"Failed to update voice for {name} ({id})");
                         }
                     }
                 });
