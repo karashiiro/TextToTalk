@@ -16,52 +16,92 @@ namespace TextToTalk.Backends.OpenAI;
 public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
 {
     private const string UrlBase = "https://api.openai.com";
-    
-    public record ModelConfig(string ModelName, IReadOnlySet<string> Voices, bool InstructionsSupported, bool SpeedSupported);
+
+    public record ModelConfig(
+    string ModelName,
+    IReadOnlyDictionary<string, string> Voices,
+    bool InstructionsSupported,
+    bool SpeedSupported);
+
+    private static readonly Dictionary<string, string> VoiceLabels = new()
+{
+    { "alloy", "Alloy (Neutral & Balanced)" },
+    { "ash", "Ash (Clear & Precise)" },
+    { "ballad", "Ballad (Melodic & Smooth)" },
+    { "coral", "Coral (Warm & Friendly)" },
+    { "echo", "Echo (Resonant & Deep)" },
+    { "fable", "Fable (Alto Narrative)" },
+    { "onyx", "Onyx (Deep & Energetic)" },
+    { "nova", "Nova (Bright & Energetic)" },
+    { "sage", "Sage (Calm & Thoughtful)" },
+    { "shimmer", "Shimmer (Bright & Feminine)" },
+    { "verse", "Verse (Versatile & Expressive)" },
+    { "marin", "Marin (Latest and Greatest)" },
+    { "cedar", "Cedar (Latest and Greatest)" }
+};
 
     public static readonly List<ModelConfig> Models =
     [
-        // Note: while speed is 'technically' supported by gpt-4o-mini-tts, it doesn't appear to influence the output.
-        new("gpt-4o-mini-tts", new HashSet<string>
-        {
-            "alloy",
-            "ash",
-            "ballad",
-            "coral",
-            "echo",
-            "fable",
-            "onyx",
-            "nova",
-            "sage",
-            "shimmer",
-            "verse"
-        }, true, false),
-        new("tts-1", new HashSet<string>
-        {
-            "nova",
-            "shimmer",
-            "echo",
-            "onyx",
-            "fable",
-            "alloy",
-            "ash",
-            "sage",
-            "coral"
-        }, false, true),
-        new("tts-1-hd", new HashSet<string>
-        {
-            "nova",
-            "shimmer",
-            "echo",
-            "onyx",
-            "fable",
-            "alloy",
-            "ash",
-            "sage",
-            "coral"
-        }, false, false),
+        new("gpt-4o-mini-tts",
+        VoiceLabels.ToDictionary(v => v.Key, v => v.Value),
+        true, false),
+
+    new("tts-1",
+        VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse")
+                   .ToDictionary(v => v.Key, v => v.Value),
+        false, true),
+
+    new("tts-1-hd",
+        VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse")
+                   .ToDictionary(v => v.Key, v => v.Value),
+        false, false)
     ];
-    
+
+    //    public record ModelConfig(string ModelName, IReadOnlySet<string> Voices, bool InstructionsSupported, bool SpeedSupported);
+    //
+    //    public static readonly List<ModelConfig> Models =
+    //    [
+    //        // Note: while speed is 'technically' supported by gpt-4o-mini-tts, it doesn't appear to influence the output.
+    //        new("gpt-4o-mini-tts", new HashSet<string>
+    //        {
+    //            "alloy",
+    //            "ash",
+    //            "ballad",
+    //            "coral",
+    //            "echo",
+    //            "fable",
+    //            "onyx",
+    //            "nova",
+    //            "sage",
+    //            "shimmer",
+    //            "verse"
+    //        }, true, false),
+    //        new("tts-1", new HashSet<string>
+    //        {
+    //            "nova",
+    //            "shimmer",
+    //            "echo",
+    //            "onyx",
+    //            "fable",
+    //            "alloy",
+    //            "ash",
+    //            "sage",
+    //            "coral"
+    //        }, false, true),
+    //        new("tts-1-hd", new HashSet<string>
+    //        {
+    //            "nova",
+    //            "shimmer",
+    //            "echo",
+    //            "onyx",
+    //            "fable",
+    //            "alloy",
+    //            "ash",
+    //            "sage",
+    //            "coral"
+    //        }, false, false),
+    //    ];
+
     public string? ApiKey { get; set; }
 
     private void AddAuthorization(HttpRequestMessage req)
@@ -142,13 +182,13 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         }
 
         var modelConfig = Models.First(m => m.ModelName == model);
-        if (preset.VoiceName != null && modelConfig.Voices.Contains(preset.VoiceName))
+        if (preset.VoiceName != null && modelConfig.Voices.Keys.Contains(preset.VoiceName))
         {
             voice = preset.VoiceName;
         }
         else
         {
-            voice = modelConfig.Voices.First();
+            voice = modelConfig.Voices.Keys.First();
         }
 
         Dictionary<string, object> args = new()

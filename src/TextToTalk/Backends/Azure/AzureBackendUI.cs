@@ -11,6 +11,7 @@ using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
 using TextToTalk.UI.Lexicons;
 using TextToTalk.UI.Windows;
+using System.Numerics;
 
 namespace TextToTalk.Backends.Azure;
 
@@ -116,14 +117,76 @@ public class AzureBackendUI
 
         {
             var voices = this.model.Voices;
-            string?[] voiceArray = voices.Where(v => v != null && !string.IsNullOrEmpty(v.Name)).Select(v => v.Name).ToArray();
+
+            string?[] voiceArray = voices
+                .Where(v => v != null && !string.IsNullOrEmpty(v.ShortName))
+                .Select(v => v.ShortName)
+                .ToArray();
+
+            string[] displayArray = voices
+                .Where(v => v != null && !string.IsNullOrEmpty(v.ShortName))
+                .Select(v => v.Styles?.Count > 1
+                             ? $"{v.ShortName} [Styles Available]"
+                             : v.ShortName!)
+                .ToArray();
+
             var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
-            if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))
+            // 1. Determine if the currently selected voice has styles
+            bool previewHasStyles = voiceIndex >= 0 && voices[voiceIndex].Styles?.Count > 1;
+            string previewName = voiceIndex >= 0 ? voiceArray[voiceIndex] : "Select a voice...";
+
+            // 2. Start combo with an empty preview string so we can draw our own
+            if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", "", ImGuiComboFlags.HeightLarge))
             {
-                currentVoicePreset.VoiceName = voiceArray[voiceIndex];
-                this.config.Save();
+                var filteredVoices = voices.Where(v => v != null && !string.IsNullOrEmpty(v.ShortName)).ToList();
+
+                for (int i = 0; i < filteredVoices.Count; i++)
+                {
+                    var v = filteredVoices[i];
+                    bool isSelected = (voiceIndex == i);
+                    bool hasStyles = v.Styles?.Count > 1;
+
+                    if (ImGui.Selectable($"##{v.ShortName}_{i}", isSelected))
+                    {
+                        voiceIndex = i;
+                        currentVoicePreset.VoiceName = voiceArray[voiceIndex];
+                        this.config.Save();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().ItemSpacing.X);
+                    ImGui.Text(v.ShortName);
+
+                    if (hasStyles)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextColored(new Vector4(0.55f, 0.75f, 1.0f, 1.0f), "[Styles Available]");
+                    }
+
+                    if (isSelected) ImGui.SetItemDefaultFocus();
+                }
+                ImGui.EndCombo();
             }
 
+            // 3. Overlay the custom text on the Combo box itself
+            // We calculate the position relative to the last item (the Combo box)
+            ImGui.SameLine();
+            float comboRectMinX = ImGui.GetItemRectMin().X;
+            float comboRectMinY = ImGui.GetItemRectMin().Y;
+            float stylePadding = ImGui.GetStyle().FramePadding.X;
+
+            // Move cursor to inside the combo box frame
+            ImGui.SetCursorScreenPos(new Vector2(comboRectMinX + stylePadding, comboRectMinY + ImGui.GetStyle().FramePadding.Y - 3.0f));
+
+            // Draw the Name
+            ImGui.Text(previewName);
+
+            // Draw the Tag if applicable
+            if (previewHasStyles)
+            {
+                ImGui.SameLine();
+                ImGui.TextColored(new Vector4(0.55f, 0.75f, 1.0f, 1.0f), "[Styles Available]");
+            }
             switch (voices.Count)
             {
                 case 0:
@@ -153,8 +216,9 @@ public class AzureBackendUI
         }
 
         var voiceStyles = new List<string>();
-        var voiceDetails = this.backend?.voices?.OrderBy(v => v.Name).FirstOrDefault(v => v?.Name == currentVoicePreset?.VoiceName);
-        if (voiceStyles == null || (voiceDetails?.Styles?.Count ?? 0) == 1) // the styles list will always contain at least 1 empty string if there are no styles available
+        var voiceDetails = this.backend?.voices?.OrderBy(v => v.ShortName).FirstOrDefault(v => v?.ShortName == currentVoicePreset?.VoiceName);
+        // the styles list will always contain at least 1 empty string if there are no styles available
+        if (voiceStyles == null || (voiceDetails?.Styles?.Count ?? 0) == 1) 
         {
             ImGui.BeginDisabled();
             if (ImGui.BeginCombo("Style", "No styles available for this voice"))

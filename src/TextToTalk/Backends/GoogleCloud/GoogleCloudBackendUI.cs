@@ -83,15 +83,18 @@ public class GoogleCloudBackendUI
         }
 
         var voiceNames = client.Voices;
-        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentVoicePreset.VoiceName))
+        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", $"{currentVoicePreset.VoiceName} - {currentVoicePreset.Gender}"))
         {
             if (voiceNames != null && currentVoicePreset.Locale != null)
             {
-                voiceNames = voiceNames.Where(vn => vn.StartsWith(currentVoicePreset.Locale)).ToList();
+                voiceNames = voiceNames
+                    .Where(kvp => kvp.Key.StartsWith(currentVoicePreset.Locale))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 foreach (var voiceName in voiceNames)
                 {
-                    if (!ImGui.Selectable(voiceName, voiceName == currentVoicePreset.VoiceName)) continue;
-                    currentVoicePreset.VoiceName = voiceName;
+                    if (!ImGui.Selectable($"{voiceName.Value.Name} - {voiceName.Value.Gender}", voiceName.Value.Name == currentVoicePreset.VoiceName)) continue;
+                    currentVoicePreset.VoiceName = voiceName.Value.Name;
+                    currentVoicePreset.Gender = voiceName.Value.Gender.ToString();
                     config.Save();
                 }
             }

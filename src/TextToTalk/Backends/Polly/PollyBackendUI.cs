@@ -131,7 +131,7 @@ public class PollyBackendUI
 
         {
             var voices = this.model.CurrentEngineVoices;
-            var voiceArray = voices.Select(v => v.Name).ToArray();
+            var voiceArray = voices.Select(v => $"{v.Name} - {v.Gender} ({v.LanguageName})").ToArray();
             var voiceIdArray = voices.Select(v => v.Id).ToArray();
             var voiceIndex = Array.IndexOf(voiceIdArray, currentVoicePreset.VoiceName);
             if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))

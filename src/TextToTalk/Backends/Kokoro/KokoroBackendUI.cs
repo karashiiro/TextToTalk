@@ -1,8 +1,9 @@
-using System;
-using System.Linq;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Utility;
 using KokoroSharp;
 using KokoroSharp.Core;
+using System;
+using System.Linq;
 using TextToTalk.UI;
 
 namespace TextToTalk.Backends.Kokoro;
@@ -60,11 +61,15 @@ public class KokoroBackendUI(PluginConfiguration config, KokoroBackend kokoroBac
         }
 
         var voices = KokoroVoiceManager.GetVoices(Enum.GetValues<KokoroLanguage>());
-        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentVoicePreset.InternalName))
+        var voiceNameArray = voices.Select(v => v.Name).ToArray();
+        var voiceArray = voices.Select(v => $"{v.Name.Substring(3)} - {v.Gender} ({v.Language})").ToArray();
+        var voiceIndex = Array.IndexOf(voiceNameArray, currentVoicePreset.InternalName);
+        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", voiceArray[voiceIndex]))
         {
             foreach (var voice in voices)
             {
-                if (!ImGui.Selectable(voice.Name, voice.Name == currentVoicePreset.InternalName)) continue;
+                string displayName = $"{voice.Name.Substring(3)} - {voice.Gender} ({voice.Language})";
+                if (!ImGui.Selectable(displayName, voice.Name == currentVoicePreset.InternalName)) continue;
                 currentVoicePreset.InternalName = voice.Name;
                 config.Save();
             }

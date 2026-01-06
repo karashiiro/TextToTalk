@@ -21,7 +21,7 @@ public class OpenAiVoicePreset : VoicePreset
         var defaultConfig = OpenAiClient.Models.First();
         Volume = 1.0f;
         PlaybackRate = 1.0f;
-        VoiceName = defaultConfig.Voices.First();
+        VoiceName = defaultConfig.Voices.Keys.First();
         Style = string.Empty;
         EnabledBackend = TTSBackend.OpenAi;
         Model = defaultConfig.ModelName;

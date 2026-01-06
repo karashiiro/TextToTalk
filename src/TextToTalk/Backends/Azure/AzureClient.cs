@@ -40,6 +40,7 @@ public class AzureClient : IDisposable
         return res.Voices.Select(voice => new VoiceDetails
         {
             Name = voice.Name,
+            ShortName = voice.ShortName,
             Styles = voice.StyleList.ToList() // StyleList is a string[]
         }).ToList();
     }
@@ -47,6 +48,7 @@ public class AzureClient : IDisposable
     public class VoiceDetails
     {
         public string Name { get; set; }
+        public string ShortName { get; set; }
         public List<string> Styles { get; set; }
     }
 

@@ -1,4 +1,5 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Serilog;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -35,6 +36,7 @@ public class OpenAiBackend : VoiceBackend
         {
             try
             {
+                Log.Information($"Voice name  = {voicePreset.VoiceName}");
                 await this.uiModel.OpenAi.Say(voicePreset, request, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (voicePreset.Style ?? string.Empty));
             }
             catch (OpenAiUnauthorizedException e)

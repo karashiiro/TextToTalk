@@ -44,7 +44,7 @@ public class PollyBackendUIModel : IDisposable
     /// <summary>
     /// Gets the available voice engines for AWS Polly.
     /// </summary>
-    public string[] Engines { get; } = { Engine.Neural, Engine.Standard };
+    public string[] Engines { get; } = { Engine.Neural, Engine.Standard, Engine.Generative, Engine.LongForm };
 
     public PollyBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager)
     {

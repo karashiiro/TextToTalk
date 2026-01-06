@@ -8,6 +8,7 @@ using System.Linq;
 using System.Numerics;
 using TextToTalk.UI;
 using TextToTalk.UI.Windows;
+using static FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentHousingPlant;
 using static TextToTalk.Backends.Azure.AzureClient;
 
 namespace TextToTalk.Backends.ElevenLabs;
@@ -148,13 +149,22 @@ public class ElevenLabsBackendUI
             var modelIdList = modelDescriptions.Keys.ToList();
             var modelDescriptionsList = modelDescriptions.Values.Select(v => v.Items.First()).ToList();
             var selectedItemIndex = modelIdList.IndexOf(currentVoicePreset.ModelId);
+
             string modelPreviewName = "";
             if (selectedItemIndex != -1)
             {
-                modelPreviewName = modelDescriptionsList[selectedItemIndex].ModelId;
+                var selectedItem = modelDescriptionsList[selectedItemIndex];
+                modelPreviewName = $"{selectedItem.ModelId} || Cost Multiplier: {selectedItem.ModelRates["character_cost_multiplier"]}";
+                if (currentVoicePreset.ModelId == "eleven_v3")
+                {
+                    modelPreviewName += " [Styles Available]";
+                }
             }
 
-            if (ImGui.BeginCombo($"Models##{MemoizedId.Create()}", modelPreviewName))
+            bool previewHasStyles = modelIdList[selectedItemIndex] == "eleven_v3";
+            string previewName = voiceIndex >= 0 ? $"{modelIdList[selectedItemIndex]} || Cost Multiplier: {modelDescriptionsList[selectedItemIndex].ModelRates["character_cost_multiplier"]}" : "Select a model...";
+
+            if (ImGui.BeginCombo($"Models##{MemoizedId.Create()}", "", ImGuiComboFlags.HeightLarge))
             {
                 for (int i = 0; i < modelDescriptionsList.Count; i++)
                 {
@@ -163,24 +173,49 @@ public class ElevenLabsBackendUI
 
                     ImGui.Selectable(item.ModelDescription, false, ImGuiSelectableFlags.Disabled);
 
-                    if (ImGui.Selectable($"  {item.ModelId} || Cost Multiplier: {item.ModelRates["character_cost_multiplier"]}##{i}", isSelected))
+                    string baseText = $"  {item.ModelId} || Cost Multiplier: {item.ModelRates["character_cost_multiplier"]}";
+
+                    // 3. Use a Group to keep the Selectable and the extra text on the same line behaviorally
+                    if (ImGui.Selectable($"{baseText}##{i}", isSelected))
                     {
                         currentVoicePreset.ModelId = item.ModelId;
-                        // Snaps to nearest 0.5 for eleven_v3 compatibility
                         currentVoicePreset.Stability = (float)Math.Round(currentVoicePreset.Stability / 0.5f) * 0.5f;
                         this.config.Save();
                     }
 
-                    if (isSelected)
+                    // 4. Overlay the Yellow Text if applicable
+                    if (item.ModelId == "eleven_v3")
                     {
-                        ImGui.SetItemDefaultFocus();
+                        ImGui.SameLine();
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 1.0f, 0.6f, 1.0f));
+                        ImGui.Text(" [Styles Available]");
+                        ImGui.PopStyleColor();
                     }
+
+                    if (isSelected) ImGui.SetItemDefaultFocus();
                 }
                 ImGui.EndCombo();
             }
+            ImGui.SameLine();
+            float comboRectMinX = ImGui.GetItemRectMin().X;
+            float comboRectMinY = ImGui.GetItemRectMin().Y;
+            float stylePadding = ImGui.GetStyle().FramePadding.X;
+
+            // Move cursor to inside the combo box frame
+            ImGui.SetCursorScreenPos(new Vector2(comboRectMinX + stylePadding, comboRectMinY + ImGui.GetStyle().FramePadding.Y - 3.0f));
+
+            // Draw the Name
+            ImGui.Text(previewName);
+            
+            // Draw the Tag if applicable
+            if (previewHasStyles)
+            {
+                ImGui.SameLine();
+                ImGui.TextColored(new Vector4(1.0f, 1.0f, 0.6f, 1.0f), "[Styles Available]");
+            }
         }
 
-        var similarityBoost = currentVoicePreset.SimilarityBoost;
+            var similarityBoost = currentVoicePreset.SimilarityBoost;
         if (ImGui.SliderFloat($"Clarity/Similarity boost##{MemoizedId.Create()}", ref similarityBoost, 0, 1,
                 "%.2f", ImGuiSliderFlags.AlwaysClamp))
         {

@@ -17,14 +17,16 @@ namespace TextToTalk.Backends.System
         private readonly SystemBackend backend;
         private readonly PluginConfiguration config;
         private int soundLock;
+        private readonly SemaphoreSlim deviceLock = new SemaphoreSlim(1, 1);
 
         public Observable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
         private readonly Subject<SelectVoiceFailedException> selectVoiceFailed;
+        private bool isSynthesizing = false;
 
 
-        public async Task ASyncSpeak(SpeechSynthesizer synth, string textToSpeak)
+        public async void ASyncSpeak(SpeechSynthesizer synth, string textToSpeak)
         {
-            synth.SpeakSsml(textToSpeak);
+            await Task.Run(() => synth.SpeakSsml(textToSpeak));
         }
 
         public SystemSoundQueue(LexiconManager lexiconManager, PluginConfiguration config)
@@ -66,16 +68,31 @@ namespace TextToTalk.Backends.System
                 langCode: this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
             DetailedLog.Verbose(ssml);
 
-            this.stream = new MemoryStream();
-            this.speechSynthesizer.SetOutputToWaveStream(this.stream);
+            try
+            {
+                isSynthesizing = true;
 
-            await ASyncSpeak(this.speechSynthesizer,
-                ssml); // Wrapped Synchronous Speech Synthesis in an async Task.  This is because the SpeakAsync and SpeakSsmlAsync methods do not output a useable MemoryStream.
+                await deviceLock.WaitAsync();
+
+                this.stream = new MemoryStream();
+                this.speechSynthesizer.SetOutputToWaveStream(this.stream);
+
+                await Task.Run(() => this.speechSynthesizer.SpeakSsml(ssml));
+
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+
+            finally
+            {
+                isSynthesizing = false;
+                deviceLock.Release();
+            }
 
             this.stream.Seek(0, SeekOrigin.Begin);
-            DetailedLog.Debug($"Stream Length = {this.stream.Length}");
-            this.streamSoundQueue.EnqueueSound(stream, nextItem.Source, StreamFormat.Wave,
-                1f); // Hard coded 1f for volume float as ssml already takes care of user volume input
+            this.streamSoundQueue.EnqueueSound(stream, nextItem.Source, StreamFormat.Wave, 1f);
         }
 
         public override void CancelAllSounds()
@@ -94,8 +111,8 @@ namespace TextToTalk.Backends.System
         protected override void OnSoundCancelled()
         {
             try 
-            { 
-                this.speechSynthesizer.SetOutputToNull(); 
+            {
+                this.speechSynthesizer.SetOutputToNull();
             }
 
             catch (ObjectDisposedException)

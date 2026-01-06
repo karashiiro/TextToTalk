@@ -115,27 +115,43 @@ public class OpenAiBackendUI
         }
 
         if (currentVoicePreset.Model == null) return;
-        
+
         var currentModel = OpenAiClient.Models.First(x => x.ModelName == currentVoicePreset.Model);
-        var voiceNames = currentModel.Voices;
-        if (currentVoicePreset.VoiceName == null || !voiceNames.Contains(currentVoicePreset.VoiceName))
+        // 1. Determine what to display in the preview (the value corresponding to the current key)
+        if (!currentModel.Voices.TryGetValue(currentVoicePreset.VoiceName ?? "", out var currentPreviewName))
         {
-            currentVoicePreset.VoiceName = voiceNames.First();
+            // Fallback if current key is invalid or null
+            currentVoicePreset.VoiceName = currentModel.Voices.Keys.First();
+            currentPreviewName = currentModel.Voices[currentVoicePreset.VoiceName];
             config.Save();
         }
-        
-        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentVoicePreset.VoiceName))
+
+        // 2. Start the Combo Box with the Descriptive Value as the preview
+        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentPreviewName))
         {
-            foreach (var voiceName in voiceNames)
+            foreach (var voice in currentModel.Voices)
             {
-                if (!ImGui.Selectable(voiceName, voiceName == currentVoicePreset.VoiceName)) continue;
+                // voice.Key is "alloy", "ash", etc.
+                // voice.Value is "Alloy (Neutral & Balanced)", etc.
+                bool isSelected = (currentVoicePreset.VoiceName == voice.Key);
 
-                currentVoicePreset.VoiceName = voiceName;
-                config.Save();
+                // 3. Display the descriptive Value to the user
+                if (ImGui.Selectable(voice.Value, isSelected))
+                {
+                    // 4. Update config with the underlying Key
+                    currentVoicePreset.VoiceName = voice.Key;
+                    config.Save();
+                }
+
+                // Standard ImGui accessibility: set focus to the selected item
+                if (isSelected)
+                {
+                    ImGui.SetItemDefaultFocus();
+                }
             }
-
             ImGui.EndCombo();
         }
+
 
         var volume = (int) (currentVoicePreset.Volume * 100);
         if (ImGui.SliderInt($"Volume##{MemoizedId.Create()}", ref volume, 0, 200, "%d%%"))

@@ -308,7 +308,7 @@ namespace TextToTalk
             {
                 return;
             }
-
+            
             string textContent = textValue; // Default to original text
             string textStyle = "";
 
