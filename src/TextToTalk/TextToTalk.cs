@@ -16,6 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
@@ -36,8 +37,10 @@ using TextToTalk.Services;
 using TextToTalk.Talk;
 using TextToTalk.TextProviders;
 using TextToTalk.UI;
+using TextToTalk.UI.Windows;
 using TextToTalk.UngenderedOverrides;
 using TextToTalk.Utils;
+using static System.Net.Mime.MediaTypeNames;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
 namespace TextToTalk
@@ -74,7 +77,6 @@ namespace TextToTalk
         private readonly WindowSystem windows;
         private readonly IDataManager data;
         private readonly NotificationService notificationService;
-
         private readonly ConfigurationWindow configurationWindow;
         private readonly VoiceUnlockerWindow voiceUnlockerWindow;
 
@@ -84,6 +86,8 @@ namespace TextToTalk
 
         private ILiteDatabase? textEventLogDatabase;
         private TextEventLogCollection? textEventLog;
+        private readonly IConfigUIDelegates configUIDelegates;
+        private readonly VoiceStyles StylesWindow;
 
         public string Name => "TextToTalk";
 
@@ -128,13 +132,14 @@ namespace TextToTalk
 
             this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, gui);
             this.addonBattleTalkManager = new AddonBattleTalkManager(framework, clientState, condition, gui);
+            this.configUIDelegates = new ConfigUIDelegates();
+            
 
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager =
-                new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
-
+            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
+            this.StylesWindow = new VoiceStyles(this.backendManager, this.configUIDelegates, this.config);
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
             this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);
 
@@ -160,6 +165,7 @@ namespace TextToTalk
             this.windows.AddWindow(this.voiceUnlockerWindow);
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
+            this.windows.AddWindow(this.StylesWindow);
 
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler =
@@ -176,8 +182,9 @@ namespace TextToTalk
 
             this.ungenderedOverrides = new UngenderedOverrideManager();
 
+            
             this.commandModule = new MainCommandModule(commandManager, chat, this.config, this.backendManager,
-                this.configurationWindow);
+                this.configurationWindow, this.configUIDelegates, this.StylesWindow);
             this.debugCommandModule = new DebugCommandModule(commandManager, chat, gui, framework);
 
 
@@ -301,15 +308,38 @@ namespace TextToTalk
             {
                 return;
             }
+            
+            string textContent = textValue; // Default to original text
+            string textStyle = "";
 
-            // Run a preprocessing pipeline to clean the text for the speech synthesizer
-            var cleanText = FunctionalUtils.Pipe(
-                textValue,
-                TalkUtils.StripAngleBracketedText,
-                TalkUtils.ReplaceSsmlTokens,
-                TalkUtils.NormalizePunctuation,
-                t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
-                x => x.Trim());
+            if (config.AdHocStyleTagsEnabled == true)
+            {
+                var match = Regex.Match(textValue, config.StyleRegex);
+
+                if (match.Success)
+                {
+                    textStyle = match.Groups[1].Value.Trim();
+                    // Replace the tagged portion with just the inner content for the final output
+                    textContent = Regex.Replace(textValue, config.StyleRegex, m => m.Groups[2].Value);
+                }
+                else
+                {
+                    textContent = textValue;
+                }
+            }
+            else 
+            { 
+                textContent = textValue; 
+            }
+
+                // Run a preprocessing pipeline to clean the text for the speech synthesizer
+                var cleanText = FunctionalUtils.Pipe(
+                        textContent,
+                        TalkUtils.StripAngleBracketedText,
+                        TalkUtils.ReplaceSsmlTokens,
+                        TalkUtils.NormalizePunctuation,
+                        t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
+                        x => x.Trim());
 
             // Ensure that the result is clean; ignore it otherwise
             if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))
@@ -352,6 +382,7 @@ namespace TextToTalk
                 Source = source,
                 Speaker = cleanSpeakerName,
                 Text = cleanText,
+                Style = textStyle,
                 TextTemplate = textTemplate,
                 Voice = preset,
                 ChatType = chatType,
@@ -429,7 +460,7 @@ namespace TextToTalk
             if (speaker is null &&
                 this.config.UsePlayerVoicePresets &&
                 this.playerService.TryGetPlayerOtherZone(speakerName, out var otherPlayerInfo) &&
-                this.playerService.TryGetPlayerVoice(otherPlayerInfo, out var otherPlayerVoice))
+                this.playerService.TryGetPlayerVoice(otherPlayerInfo, out var otherPlayerVoice, config.Backend.ToString()))
             {
                 return otherPlayerVoice;
             }
@@ -437,7 +468,7 @@ namespace TextToTalk
             if (speaker is IPlayerCharacter pc &&
                 this.config.UsePlayerVoicePresets &&
                 this.playerService.TryGetPlayer(speakerName, pc.HomeWorld.RowId, out var playerInfo) &&
-                this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice))
+                this.playerService.TryGetPlayerVoice(playerInfo, out var playerVoice, config.Backend.ToString()))
             {
                 return playerVoice;
             }
@@ -445,7 +476,7 @@ namespace TextToTalk
             if (speaker is not null &&
                 this.config.UseNpcVoicePresets &&
                 this.npcService.TryGetNpc(speakerName, out var npcInfo) &&
-                this.npcService.TryGetNpcVoice(npcInfo, out var npcVoice))
+                this.npcService.TryGetNpcVoice(npcInfo, this.config.Backend.ToString(), out var npcVoice))
             {
                 return npcVoice;
             }

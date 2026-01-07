@@ -73,9 +73,21 @@ public static class BackendUI
             var otherPreset = voiceConfig.VoicePresets.First(p => p.Id != preset.Id);
             config.SetCurrentVoicePreset(otherPreset.Id);
 
-            voiceConfig.UngenderedVoicePresets[backend].Remove(preset.Id);
-            voiceConfig.MaleVoicePresets[backend].Remove(preset.Id);
-            voiceConfig.FemaleVoicePresets[backend].Remove(preset.Id);
+            // Use TryGetValue to safely access the inner dictionary for the specific backend
+            if (voiceConfig.UngenderedVoicePresets.TryGetValue(backend, out var ungendered))
+            {
+                ungendered.Remove(preset.Id);
+            }
+
+            if (voiceConfig.MaleVoicePresets.TryGetValue(backend, out var male))
+            {
+                male.Remove(preset.Id);
+            }
+
+            if (voiceConfig.FemaleVoicePresets.TryGetValue(backend, out var female))
+            {
+                female.Remove(preset.Id);
+            }
 
             voiceConfig.VoicePresets.Remove(preset);
 

@@ -4,6 +4,7 @@ using Dalamud.Game.Text;
 using System;
 using System.Linq;
 using TextToTalk.UI;
+using TextToTalk.UI.Windows;
 
 namespace TextToTalk.Backends.OpenAI;
 
@@ -114,27 +115,43 @@ public class OpenAiBackendUI
         }
 
         if (currentVoicePreset.Model == null) return;
-        
+
         var currentModel = OpenAiClient.Models.First(x => x.ModelName == currentVoicePreset.Model);
-        var voiceNames = currentModel.Voices;
-        if (currentVoicePreset.VoiceName == null || !voiceNames.Contains(currentVoicePreset.VoiceName))
+        // 1. Determine what to display in the preview (the value corresponding to the current key)
+        if (!currentModel.Voices.TryGetValue(currentVoicePreset.VoiceName ?? "", out var currentPreviewName))
         {
-            currentVoicePreset.VoiceName = voiceNames.First();
+            // Fallback if current key is invalid or null
+            currentVoicePreset.VoiceName = currentModel.Voices.Keys.First();
+            currentPreviewName = currentModel.Voices[currentVoicePreset.VoiceName];
             config.Save();
         }
-        
-        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentVoicePreset.VoiceName))
+
+        // 2. Start the Combo Box with the Descriptive Value as the preview
+        if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentPreviewName))
         {
-            foreach (var voiceName in voiceNames)
+            foreach (var voice in currentModel.Voices)
             {
-                if (!ImGui.Selectable(voiceName, voiceName == currentVoicePreset.VoiceName)) continue;
+                // voice.Key is "alloy", "ash", etc.
+                // voice.Value is "Alloy (Neutral & Balanced)", etc.
+                bool isSelected = (currentVoicePreset.VoiceName == voice.Key);
 
-                currentVoicePreset.VoiceName = voiceName;
-                config.Save();
+                // 3. Display the descriptive Value to the user
+                if (ImGui.Selectable(voice.Value, isSelected))
+                {
+                    // 4. Update config with the underlying Key
+                    currentVoicePreset.VoiceName = voice.Key;
+                    config.Save();
+                }
+
+                // Standard ImGui accessibility: set focus to the selected item
+                if (isSelected)
+                {
+                    ImGui.SetItemDefaultFocus();
+                }
             }
-
             ImGui.EndCombo();
         }
+
 
         var volume = (int) (currentVoicePreset.Volume * 100);
         if (ImGui.SliderInt($"Volume##{MemoizedId.Create()}", ref volume, 0, 200, "%d%%"))
@@ -155,17 +172,30 @@ public class OpenAiBackendUI
 
         if (currentModel.InstructionsSupported)
         {
-            var instructions = currentVoicePreset.Instructions ?? "";
-            if (ImGui.InputTextWithHint($"Instructions##{MemoizedId.Create()}",
-                    "Enter instructions to direct the tone, style, pacing, pronunciation, etc.",
-                    ref instructions, 1024))
+            var voiceStyles = config.CustomVoiceStyles.ToList();
+            if (voiceStyles == null || voiceStyles.Count == 0)
             {
-                currentVoicePreset.Instructions = instructions;
-                config.Save();
+                ImGui.BeginDisabled();
+                if (ImGui.BeginCombo("Style", "No styles have been configured"))
+                {
+                    ImGui.EndCombo();
+                }
+                ImGui.EndDisabled();
+            }
+            else
+            {
+                var style = currentVoicePreset.Style;
+                voiceStyles.Insert(0, "");
+                var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
+                if (ImGui.Combo($"Voice Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+                {
+                    currentVoicePreset.Style = voiceStyles[styleIndex];
+                    this.config.Save();
+                }
             }
 
             Components.HelpTooltip("""
-                Instructions are additional information that can be provided to the model to help it generate more accurate speech.
+                Styles are additional information that can be provided to the model to help it generate more accurate speech.
                 This can include things like emphasis, pronunciation, pauses, tone, pacing, voice affect, inflections, word choice etc.
                 Examples can be found at https://openai.fm
                 """);
@@ -190,6 +220,15 @@ public class OpenAiBackendUI
                 backend.CancelSay(TextSource.Chat);
                 backend.Say(request);
             }
+        }
+        ImGui.SameLine();
+        if (ImGui.Button($"Configure Voice Styles##{MemoizedId.Create()}"))
+        {
+            VoiceStyles.Instance?.ToggleStyle();
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Use Tags like \"Shout\" or \"Whisper\" to direct your voices");
         }
 
         ImGui.Separator();

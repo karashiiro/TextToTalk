@@ -42,6 +42,10 @@ public class WebsocketBackend : VoiceBackend
         this.wsServer.Start();
     }
 
+    public override void DrawStyles(IConfigUIDelegates helpers)
+    {
+        helpers.OpenVoiceStylesConfig();
+    }
     public override void Say(SayRequest request)
     {
         try

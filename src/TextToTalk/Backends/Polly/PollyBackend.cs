@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using Dalamud.Bindings.ImGui;
+using Serilog;
 
 namespace TextToTalk.Backends.Polly
 {
@@ -21,19 +22,21 @@ namespace TextToTalk.Backends.Polly
             this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http, this);
         }
 
+        public override void DrawStyles(IConfigUIDelegates helpers)
+        {
+            helpers.OpenVoiceStylesConfig();
+        }
         public override void Say(SayRequest request)
         {
             if (request.Voice is not PollyVoicePreset pollyVoicePreset)
             {
                 throw new InvalidOperationException("Invalid voice preset provided.");
             }
-
             if (this.uiModel.Polly == null)
             {
                 DetailedLog.Warn("Polly client has not yet been initialized");
                 return;
             }
-
             _ = this.uiModel.Polly.Say(pollyVoicePreset.VoiceEngine, pollyVoicePreset.VoiceName,
                 pollyVoicePreset.AmazonDomainName, pollyVoicePreset.SampleRate, pollyVoicePreset.PlaybackRate,
                 pollyVoicePreset.Volume, request.Source, request.Text);

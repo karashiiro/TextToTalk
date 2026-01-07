@@ -30,6 +30,27 @@ public class AzureClient : IDisposable
     {
         return this.soundQueue.GetCurrentlySpokenTextSource();
     }
+    public List<VoiceDetails> GetVoicesWithStyles()
+    {
+        // Fetches the voice result asynchronously and waits for completion
+        var res = this.synthesizer.GetVoicesAsync().GetAwaiter().GetResult();
+        HandleResult(res);
+
+        // Maps each voice to a custom object containing Name and StyleList
+        return res.Voices.Select(voice => new VoiceDetails
+        {
+            Name = voice.Name,
+            ShortName = voice.ShortName,
+            Styles = voice.StyleList.ToList() // StyleList is a string[]
+        }).ToList();
+    }
+
+    public class VoiceDetails
+    {
+        public string Name { get; set; }
+        public string ShortName { get; set; }
+        public List<string> Styles { get; set; }
+    }
 
     public List<string> GetVoices()
     {
@@ -38,10 +59,11 @@ public class AzureClient : IDisposable
         return res.Voices.Select(voice => voice.Name).ToList();
     }
 
-    public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text)
+    public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text, string style)
     {
         var ssml = this.lexiconManager.MakeSsml(
             text,
+            style,
             voice: voice,
             langCode: "en-US",
             playbackRate: playbackRate,

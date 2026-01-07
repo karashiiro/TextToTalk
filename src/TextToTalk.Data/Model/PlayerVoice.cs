@@ -8,4 +8,6 @@ public class PlayerVoice
     public Guid PlayerId { get; init; }
 
     public int VoicePresetId { get; init; }
+
+    public string? VoiceBackend { get; init; } // Added for composite key
 }

@@ -24,6 +24,10 @@ namespace TextToTalk.Backends.System
             this.voiceExceptions = this.uiModel.SubscribeToVoiceExceptions(this.soundQueue.SelectVoiceFailed);
         }
 
+        public override void DrawStyles(IConfigUIDelegates helpers)
+        {
+            helpers.OpenVoiceStylesConfig();
+        }
         public override void Say(SayRequest request)
         {
             this.soundQueue.EnqueueSound(request.Voice, request.Source, request.Text);

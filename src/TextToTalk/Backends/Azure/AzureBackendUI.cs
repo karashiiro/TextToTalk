@@ -1,8 +1,8 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
 using Dalamud.Game.Text;
-using Google.Api;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -10,6 +10,8 @@ using TextToTalk.Lexicons;
 using TextToTalk.Lexicons.Updater;
 using TextToTalk.UI;
 using TextToTalk.UI.Lexicons;
+using TextToTalk.UI.Windows;
+using System.Numerics;
 
 namespace TextToTalk.Backends.Azure;
 
@@ -87,6 +89,10 @@ public class AzureBackendUI
         {
             ImGui.TextColored(ImColor.Red, "You have no presets. Please create one using the \"New preset\" button.");
         }
+        else if (currentVoicePreset == null && presets.Count > 0)
+        {
+            config.SetCurrentVoicePreset(presets.First().Id);
+        }
 
         BackendUI.NewPresetButton<AzureVoicePreset>($"New preset##{MemoizedId.Create()}", this.config);
 
@@ -111,14 +117,76 @@ public class AzureBackendUI
 
         {
             var voices = this.model.Voices;
-            string?[] voiceArray = voices.ToArray();
+
+            string?[] voiceArray = voices
+                .Where(v => v != null && !string.IsNullOrEmpty(v.ShortName))
+                .Select(v => v.ShortName)
+                .ToArray();
+
+            string[] displayArray = voices
+                .Where(v => v != null && !string.IsNullOrEmpty(v.ShortName))
+                .Select(v => v.Styles?.Count > 1
+                             ? $"{v.ShortName} [Styles Available]"
+                             : v.ShortName!)
+                .ToArray();
+
             var voiceIndex = Array.IndexOf(voiceArray, currentVoicePreset.VoiceName);
-            if (ImGui.Combo($"Voice##{MemoizedId.Create()}", ref voiceIndex, voiceArray, voices.Count))
+            // 1. Determine if the currently selected voice has styles
+            bool previewHasStyles = voiceIndex >= 0 && voices[voiceIndex].Styles?.Count > 1;
+            string previewName = voiceIndex >= 0 ? voiceArray[voiceIndex] : "Select a voice...";
+
+            // 2. Start combo with an empty preview string so we can draw our own
+            if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", "", ImGuiComboFlags.HeightLarge))
             {
-                currentVoicePreset.VoiceName = voiceArray[voiceIndex];
-                this.config.Save();
+                var filteredVoices = voices.Where(v => v != null && !string.IsNullOrEmpty(v.ShortName)).ToList();
+
+                for (int i = 0; i < filteredVoices.Count; i++)
+                {
+                    var v = filteredVoices[i];
+                    bool isSelected = (voiceIndex == i);
+                    bool hasStyles = v.Styles?.Count > 1;
+
+                    if (ImGui.Selectable($"##{v.ShortName}_{i}", isSelected))
+                    {
+                        voiceIndex = i;
+                        currentVoicePreset.VoiceName = voiceArray[voiceIndex];
+                        this.config.Save();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().ItemSpacing.X);
+                    ImGui.Text(v.ShortName);
+
+                    if (hasStyles)
+                    {
+                        ImGui.SameLine();
+                        ImGui.TextColored(new Vector4(0.55f, 0.75f, 1.0f, 1.0f), "[Styles Available]");
+                    }
+
+                    if (isSelected) ImGui.SetItemDefaultFocus();
+                }
+                ImGui.EndCombo();
             }
 
+            // 3. Overlay the custom text on the Combo box itself
+            // We calculate the position relative to the last item (the Combo box)
+            ImGui.SameLine();
+            float comboRectMinX = ImGui.GetItemRectMin().X;
+            float comboRectMinY = ImGui.GetItemRectMin().Y;
+            float stylePadding = ImGui.GetStyle().FramePadding.X;
+
+            // Move cursor to inside the combo box frame
+            ImGui.SetCursorScreenPos(new Vector2(comboRectMinX + stylePadding, comboRectMinY + ImGui.GetStyle().FramePadding.Y - 3.0f));
+
+            // Draw the Name
+            ImGui.Text(previewName);
+
+            // Draw the Tag if applicable
+            if (previewHasStyles)
+            {
+                ImGui.SameLine();
+                ImGui.TextColored(new Vector4(0.55f, 0.75f, 1.0f, 1.0f), "[Styles Available]");
+            }
             switch (voices.Count)
             {
                 case 0:
@@ -126,7 +194,7 @@ public class AzureBackendUI
                         "No voices are available on this voice engine for the current region.\n" +
                         "Please log in using a different region.");
                     break;
-                case > 0 when !voices.Any(v => v == currentVoicePreset.VoiceName):
+                case > 0 when !voiceArray.Any(v => v == currentVoicePreset.VoiceName):
                     BackendUI.ImGuiVoiceNotSelected();
                     break;
             }
@@ -146,6 +214,33 @@ public class AzureBackendUI
             currentVoicePreset.Volume = (float)Math.Round((double)volume / 100, 2);
             this.config.Save();
         }
+
+        var voiceStyles = new List<string>();
+        var voiceDetails = this.backend?.voices?.OrderBy(v => v.ShortName).FirstOrDefault(v => v?.ShortName == currentVoicePreset?.VoiceName);
+        // the styles list will always contain at least 1 empty string if there are no styles available
+        if (voiceStyles == null || (voiceDetails?.Styles?.Count ?? 0) == 1) 
+        {
+            ImGui.BeginDisabled();
+            if (ImGui.BeginCombo("Style", "No styles available for this voice"))
+            {
+                ImGui.EndCombo();
+            }
+
+            ImGui.EndDisabled();
+        }
+        else if (voiceDetails?.Styles != null && voiceDetails.Styles.Count > 0)
+        {
+            voiceStyles.Add("");
+            voiceStyles.AddRange(voiceDetails.Styles);
+            var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
+            if (ImGui.Combo($"Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+            {
+                currentVoicePreset.Style = voiceStyles[styleIndex];
+                this.config.Save();
+            }
+        }
+        ImGui.Separator();
+
         if (ImGui.Button($"Test##{MemoizedId.Create()}"))
         {
             var voice = currentVoicePreset;
@@ -166,6 +261,11 @@ public class AzureBackendUI
                 backend.CancelSay(TextSource.Chat);
                 backend.Say(request);
             }
+        }
+        ImGui.SameLine();
+        if (ImGui.Button($"Configure Voice Styles##{MemoizedId.Create()}"))
+        {
+            VoiceStyles.Instance?.ToggleStyle();
         }
 
         this.lexiconComponent.Draw();

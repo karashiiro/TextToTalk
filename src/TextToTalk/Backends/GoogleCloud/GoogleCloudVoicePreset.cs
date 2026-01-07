@@ -16,6 +16,8 @@ public class GoogleCloudVoicePreset : VoicePreset
 
     public string? Locale { get; set; }
 
+    public string? Gender { get; set; }
+
     [JsonPropertyName("GoogleCloudVoiceName")] public string? VoiceName { get; set; }
 
     public override bool TrySetDefaultValues()
@@ -26,6 +28,7 @@ public class GoogleCloudVoicePreset : VoicePreset
         PlaybackRate = 1.0f;
         Locale = "en-US";
         VoiceName = "en-US-Wavenet-D";
+        Gender = "Male";
         EnabledBackend = TTSBackend.GoogleCloud;
         return true;
     }

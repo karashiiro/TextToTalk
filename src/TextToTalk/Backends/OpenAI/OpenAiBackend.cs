@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Dalamud.Bindings.ImGui;
+using Serilog;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Dalamud.Bindings.ImGui;
+using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Services;
 
 namespace TextToTalk.Backends.OpenAI;
@@ -20,6 +22,11 @@ public class OpenAiBackend : VoiceBackend
         this.notificationService = notificationService;
     }
 
+    public override void DrawStyles(IConfigUIDelegates helpers)
+    {
+        helpers.OpenVoiceStylesConfig();
+    }
+
     public override void Say(SayRequest request)
     {
         if (request.Voice is not OpenAiVoicePreset voicePreset)
@@ -29,7 +36,8 @@ public class OpenAiBackend : VoiceBackend
         {
             try
             {
-                await this.uiModel.OpenAi.Say(voicePreset, request, request.Text);
+                Log.Information($"Voice name  = {voicePreset.VoiceName}");
+                await this.uiModel.OpenAi.Say(voicePreset, request, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (voicePreset.Style ?? string.Empty));
             }
             catch (OpenAiUnauthorizedException e)
             {

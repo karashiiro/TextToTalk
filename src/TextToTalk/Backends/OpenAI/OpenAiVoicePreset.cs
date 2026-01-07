@@ -14,14 +14,15 @@ public class OpenAiVoicePreset : VoicePreset
 
     [JsonPropertyName("OpenAIVoiceName")] public string? VoiceName { get; set; }
     
-    public string? Instructions { get; set; }
+    public string? Style { get; set; }
 
     public override bool TrySetDefaultValues()
     {
         var defaultConfig = OpenAiClient.Models.First();
         Volume = 1.0f;
         PlaybackRate = 1.0f;
-        VoiceName = defaultConfig.Voices.First();
+        VoiceName = defaultConfig.Voices.Keys.First();
+        Style = string.Empty;
         EnabledBackend = TTSBackend.OpenAi;
         Model = defaultConfig.ModelName;
         return true;

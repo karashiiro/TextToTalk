@@ -17,11 +17,14 @@ public class AzureVoicePreset : VoicePreset
 
     [JsonProperty("AzureVoiceName")] public string? VoiceName { get; set; }
 
+    public string? Style { get; set; }
+
     public override bool TrySetDefaultValues()
     {
         Volume = 1.0f;
         PlaybackRate = 0;
         VoiceName = "en-US-JennyNeural";
+        Style = string.Empty;
         EnabledBackend = TTSBackend.Azure;
         return true;
     }

@@ -12,7 +12,7 @@ public class GoogleCloudClient
 {
     private TextToSpeechClient? client;
     private readonly StreamSoundQueue? soundQueue;
-    public List<string>? Voices;
+    public Dictionary<string, dynamic>? Voices;
     public List<string>? Locales;
 
     public GoogleCloudClient(StreamSoundQueue soundQueue, string pathToCredential)
@@ -27,18 +27,23 @@ public class GoogleCloudClient
         Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", pathToCredential);
         this.client = TextToSpeechClient.Create();
         this.Voices = GetGoogleTextToSpeechVoices();
-        this.Locales = ExtractUniqueLocales(Voices);
+        this.Locales = ExtractUniqueLocales(Voices.Keys.ToList());
     }
 
-    public List<string>? GetGoogleTextToSpeechVoices()
+    public Dictionary<string, dynamic>? GetGoogleTextToSpeechVoices()
     {
-        if (client == null) return new List<string>();
+        if (client == null) return new Dictionary<string, dynamic>();
         var response = client.ListVoices("");
 
-        var fetchedVoices = new List<string>();
+        var fetchedVoices = new Dictionary<string, dynamic>();
+
         foreach (var voice in response.Voices)
         {
-            fetchedVoices.Add(voice.Name);
+            fetchedVoices.Add(voice.Name, new
+            {
+                Name = voice.Name,
+                Gender = voice.SsmlGender,
+            });
         }
 
         return fetchedVoices;

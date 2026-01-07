@@ -14,11 +14,17 @@ public class ElevenLabsVoicePreset : VoicePreset
 
     public float Stability { get; set; }
 
+    public string? ModelId { get; set; }
+
+    public string? Style { get; set; }
+
     public override bool TrySetDefaultValues()
     {
         Volume = 1.0f;
         PlaybackRate = 100;
         VoiceId = "21m00Tcm4TlvDq8ikWAM";
+        ModelId = "eleven_flash_v2_5";
+        Style = string.Empty;
         SimilarityBoost = 0.5f;
         Stability = 0.5f;
         EnabledBackend = TTSBackend.ElevenLabs;

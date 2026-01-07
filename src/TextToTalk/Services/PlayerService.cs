@@ -29,6 +29,7 @@ public class PlayerService(PlayerCollection collection, IList<VoicePreset> voice
     public void DeletePlayer(Player info)
     {
         collection.DeletePlayerById(info.Id);
+        // Deletes ALL voices for this player across all backends
         collection.DeletePlayerVoiceByPlayerId(info.Id);
     }
 
@@ -37,11 +38,13 @@ public class PlayerService(PlayerCollection collection, IList<VoicePreset> voice
         return collection.TryFetchPlayerByNameAndWorld(name, worldId, out info);
     }
 
-    public bool TryGetPlayerVoice(Player? info, [NotNullWhen(true)] out VoicePreset? voice)
+    // Fetch a voice preset for a specific Player + Backend combination
+    public bool TryGetPlayerVoice(Player? info, [NotNullWhen(true)] out VoicePreset? voice, string backend)
     {
         voice = null;
         if (info is null) return false;
-        if (collection.TryFetchPlayerVoiceByPlayerId(info.Id, out var voiceInfo))
+
+        if (collection.TryFetchPlayerVoiceByCompositeKey(info.Id, backend, out var voiceInfo))
         {
             voice = voices.FirstOrDefault(v => v.Id == voiceInfo.VoicePresetId);
         }
@@ -54,6 +57,7 @@ public class PlayerService(PlayerCollection collection, IList<VoicePreset> voice
         return collection.TryFetchPlayerByName(name, out info);
     }
 
+    // Allows setting/replacing a voice specifically for one backend
     public bool SetPlayerVoice(Player info, VoicePreset voice)
     {
         if (info.Name is null || !TryGetPlayer(info.Name, info.WorldId, out _))
@@ -66,12 +70,21 @@ public class PlayerService(PlayerCollection collection, IList<VoicePreset> voice
             return false;
         }
 
-        if (TryGetPlayerVoice(info, out _))
+        string backend = voice.EnabledBackend.ToString();
+
+        // Modified: Only check and delete for the specific backend provided
+        if (TryGetPlayerVoice(info, out _, backend))
         {
-            collection.DeletePlayerVoiceByPlayerId(info.Id);
+            collection.DeletePlayerVoiceByCompositeKey(info.Id, backend);
         }
 
-        collection.StorePlayerVoice(new PlayerVoice { PlayerId = info.Id, VoicePresetId = voice.Id });
+        // Modified: Store with the backend string to satisfy the composite requirement
+        collection.StorePlayerVoice(new PlayerVoice
+        {
+            PlayerId = info.Id,
+            VoicePresetId = voice.Id,
+            VoiceBackend = backend
+        });
 
         return true;
     }

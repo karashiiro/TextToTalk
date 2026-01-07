@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace TextToTalk.Lexicons;
@@ -88,10 +90,12 @@ public class LexiconManager
 
     public string MakeSsml(
         string text,
+        string style = "",
         string? voice = null,
         string? langCode = null,
         int playbackRate = -1,
         bool includeSpeakAttributes = true)
+
     {
         foreach (var (_, lexicon) in this.lexicons)
         {
@@ -109,6 +113,10 @@ public class LexiconManager
                 }
             }
         }
+        if (!string.IsNullOrEmpty(style) && voice != null)
+        {
+            text = $"<mstts:express-as style=\"{style}\" styledegree=\"1.5\">{text}</mstts:express-as>";
+        }
 
         if (playbackRate >= 0)
         {
@@ -125,7 +133,10 @@ public class LexiconManager
         var speakTag = "<speak";
         if (includeSpeakAttributes)
         {
-            speakTag += " version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\"";
+            // Correctly define both the default SSML namespace and the Microsoft-specific namespace
+            speakTag += " version=\"1.0\" " +
+                        "xmlns=\"http://www.w3.org/2001/10/synthesis\" " +
+                        "xmlns:mstts=\"http://www.w3.org/2001/mstts\""; // Fixed URI
 
             if (langCode != null)
             {

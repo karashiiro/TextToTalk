@@ -16,6 +16,10 @@ public class GoogleCloudBackend : VoiceBackend
         ui = new GoogleCloudBackendUI(config, client, this);
     }
 
+    public override void DrawStyles(IConfigUIDelegates helpers)
+    {
+        helpers.OpenVoiceStylesConfig();
+    }
     public override void Say(SayRequest request)
     {
         if (request.Voice is not GoogleCloudVoicePreset voicePreset)

@@ -9,22 +9,8 @@ public class PlayerCollection(ILiteDatabase db)
     private const string PlayerCollectionName = "player";
     private const string PlayerVoiceCollectionName = "player_voice";
 
-    /// <summary>
-    /// Fetches all stored players from the database.
-    /// </summary>
-    /// <returns>The stored players.</returns>
-    public IEnumerable<Player> FetchAllPlayers()
-    {
-        return GetPlayerCollection().FindAll();
-    }
+    public IEnumerable<Player> FetchAllPlayers() => GetPlayerCollection().FindAll();
 
-    /// <summary>
-    /// Fetches a player from the database using their name and world.
-    /// </summary>
-    /// <param name="name">The player's name.</param>
-    /// <param name="worldId">The player's world ID.</param>
-    /// <param name="player">The player, or null if they couldn't be found.</param>
-    /// <returns>If the player could be found.</returns>
     public bool TryFetchPlayerByNameAndWorld(string name, uint worldId, [NotNullWhen(true)] out Player? player)
     {
         var collection = GetPlayerCollection();
@@ -34,28 +20,7 @@ public class PlayerCollection(ILiteDatabase db)
         return player != null;
     }
 
-    /// <summary>
-    /// Fetches a player voice from the database using their local ID.
-    /// </summary>
-    /// <param name="id">The player's local ID.</param>
-    /// <param name="voice">The voice info, or null if it couldn't be found.</param>
-    /// <returns>If the voice could be found.</returns>
-    public bool TryFetchPlayerVoiceByPlayerId(Guid id, [NotNullWhen(true)] out PlayerVoice? voice)
-    {
-        var collection = GetPlayerVoiceCollection();
-        voice = collection.Query()
-            .Where(v => v.PlayerId == id)
-            .FirstOrDefault();
-        return voice != null;
-    }
-
-    /// <summary>
-    /// Fetches a player from the database using their name only.
-    /// </summary>
-    /// <param name="name">The player's name.</param>
-    /// <param name="player">The player, or null if they couldn't be found.</param>
-    /// <returns>If the player could be found.</returns>
-    public bool TryFetchPlayerByName(string name, [NotNullWhen(true)] out Player? player)
+    public bool TryFetchPlayerByName(string name,[NotNullWhen(true)] out Player? player)
     {
         var collection = GetPlayerCollection();
         player = collection.Query()
@@ -65,9 +30,17 @@ public class PlayerCollection(ILiteDatabase db)
     }
 
     /// <summary>
-    /// Stores a player in the database.
+    /// Fetches a player voice using the Player's Guid and the specific backend name.
     /// </summary>
-    /// <param name="player">The player to store.</param>
+    public bool TryFetchPlayerVoiceByCompositeKey(Guid playerId, string backend, [NotNullWhen(true)] out PlayerVoice? voice)
+    {
+        var collection = GetPlayerVoiceCollection();
+        voice = collection.Query()
+            .Where(v => v.PlayerId == playerId && v.VoiceBackend == backend)
+            .FirstOrDefault();
+        return voice != null;
+    }
+
     public void StorePlayer(Player player)
     {
         var collection = GetPlayerCollection();
@@ -77,10 +50,6 @@ public class PlayerCollection(ILiteDatabase db)
         }
     }
 
-    /// <summary>
-    /// Stores a player voice in the database.
-    /// </summary>
-    /// <param name="voice">The player voice to store.</param>
     public void StorePlayerVoice(PlayerVoice voice)
     {
         var collection = GetPlayerVoiceCollection();
@@ -90,50 +59,41 @@ public class PlayerCollection(ILiteDatabase db)
         }
     }
 
-    /// <summary>
-    /// Deletes a player from the database using their local ID.
-    /// </summary>
-    /// <param name="id">The player's ID.</param>
-    public void DeletePlayerById(Guid id)
-    {
-        var collection = GetPlayerCollection();
-        collection.Delete(id);
-    }
+    public void DeletePlayerById(Guid id) => GetPlayerCollection().Delete(id);
 
     /// <summary>
-    /// Deletes a player voice from the database using their local ID.
+    /// Deletes all voices associated with a player (Cleanup).
     /// </summary>
-    /// <param name="id">The player's ID.</param>
     public void DeletePlayerVoiceByPlayerId(Guid id)
     {
         var collection = GetPlayerVoiceCollection();
         collection.DeleteMany(v => v.PlayerId == id);
     }
 
+    /// <summary>
+    /// Deletes the specific voice preset for a player on a specific backend.
+    /// </summary>
+    public void DeletePlayerVoiceByCompositeKey(Guid playerId, string backend)
+    {
+        var collection = GetPlayerVoiceCollection();
+        // FIXED: Changed v.Id to v.PlayerId to correctly target the relationship
+        collection.DeleteMany(v => v.PlayerId == playerId && v.VoiceBackend == backend);
+    }
+
     private ILiteCollection<Player> GetPlayerCollection()
     {
         var collection = db.GetCollection<Player>(PlayerCollectionName);
-        EnsureIndices(collection);
+        collection.EnsureIndex(p => p.Name);
+        collection.EnsureIndex(p => p.WorldId);
         return collection;
     }
 
     private ILiteCollection<PlayerVoice> GetPlayerVoiceCollection()
     {
         var collection = db.GetCollection<PlayerVoice>(PlayerVoiceCollectionName);
-        EnsureIndices(collection);
-        return collection;
-    }
-
-    private static void EnsureIndices(ILiteCollection<Player> collection)
-    {
-        // "By default, an index over _id is created upon the first insertion."
-        // https://www.litedb.org/docs/indexes/
-        collection.EnsureIndex(p => p.Name);
-        collection.EnsureIndex(p => p.WorldId);
-    }
-
-    private static void EnsureIndices(ILiteCollection<PlayerVoice> collection)
-    {
+        // Added index for the backend to speed up composite queries
         collection.EnsureIndex(v => v.PlayerId);
+        collection.EnsureIndex(v => v.VoiceBackend);
+        return collection;
     }
 }

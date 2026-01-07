@@ -223,6 +223,7 @@ public class VoicePresetConfiguration
                 PlaybackRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "PlaybackRate")),
                 Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
                 VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
+                Style = GetNullableValue<string?>(corrupted, "Style"),
                 EnabledBackend = TTSBackend.Azure,
             },
             TTSBackend.ElevenLabs => new ElevenLabsVoicePreset
@@ -232,6 +233,8 @@ public class VoicePresetConfiguration
                 PlaybackRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "PlaybackRate")),
                 Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
                 VoiceId = GetNullableValue<string?>(corrupted, "VoiceId"),
+                ModelId = GetNullableValue<string?>(corrupted, "ModelId"),
+                Style = GetNullableValue<string?>(corrupted, "Style"),
                 SimilarityBoost = Convert.ToSingle(GetNullableValue<double?>(corrupted, "SimilarityBoost")),
                 Stability = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Stability")),
                 EnabledBackend = TTSBackend.ElevenLabs,
@@ -243,12 +246,14 @@ public class VoicePresetConfiguration
                 Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
                 VoiceName = GetNullableValue<string?>(corrupted, "VoiceName"),
                 Model = GetNullableValue<string?>(corrupted, "Model"),
+                Style = GetNullableValue<string?>(corrupted, "Style"),
                 EnabledBackend = TTSBackend.OpenAi
             },
             TTSBackend.GoogleCloud => new GoogleCloudVoicePreset
             {
                 Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
                 Name = GetNullableValue<string?>(corrupted, "Name"),
+                Gender = GetNullableValue<string?>(corrupted, "Gender"),
                 SampleRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "SampleRate")),
                 Pitch = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Pitch")),
                 PlaybackRate = Convert.ToSingle(GetNullableValue<double?>(corrupted, "PlaybackRate")),

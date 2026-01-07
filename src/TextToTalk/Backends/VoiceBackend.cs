@@ -15,6 +15,8 @@ namespace TextToTalk.Backends
 
         public abstract void DrawSettings(IConfigUIDelegates helpers);
 
+        public abstract void DrawStyles(IConfigUIDelegates helpers);
+
         public abstract TextSource GetCurrentlySpokenTextSource();
 
         protected abstract void Dispose(bool disposing);

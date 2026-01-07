@@ -8,4 +8,6 @@ public class NpcVoice
     public Guid NpcId { get; init; }
 
     public int VoicePresetId { get; init; }
+
+    public string? VoiceBackend { get; init; } // Added for composite key
 }

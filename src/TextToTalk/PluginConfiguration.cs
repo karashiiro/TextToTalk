@@ -31,6 +31,11 @@ namespace TextToTalk
     {
         private const string DefaultPreset = "Default";
 
+        //public string PersistentStyleTag { get; set; } = "";
+        public string StyleTag { get; set; } = "|";
+
+        public string StyleRegex { get; set; } = "";
+
         #region Obsolete Members
 
         [Obsolete("Use EnabledChatTypesPresets.")]
@@ -107,6 +112,10 @@ namespace TextToTalk
         #endregion
 
 
+        public List<string> CustomVoiceStyles { get; set; }
+
+        public int ElevenLabsModelIndex { get; set; }
+
         public int SelectedAudioDeviceIndex { get; set; }
 
         public Guid SelectedAudioDeviceGuid => AudioDevices.DeviceList.ElementAt(SelectedAudioDeviceIndex).Guid;
@@ -179,6 +188,12 @@ namespace TextToTalk
 
         public bool OnlyMessagesFromYou { get; set; }
 
+        //public bool PersistentStyleTagEnabled { get; set; }
+
+        //public bool PersistentPersonalStyleTagEnabled { get; set; }
+
+        public bool AdHocStyleTagsEnabled { get; set; }
+
         [Tooltip(
             "Use the American pronunciation for English instead of the British one. This doesn't affect the accents of the voices.")]
         public bool KokoroUseAmericanEnglish { get; set; } = true;
@@ -221,12 +236,14 @@ namespace TextToTalk
             this.voicePresetConfig = VoicePresetConfiguration.LoadFromFile(GetVoicePresetsConfigPath());
 
             EnabledChatTypesPresets ??= new List<EnabledChatTypesPreset>();
+           
 
             foreach (var preset in EnabledChatTypesPresets)
             {
                 preset.Initialize(this);
             }
 
+            CustomVoiceStyles ??= new List<string>();
             AzureLexiconFiles ??= new List<string>();
             PollyLexiconFiles ??= new List<string>();
             Lexicons ??= new List<string>();

@@ -7,59 +7,101 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using TextToTalk.GameEnums;
+using Serilog;
 
 namespace TextToTalk.Backends.OpenAI;
 
 public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
 {
     private const string UrlBase = "https://api.openai.com";
-    
-    public record ModelConfig(string ModelName, IReadOnlySet<string> Voices, bool InstructionsSupported, bool SpeedSupported);
+
+    public record ModelConfig(
+    string ModelName,
+    IReadOnlyDictionary<string, string> Voices,
+    bool InstructionsSupported,
+    bool SpeedSupported);
+
+    private static readonly Dictionary<string, string> VoiceLabels = new()
+{
+    { "alloy", "Alloy (Neutral & Balanced)" },
+    { "ash", "Ash (Clear & Precise)" },
+    { "ballad", "Ballad (Melodic & Smooth)" },
+    { "coral", "Coral (Warm & Friendly)" },
+    { "echo", "Echo (Resonant & Deep)" },
+    { "fable", "Fable (Alto Narrative)" },
+    { "onyx", "Onyx (Deep & Energetic)" },
+    { "nova", "Nova (Bright & Energetic)" },
+    { "sage", "Sage (Calm & Thoughtful)" },
+    { "shimmer", "Shimmer (Bright & Feminine)" },
+    { "verse", "Verse (Versatile & Expressive)" },
+    { "marin", "Marin (Latest and Greatest)" },
+    { "cedar", "Cedar (Latest and Greatest)" }
+};
 
     public static readonly List<ModelConfig> Models =
     [
-        // Note: while speed is 'technically' supported by gpt-4o-mini-tts, it doesn't appear to influence the output.
-        new("gpt-4o-mini-tts", new HashSet<string>
-        {
-            "alloy",
-            "ash",
-            "ballad",
-            "coral",
-            "echo",
-            "fable",
-            "onyx",
-            "nova",
-            "sage",
-            "shimmer",
-            "verse"
-        }, true, false),
-        new("tts-1", new HashSet<string>
-        {
-            "nova",
-            "shimmer",
-            "echo",
-            "onyx",
-            "fable",
-            "alloy",
-            "ash",
-            "sage",
-            "coral"
-        }, false, true),
-        new("tts-1-hd", new HashSet<string>
-        {
-            "nova",
-            "shimmer",
-            "echo",
-            "onyx",
-            "fable",
-            "alloy",
-            "ash",
-            "sage",
-            "coral"
-        }, false, false),
+        new("gpt-4o-mini-tts",
+        VoiceLabels.ToDictionary(v => v.Key, v => v.Value),
+        true, false),
+
+    new("tts-1",
+        VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse")
+                   .ToDictionary(v => v.Key, v => v.Value),
+        false, true),
+
+    new("tts-1-hd",
+        VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse")
+                   .ToDictionary(v => v.Key, v => v.Value),
+        false, false)
     ];
-    
+
+    //    public record ModelConfig(string ModelName, IReadOnlySet<string> Voices, bool InstructionsSupported, bool SpeedSupported);
+    //
+    //    public static readonly List<ModelConfig> Models =
+    //    [
+    //        // Note: while speed is 'technically' supported by gpt-4o-mini-tts, it doesn't appear to influence the output.
+    //        new("gpt-4o-mini-tts", new HashSet<string>
+    //        {
+    //            "alloy",
+    //            "ash",
+    //            "ballad",
+    //            "coral",
+    //            "echo",
+    //            "fable",
+    //            "onyx",
+    //            "nova",
+    //            "sage",
+    //            "shimmer",
+    //            "verse"
+    //        }, true, false),
+    //        new("tts-1", new HashSet<string>
+    //        {
+    //            "nova",
+    //            "shimmer",
+    //            "echo",
+    //            "onyx",
+    //            "fable",
+    //            "alloy",
+    //            "ash",
+    //            "sage",
+    //            "coral"
+    //        }, false, true),
+    //        new("tts-1-hd", new HashSet<string>
+    //        {
+    //            "nova",
+    //            "shimmer",
+    //            "echo",
+    //            "onyx",
+    //            "fable",
+    //            "alloy",
+    //            "ash",
+    //            "sage",
+    //            "coral"
+    //        }, false, false),
+    //    ];
+
     public string? ApiKey { get; set; }
 
     private void AddAuthorization(HttpRequestMessage req)
@@ -101,9 +143,9 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             instructionBuilder.AppendLine($"BodyType: {request.BodyType}");
         }
 
-        if (preset.Instructions is {Length: > 0})
+        if (preset.Style is {Length: > 0})
         {
-            instructionBuilder.AppendLine($"Instructions: {preset.Instructions}");
+            instructionBuilder.AppendLine($"Instructions: {(!string.IsNullOrEmpty(request.Style) ? request.Style : preset.Style)}"); // Style tags from Say Request take precedence over Style tags from voice preset.
         }
 
         var instructions = instructionBuilder.ToString()
@@ -112,7 +154,7 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         return instructions.Length > 0 ? instructions : null;
     }
 
-    public async Task Say(OpenAiVoicePreset preset, SayRequest request, string text)
+    public async Task Say(OpenAiVoicePreset preset, SayRequest request, string text, string style)
     {
         if (!IsAuthorizationSet())
         {
@@ -134,14 +176,19 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             model = Models.First().ModelName;
         }
         
+        if (request.Style is {Length: > 0 }) 
+        {
+            model = "gpt-4o-mini-tts"; // Force Say request to model that can handle Voice Styles if user has embedded a style tag into their message
+        }
+
         var modelConfig = Models.First(m => m.ModelName == model);
-        if (preset.VoiceName != null && modelConfig.Voices.Contains(preset.VoiceName))
+        if (preset.VoiceName != null && modelConfig.Voices.Keys.Contains(preset.VoiceName))
         {
             voice = preset.VoiceName;
         }
         else
         {
-            voice = modelConfig.Voices.First();
+            voice = modelConfig.Voices.Keys.First();
         }
 
         Dictionary<string, object> args = new()
@@ -152,16 +199,20 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
             ["response_format"] = "mp3",
             ["speed"] = modelConfig.SpeedSupported ? preset.PlaybackRate ?? 1.0f : 1.0f
         };
-        
+
         if (modelConfig.InstructionsSupported)
         {
-            string? instructions = GetInstructionsForRequest(request, preset);
-            if (instructions != null)
+            string? configinstructions = GetInstructionsForRequest(request, preset);
+            //if (style != "")
+            //{
+            //    args["instructions"] = style;
+            //}
+            // Instructions from style take precedence over preset instructions.
+            if (configinstructions != null)
             {
-                args["instructions"] = instructions;
+                args["instructions"] = configinstructions;
             }
-        }
-
+        }   
         var json = JsonSerializer.Serialize(args);
         DetailedLog.Verbose(json);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");

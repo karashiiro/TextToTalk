@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
-using Dalamud.Bindings.ImGui;
+using TextToTalk.Backends.ElevenLabs;
+using static TextToTalk.Backends.Azure.AzureClient;
 
 namespace TextToTalk.Backends.Azure;
 
@@ -8,6 +12,7 @@ public class AzureBackend : VoiceBackend
 {
     private readonly AzureBackendUI ui;
     private readonly AzureBackendUIModel uiModel;
+    public List<VoiceDetails> voices;
 
     public AzureBackend(PluginConfiguration config, HttpClient http)
     {
@@ -17,7 +22,14 @@ public class AzureBackend : VoiceBackend
         LexiconUtils.LoadFromConfigAzure(lexiconManager, config);
 
         this.uiModel = new AzureBackendUIModel(config, lexiconManager);
+        this.voices = this.uiModel.voices;
         this.ui = new AzureBackendUI(this.uiModel, config, lexiconManager, http, this);
+
+    }
+
+    public override void DrawStyles(IConfigUIDelegates helpers)
+    {
+        helpers.OpenVoiceStylesConfig();
     }
 
     public override void Say(SayRequest request)
@@ -34,7 +46,7 @@ public class AzureBackend : VoiceBackend
         }
 
         _ = this.uiModel.Azure.Say(azureVoicePreset.VoiceName,
-            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, request.Source, request.Text);
+            azureVoicePreset.PlaybackRate, azureVoicePreset.Volume, request.Source, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (azureVoicePreset.Style ?? string.Empty));
     }
 
     public override void CancelAllSpeech()
@@ -82,4 +94,5 @@ public class AzureBackend : VoiceBackend
             this.uiModel.Azure?.Dispose();
         }
     }
+
 }

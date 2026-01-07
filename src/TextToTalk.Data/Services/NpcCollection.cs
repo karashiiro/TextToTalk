@@ -9,21 +9,8 @@ public class NpcCollection(ILiteDatabase db)
     private const string NpcCollectionName = "npc";
     private const string NpcVoiceCollectionName = "npc_voice";
 
-    /// <summary>
-    /// Fetches all stored NPCs from the database.
-    /// </summary>
-    /// <returns>The stored NPCs.</returns>
-    public IEnumerable<Npc> FetchAllNpcs()
-    {
-        return GetNpcCollection().FindAll();
-    }
+    public IEnumerable<Npc> FetchAllNpcs() => GetNpcCollection().FindAll();
 
-    /// <summary>
-    /// Fetches an NPC from the database using their name and world.
-    /// </summary>
-    /// <param name="name">The NPC's name.</param>
-    /// <param name="npc">The NPC, or null if they couldn't be found.</param>
-    /// <returns>If the NPC could be found.</returns>
     public bool TryFetchNpcByName(string name, [NotNullWhen(true)] out Npc? npc)
     {
         var collection = GetNpcCollection();
@@ -34,24 +21,17 @@ public class NpcCollection(ILiteDatabase db)
     }
 
     /// <summary>
-    /// Fetches an NPC voice from the database using their local ID.
+    /// Fetches a specific voice for an NPC and a specific backend.
     /// </summary>
-    /// <param name="id">The NPC's local ID.</param>
-    /// <param name="voice">The voice info, or null if it couldn't be found.</param>
-    /// <returns>If the voice could be found.</returns>
-    public bool TryFetchNpcVoiceByNpcId(Guid id, [NotNullWhen(true)] out NpcVoice? voice)
+    public bool TryFetchNpcVoiceByCompositeKey(Guid npcId, string backend, [NotNullWhen(true)] out NpcVoice? voice)
     {
         var collection = GetNpcVoiceCollection();
         voice = collection.Query()
-            .Where(v => v.NpcId == id)
+            .Where(v => v.NpcId == npcId && v.VoiceBackend == backend)
             .FirstOrDefault();
         return voice != null;
     }
 
-    /// <summary>
-    /// Stores an NPC in the database.
-    /// </summary>
-    /// <param name="npc">The NPC to store.</param>
     public void StoreNpc(Npc npc)
     {
         var collection = GetNpcCollection();
@@ -61,10 +41,6 @@ public class NpcCollection(ILiteDatabase db)
         }
     }
 
-    /// <summary>
-    /// Stores an NPC voice in the database.
-    /// </summary>
-    /// <param name="voice">The NPC voice to store.</param>
     public void StoreNpcVoice(NpcVoice voice)
     {
         var collection = GetNpcVoiceCollection();
@@ -74,49 +50,39 @@ public class NpcCollection(ILiteDatabase db)
         }
     }
 
-    /// <summary>
-    /// Deletes an NPC from the database using their local ID.
-    /// </summary>
-    /// <param name="id">The NPC's ID.</param>
-    public void DeleteNpcById(Guid id)
-    {
-        var collection = GetNpcCollection();
-        collection.Delete(id);
-    }
+    public void DeleteNpcById(Guid id) => GetNpcCollection().Delete(id);
 
     /// <summary>
-    /// Deletes an NPC voice from the database using their local ID.
+    /// Deletes ALL voice presets for a specific NPC (e.g., when the NPC is deleted).
     /// </summary>
-    /// <param name="id">The NPC's ID.</param>
     public void DeleteNpcVoiceByNpcId(Guid id)
     {
         var collection = GetNpcVoiceCollection();
         collection.DeleteMany(v => v.NpcId == id);
     }
 
+    /// <summary>
+    /// Deletes a specific voice preset for one NPC on a specific backend.
+    /// </summary>
+    public void DeleteNpcVoiceByCompositeKey(Guid npcId, string backend)
+    {
+        var collection = GetNpcVoiceCollection();
+        collection.DeleteMany(v => v.NpcId == npcId && v.VoiceBackend == backend);
+    }
+
     private ILiteCollection<Npc> GetNpcCollection()
     {
         var collection = db.GetCollection<Npc>(NpcCollectionName);
-        EnsureIndices(collection);
+        collection.EnsureIndex(npc => npc.Name);
         return collection;
     }
 
     private ILiteCollection<NpcVoice> GetNpcVoiceCollection()
     {
         var collection = db.GetCollection<NpcVoice>(NpcVoiceCollectionName);
-        EnsureIndices(collection);
-        return collection;
-    }
-
-    private static void EnsureIndices(ILiteCollection<Npc> collection)
-    {
-        // "By default, an index over _id is created upon the first insertion."
-        // https://www.litedb.org/docs/indexes/
-        collection.EnsureIndex(npc => npc.Name);
-    }
-
-    private static void EnsureIndices(ILiteCollection<NpcVoice> collection)
-    {
+        // Added index for the backend to speed up composite queries
         collection.EnsureIndex(v => v.NpcId);
+        collection.EnsureIndex(v => v.VoiceBackend);
+        return collection;
     }
 }

@@ -8,22 +8,19 @@ namespace TextToTalk.Services;
 
 public class NpcService(NpcCollection collection, IList<VoicePreset> voices)
 {
-    public IEnumerable<Npc> GetAllNpcs()
-    {
-        return collection.FetchAllNpcs();
-    }
+    public IEnumerable<Npc> GetAllNpcs() => collection.FetchAllNpcs();
 
     public bool AddNpc(string name)
     {
         if (TryGetNpc(name, out _)) return false;
-        var info = new Npc { Name = name };
-        collection.StoreNpc(info);
+        collection.StoreNpc(new Npc { Name = name });
         return true;
     }
 
     public void DeleteNpc(Npc info)
     {
         collection.DeleteNpcById(info.Id);
+        // Deletes all voice presets associated with this NPC across all backends
         collection.DeleteNpcVoiceByNpcId(info.Id);
     }
 
@@ -32,11 +29,13 @@ public class NpcService(NpcCollection collection, IList<VoicePreset> voices)
         return collection.TryFetchNpcByName(name, out info);
     }
 
-    public bool TryGetNpcVoice(Npc? info, [NotNullWhen(true)] out VoicePreset? voice)
+    // Fetch a voice preset for a specific NPC + Backend combination
+    public bool TryGetNpcVoice(Npc? info, string backend, [NotNullWhen(true)] out VoicePreset? voice)
     {
         voice = null;
         if (info is null) return false;
-        if (collection.TryFetchNpcVoiceByNpcId(info.Id, out var voiceInfo))
+
+        if (collection.TryFetchNpcVoiceByCompositeKey(info.Id, backend, out var voiceInfo))
         {
             voice = voices.FirstOrDefault(v => v.Id == voiceInfo.VoicePresetId);
         }
@@ -44,29 +43,27 @@ public class NpcService(NpcCollection collection, IList<VoicePreset> voices)
         return voice != null;
     }
 
-    public void UpdateNpc(Npc info)
-    {
-        collection.StoreNpc(info);
-    }
+    public void UpdateNpc(Npc info) => collection.StoreNpc(info);
 
+    // Allows setting/replacing a voice specifically for one backend
     public bool SetNpcVoice(Npc info, VoicePreset voice)
     {
-        if (info.Name is null || !TryGetNpc(info.Name, out _))
+        if (info.Name is null || !TryGetNpc(info.Name, out _)) return false;
+
+        if (voices.All(v => v.Id == voice.Id)) return false;
+        string backend = voice.EnabledBackend.ToString();
+
+        if (TryGetNpcVoice(info, backend, out _))
         {
-            return false;
+            collection.DeleteNpcVoiceByCompositeKey(info.Id, backend);
         }
 
-        if (voices.All(v => v.Id != voice.Id))
+        collection.StoreNpcVoice(new NpcVoice
         {
-            return false;
-        }
-
-        if (TryGetNpcVoice(info, out _))
-        {
-            collection.DeleteNpcVoiceByNpcId(info.Id);
-        }
-
-        collection.StoreNpcVoice(new NpcVoice { NpcId = info.Id, VoicePresetId = voice.Id });
+            NpcId = info.Id,
+            VoicePresetId = voice.Id,
+            VoiceBackend = backend
+        });
 
         return true;
     }
