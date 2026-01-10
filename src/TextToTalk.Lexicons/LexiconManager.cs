@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Security;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -97,6 +98,7 @@ public class LexiconManager
         bool includeSpeakAttributes = true)
 
     {
+        text = SecurityElement.Escape(text);
         foreach (var (_, lexicon) in this.lexicons)
         {
             foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme)))
