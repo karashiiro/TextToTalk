@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Xml.Linq;
 
 namespace TextToTalk.Lexicons;
@@ -93,6 +94,7 @@ public class LexiconManager
         int playbackRate = -1,
         bool includeSpeakAttributes = true)
     {
+        text = SecurityElement.Escape(text);
         foreach (var (_, lexicon) in this.lexicons)
         {
             foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme)))
