@@ -6,12 +6,12 @@ namespace TextToTalk.Backends.GoogleCloud;
 public class GoogleCloudBackend : VoiceBackend
 {
     private readonly GoogleCloudClient client;
-    private readonly StreamSoundQueue soundQueue;
+    private readonly StreamingSoundQueue soundQueue;
     private readonly GoogleCloudBackendUI ui;
 
     public GoogleCloudBackend(PluginConfiguration config)
     {
-        soundQueue = new StreamSoundQueue(config);
+        soundQueue = new StreamingSoundQueue(config);
         client = new GoogleCloudClient(soundQueue, config.GoogleCreds);
         ui = new GoogleCloudBackendUI(config, client, this);
     }
@@ -25,18 +25,28 @@ public class GoogleCloudBackend : VoiceBackend
         if (request.Voice is not GoogleCloudVoicePreset voicePreset)
             throw new InvalidOperationException("Invalid voice preset provided.");
 
-        _ = client.Say(voicePreset.Locale, voicePreset.VoiceName, voicePreset.SampleRate, voicePreset.Pitch, voicePreset.PlaybackRate, voicePreset.Volume, request.Source,
+        _ = client.Say(voicePreset.Locale, voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume, request.Source,
             request.Text);
     }
 
     public override void CancelAllSpeech()
     {
         soundQueue.CancelAllSounds();
+        if (client._TtsCts != null)
+        {
+            client._TtsCts?.Cancel();
+        }
+        soundQueue.StopHardware();
     }
 
     public override void CancelSay(TextSource source)
     {
         soundQueue.CancelFromSource(source);
+        if (client._TtsCts != null)
+        {
+            client._TtsCts?.Cancel();
+        }
+        soundQueue.StopHardware();
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)

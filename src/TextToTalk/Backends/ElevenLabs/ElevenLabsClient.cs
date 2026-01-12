@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -6,9 +8,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Serilog;
 
 namespace TextToTalk.Backends.ElevenLabs;
 
@@ -17,11 +19,13 @@ public class ElevenLabsClient
     private const string UrlBase = "https://api.elevenlabs.io";
 
     private readonly HttpClient http;
-    private readonly StreamSoundQueue soundQueue;
+    private readonly StreamingSoundQueue soundQueue;
 
     public string? ApiKey { get; set; }
 
-    public ElevenLabsClient(StreamSoundQueue soundQueue, HttpClient http)
+    public CancellationTokenSource? _TtsCts;
+
+    public ElevenLabsClient(StreamingSoundQueue soundQueue, HttpClient http)
     {
         this.http = http;
         this.soundQueue = soundQueue;
@@ -30,56 +34,74 @@ public class ElevenLabsClient
     public async Task Say(string? voice, int playbackRate, float volume, float similarityBoost, float stability,
         TextSource source, string text, string? model, string? style)
     {
-        if (!IsAuthorizationSet())
+        Log.Information($"Style = {style}");
+        _TtsCts?.Cancel();
+        _TtsCts?.Dispose();
+
+        _TtsCts = new CancellationTokenSource();
+        var ct = _TtsCts.Token;
+
+        try
         {
-            throw new ElevenLabsMissingCredentialsException("No ElevenLabs authorization keys have been configured.");
-        }
-        Log.Information($"Style String = {style}");
-        if (style != "")
-        {
-            model = "eleven_v3"; //force eleven_v3 model for styles
-            text = $"[{style}] " + text; //append style tag to text
-        }
-        float finalStability = stability;
-        if (model == "eleven_v3") // eleven_v3 only supports stability float values 0.0, 0.5, 1.0
-        {
-            finalStability = (float)Math.Round(stability * 2.0f, MidpointRounding.AwayFromZero) / 2.0f;
-        }
-        Log.Information($"Message String = {text}");
-        Log.Information($"Model String = {model}");
-        var args = new ElevenLabsTextToSpeechRequest
-        {
-            Text = text,
-            ModelId = model,
-            VoiceSettings = new ElevenLabsVoiceSettings
+            if (!IsAuthorizationSet())
             {
-                SimilarityBoost = similarityBoost,
-                Stability = finalStability,
-            },
-        };
+                throw new ElevenLabsMissingCredentialsException("No ElevenLabs authorization keys have been configured.");
+            }
 
-        // Make the request
-        var uriBuilder = new UriBuilder(UrlBase) { Path = $"/v1/text-to-speech/{voice}/stream" };
-        using var req = new HttpRequestMessage(HttpMethod.Post, uriBuilder.Uri);
-        AddAuthorization(req);
-        req.Headers.Add("accept", "audio/mpeg");
+            if (!string.IsNullOrEmpty(style))
+            {
+                model = "eleven_v3";
+                text = $"[{style}] " + text;
+            }
 
-        DetailedLog.Verbose(JsonConvert.SerializeObject(args));
-        using var content = new StringContent(JsonConvert.SerializeObject(args));
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-        req.Content = content;
-        
-        var res = await this.http.SendAsync(req);
-        EnsureSuccessStatusCode(res);
+            float finalStability = stability;
+            if (model == "eleven_v3")
+            {
+                finalStability = (float)Math.Round(stability * 2.0f, MidpointRounding.AwayFromZero) / 2.0f;
+            }
 
-        // Copy the sound to a new buffer and enqueue it
-        var responseStream = await res.Content.ReadAsStreamAsync();
-        var mp3Stream = new MemoryStream();
-        await responseStream.CopyToAsync(mp3Stream);
-        mp3Stream.Seek(0, SeekOrigin.Begin);
+            var args = new ElevenLabsTextToSpeechRequest
+            {
+                Text = text,
+                ModelId = model,
+                VoiceSettings = new ElevenLabsVoiceSettings
+                {
+                    SimilarityBoost = similarityBoost,
+                    Stability = finalStability,
+                },
+            };
+            Log.Information($"Model Called = {args.ModelId}");
+            Log.Information($"Message Sent = {args.Text}");
 
-        this.soundQueue.EnqueueSound(mp3Stream, source, StreamFormat.Mp3, volume);
+            var uriBuilder = new UriBuilder(UrlBase) { Path = $"/v1/text-to-speech/{voice}/stream" };
+
+            // Use HttpCompletionOption.ResponseHeadersRead to begin processing before the body is fully downloaded
+            using var req = new HttpRequestMessage(HttpMethod.Post, uriBuilder.Uri);
+            AddAuthorization(req);
+            req.Headers.Add("accept", "audio/mpeg");
+
+            using var content = new StringContent(JsonConvert.SerializeObject(args), Encoding.UTF8, "application/json");
+            req.Content = content;
+
+            // SendAsync with ResponseHeadersRead is the key for streaming
+            var res = await this.http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
+            EnsureSuccessStatusCode(res);
+
+            // Get the stream directly from the response
+            var responseStream = await res.Content.ReadAsStreamAsync(ct);
+
+            // Enqueue the live stream. 
+            // IMPORTANT: Your soundQueue must be able to process the stream as bytes arrive.
+            this.soundQueue.EnqueueSound(responseStream, source, volume, StreamFormat.Mp3, res);
+        }
+        catch (OperationCanceledException)
+        {
+            // 2026 Best Practice: Catch the cancellation exception to prevent it 
+            // from bubbling up as a generic error.
+            Log.Information("TTS generation was cancelled.");
+        }
     }
+
 
     public async Task<ElevenLabsUserSubscriptionInfo> GetUserSubscriptionInfo()
     {

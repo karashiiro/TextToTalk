@@ -97,6 +97,7 @@ public class LexiconManager
         bool includeSpeakAttributes = true)
 
     {
+        text = System.Security.SecurityElement.Escape(text);
         foreach (var (_, lexicon) in this.lexicons)
         {
             foreach (var lexeme in lexicon.Lexemes.Where(lexeme => text.Contains(lexeme.Grapheme)))

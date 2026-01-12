@@ -1,4 +1,5 @@
 ﻿using Dalamud.Bindings.ImGui;
+using OpenAI;
 using Serilog;
 using System;
 using System.Net;
@@ -36,8 +37,8 @@ public class OpenAiBackend : VoiceBackend
         {
             try
             {
-                Log.Information($"Voice name  = {voicePreset.VoiceName}");
-                await this.uiModel.OpenAi.Say(voicePreset, request, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (voicePreset.Style ?? string.Empty));
+                Log.Information($"Voice Style = {voicePreset.Style}");
+                await this.uiModel.OpenAi.Say(request.Text, voicePreset.Model, voicePreset.VoiceName, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (voicePreset.Style ?? string.Empty), 1.0f, voicePreset.Volume);
             }
             catch (OpenAiUnauthorizedException e)
             {
@@ -69,12 +70,42 @@ public class OpenAiBackend : VoiceBackend
 
     public override void CancelAllSpeech()
     {
+        //Cancel at the queue
         this.uiModel.SoundQueue.CancelAllSounds();
+
+        //Cancel at Speech Generation
+        if (uiModel.OpenAi._ttsCts != null)
+        {
+            uiModel.OpenAi._ttsCts.Cancel();
+            uiModel.OpenAi._ttsCts.Dispose();
+            uiModel.OpenAi._ttsCts = null;
+        }
+        //Cancel at Playback
+        this.uiModel.SoundQueue.StopHardware();
+        
     }
 
     public override void CancelSay(TextSource source)
     {
+        //Cancel at the queue
         this.uiModel.SoundQueue.CancelFromSource(source);
+
+        //Cancel at Speech Generation
+        if (uiModel.OpenAi._ttsCts != null)
+        {
+            uiModel.OpenAi._ttsCts.Cancel();
+            uiModel.OpenAi._ttsCts.Dispose();
+            uiModel.OpenAi._ttsCts = null;
+        }
+
+        //Cancel at Playback
+        if (uiModel.SoundQueue._ttsCts != null)
+        {
+            uiModel.OpenAi._ttsCts.Cancel();
+            uiModel.OpenAi._ttsCts.Dispose();
+            uiModel.OpenAi._ttsCts = null;
+        }
+        this.uiModel.SoundQueue.StopHardware();
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)
@@ -91,6 +122,9 @@ public class OpenAiBackend : VoiceBackend
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) this.uiModel.SoundQueue.Dispose();
+        if (disposing)
+        {
+            this.uiModel.SoundQueue.Dispose(); 
+        }
     }
 }

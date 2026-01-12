@@ -1,5 +1,10 @@
-﻿using R3;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
+using R3;
+using Serilog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Speech.Synthesis;
 using System.Threading;
@@ -10,125 +15,253 @@ namespace TextToTalk.Backends.System
 {
     public class SystemSoundQueue : SoundQueue<SystemSoundQueueItem>
     {
-        private MemoryStream stream;
-        private readonly SpeechSynthesizer speechSynthesizer;
-        private readonly LexiconManager lexiconManager;
-        private readonly StreamSoundQueue streamSoundQueue;
-        private readonly SystemBackend backend;
-        private readonly PluginConfiguration config;
-        private int soundLock;
-        private readonly SemaphoreSlim deviceLock = new SemaphoreSlim(1, 1);
+        // WASAPI Hardware Members
+        private WasapiOut? soundOut;
+        private BufferedWaveProvider? bufferedProvider;
+        private VolumeSampleProvider? volumeProvider;
+        private readonly object soundLock = new();
 
-        public Observable<SelectVoiceFailedException> SelectVoiceFailed => selectVoiceFailed;
-        private readonly Subject<SelectVoiceFailedException> selectVoiceFailed;
-        private bool isSynthesizing = false;
+        // 1. Unified Audio Configuration
+        private static readonly WaveFormat SystemFormat = new(22050, 16, 1);
+        private readonly SpeechSynthesizer _speechSynthesizer;
+        private readonly LexiconManager _lexiconManager;
+        private readonly PluginConfiguration _config;
 
 
-        public async void ASyncSpeak(SpeechSynthesizer synth, string textToSpeak)
+        private readonly Subject<SelectVoiceFailedException> _selectVoiceFailed = new();
+        public Observable<SelectVoiceFailedException> SelectVoiceFailed => _selectVoiceFailed;
+        private bool _isDisposed;
+
+        private readonly Dictionary<string, SpeechSynthesizer> _synthPool = new();
+
+        private SpeechSynthesizer GetSynthesizerForVoice(string voiceName)
         {
-            await Task.Run(() => synth.SpeakSsml(textToSpeak));
+            if (!_synthPool.TryGetValue(voiceName, out var synth))
+            {
+                synth = new SpeechSynthesizer();
+                synth.SelectVoice(voiceName);
+                // Pre-link the bridge for this specific synth
+                _synthPool[voiceName] = synth;
+            }
+            return synth;
         }
-
-        public SystemSoundQueue(LexiconManager lexiconManager, PluginConfiguration config)
-        {
-            this.streamSoundQueue = new StreamSoundQueue(config);
-            this.lexiconManager = lexiconManager;
-            this.speechSynthesizer = new SpeechSynthesizer();
-            this.selectVoiceFailed = new Subject<SelectVoiceFailedException>();
-        }
-
         public void EnqueueSound(VoicePreset preset, TextSource source, string text)
         {
             AddQueueItem(new SystemSoundQueueItem
             {
                 Preset = preset,
-                Text = text,
                 Source = source,
+                Text = text,
             });
         }
 
-        protected override async void OnSoundLoop(SystemSoundQueueItem nextItem)
+        public SystemSoundQueue(LexiconManager lexiconManager, PluginConfiguration config)
         {
-            if (nextItem.Preset is not SystemVoicePreset systemVoicePreset)
+            _lexiconManager = lexiconManager;
+            _config = config;
+            _speechSynthesizer = new SpeechSynthesizer();
+
+        }
+
+
+
+        private MMDevice GetWasapiDeviceFromGuid(Guid targetGuid)
+        {
+            using var enumerator = new MMDeviceEnumerator();
+            var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+            foreach (var device in devices)
             {
-                throw new InvalidOperationException("Invalid voice preset provided.");
+                if (device.Properties.Contains(PropertyKeys.PKEY_AudioEndpoint_GUID))
+                {
+                    var guidString = device.Properties[PropertyKeys.PKEY_AudioEndpoint_GUID].Value as string;
+                    if (Guid.TryParse(guidString, out var deviceGuid) && deviceGuid == targetGuid)
+                        return device;
+                }
+            }
+            return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+        }
+
+        protected override void OnSoundLoop(SystemSoundQueueItem nextItem)
+        {
+            if (nextItem.Preset is not SystemVoicePreset preset || nextItem.Aborted) return;
+
+            // 1. Mimic Kokoro: Shared Hardware Setup
+            lock (this.soundLock)
+            {
+                if (this.soundOut == null)
+                {
+                    var mmDevice = GetWasapiDeviceFromGuid(_config.SelectedAudioDeviceGuid);
+                    // Match the voice's expected format (SAPI default is 22050Hz, 16-bit, Mono)
+                    this.bufferedProvider = new BufferedWaveProvider(new WaveFormat(22050, 16, 1))
+                    {
+                        ReadFully = true, // Prevents WASAPI from stopping on empty buffer
+                        BufferDuration = TimeSpan.FromSeconds(30)
+                    };
+                    this.soundOut = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 50);
+                    this.soundOut.Init(this.bufferedProvider);
+                }
             }
 
-            try
+            // 1.5 Instant Voice Switching via Pool
+            if (!_synthPool.TryGetValue(preset.VoiceName, out var synth))
             {
-                this.speechSynthesizer.UseVoicePreset(nextItem.Preset);
-            }
-            catch (SelectVoiceFailedException e)
-            {
-                DetailedLog.Error(e, "Failed to select voice {0}", systemVoicePreset.VoiceName ?? "");
-                this.selectVoiceFailed.OnNext(e);
+                synth = new SpeechSynthesizer();
+                synth.SelectVoice(preset.VoiceName);
+                _synthPool[preset.VoiceName] = synth;
             }
 
-            var ssml = this.lexiconManager.MakeSsml(nextItem.Text,
-                langCode: this.speechSynthesizer.Voice.Culture.IetfLanguageTag);
-            DetailedLog.Verbose(ssml);
+            synth.Volume = preset.Volume;
+            synth.Rate = preset.Rate;
 
-            try
+            // 2. Prepare Synthesis
+            if (_speechSynthesizer.Voice.Name != preset.VoiceName)
             {
-                isSynthesizing = true;
-
-                await deviceLock.WaitAsync();
-
-                this.stream = new MemoryStream();
-                this.speechSynthesizer.SetOutputToWaveStream(this.stream);
-
-                await Task.Run(() => this.speechSynthesizer.SpeakSsml(ssml));
-
+                _speechSynthesizer.SelectVoice(preset.VoiceName);
             }
-            catch (OperationCanceledException)
+            _speechSynthesizer.Volume = preset.Volume;
+            _speechSynthesizer.Rate = preset.Rate;
+
+            var ssml = _lexiconManager.MakeSsml(nextItem.Text, langCode: _speechSynthesizer.Voice.Culture.IetfLanguageTag);
+
+            // 3. Start Synthesis in Background (Feeding the buffer via bridge)
+            using var bridge = new SynthesisBridgeStream(this.bufferedProvider!);
+            _speechSynthesizer.SetOutputToWaveStream(bridge);
+
+            // Use SpeakAsync to avoid blocking the loop
+            var synthPrompt = _speechSynthesizer.SpeakSsmlAsync(ssml);
+
+            // 4. This loop remains active as long as synthesis is running or audio is playing
+            while (!nextItem.Aborted && (!synthPrompt.IsCompleted || this.bufferedProvider?.BufferedBytes > 44))
             {
-
+                if (this.bufferedProvider?.BufferedBytes > 512) // Pre-roll threshold
+                {
+                    if (this.soundOut?.PlaybackState != PlaybackState.Playing)
+                    {
+                        this.soundOut?.Play();
+                        Log.Information("Playing");
+                    }
+                }
             }
 
-            finally
+            // 5. Cleanup current item
+
+            this.StopHardware();
+        }
+
+        // Custom Stream to pipe synthesizer output directly to NAudio buffer
+        private class SynthesisBridgeStream : Stream
+        {
+            private readonly BufferedWaveProvider _target;
+            private int _bytesToSkip = 0;
+            private bool _headerSkipped = false;
+            private long _position = 0;
+
+            public SynthesisBridgeStream(BufferedWaveProvider target) => _target = target;
+
+            public override void Write(byte[] buffer, int offset, int count)
             {
-                isSynthesizing = false;
-                deviceLock.Release();
+                if (_bytesToSkip > 0)
+                {
+                    int skipNow = Math.Min(count, _bytesToSkip);
+                    _bytesToSkip -= skipNow;
+                    offset += skipNow;
+                    count -= skipNow;
+                }
+
+                if (count > 0)
+                {
+                    _target.AddSamples(buffer, offset, count);
+                }
             }
 
-            this.stream.Seek(0, SeekOrigin.Begin);
-            this.streamSoundQueue.EnqueueSound(stream, nextItem.Source, StreamFormat.Wave, 1f);
+            public override bool CanRead => false;
+            public override bool CanSeek => true;
+            public override bool CanWrite => true;
+            public override long Length => _position;
+            public override long Position { get => _position; set => _position = value; }
+
+            public override long Seek(long offset, SeekOrigin origin) => _position; // Dummy seek
+            public override void SetLength(long value) { }
+            public override void Flush() { }
+            public override int Read(byte[] buffer, int offset, int count) => 0;
+        }
+
+        protected override void OnSoundCancelled()
+        {
+            // 1. Flag the current item to stop the inference loop
+            GetCurrentItem()?.Cancel();
+
+            _speechSynthesizer.SpeakAsyncCancelAll();
+
+            // 2. Hard Stop the WASAPI hardware session immediately
+            StopHardware();
         }
 
         public override void CancelAllSounds()
         {
-            base.CancelAllSounds();
-            this.streamSoundQueue.CancelAllSounds();
-        }
+            // Check if disposed before accessing the synthesizer
+            if (_isDisposed) return;
 
-        public override void CancelFromSource(TextSource source)
-        {
-            base.CancelFromSource(source);
-            this.streamSoundQueue.CancelFromSource(source);
-        }
-
-
-        protected override void OnSoundCancelled()
-        {
-            try 
+            try
             {
-                this.speechSynthesizer.SetOutputToNull();
+                _speechSynthesizer?.SpeakAsyncCancelAll();
             }
+            catch (ObjectDisposedException) { /* Already gone, safe to ignore */ }
 
-            catch (ObjectDisposedException)
+            StopHardware();
+
+            // Call base after local cancellation logic
+            base.CancelAllSounds();
+        }
+
+        private void StopHardware()
+        {
+            lock (this.soundLock)
             {
-
+                if (this.soundOut != null)
+                {
+                    this.soundOut.Stop();
+                    Thread.Sleep(10);
+                    this.soundOut.Dispose();
+                    this.soundOut = null;
+                }
+                if (this.bufferedProvider != null)
+                {
+                    this.bufferedProvider.ClearBuffer();
+                    this.bufferedProvider = null;
+                }
             }
         }
 
         protected override void Dispose(bool disposing)
         {
+            if (_isDisposed) return;
+            _isDisposed = true; // Signal all loops to stop immediately
+
             if (disposing)
             {
-                this.speechSynthesizer.Dispose();
-            }
+                try
+                {
+                    // Stop hardware first to release the audio device
+                    soundOut?.Stop();
 
-            base.Dispose(disposing);
+                    // Abort the synthesizer BEFORE calling base.Dispose
+                    _speechSynthesizer?.SpeakAsyncCancelAll();
+                    _speechSynthesizer?.SetOutputToNull();
+
+                    // Give the background thread a very short window to exit gracefully
+                    // rather than joining it indefinitely.
+                }
+                catch (Exception ex)
+                {
+                    DetailedLog.Error(ex, "Error during early shutdown phase");
+                }
+
+                base.Dispose(disposing); // Clean up the queue thread
+
+                _speechSynthesizer?.Dispose();
+                soundOut?.Dispose();
+            }
         }
     }
 }

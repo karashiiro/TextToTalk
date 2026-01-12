@@ -5,4 +5,7 @@ public enum StreamFormat
     Mp3,
     Wave,
     Raw,
+    Azure,
+    System,
+    Uberduck,
 }

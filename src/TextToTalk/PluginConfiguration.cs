@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using TextToTalk.Backends;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;

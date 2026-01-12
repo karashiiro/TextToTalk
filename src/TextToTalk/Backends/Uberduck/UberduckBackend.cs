@@ -11,7 +11,7 @@ namespace TextToTalk.Backends.Uberduck;
 /// </summary>
 public class UberduckBackend : VoiceBackend
 {
-    private readonly StreamSoundQueue soundQueue;
+    private readonly StreamingSoundQueue soundQueue;
     private readonly UberduckBackendUI ui;
     private readonly UberduckClient? uberduck;
 
@@ -19,10 +19,10 @@ public class UberduckBackend : VoiceBackend
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFDE7312);
 
-        this.soundQueue = new StreamSoundQueue(config);
+        this.soundQueue = new StreamingSoundQueue(config);
         this.uberduck = new UberduckClient(this.soundQueue, http);
 
-        var voices = this.uberduck.GetVoices().GetAwaiter().GetResult();
+        var voices = this.uberduck.UpdateVoices().GetAwaiter().GetResult();
         this.ui = new UberduckBackendUI(config, this.uberduck, () => voices, this);
     }
 

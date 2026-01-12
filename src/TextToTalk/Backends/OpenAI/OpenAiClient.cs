@@ -1,261 +1,123 @@
-﻿using System;
+﻿using NAudio.CoreAudioApi;
+using OpenAI;
+using Serilog;
+using System;
+using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
-using TextToTalk.GameEnums;
-using Serilog;
+using OpenAIAudio = OpenAI.Audio;
 
 namespace TextToTalk.Backends.OpenAI;
 
-public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
+public class OpenAiClient
 {
-    private const string UrlBase = "https://api.openai.com";
+    private readonly OpenAIClient _openAiClient;
+    private readonly StreamingSoundQueue _soundQueue;
+    public CancellationTokenSource? _ttsCts;
 
+    // --- Provided Definitions ---
     public record ModelConfig(
-    string ModelName,
-    IReadOnlyDictionary<string, string> Voices,
-    bool InstructionsSupported,
-    bool SpeedSupported);
+        string ModelName,
+        IReadOnlyDictionary<string, string> Voices,
+        bool InstructionsSupported,
+        bool SpeedSupported);
 
     private static readonly Dictionary<string, string> VoiceLabels = new()
-{
-    { "alloy", "Alloy (Neutral & Balanced)" },
-    { "ash", "Ash (Clear & Precise)" },
-    { "ballad", "Ballad (Melodic & Smooth)" },
-    { "coral", "Coral (Warm & Friendly)" },
-    { "echo", "Echo (Resonant & Deep)" },
-    { "fable", "Fable (Alto Narrative)" },
-    { "onyx", "Onyx (Deep & Energetic)" },
-    { "nova", "Nova (Bright & Energetic)" },
-    { "sage", "Sage (Calm & Thoughtful)" },
-    { "shimmer", "Shimmer (Bright & Feminine)" },
-    { "verse", "Verse (Versatile & Expressive)" },
-    { "marin", "Marin (Latest and Greatest)" },
-    { "cedar", "Cedar (Latest and Greatest)" }
-};
+    {
+        { "alloy", "Alloy (Neutral & Balanced)" },
+        { "ash", "Ash (Clear & Precise)" },
+        { "ballad", "Ballad (Melodic & Smooth)" },
+        { "coral", "Coral (Warm & Friendly)" },
+        { "echo", "Echo (Resonant & Deep)" },
+        { "fable", "Fable (Alto Narrative)" },
+        { "onyx", "Onyx (Deep & Energetic)" },
+        { "nova", "Nova (Bright & Energetic)" },
+        { "sage", "Sage (Calm & Thoughtful)" },
+        { "shimmer", "Shimmer (Bright & Feminine)" },
+        { "verse", "Verse (Versatile & Expressive)" },
+        { "marin", "Marin (Latest and Greatest)" },
+        { "cedar", "Cedar (Latest and Greatest)" }
+    };
 
     public static readonly List<ModelConfig> Models =
     [
-        new("gpt-4o-mini-tts",
-        VoiceLabels.ToDictionary(v => v.Key, v => v.Value),
-        true, false),
-
-    new("tts-1",
-        VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse")
-                   .ToDictionary(v => v.Key, v => v.Value),
-        false, true),
-
-    new("tts-1-hd",
-        VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse")
-                   .ToDictionary(v => v.Key, v => v.Value),
-        false, false)
+        new("gpt-4o-mini-tts", VoiceLabels.ToDictionary(v => v.Key, v => v.Value), true, true),
+        new("tts-1", VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse").ToDictionary(v => v.Key, v => v.Value), false, true),
+        new("tts-1-hd", VoiceLabels.Where(v => v.Key != "ballad" && v.Key != "verse").ToDictionary(v => v.Key, v => v.Value), false, true)
     ];
-
-    //    public record ModelConfig(string ModelName, IReadOnlySet<string> Voices, bool InstructionsSupported, bool SpeedSupported);
-    //
-    //    public static readonly List<ModelConfig> Models =
-    //    [
-    //        // Note: while speed is 'technically' supported by gpt-4o-mini-tts, it doesn't appear to influence the output.
-    //        new("gpt-4o-mini-tts", new HashSet<string>
-    //        {
-    //            "alloy",
-    //            "ash",
-    //            "ballad",
-    //            "coral",
-    //            "echo",
-    //            "fable",
-    //            "onyx",
-    //            "nova",
-    //            "sage",
-    //            "shimmer",
-    //            "verse"
-    //        }, true, false),
-    //        new("tts-1", new HashSet<string>
-    //        {
-    //            "nova",
-    //            "shimmer",
-    //            "echo",
-    //            "onyx",
-    //            "fable",
-    //            "alloy",
-    //            "ash",
-    //            "sage",
-    //            "coral"
-    //        }, false, true),
-    //        new("tts-1-hd", new HashSet<string>
-    //        {
-    //            "nova",
-    //            "shimmer",
-    //            "echo",
-    //            "onyx",
-    //            "fable",
-    //            "alloy",
-    //            "ash",
-    //            "sage",
-    //            "coral"
-    //        }, false, false),
-    //    ];
 
     public string? ApiKey { get; set; }
 
-    private void AddAuthorization(HttpRequestMessage req)
+    // --- Implementation ---
+    public OpenAiClient(StreamingSoundQueue soundQueue, string apiKey)
     {
-        req.Headers.Add("Authorization", $"Bearer {ApiKey}");
+        _soundQueue = soundQueue;
+        ApiKey = apiKey;
+
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            _openAiClient = new OpenAIClient(apiKey);
+        }
     }
 
-    private bool IsAuthorizationSet()
+    public async Task Say(string text, string modelName, string voiceId, string? instructions, float speed, float volume)
     {
-        return ApiKey is { Length: > 0 };
-    }
+        if (_openAiClient == null) return;
 
-    public async Task TestCredentials()
-    {
-        if (!IsAuthorizationSet())
+        // Cancel any previous request before starting a new one
+        _ttsCts?.Cancel();
+        _ttsCts = new CancellationTokenSource();
+        var token = _ttsCts.Token;
+
+        try
         {
-            throw new OpenAiMissingCredentialsException("No OpenAI authorization keys have been configured.");
-        }
+            OpenAIAudio.AudioClient audioClient = _openAiClient.GetAudioClient(modelName);
 
-        var uriBuilder = new UriBuilder(UrlBase) { Path = "/v1/models" };
-        using var req = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-        AddAuthorization(req);
-
-        var res = await http.SendAsync(req);
-        await EnsureSuccessStatusCode(res);
-    }
-
-    public string? GetInstructionsForRequest(SayRequest request, OpenAiVoicePreset preset)
-    {
-        var instructionBuilder = new StringBuilder();
-        instructionBuilder.AppendLine($"Tone: Final fantasy 14 character named {request.Speaker}");
-        if (request.Race is {Length: > 0})
+            var requestBody = new Dictionary<string, object>
         {
-            instructionBuilder.AppendLine($"Race: {request.Race}");
-        }
-
-        if (request.BodyType is not BodyType.Unknown)
-        {
-            instructionBuilder.AppendLine($"BodyType: {request.BodyType}");
-        }
-
-        if (preset.Style is {Length: > 0})
-        {
-            instructionBuilder.AppendLine($"Instructions: {(!string.IsNullOrEmpty(request.Style) ? request.Style : preset.Style)}"); // Style tags from Say Request take precedence over Style tags from voice preset.
-        }
-
-        var instructions = instructionBuilder.ToString()
-            .Trim();
-
-        return instructions.Length > 0 ? instructions : null;
-    }
-
-    public async Task Say(OpenAiVoicePreset preset, SayRequest request, string text, string style)
-    {
-        if (!IsAuthorizationSet())
-        {
-            throw new OpenAiMissingCredentialsException("No OpenAI authorization keys have been configured.");
-        }
-        
-        var uriBuilder = new UriBuilder(UrlBase) { Path = "/v1/audio/speech" };
-        using var req = new HttpRequestMessage(HttpMethod.Post, uriBuilder.Uri);
-        AddAuthorization(req);
-
-        string model;
-        string voice;
-        if (preset.Model != null && Models.Any(m => m.ModelName == preset.Model))
-        {
-            model = preset.Model;
-        }
-        else
-        {
-            model = Models.First().ModelName;
-        }
-        
-        if (request.Style is {Length: > 0 }) 
-        {
-            model = "gpt-4o-mini-tts"; // Force Say request to model that can handle Voice Styles if user has embedded a style tag into their message
-        }
-
-        var modelConfig = Models.First(m => m.ModelName == model);
-        if (preset.VoiceName != null && modelConfig.Voices.Keys.Contains(preset.VoiceName))
-        {
-            voice = preset.VoiceName;
-        }
-        else
-        {
-            voice = modelConfig.Voices.Keys.First();
-        }
-
-        Dictionary<string, object> args = new()
-        {
-            ["model"] = model,
-            ["input"] = text,
-            ["voice"] = voice,
-            ["response_format"] = "mp3",
-            ["speed"] = modelConfig.SpeedSupported ? preset.PlaybackRate ?? 1.0f : 1.0f
+            { "model", modelName },
+            { "input", text },
+            { "voice", voiceId.ToLowerInvariant() },
+            { "response_format", "mp3" },
+            { "speed", speed }
         };
 
-        if (modelConfig.InstructionsSupported)
-        {
-            string? configinstructions = GetInstructionsForRequest(request, preset);
-            //if (style != "")
-            //{
-            //    args["instructions"] = style;
-            //}
-            // Instructions from style take precedence over preset instructions.
-            if (configinstructions != null)
+            if (Models.First(m => m.ModelName == "gpt-4o-mini-tts").InstructionsSupported)
             {
-                args["instructions"] = configinstructions;
+                requestBody["instructions"] = instructions ?? "";
             }
-        }   
-        var json = JsonSerializer.Serialize(args);
-        DetailedLog.Verbose(json);
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        req.Content = content;
 
-        var res = await http.SendAsync(req);
-        await EnsureSuccessStatusCode(res);
+            BinaryContent content = BinaryContent.Create(BinaryData.FromObjectAsJson(requestBody));
+            RequestOptions options = new();
+            options.BufferResponse = false;
 
-        var mp3Stream = new MemoryStream();
-        var responseStream = await res.Content.ReadAsStreamAsync();
-        await responseStream.CopyToAsync(mp3Stream);
-        mp3Stream.Seek(0, SeekOrigin.Begin);
+            // PASS THE TOKEN HERE
+            options.CancellationToken = token;
 
-        soundQueue.EnqueueSound(mp3Stream, request.Source, StreamFormat.Mp3, preset.Volume);
-    }
+            // The request will throw OperationCanceledException if cancelled during the call
+            ClientResult result = await audioClient.GenerateSpeechAsync(content, options);
 
-    private static async Task EnsureSuccessStatusCode(HttpResponseMessage res)
-    {
-        if (res.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-        {
-            throw new OpenAiUnauthorizedException(res.StatusCode, "Unauthorized request.");
+            Stream liveAudioStream = result.GetRawResponse().ContentStream;
+
+            // Register a callback to close the stream if cancellation happens while reading
+            token.Register(() => liveAudioStream.Close());
+
+            Log.Information("Queuing Sound");
+            _soundQueue.EnqueueSound(liveAudioStream, TextSource.None, volume, StreamFormat.Mp3, null);
         }
-
-        if (!res.IsSuccessStatusCode)
+        catch (OperationCanceledException)
         {
-            try
-            {
-                var content = await res.Content.ReadAsStringAsync();
-                DetailedLog.Debug(content);
-
-                var error = JsonSerializer.Deserialize<OpenAiErrorResponse>(content);
-                if (error?.Error != null)
-                {
-                    throw new OpenAiFailedException(res.StatusCode, error.Error,
-                        $"Request failed with status code {error.Error.Code}: {error.Error.Message}");
-                }
-            }
-            catch (Exception e) when (e is not OpenAiFailedException)
-            {
-                DetailedLog.Error(e, "Failed to parse OpenAI error response.");
-            }
-
-            throw new OpenAiFailedException(res.StatusCode, null, $"Request failed with status code {res.StatusCode}.");
+            Log.Information("OpenAI Speech generation was cancelled by the user.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "OpenAI Streaming Speech generation failed.");
         }
     }
 }

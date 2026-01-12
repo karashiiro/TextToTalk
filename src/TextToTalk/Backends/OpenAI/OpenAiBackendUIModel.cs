@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.ClientModel;
+using OpenAI;
+using OpenAI.Models; // Ensure you have the Models namespace
 
 namespace TextToTalk.Backends.OpenAI;
 
@@ -16,7 +19,9 @@ public class OpenAiBackendUIModel
     /// <summary>
     /// Gets the sound playback queue.
     /// </summary>
-    public StreamSoundQueue SoundQueue { get; }
+    public StreamingSoundQueue SoundQueue { get; }
+
+    //public RawStreamingSoundQueue RawStreamingSoundQueue { get; }
 
     /// <summary>
     /// Gets the currently-instantiated OpenAI client instance.
@@ -36,18 +41,20 @@ public class OpenAiBackendUIModel
 
     public OpenAiBackendUIModel(PluginConfiguration config, HttpClient http)
     {
-        SoundQueue = new StreamSoundQueue(config);
-        OpenAi = new OpenAiClient(SoundQueue, http);
+        SoundQueue = new StreamingSoundQueue(config);
+        var credentials = OpenAiCredentialManager.LoadCredentials();
+        if (credentials != null)
+        {
+            apiKey = (credentials.Password);
+        }
+        //RawStreamingSoundQueue = new RawStreamingSoundQueue(config);
+        OpenAi = new OpenAiClient(SoundQueue, apiKey);
         this.config = config;
         this.apiKey = "";
 
         // this.Voices = new Dictionary<string, IReadOnlyList<string>>();
 
-        var credentials = OpenAiCredentialManager.LoadCredentials();
-        if (credentials != null)
-        {
-            LoginWith(credentials.Password);
-        }
+
     }
 
     /// <summary>
@@ -88,27 +95,45 @@ public class OpenAiBackendUIModel
         this.config.Save();
     }
 
-    private bool TryLogin(string testApiKey)
+private bool TryLogin(string testApiKey)
+{
+    OpenAiLoginException = null;
+    var lastApiKey = this.apiKey;
+
+    try
     {
-        OpenAiLoginException = null;
-        var lastApiKey = this.apiKey;
-        try
-        {
-            DetailedLog.Info("Testing OpenAI authorization status");
-            OpenAi.ApiKey = testApiKey;
-            // This should throw an exception if the API key was incorrect
-            OpenAi.TestCredentials().GetAwaiter().GetResult();
-            DetailedLog.Info("OpenAI authorization successful");
-            return true;
-        }
-        catch (Exception e)
-        {
-            OpenAiLoginException = e;
-            OpenAi.ApiKey = lastApiKey;
-            DetailedLog.Error(e, "Failed to initialize OpenAI client");
-            return false;
-        }
+        DetailedLog.Info("Testing OpenAI authorization status...");
+
+        // 1. Initialize a temporary client with the test key
+        // In the v2 SDK, you can use OpenAIModelClient for a cheap validation call
+        var modelClient = new OpenAIModelClient(new ApiKeyCredential(testApiKey));
+
+        // 2. Perform a 'List Models' call. 
+        // This is a free metadata call that requires valid authentication.
+        // Use GetModels() to verify credentials.
+        _ = modelClient.GetModels(); 
+
+        // 3. If successful, update the primary ApiKey and return true
+        this.apiKey = testApiKey;
+        DetailedLog.Info("OpenAI authorization successful.");
+        return true;
     }
+    catch (ClientResultException e)
+    {
+        // Specifically catch SDK-based authentication or client errors
+        OpenAiLoginException = e;
+        this.apiKey = lastApiKey;
+        DetailedLog.Error(e, $"OpenAI authorization failed: {e.Status} {e.Message}");
+        return false;
+    }
+    catch (Exception e)
+    {
+        OpenAiLoginException = e;
+        this.apiKey = lastApiKey;
+        DetailedLog.Error(e, "An unexpected error occurred during OpenAI initialization.");
+        return false;
+    }
+}
 
     public void Dispose()
     {

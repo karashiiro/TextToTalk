@@ -67,11 +67,21 @@ public class ElevenLabsBackend : VoiceBackend
     public override void CancelAllSpeech()
     {
         this.uiModel.SoundQueue.CancelAllSounds();
+        if (this.uiModel.ElevenLabs._TtsCts != null)
+        {
+            this.uiModel.ElevenLabs._TtsCts.Cancel();
+        }
+        this.uiModel.SoundQueue.StopHardware();
     }
 
     public override void CancelSay(TextSource source)
     {
         this.uiModel.SoundQueue.CancelFromSource(source);
+        if (this.uiModel.ElevenLabs._TtsCts != null)
+        {
+            this.uiModel.ElevenLabs._TtsCts.Cancel();
+        }
+        this.uiModel.SoundQueue.StopHardware();
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)

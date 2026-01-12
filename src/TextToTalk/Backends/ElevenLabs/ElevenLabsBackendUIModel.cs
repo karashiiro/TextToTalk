@@ -21,7 +21,7 @@ public class ElevenLabsBackendUIModel : IDisposable
     /// <summary>
     /// Gets the sound playback queue.
     /// </summary>
-    public StreamSoundQueue SoundQueue { get; }
+    public StreamingSoundQueue SoundQueue { get; }
 
     /// <summary>
     /// Gets the currently-instantiated ElevenLabs client instance.
@@ -46,7 +46,7 @@ public class ElevenLabsBackendUIModel : IDisposable
     public IReadOnlyDictionary<string, (IReadOnlyList<ElevenLabsModel> Items, Dictionary<string, double>? Rates)> Models { get; private set; }
     public ElevenLabsBackendUIModel(PluginConfiguration config, HttpClient http)
     {
-        SoundQueue = new StreamSoundQueue(config);
+        SoundQueue = new StreamingSoundQueue(config);
         ElevenLabs = new ElevenLabsClient(SoundQueue, http);
         this.config = config;
         this.getUserSubscriptionInfoImmediately = new ReactiveProperty<long>(0);

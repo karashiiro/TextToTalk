@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Bindings.ImGui;
 using TextToTalk.UI;
+using TextToTalk.UI.Windows;
 
 namespace TextToTalk.Backends;
 
@@ -142,5 +143,39 @@ public static class BackendUI
 
         ImGui.EndCombo();
         return didPresetsChange;
+    }
+    public static bool ImGuiStylesCombo(string label, string previewText, SortedSet<int> selectedIndices, List<string> styles)
+    {
+        // Use the passed-in string, or a placeholder if it's empty
+        string displayValue = !string.IsNullOrEmpty(previewText) ? previewText : "None selected";
+
+        bool didChange = false;
+
+        // The second parameter of BeginCombo controls what is shown in the closed box
+        if (ImGui.BeginCombo(label, displayValue))
+        {
+            for (int i = 0; i < styles.Count; i++)
+            {
+                bool isSelected = selectedIndices.Contains(i);
+
+                // Use Selectable with DontClosePopups for multi-select
+                if (ImGui.Selectable(styles[i], isSelected, ImGuiSelectableFlags.DontClosePopups))
+                {
+                    if (!isSelected)
+                        selectedIndices.Add(i);
+                    else
+                        selectedIndices.Remove(i);
+
+                    didChange = true;
+                }
+
+                if (isSelected)
+                    ImGui.SetItemDefaultFocus();
+            }
+
+            ImGui.EndCombo();
+        }
+
+        return didChange;
     }
 }

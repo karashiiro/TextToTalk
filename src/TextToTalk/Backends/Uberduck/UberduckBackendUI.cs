@@ -29,8 +29,7 @@ public class UberduckBackendUI
         var credentials = UberduckCredentialManager.LoadCredentials();
         if (credentials != null)
         {
-            this.apiKey = credentials.UserName;
-            this.apiSecret = credentials.Password;
+            this.apiKey = credentials.Password;
         }
 
         this.uberduck.ApiKey = this.apiKey;
@@ -52,11 +51,11 @@ public class UberduckBackendUI
 
         if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
-            var username = Whitespace.Replace(this.apiKey, "");
-            var password = Whitespace.Replace(this.apiSecret, "");
-            UberduckCredentialManager.SaveCredentials(username, password);
-            this.uberduck.ApiKey = username;
-            this.uberduck.ApiSecret = password;
+            var apiKey = Whitespace.Replace(this.apiKey, "");
+            //var password = Whitespace.Replace(this.apiSecret, "");
+            UberduckCredentialManager.SaveCredentials(apiKey);
+            this.uberduck.ApiKey = apiKey;
+            //this.uberduck.ApiSecret = password;
         }
 
         ImGui.SameLine();

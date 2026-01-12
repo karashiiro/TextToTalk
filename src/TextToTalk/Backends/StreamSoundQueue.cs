@@ -1,5 +1,6 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using Serilog;
 using System;
 using System.IO;
 using System.Threading;
@@ -32,6 +33,7 @@ namespace TextToTalk.Backends
             // Play the sound
             lock (this.soundLock)
             {
+                Log.Information("Playing");
                 this.soundOut = new DirectSoundOut(playbackDeviceId);
                 this.soundOut.PlaybackStopped += (_, _) => { this.speechCompleted.Set(); };
                 this.soundOut.Init(volumeSampleProvider);

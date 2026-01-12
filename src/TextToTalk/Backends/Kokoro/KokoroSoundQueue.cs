@@ -1,5 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Game;
 using KokoroSharp;
@@ -10,16 +14,19 @@ namespace TextToTalk.Backends.Kokoro;
 
 public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
 {
-    private readonly KokoroPlayback playback = new();
-    private readonly StreamSoundQueue streamSoundQueue;
+    private static readonly WaveFormat WaveFormat = new(24000, 16, 1);
+    private readonly object soundLock = new();
     private readonly PluginConfiguration config;
     private readonly Task<KokoroModel> modelTask;
+
+    // WASAPI Hardware Members
+    private WasapiOut? soundOut;
+    private BufferedWaveProvider? bufferedProvider;
 
     public KokoroSoundQueue(PluginConfiguration config, Task<KokoroModel> modelTask)
     {
         this.config = config;
         this.modelTask = modelTask;
-        this.streamSoundQueue = new StreamSoundQueue(config);
     }
 
     private bool TryGetModel([NotNullWhen(true)] out KokoroModel? model)
@@ -33,81 +40,130 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
         return false;
     }
 
-    public void EnqueueSound(KokoroSourceQueueItem item)
+    protected override void OnSoundLoop(KokoroSourceQueueItem nextItem)
     {
-        this.AddQueueItem(item);
+        if (!TryGetModel(out var model) || nextItem.Aborted) return;
+
+        // 1. Setup WASAPI Hardware Session
+        lock (this.soundLock)
+        {
+            if (this.soundOut == null)
+            {
+                var mmDevice = GetWasapiDeviceFromGuid(config.SelectedAudioDeviceGuid);
+                this.bufferedProvider = new BufferedWaveProvider(WaveFormat)
+                {
+                    ReadFully = false,
+                    BufferDuration = TimeSpan.FromSeconds(30),
+                    DiscardOnBufferOverflow = true
+                };
+                this.soundOut = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 50);
+                this.soundOut.Init(this.bufferedProvider);
+            }
+        }
+
+        // 2. Prepare Language & Tokens
+        string langCode = nextItem.Language switch
+        {
+            ClientLanguage.Japanese => "ja",
+            ClientLanguage.German => "de",
+            ClientLanguage.French => "fr",
+            _ => config.KokoroUseAmericanEnglish ? "en-us" : "en",
+        };
+
+        int[] tokens = Tokenizer.Tokenize(nextItem.Text, langCode, preprocess: true);
+        var segments = SegmentationSystem.SplitToSegments(tokens, new() { MaxFirstSegmentLength = 200 });
+
+        // 3. Inference & Playback Loop
+        foreach (var chunk in segments)
+        {
+            if (nextItem.Aborted) break;
+
+            // CPU Inference
+            var samples = model.Infer(chunk, nextItem.Voice.Features, nextItem.Speed);
+            byte[] bytes = KokoroPlayback.GetBytes(samples);
+
+            // POST-INFERENCE ABORT CHECK: Prevent enqueuing "zombie" audio
+            if (nextItem.Aborted) break;
+
+            lock (this.soundLock)
+            {
+                if (this.bufferedProvider != null && this.soundOut != null)
+                {
+                    this.bufferedProvider.AddSamples(bytes, 0, bytes.Length);
+                    if (this.soundOut.PlaybackState != PlaybackState.Playing)
+                    {
+                        this.soundOut.Play();
+                    }
+                }
+            }
+        }
+
+        // 4. Wait for audio to finish playing if not aborted
+        while (!nextItem.Aborted && this.bufferedProvider?.BufferedBytes > 0)
+        {
+            Thread.Sleep(50);
+        }
     }
 
     protected override void OnSoundCancelled()
     {
+        // 1. Flag the current item to stop the inference loop
         GetCurrentItem()?.Cancel();
+
+        // 2. Hard Stop the WASAPI hardware session immediately
+        StopHardware();
     }
 
-    public override void CancelAllSounds()
+    private void StopHardware()
     {
-        base.CancelAllSounds();
-        streamSoundQueue.CancelAllSounds();
-    }
-
-    public override void CancelFromSource(TextSource source)
-    {
-        base.CancelFromSource(source);
-        streamSoundQueue.CancelFromSource(source);
-    }
-
-    protected override void OnSoundLoop(KokoroSourceQueueItem nextItem)
-    {
-        if (!TryGetModel(out var model) || nextItem.Aborted)
+        lock (this.soundLock)
         {
-            return;
-        }
-
-        var lang = nextItem.Language;
-
-        // https://github.com/espeak-ng/espeak-ng/blob/master/docs/languages.md
-        string langCode = lang switch
-        {
-            ClientLanguage.Japanese => "ja",
-            ClientLanguage.English => "en",
-            ClientLanguage.German => "de",
-            ClientLanguage.French => "fr",
-            _ => "en",
-        };
-
-        if (langCode == "en" && config.KokoroUseAmericanEnglish)
-        {
-            langCode = "en-us"; // Use American English for English language
-        }
-
-        // this is a blocking call!
-        int[] tokens = Tokenizer.Tokenize(nextItem.Text, langCode, preprocess: true);
-        if (nextItem.Aborted)
-        {
-            return;
-        }
-
-        var tokensList = SegmentationSystem.SplitToSegments(tokens, new()
-        {
-            MinFirstSegmentLength = 20,
-            MaxFirstSegmentLength = 200,
-            MaxSecondSegmentLength = 200
-        }); // Split tokens into chunks Kokoro can handle
-
-        foreach (var tokenChunk in tokensList)
-        {
-            // this is a blocking call!
-            var samples = model.Infer(tokenChunk, nextItem.Voice.Features, nextItem.Speed);
-            if (nextItem.Aborted)
+            if (this.soundOut != null)
             {
-                return;
+                this.soundOut.Stop();
+                this.soundOut.Dispose();
+                this.soundOut = null;
             }
-
-            var bytes = KokoroPlayback.GetBytes(samples);
-            var ms = new MemoryStream(bytes);
-            streamSoundQueue.EnqueueSound(ms, nextItem.Source, StreamFormat.Raw, nextItem.Volume);
+            if (this.bufferedProvider != null)
+            {
+                this.bufferedProvider.ClearBuffer();
+                this.bufferedProvider = null;
+            }
         }
+    }
+
+    private MMDevice GetWasapiDeviceFromGuid(Guid targetGuid)
+    {
+        using var enumerator = new MMDeviceEnumerator();
+        var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+        foreach (var device in devices)
+        {
+            if (device.Properties.Contains(PropertyKeys.PKEY_AudioEndpoint_GUID))
+            {
+                var guidString = device.Properties[PropertyKeys.PKEY_AudioEndpoint_GUID].Value as string;
+                if (Guid.TryParse(guidString, out var deviceGuid) && deviceGuid == targetGuid)
+                    return device;
+            }
+        }
+        return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) StopHardware();
+        base.Dispose(disposing);
+    }
+
+    public void EnqueueSound(KokoroSourceQueueItem item)
+    {
+        // Add the item to the internal SoundQueue<T> processing loop
+        this.AddQueueItem(item);
     }
 }
+
+
+
+
 
 public class KokoroSourceQueueItem : SoundQueueItem
 {

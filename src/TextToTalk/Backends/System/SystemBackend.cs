@@ -59,6 +59,7 @@ namespace TextToTalk.Backends.System
             {
                 this.voiceExceptions.Dispose();
                 this.soundQueue.Dispose();
+
             }
         }
     }

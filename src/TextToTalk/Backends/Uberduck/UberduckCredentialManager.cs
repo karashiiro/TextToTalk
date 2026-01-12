@@ -13,9 +13,9 @@ public static class UberduckCredentialManager
         return credentials;
     }
 
-    public static void SaveCredentials(string username, string password)
+    public static void SaveCredentials(string apikey)//, string password)
     {
-        var credentials = new NetworkCredential(username, password);
+        var credentials = new NetworkCredential("null", apikey);//, password);
         CredentialManager.SaveCredentials(CredentialsTarget, credentials);
     }
 

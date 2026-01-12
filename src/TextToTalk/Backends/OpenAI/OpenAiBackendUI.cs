@@ -2,6 +2,7 @@
 using Dalamud.Game;
 using Dalamud.Game.Text;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TextToTalk.UI;
 using TextToTalk.UI.Windows;
@@ -15,6 +16,7 @@ public class OpenAiBackendUI
     private readonly OpenAiBackend backend;
 
     private string apiKey;
+    private SortedSet<int> selectedStyleIndices = new SortedSet<int>();
 
     public OpenAiBackendUI(OpenAiBackendUIModel model, PluginConfiguration config, OpenAiBackend backend)
     {
@@ -22,6 +24,7 @@ public class OpenAiBackendUI
         this.model = model;
         this.apiKey = this.model.GetApiKey();
         this.backend = backend;
+
     }
 
     public void DrawLoginOptions()
@@ -45,6 +48,7 @@ public class OpenAiBackendUI
         
     }
 
+
     public void DrawVoicePresetOptions()
     {
         var currentVoicePreset = model.GetCurrentVoicePreset();
@@ -66,6 +70,7 @@ public class OpenAiBackendUI
                 .ToArray();
             if (ImGui.Combo($"Voice preset##{MemoizedId.Create()}", ref currentPresetIndex, presetDisplayNames, presets.Count))
                 config.SetCurrentVoicePreset(presets[currentPresetIndex].Id);
+                currentVoicePreset.SyncSetFromString();
         }
         else if (currentVoicePreset != null)
         {
@@ -184,17 +189,38 @@ public class OpenAiBackendUI
             }
             else
             {
-                var style = currentVoicePreset.Style;
-                voiceStyles.Insert(0, "");
-                var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
-                if (ImGui.Combo($"Voice Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+                // 1. Generate the preview text directly from the set
+                string previewText = currentVoicePreset.Styles.Count > 0
+                    ? string.Join(", ", currentVoicePreset.Styles)
+                    : "None selected";
+
+                // 2. Open the Combo
+                if (ImGui.BeginCombo($"Voice Style##{MemoizedId.Create()}", previewText))
                 {
-                    currentVoicePreset.Style = voiceStyles[styleIndex];
-                    this.config.Save();
+                    foreach (var styleName in config.CustomVoiceStyles)
+                    {
+                        // Check if this style is currently in our preset's set
+                        bool isSelected = currentVoicePreset.Styles.Contains(styleName);
+
+                        if (ImGui.Selectable(styleName, isSelected, ImGuiSelectableFlags.DontClosePopups))
+                        {
+                            if (isSelected)
+                                currentVoicePreset.Styles.Remove(styleName);
+                            else
+                                currentVoicePreset.Styles.Add(styleName);
+
+                            // 3. Save immediately
+                            // Because 'Styles' is a reference type inside the preset, 
+                            // the save/reload won't "wipe" your local UI state anymore.
+                            currentVoicePreset.SyncStringFromSet();
+                            this.config.Save();
+                        }
+                    }
+                    ImGui.EndCombo();
                 }
             }
 
-            Components.HelpTooltip("""
+                Components.HelpTooltip("""
                 Styles are additional information that can be provided to the model to help it generate more accurate speech.
                 This can include things like emphasis, pronunciation, pauses, tone, pacing, voice affect, inflections, word choice etc.
                 Examples can be found at https://openai.fm
