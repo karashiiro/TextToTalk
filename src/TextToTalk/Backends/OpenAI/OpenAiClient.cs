@@ -1,13 +1,17 @@
-﻿using NAudio.CoreAudioApi;
+﻿using Dalamud.Bindings.ImGui;
+using NAudio.CoreAudioApi;
 using OpenAI;
 using Serilog;
 using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +24,8 @@ public class OpenAiClient
     private readonly OpenAIClient _openAiClient;
     private readonly StreamingSoundQueue _soundQueue;
     public CancellationTokenSource? _ttsCts;
+
+    private readonly HttpClient _httpClient = new();
 
     // --- Provided Definitions ---
     public record ModelConfig(
@@ -66,58 +72,57 @@ public class OpenAiClient
         }
     }
 
-    public async Task Say(string text, string modelName, string voiceId, string? instructions, float speed, float volume)
+    public async Task Say(string text, string modelName, TextSource source, string voiceId, string? instructions, float speed, float volume)
     {
-        if (_openAiClient == null) return;
+        long methodStart = Stopwatch.GetTimestamp();
+        if (string.IsNullOrWhiteSpace(ApiKey)) return;
 
-        // Cancel any previous request before starting a new one
         _ttsCts?.Cancel();
         _ttsCts = new CancellationTokenSource();
         var token = _ttsCts.Token;
 
         try
         {
-            OpenAIAudio.AudioClient audioClient = _openAiClient.GetAudioClient(modelName);
-
+            // 1. Prepare the JSON Payload
             var requestBody = new Dictionary<string, object>
         {
             { "model", modelName },
             { "input", text },
             { "voice", voiceId.ToLowerInvariant() },
-            { "response_format", "mp3" },
+            { "response_format", "pcm" },
             { "speed", speed }
         };
 
-            if (Models.First(m => m.ModelName == "gpt-4o-mini-tts").InstructionsSupported)
+            // Check if model supports instructions (gpt-4o-mini-tts)
+            var modelCfg = Models.FirstOrDefault(m => m.ModelName == modelName);
+            if (modelCfg != null && modelCfg.InstructionsSupported && !string.IsNullOrEmpty(instructions))
             {
-                requestBody["instructions"] = instructions ?? "";
+                requestBody["instructions"] = instructions;
             }
 
-            BinaryContent content = BinaryContent.Create(BinaryData.FromObjectAsJson(requestBody));
-            RequestOptions options = new();
-            options.BufferResponse = false;
+            // 2. Configure the Request
+            using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/audio/speech");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
+            request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
-            // PASS THE TOKEN HERE
-            options.CancellationToken = token;
+            // 3. Send and Stream Response
+            // HttpCompletionOption.ResponseHeadersRead is the "magic" for low latency
+            var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
+            response.EnsureSuccessStatusCode();
 
-            // The request will throw OperationCanceledException if cancelled during the call
-            ClientResult result = await audioClient.GenerateSpeechAsync(content, options);
+            var responseStream = await response.Content.ReadAsStreamAsync(token);
 
-            Stream liveAudioStream = result.GetRawResponse().ContentStream;
-
-            // Register a callback to close the stream if cancellation happens while reading
-            token.Register(() => liveAudioStream.Close());
-
-            Log.Information("Queuing Sound");
-            _soundQueue.EnqueueSound(liveAudioStream, TextSource.None, volume, StreamFormat.Mp3, null);
+            // 4. Pass the live stream directly to the sound queue
+            // The queue will handle the background reading/decoding
+            _soundQueue.EnqueueSound(responseStream, source, volume, StreamFormat.Wave, null, methodStart);
         }
         catch (OperationCanceledException)
         {
-            Log.Information("OpenAI Speech generation was cancelled by the user.");
+            Log.Information("OpenAI Speech generation was cancelled.");
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "OpenAI Streaming Speech generation failed.");
+            Log.Error(ex, "OpenAI REST Speech generation failed.");
         }
     }
 }

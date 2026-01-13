@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net.Http;
+using System.Diagnostics;
 using static TextToTalk.Backends.System.SystemSoundQueue;
 
 namespace TextToTalk.Backends
@@ -36,6 +37,8 @@ namespace TextToTalk.Backends
             public StreamFormat Format { get; init; }
             public HttpResponseMessage? Response { get; set; }
             public bool Aborted { get; set; }
+
+            public long? StartTime { get; set; } // Use GetTimestamp() value
 
             protected override void Dispose(bool disposing)
             {

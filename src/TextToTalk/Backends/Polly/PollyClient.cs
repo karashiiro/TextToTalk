@@ -5,6 +5,7 @@ using Amazon.Runtime;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,6 +58,7 @@ namespace TextToTalk.Backends.Polly
         public async Task Say(Engine engine, VoiceId voice, string? amazonDomainName, int sampleRate, int playbackRate,
             float volume, TextSource source, string text)
         {
+            long methodStart = Stopwatch.GetTimestamp();
             _TtsCts?.Cancel();
             _TtsCts?.Dispose();
 
@@ -80,7 +82,7 @@ namespace TextToTalk.Backends.Polly
                 SampleRate = sampleRate.ToString(),
                 TextType = TextType.Ssml,
             };
-
+            bool isFirstChunk = true;
             try
             {
                 // Using 'using' ensures the response (and its stream) is disposed after the queue handles it
@@ -88,7 +90,9 @@ namespace TextToTalk.Backends.Polly
 
                 // Pass the live AudioStream directly to the queue.
                 // Ensure EnqueueSound is updated to process the stream as it arrives.
-                this.soundQueue.EnqueueSound(res.AudioStream, source, volume, StreamFormat.Mp3, null);
+                long? timestampToPass = isFirstChunk ? methodStart : null;
+                this.soundQueue.EnqueueSound(res.AudioStream, source, volume, StreamFormat.Mp3, null, timestampToPass);
+                isFirstChunk = false;
             }
             catch (OperationCanceledException)
             {

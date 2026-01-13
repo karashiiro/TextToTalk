@@ -3,30 +3,44 @@ using Microsoft.CognitiveServices.Speech.Audio;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net.Http;
 using TextToTalk.Lexicons;
 
 namespace TextToTalk.Backends.Azure;
 
 public class AzureClient : IDisposable
 {
+    private readonly HttpClient _httpClient;
+    private readonly string _apiKey;
+    private readonly string _endpoint;
+
     private readonly SpeechConfig speechConfig;
     private readonly SpeechSynthesizer synthesizer;
+
     private readonly StreamingSoundQueue soundQueue;
-    private readonly LexiconManager lexiconManager;
+    private readonly LexiconManager _lexiconManager;
     private readonly PluginConfiguration config;
     private CancellationTokenSource? _ttsCts;
 
     public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager, PluginConfiguration config)
     {
-        var audioConfig = AudioConfig.FromWavFileOutput("NUL");
-        this.speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
-        this.synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
-        this.soundQueue = new StreamingSoundQueue(config);
-        this.lexiconManager = lexiconManager;
+        _apiKey = subscriptionKey;
+        _endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1";
+
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", _apiKey);
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "TextToTalkApp");
+
+        soundQueue = new StreamingSoundQueue(config);
+        _lexiconManager = lexiconManager;
+        speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
+        speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm);
+        synthesizer = new SpeechSynthesizer(speechConfig, null);
     }
 
     public TextSource GetCurrentlySpokenTextSource()
@@ -64,37 +78,45 @@ public class AzureClient : IDisposable
 
     public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text, string style)
     {
+        long methodStart = Stopwatch.GetTimestamp();
         _ttsCts?.Cancel();
         _ttsCts = new CancellationTokenSource();
         var token = _ttsCts.Token;
 
-        var ssml = this.lexiconManager.MakeSsml(
-            text,
-            style,
-            voice: voice,
-            langCode: "en-US",
-            playbackRate: playbackRate,
-            includeSpeakAttributes: true);
+        
+        var ssml = _lexiconManager.MakeSsml(text, style, voice, "en-US", playbackRate, true);
 
-            // LOW LATENCY PATH: Start speaking and stream chunks immediately
-            speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm);
-            using var result = await this.synthesizer.StartSpeakingSsmlAsync(ssml);
-            using var audioDataStream = AudioDataStream.FromResult(result);
+        using var request = new HttpRequestMessage(HttpMethod.Post, _endpoint)
+        {
+            Content = new StringContent(ssml, global::System.Text.Encoding.UTF8, "application/ssml+xml")
+        };
 
-            byte[] buffer = new byte[4096];
-            uint bytesRead;
-            while ((bytesRead = audioDataStream.ReadData(buffer)) > 0)
-            {
-                if (token.IsCancellationRequested) break;
-                // Create a copy of the buffer for the specific chunk
-                var chunk = new byte[bytesRead];
-                Buffer.BlockCopy(buffer, 0, chunk, 0, (int)bytesRead);
+        // 2026 Low Latency Format: 'raw' is better for direct streaming than 'riff'
+        request.Headers.Add("X-Microsoft-OutputFormat", "raw-16khz-16bit-mono-pcm");
 
-                var chunkStream = new MemoryStream(chunk);
-                this.soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Azure, null);
-            }
-            
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
+        response.EnsureSuccessStatusCode();
+
+        using var responseStream = await response.Content.ReadAsStreamAsync(token);
+
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+
+        while ((bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+        {
+            if (token.IsCancellationRequested) break;
+
+            var chunk = new byte[bytesRead];
+            Buffer.BlockCopy(buffer, 0, chunk, 0, bytesRead);
+
+            var chunkStream = new MemoryStream(chunk);
+            long? timestampToPass = methodStart;
+            soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Azure, null, timestampToPass);
+
         }
+
+        // Implicitly returns Task.CompletedTask because it is 'async Task'
+    }
 
 
     public Task CancelAllSounds()

@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -45,6 +46,7 @@ public partial class UberduckClient
 
     public async Task Say(string voice, int playbackRate, float volume, TextSource source, string text)
     {
+        long methodStart = Stopwatch.GetTimestamp();
         var url = "https://api.uberduck.ai/v1/text-to-speech";
 
         var payload = new
@@ -72,10 +74,10 @@ public partial class UberduckClient
 
                 // Use a MemoryStream to hold the downloaded data
                 var waveStream = new MemoryStream(audioBytes);
-
+                long? timestampToPass = methodStart;
                 // Pass the stream to your queue. Ensure the consumer uses WaveFileReader 
                 // to correctly handle the WAV container.
-                this.soundQueue.EnqueueSound(waveStream, source, volume, StreamFormat.Uberduck, null);
+                this.soundQueue.EnqueueSound(waveStream, source, volume, StreamFormat.Uberduck, null, timestampToPass);
             }
         }
     }

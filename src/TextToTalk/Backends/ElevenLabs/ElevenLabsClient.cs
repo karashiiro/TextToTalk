@@ -3,6 +3,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -34,7 +35,7 @@ public class ElevenLabsClient
     public async Task Say(string? voice, int playbackRate, float volume, float similarityBoost, float stability,
         TextSource source, string text, string? model, string? style)
     {
-        Log.Information($"Style = {style}");
+        long methodStart = Stopwatch.GetTimestamp();
         _TtsCts?.Cancel();
         _TtsCts?.Dispose();
 
@@ -70,8 +71,6 @@ public class ElevenLabsClient
                     Stability = finalStability,
                 },
             };
-            Log.Information($"Model Called = {args.ModelId}");
-            Log.Information($"Message Sent = {args.Text}");
 
             var uriBuilder = new UriBuilder(UrlBase) { Path = $"/v1/text-to-speech/{voice}/stream" };
 
@@ -89,10 +88,10 @@ public class ElevenLabsClient
 
             // Get the stream directly from the response
             var responseStream = await res.Content.ReadAsStreamAsync(ct);
-
+            long? timestampToPass = methodStart;
             // Enqueue the live stream. 
             // IMPORTANT: Your soundQueue must be able to process the stream as bytes arrive.
-            this.soundQueue.EnqueueSound(responseStream, source, volume, StreamFormat.Mp3, res);
+            this.soundQueue.EnqueueSound(responseStream, source, volume, StreamFormat.Mp3, res, timestampToPass);
         }
         catch (OperationCanceledException)
         {

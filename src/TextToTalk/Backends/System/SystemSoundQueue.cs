@@ -5,6 +5,7 @@ using R3;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Speech.Synthesis;
 using System.Threading;
@@ -45,13 +46,14 @@ namespace TextToTalk.Backends.System
             }
             return synth;
         }
-        public void EnqueueSound(VoicePreset preset, TextSource source, string text)
+        public void EnqueueSound(VoicePreset preset, TextSource source, string text, long? timeStamp)
         {
             AddQueueItem(new SystemSoundQueueItem
             {
                 Preset = preset,
                 Source = source,
                 Text = text,
+                StartTime = timeStamp,
             });
         }
 
@@ -137,8 +139,12 @@ namespace TextToTalk.Backends.System
                 {
                     if (this.soundOut?.PlaybackState != PlaybackState.Playing)
                     {
+                        if (nextItem.StartTime.HasValue)
+                        {
+                            var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
+                            Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
+                        }
                         this.soundOut?.Play();
-                        Log.Information("Playing");
                     }
                 }
             }

@@ -8,6 +8,8 @@
 
         public bool Aborted { get; private set; }
 
+        public long? StartTime { get; set; } // Use GetTimestamp() value
+
         internal void Cancel()
         {
             Aborted = true;

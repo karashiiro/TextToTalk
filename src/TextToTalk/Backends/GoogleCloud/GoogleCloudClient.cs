@@ -1,6 +1,7 @@
 using Google.Cloud.TextToSpeech.V1;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -77,6 +78,7 @@ public class GoogleCloudClient
 
     public async Task Say(string? locale, string? voice, float? speed, float volume, TextSource source, string text)
     {
+        long methodStart = Stopwatch.GetTimestamp();
         if (client == null || soundQueue == null || locale == null) return;
 
         if (_TtsCts != null)
@@ -125,7 +127,7 @@ public class GoogleCloudClient
             await streamingCall.WriteCompleteAsync();
 
             // 4. Process the response stream with the cancellation token
-            // Use WithCancellation to properly dispose of the enumerator on cancel
+
             await foreach (var response in streamingCall.GetResponseStream().WithCancellation(ct))
             {
                 if (response.AudioContent.Length > 0)
@@ -134,7 +136,8 @@ public class GoogleCloudClient
 
                     // Note: Linear16 audio is typically handled as StreamFormat.Pcm 
                     // but matches Wave if your queue expects raw headerless bytes.
-                    soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Wave, null);
+                    long? timestampToPass = methodStart;
+                    soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Wave, null, timestampToPass);
                 }
             }
         }

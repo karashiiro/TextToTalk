@@ -1,9 +1,11 @@
-﻿using NAudio.CoreAudioApi;
+﻿using Google.Protobuf.WellKnownTypes;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Sockets;
@@ -34,7 +36,7 @@ namespace TextToTalk.Backends
         private bool _isDisposed;
         public CancellationTokenSource? _ttsCts;
 
-        public void EnqueueSound(Stream data, TextSource source, float volume, StreamFormat format, HttpResponseMessage? response)
+        public void EnqueueSound(Stream data, TextSource source, float volume, StreamFormat format, HttpResponseMessage? response, long? timeStamp)
         {
             AddQueueItem(new StreamingSoundQueueItem
             {
@@ -43,6 +45,7 @@ namespace TextToTalk.Backends
                 Volume = volume,
                 Format = format,
                 Response = response,
+                StartTime = timeStamp,
             });
         }
 
@@ -59,6 +62,7 @@ namespace TextToTalk.Backends
             {
                 ProcessMp3Stream(nextItem);
             }
+ 
             else
             {
                 ProcessRawPcmStream(nextItem);
@@ -67,14 +71,12 @@ namespace TextToTalk.Backends
 
         private void ProcessMp3Stream(StreamingSoundQueueItem nextItem)
         {
-            Log.Information("Playing as Mp3)");
             IMp3FrameDecompressor decompressor = null;
             try
             {
                 // Wrap the network stream to support forward-only Position tracking 
                 // and prevent partial-read exceptions in LoadFromStream.
                 using var readFullyStream = new ReadFullyStream(nextItem.Data);
-                Log.Information("Processing as MP3");
                 while (true)
                 {
 
@@ -118,6 +120,11 @@ namespace TextToTalk.Backends
                             if (this.bufferedProvider.BufferedBytes > 4096 &&
                                 this.soundOut.PlaybackState != PlaybackState.Playing)
                             {
+                                if (nextItem.StartTime.HasValue)
+                                {
+                                    var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
+                                    Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
+                                }
                                 this.soundOut.Play();
                             }
                         }
@@ -137,12 +144,11 @@ namespace TextToTalk.Backends
 
         private void ProcessRawPcmStream(StreamingSoundQueueItem nextItem)
         {
-            Log.Information("Playing as raw PCM");
-            // Resolve format for raw PCM types
+            // Resolve format
             WaveFormat chunkFormat = nextItem.Format switch
             {
                 StreamFormat.Wave => Wave,
-                StreamFormat.Azure => Azure,
+                StreamFormat.Azure => Azure, // Ensure this is 24000Hz for OpenAI PCM!
                 _ => throw new NotSupportedException($"Format {nextItem.Format} requires a decompressor."),
             };
 
@@ -150,18 +156,27 @@ namespace TextToTalk.Backends
             {
                 EnsureHardwareInitialized(chunkFormat);
 
-                // Read in chunks to avoid calling .Length on network streams
                 byte[] chunkBuffer = new byte[16384];
                 int bytesRead;
+                bool latencyLogged = false; // Flag to ensure we only log once
+
                 while ((bytesRead = nextItem.Data.Read(chunkBuffer, 0, chunkBuffer.Length)) > 0)
                 {
                     ApplyVolumeToPcmBuffer(chunkBuffer, bytesRead, nextItem.Volume);
-
                     this.bufferedProvider.AddSamples(chunkBuffer, 0, bytesRead);
 
-                    if (this.bufferedProvider.BufferedBytes > 512 && this.soundOut.PlaybackState != PlaybackState.Playing)
+                    // Condition: Buffer has enough "cushion" to prevent the blip
+                    if (this.bufferedProvider.BufferedBytes > 16384 && this.soundOut.PlaybackState != PlaybackState.Playing)
                     {
                         this.soundOut.Play();
+
+                        // Log latency exactly once when the sound actually starts
+                        if (!latencyLogged && nextItem.StartTime.HasValue)
+                        {
+                            var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
+                            Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
+                            latencyLogged = true;
+                        }
                     }
                 }
             }

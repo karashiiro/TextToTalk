@@ -1,14 +1,16 @@
-﻿using NAudio.CoreAudioApi;
+﻿using Dalamud.Game;
+using KokoroSharp;
+using KokoroSharp.Core;
+using KokoroSharp.Processing;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
+using Serilog;
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Game;
-using KokoroSharp;
-using KokoroSharp.Core;
-using KokoroSharp.Processing;
 
 namespace TextToTalk.Backends.Kokoro;
 
@@ -92,6 +94,11 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
                     this.bufferedProvider.AddSamples(bytes, 0, bytes.Length);
                     if (this.soundOut.PlaybackState != PlaybackState.Playing)
                     {
+                        if (nextItem.StartTime.HasValue)
+                        {
+                            var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
+                            Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
+                        }
                         this.soundOut.Play();
                     }
                 }
@@ -167,7 +174,7 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
 
 public class KokoroSourceQueueItem : SoundQueueItem
 {
-    public KokoroSourceQueueItem(string text, KokoroVoice voice, float speed, float volume, TextSource source, ClientLanguage language)
+    public KokoroSourceQueueItem(string text, KokoroVoice voice, float speed, float volume, TextSource source, ClientLanguage language, long? startTime)
     {
         Source = source;
         Text = text;
@@ -176,6 +183,7 @@ public class KokoroSourceQueueItem : SoundQueueItem
         Volume = volume;
         Source = source;
         Language = language;
+        StartTime = startTime;
     }
 
     public string Text { get; }
@@ -184,6 +192,8 @@ public class KokoroSourceQueueItem : SoundQueueItem
     public float Volume { get; }
     public bool Aborted { get; private set; }
     public ClientLanguage Language { get; }
+
+    public long? StartTime { get; set; } // Use GetTimestamp() value
 
     internal void Cancel()
     {

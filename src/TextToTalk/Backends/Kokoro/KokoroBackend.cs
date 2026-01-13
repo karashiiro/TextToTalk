@@ -1,15 +1,16 @@
+using Dalamud.Bindings.ImGui;
+using Dalamud.Game;
+using KokoroSharp;
+using KokoroSharp.Core;
+using KokoroSharp.Processing;
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Game;
-using Dalamud.Bindings.ImGui;
-using KokoroSharp;
-using KokoroSharp.Core;
-using KokoroSharp.Processing;
 
 namespace TextToTalk.Backends.Kokoro;
 
@@ -105,6 +106,8 @@ public class KokoroBackend : VoiceBackend
 
     public void Say(string text, KokoroVoicePreset voicePreset, TextSource source, ClientLanguage language)
     {
+        long methodStart = Stopwatch.GetTimestamp();
+        long? timestampToPass = methodStart;
         if (!TryGetModel(out _))
         {
             return;
@@ -120,7 +123,7 @@ public class KokoroBackend : VoiceBackend
         }
 
         // TODO: apply lexicon once KokoroSharp supports it
-        soundQueue.EnqueueSound(new(text, voice, voicePreset.Speed ?? 1f, voicePreset.Volume ?? 0.6f, source, language));
+        soundQueue.EnqueueSound(new(text, voice, voicePreset.Speed ?? 1f, voicePreset.Volume ?? 0.6f, source, language, timestampToPass));
     }
 
     public override void CancelAllSpeech()

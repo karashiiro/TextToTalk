@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 
@@ -30,7 +31,9 @@ namespace TextToTalk.Backends.System
         }
         public override void Say(SayRequest request)
         {
-            this.soundQueue.EnqueueSound(request.Voice, request.Source, request.Text);
+            long methodStart = Stopwatch.GetTimestamp();
+            long? timestampToPass = methodStart;
+            this.soundQueue.EnqueueSound(request.Voice, request.Source, request.Text, timestampToPass);
         }
 
         public override void CancelAllSpeech()
