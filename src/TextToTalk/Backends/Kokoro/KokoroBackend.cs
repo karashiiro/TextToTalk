@@ -165,10 +165,6 @@ public class KokoroBackend : VoiceBackend
         cts.Cancel();
         if (disposing)
         {
-            if (TryGetModel(out var model))
-            {
-                model.Dispose();
-            }
             soundQueue.Dispose();
         }
     }

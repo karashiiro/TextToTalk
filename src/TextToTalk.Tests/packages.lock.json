@@ -372,10 +372,29 @@
         "resolved": "5.0.0-pre.13",
         "contentHash": "65qbZS49AfrTM6jtZ2RDTWAzLe13ywCXIiSP5QrAJLmZT6sQqHGd1LfFXLhx8Ccp77qy7qh/LHsxpUOlkgZTCg=="
       },
+      "PiperSharp": {
+        "type": "Transitive",
+        "resolved": "1.0.6",
+        "contentHash": "g68TbampKc0ATx80nur6LHHrhIpXvmioIVuwAuWKcjTXTB2tf+Klk4JPwzWZRo+DRSR4kS370eh+davEQVR0cw==",
+        "dependencies": {
+          "NAudio": "2.2.1",
+          "NAudio.Core": "2.2.1",
+          "Newtonsoft.Json": "13.0.1",
+          "SharpCompress": "0.36.0"
+        }
+      },
       "R3": {
         "type": "Transitive",
         "resolved": "1.2.9",
         "contentHash": "dKMFt90XW+n7JK2P40dx9uuLg57Pcj4cA/9n1NwdKWFcMAM6j49OU8h9EborpVe4KXI+2MV/EjKc1LG7fhQJUA=="
+      },
+      "SharpCompress": {
+        "type": "Transitive",
+        "resolved": "0.36.0",
+        "contentHash": "48am//T6Ou+GmyPmBaxaFN1ym0VNidRcBeANr9+OYTzpKRz8QMGzAkHVkCV30lFQ/gnWqGr50AuebahpG1C6xA==",
+        "dependencies": {
+          "ZstdSharp.Port": "0.7.4"
+        }
       },
       "Standart.Hash.xxHash": {
         "type": "Transitive",
@@ -477,6 +496,11 @@
         "resolved": "15.3.0",
         "contentHash": "F93japYa9YrJ59AZGhgdaUGHN7ITJ55FBBg/D/8C0BDgahv/rQD6MOSwHxOJJpon1kYyslVbeBrQ2wcJhox01w=="
       },
+      "ZstdSharp.Port": {
+        "type": "Transitive",
+        "resolved": "0.7.4",
+        "contentHash": "ziptnotpUJr51afwXJQ5Wc03dvDiZAdmxS08s1g7SHn/VzbyZUXdH6yORk/zaNjzUOEE6pVZ0Nqztab0rYROgQ=="
+      },
       "texttotalk": {
         "type": "Project",
         "dependencies": {
@@ -488,6 +512,7 @@
           "Microsoft.CognitiveServices.Speech": "[1.41.1, )",
           "NAudio": "[2.2.1, )",
           "OpenAI": "[2.8.0, )",
+          "PiperSharp": "[1.0.6, )",
           "R3": "[1.2.9, )",
           "Standart.Hash.xxHash": "[4.0.5, )",
           "System.Drawing.Common": "[9.0.0, )",

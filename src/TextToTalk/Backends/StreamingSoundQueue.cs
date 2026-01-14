@@ -148,38 +148,61 @@ namespace TextToTalk.Backends
             WaveFormat chunkFormat = nextItem.Format switch
             {
                 StreamFormat.Wave => Wave,
-                StreamFormat.Azure => Azure, // Ensure this is 24000Hz for OpenAI PCM!
+                StreamFormat.Azure => Azure,
+                StreamFormat.Piper => Wave,
                 _ => throw new NotSupportedException($"Format {nextItem.Format} requires a decompressor."),
             };
 
             lock (this.soundLock)
             {
                 EnsureHardwareInitialized(chunkFormat);
-
                 byte[] chunkBuffer = new byte[16384];
                 int bytesRead;
-                bool latencyLogged = false; // Flag to ensure we only log once
+                bool latencyLogged = false;
+
+
 
                 while ((bytesRead = nextItem.Data.Read(chunkBuffer, 0, chunkBuffer.Length)) > 0)
                 {
                     ApplyVolumeToPcmBuffer(chunkBuffer, bytesRead, nextItem.Volume);
                     this.bufferedProvider.AddSamples(chunkBuffer, 0, bytesRead);
 
-                    // Condition: Buffer has enough "cushion" to prevent the blip
+                    // 2. Start hardware if it's not already playing
                     if (this.bufferedProvider.BufferedBytes > 16384 && this.soundOut.PlaybackState != PlaybackState.Playing)
                     {
-                        this.soundOut.Play();
-
-                        // Log latency exactly once when the sound actually starts
-                        if (!latencyLogged && nextItem.StartTime.HasValue)
+                        // 1. Log latency immediately when we start processing the item
+                        if (nextItem.StartTime.HasValue)
                         {
                             var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
-                            Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
-                            latencyLogged = true;
+                            Log.Information("Total Latency (Say -> Processing): {Ms}ms", elapsed.TotalMilliseconds);
                         }
+
+                        this.soundOut.Play();
+                        latencyLogged = true;
+                    }
+                }
+
+
+                // 3. WAIT AND STOP: Release the hardware lock once this item (and any previous) is finished
+                // This is critical to ensure the NEXT item sees the state as 'Not Playing'
+                // This is necessary because of some weirdness with the Piper backend.  This code is not compatible with Azure
+                if (nextItem.Format == StreamFormat.Piper)
+                {
+                    while (this.bufferedProvider.BufferedBytes > 0)
+                    {
+                        // Small sleep to prevent CPU spiking while waiting for hardware to finish the buffer
+                        Thread.Sleep(10);
+                    }
+
+                    if (this.soundOut.PlaybackState == PlaybackState.Playing)
+                    {
+                        this.soundOut.Stop(); // This resets the state to Stopped/NotPlaying
+                        Log.Debug("Playback finished, hardware stopped and lock released.");
                     }
                 }
             }
+
+            // 4. Dispose the stream after playback is complete
             nextItem.Data.Dispose();
         }
 

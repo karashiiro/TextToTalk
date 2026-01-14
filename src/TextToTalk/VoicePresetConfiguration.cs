@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
 using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.Kokoro;
 using TextToTalk.Backends.OpenAI;
+using TextToTalk.Backends.Piper;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -268,6 +269,17 @@ public class VoicePresetConfiguration
                 Name = GetNullableValue<string?>(corrupted, "Name"),
                 InternalName = GetNullableValue<string?>(corrupted, "InternalName"),
                 EnabledBackend = TTSBackend.Kokoro
+            },
+            TTSBackend.Piper => new PiperVoicePreset
+            {
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Speed = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Speed")),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                InternalName = GetNullableValue<string?>(corrupted, "InternalName"),
+                ModelPath = GetNullableValue<string?>(corrupted, "ModelPath"),
+
+                EnabledBackend = TTSBackend.Piper
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),
         };

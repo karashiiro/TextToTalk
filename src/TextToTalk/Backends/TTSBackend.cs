@@ -1,5 +1,6 @@
 ﻿using System;
 using TextToTalk.Backends.Kokoro;
+using TextToTalk.Backends.Piper;
 
 namespace TextToTalk.Backends
 {
@@ -14,6 +15,7 @@ namespace TextToTalk.Backends
         OpenAi,
         GoogleCloud,
         Kokoro,
+        Piper,
     }
 
     public static class TTSBackendExtensions
@@ -32,6 +34,8 @@ namespace TextToTalk.Backends
                 TTSBackend.GoogleCloud => "Google Cloud",
                 TTSBackend.Kokoro when config != null && KokoroBackend.IsModelFileDownloaded(config) => "Kokoro",
                 TTSBackend.Kokoro => "Kokoro (169MB download required)",
+                TTSBackend.Piper when config != null && PiperBackend.IsModelFileDownloaded(config) => "Piper",
+                TTSBackend.Piper => "Piper (download required)",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
@@ -49,6 +53,7 @@ namespace TextToTalk.Backends
                 TTSBackend.OpenAi => false,
                 TTSBackend.GoogleCloud => false,
                 TTSBackend.Kokoro => false,
+                TTSBackend.Piper => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }

@@ -42,6 +42,7 @@
         <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
         <PackageReference Include="NAudio" Version="2.2.1" />
         <PackageReference Include="OpenAI" Version="2.8.0" />
+        <PackageReference Include="PiperSharp" Version="1.0.6" />
         <PackageReference Include="R3" Version="1.2.9" />
         <PackageReference Include="Riok.Mapperly" Version="4.1.0" ExcludeAssets="runtime" PrivateAssets="all">
           <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

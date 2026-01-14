@@ -9,6 +9,7 @@ using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.Kokoro;
 using TextToTalk.Backends.OpenAI;
+using TextToTalk.Backends.Piper;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -113,6 +114,7 @@ namespace TextToTalk.Backends
                 TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http, this.notificationService),
                 TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config),
                 TTSBackend.Kokoro => new KokoroBackend(this.config),
+                TTSBackend.Piper => new PiperBackend(this.config),
                 _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };
         }

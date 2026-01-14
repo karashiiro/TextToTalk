@@ -8,4 +8,5 @@ public enum StreamFormat
     Azure,
     System,
     Uberduck,
+    Piper,
 }

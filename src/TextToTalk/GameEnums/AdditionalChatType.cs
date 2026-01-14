@@ -10,7 +10,7 @@
         Gathering = 67,
         FCAnnouncement = 69,
         FCLogin = 70,
-        RetainerSale = 71,
+        //RetainerSale = 71,
         PartyFinderState = 72,
         ActionUsedOnYou = 2091,
         FailedActionUsedOnYou = 2218,

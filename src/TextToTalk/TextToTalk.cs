@@ -23,6 +23,7 @@ using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.Kokoro;
 using TextToTalk.Backends.OpenAI;
+using TextToTalk.Backends.Piper;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
@@ -507,6 +508,7 @@ namespace TextToTalk
                 OpenAiBackend => GetVoiceForSpeaker<OpenAiVoicePreset>(name, gender),
                 GoogleCloudBackend => GetVoiceForSpeaker<GoogleCloudVoicePreset>(name, gender),
                 KokoroBackend => GetVoiceForSpeaker<KokoroVoicePreset>(name, gender),
+                PiperBackend => GetVoiceForSpeaker<PiperVoicePreset>(name, gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };
         }
