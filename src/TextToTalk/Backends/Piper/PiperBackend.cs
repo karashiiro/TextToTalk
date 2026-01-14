@@ -5,6 +5,7 @@ using PiperSharp;
 using PiperSharp.Models;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -24,26 +25,37 @@ public class PiperBackend : VoiceBackend
     private readonly StreamingSoundQueue soundQueue;
     private readonly Task<VoiceModel> modelTask;
     private CancellationTokenSource cts = new();
+    private readonly PluginConfiguration config;
 
     private Process? piperServerProcess;
     private readonly object processLock = new();
 
-    private string GetVoicesDir(PluginConfiguration config) =>
+    public string GetVoicesDir(PluginConfiguration config) =>
         Path.Combine(config.GetPluginConfigDirectory(), "piper", "voices");
 
     public PiperBackend(PluginConfiguration config)
     {
-        ui = new PiperBackendUI(config, this);
-        string piperExe = Path.Join(config.GetPluginConfigDirectory(), "piper", "piper.exe");
+        this.ui = new PiperBackendUI(config, this);
 
-        piper = new PiperProvider(new PiperConfiguration()
+        // 1. Point to the nested 'piper' subfolder created by ExtractPiper
+        string piperBaseDir = Path.Combine(config.GetPluginConfigDirectory(), "piper", "piper");
+        string piperExe = Path.Combine(piperBaseDir, "piper.exe");
+
+        this.piper = new PiperProvider(new PiperConfiguration()
         {
             ExecutableLocation = piperExe,
-            WorkingDirectory = Path.GetDirectoryName(piperExe)
+            // 2. Set the working directory to the folder containing the .exe
+            WorkingDirectory = piperBaseDir
         });
 
-        modelTask = LoadOrDownloadModelAsync(config);
-        soundQueue = new StreamingSoundQueue(config);
+        this.modelTask = LoadOrDownloadModelAsync(config);
+        this.soundQueue = new StreamingSoundQueue(config);
+        this.config = config;
+    }
+
+    public async Task<IDictionary<string, VoiceModel>> GetAvailableModels()
+    {
+        return await PiperDownloader.GetHuggingFaceModelList();
     }
     public static bool IsModelFileDownloaded(PluginConfiguration config)
     {
@@ -51,36 +63,114 @@ public class PiperBackend : VoiceBackend
         return File.Exists(piperExePath);
     }
 
+    /// <summary>
+    /// Downloads a specific model and initializes its folder structure.
+    /// </summary>
+    public async Task DownloadSpecificModel(string modelKey, VoiceModel entry)
+    {
+        string voicesDir = GetVoicesDir(config);
+        string modelTargetDir = Path.Combine(voicesDir, modelKey);
+
+        try
+        {
+            DetailedLog.Info($"Downloading voice: {modelKey}");
+            // Downloads into voicesDir/modelKey/
+            await entry.DownloadModel(voicesDir);
+
+            // Prepare the model.json for PiperSharp
+            string onnxPath = Path.Combine(modelTargetDir, $"{modelKey}.onnx");
+            await LoadSpecificVoiceModel(onnxPath);
+
+            DetailedLog.Info($"Successfully installed {modelKey}");
+        }
+        catch (Exception ex)
+        {
+            DetailedLog.Error($"Failed to download {modelKey}: {ex.Message}");
+        }
+    }
+
+    public bool DeleteVoiceModel(string modelKey)
+    {
+        try
+        {
+            // 1. Kill any active speech to unlock files
+            KillActiveProcessInternal();
+
+            string voicesDir = GetVoicesDir(config);
+            string modelTargetDir = Path.Combine(voicesDir, modelKey);
+
+            if (Directory.Exists(modelTargetDir))
+            {
+                // Delete the folder and all contents (.onnx, .json)
+                Directory.Delete(modelTargetDir, true);
+                DetailedLog.Info($"Deleted voice model: {modelKey}");
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            DetailedLog.Error($"Failed to delete {modelKey}: {ex.Message}");
+        }
+        return false;
+    }
+
     /// Downloads the Piper executable and initial voice models.
     public async Task EnsurePiperAssetsDownloaded(PluginConfiguration config)
     {
         string configDir = config.GetPluginConfigDirectory();
         string voicesDir = GetVoicesDir(config);
+
+        // Ensure the executable is downloaded first
+        await EnsureExecutableDownloaded(config);
+
+        // Fetch all available models from Hugging Face
         var allModels = await PiperDownloader.GetHuggingFaceModelList();
 
-        var filteredModels = allModels
-            .Where(m => m.Key.StartsWith("en") && (m.Key.EndsWith("medium") || m.Key.EndsWith("low") || m.Key.EndsWith("high")))
-            .ToList();
+        // TARGET: Only download "en_US-lessac-medium" initially
+        string starterModelKey = "en_US-lessac-medium";
 
-        foreach (var modelEntry in filteredModels)
+        if (allModels.TryGetValue(starterModelKey, out var modelEntry))
         {
-            string modelKey = modelEntry.Key;
-            string modelTargetDir = Path.Combine(voicesDir, modelKey);
+            string modelTargetDir = Path.Combine(voicesDir, starterModelKey);
 
-            if (File.Exists(Path.Combine(modelTargetDir, $"{modelKey}.onnx"))) continue;
-
-            try
+            // Skip if already downloaded
+            if (!File.Exists(Path.Combine(modelTargetDir, $"{starterModelKey}.onnx")))
             {
-                DetailedLog.Info($"Downloading English medium voice: {modelKey}");
-                await modelEntry.Value.DownloadModel(voicesDir);
+                try
+                {
+                    DetailedLog.Info($"Downloading starter English voice: {starterModelKey}");
 
-                string onnxPath = Path.Combine(modelTargetDir, $"{modelKey}.onnx");
-                await LoadSpecificVoiceModel(onnxPath);
+                    // Downloads the model to voicesDir/en_US-lessac-medium/
+                    await modelEntry.DownloadModel(voicesDir);
+
+                    string onnxPath = Path.Combine(modelTargetDir, $"{starterModelKey}.onnx");
+
+                    // Initialize the model config and directory
+                    await LoadSpecificVoiceModel(onnxPath);
+                }
+                catch (Exception ex)
+                {
+                    DetailedLog.Error($"Failed to download starter voice {starterModelKey}: {ex.Message}");
+                }
             }
-            catch (Exception ex)
+            else
             {
-                DetailedLog.Error($"Failed to download {modelKey}: {ex.Message}");
+                DetailedLog.Info($"Starter voice {starterModelKey} already exists.");
             }
+        }
+        else
+        {
+            DetailedLog.Error($"Starter voice {starterModelKey} not found in the Hugging Face model list.");
+        }
+    }
+
+    private async Task EnsureExecutableDownloaded(PluginConfiguration config)
+    {
+        if (!IsModelFileDownloaded(config))
+        {
+            string piperDir = Path.Combine(config.GetPluginConfigDirectory(), "piper");
+            DetailedLog.Info("Piper executable missing. Downloading...");
+            await PiperDownloader.DownloadPiper().ExtractPiper(piperDir);
         }
     }
 
@@ -165,6 +255,7 @@ public class PiperBackend : VoiceBackend
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
+             
             };
 
             // 4. Thread-Safe Process Management
@@ -219,7 +310,7 @@ public class PiperBackend : VoiceBackend
         }
     }
 
-    private void KillActiveProcessInternal()
+    public void KillActiveProcessInternal()
     {
         lock (processLock)
         {
