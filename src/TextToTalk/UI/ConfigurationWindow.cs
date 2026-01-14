@@ -631,7 +631,9 @@ namespace TextToTalk.UI
             if (currentEnabledChatTypesPreset.EnableAllChatTypes) return;
             ImGui.Spacing();
 
-            var channels = Enum.GetNames(typeof(XivChatType)).Concat(Enum.GetNames(typeof(AdditionalChatType)));
+            var channels = Enum.GetNames(typeof(XivChatType))
+                .Concat(Enum.GetNames(typeof(AdditionalChatType)))
+                .Distinct();
             foreach (var channel in channels)
             {
                 XivChatType enumValue;
