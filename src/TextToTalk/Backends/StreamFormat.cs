@@ -9,4 +9,6 @@ public enum StreamFormat
     System,
     Uberduck,
     Piper,
+    PiperLow,
+    PiperHigh,
 }

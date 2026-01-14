@@ -1,5 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
+using Microsoft.ML.OnnxRuntime;
 using PiperSharp;
 using PiperSharp.Models;
 using Serilog;
@@ -22,9 +23,10 @@ public class PiperBackend : VoiceBackend
     private readonly PiperBackendUI ui;
     private readonly StreamingSoundQueue soundQueue;
     private readonly Task<VoiceModel> modelTask;
-    private readonly CancellationTokenSource cts = new();
+    private CancellationTokenSource cts = new();
 
     private Process? piperServerProcess;
+    private readonly object processLock = new();
 
     private string GetVoicesDir(PluginConfiguration config) =>
         Path.Combine(config.GetPluginConfigDirectory(), "piper", "voices");
@@ -57,7 +59,7 @@ public class PiperBackend : VoiceBackend
         var allModels = await PiperDownloader.GetHuggingFaceModelList();
 
         var filteredModels = allModels
-            .Where(m => m.Key.StartsWith("en") && m.Key.EndsWith("medium"))
+            .Where(m => m.Key.StartsWith("en") && (m.Key.EndsWith("medium") || m.Key.EndsWith("low") || m.Key.EndsWith("high")))
             .ToList();
 
         foreach (var modelEntry in filteredModels)
@@ -130,14 +132,14 @@ public class PiperBackend : VoiceBackend
 
         if (!modelTask.IsCompletedSuccessfully) return;
 
-        Say(request.Text, voicePreset, request.Source);
+        Task.Run(async () => await Say(request.Text, (PiperVoicePreset)request.Voice, request.Source));
     }
 
     public async Task Say(string text, PiperVoicePreset voicePreset, TextSource source)
     {
-        long methodStart = Stopwatch.GetTimestamp();
-        long? timestampToPass = methodStart;
+        long? timestampToPass = Stopwatch.GetTimestamp();
 
+        // 1. Validation
         if (string.IsNullOrEmpty(voicePreset.ModelPath) || !File.Exists(voicePreset.ModelPath))
         {
             DetailedLog.Error($"Piper model file not found: {voicePreset.ModelPath}");
@@ -146,31 +148,120 @@ public class PiperBackend : VoiceBackend
 
         try
         {
+            // 2. Prepare Model and Arguments
             var voiceDir = Path.GetDirectoryName(voicePreset.ModelPath);
-            var voiceModel = await VoiceModel.LoadModel(voiceDir);
+            piper.Configuration.Model = await VoiceModel.LoadModel(voiceDir);
+            piper.Configuration.SpeakingRate = 1.0f / (voicePreset.Speed ?? 1f);
 
-            piper.Configuration.Model = voiceModel;
-            piper.Configuration.SpeakingRate = 1.0f / voicePreset.Speed ?? 1f;
+            string args = piper.Configuration.BuildArguments();
 
-            byte[] audioData = await piper.InferAsync(text, AudioOutputType.Raw, cts.Token);
-            if (audioData == null || audioData.Length == 0) return;
-            var audioStream = new MemoryStream(audioData);
-            soundQueue.EnqueueSound(audioStream, source, voicePreset.Volume ?? 1f, StreamFormat.Piper, null, timestampToPass);
+            // 3. Initialize Process
+            var process = new Process();
+            process.StartInfo = new ProcessStartInfo
+            {
+                FileName = piper.Configuration.ExecutableLocation,
+                Arguments = args,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            // 4. Thread-Safe Process Management
+            lock (processLock)
+            {
+                // Kill any dangling process before starting a new one
+                KillActiveProcessInternal();
+                piperServerProcess = process;
+            }
+
+            // 5. THE CANCELLATION BRIDGE
+            using var registration = cts.Token.Register(() => KillActiveProcessInternal());
+
+            process.Start();
+
+            // 6. Check for cancellation before writing to the pipe
+            if (cts.Token.IsCancellationRequested)
+                throw new OperationCanceledException(cts.Token);
+
+            // 7. Write Text to StandardInput
+            using (var sw = new StreamWriter(process.StandardInput.BaseStream, leaveOpen: false))
+            {
+                await sw.WriteLineAsync(text);
+                await sw.FlushAsync();
+            }
+
+            // 8. Determine Audio Format
+            var format = voicePreset.InternalName switch
+            {
+                string name when name.EndsWith("low") => StreamFormat.PiperLow,
+                string name when name.EndsWith("high") => StreamFormat.PiperHigh,
+                _ => StreamFormat.Piper // Defaults to Medium/Standard
+            };
+
+            // 9. Enqueue Stream
+            soundQueue.EnqueueSound(process.StandardOutput.BaseStream, source, voicePreset.Volume ?? 1f, format, null, timestampToPass);
+
+            // 10. Await process exit
+            await process.WaitForExitAsync(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Log.Information("Piper synthesis task was cancelled.");
         }
         catch (Exception ex)
         {
-            DetailedLog.Error($"Piper switching/inference failed: {ex.Message}");
+            DetailedLog.Error($"Piper streaming failed: {ex.Message}");
+        }
+        finally
+        {
+            KillActiveProcessInternal();
+        }
+    }
+
+    private void KillActiveProcessInternal()
+    {
+        lock (processLock)
+        {
+            if (piperServerProcess != null)
+            {
+                try
+                {
+                    piperServerProcess.Kill(true);
+                }
+                catch (Exception ex)
+                {
+                    DetailedLog.Debug($"Error killing piper process: {ex.Message}");
+                }
+                finally
+                {
+                    piperServerProcess.Dispose();
+                    piperServerProcess = null;
+                }
+            }
         }
     }
 
     public override void CancelAllSpeech()
     {
+        KillActiveProcessInternal();
+
         soundQueue.CancelAllSounds();
+        soundQueue.StopHardware();
+        cts.Cancel();
+        cts.Dispose();
+        cts = new CancellationTokenSource();
     }
 
     public override void CancelSay(TextSource source)
     {
+        KillActiveProcessInternal();
+
         soundQueue.CancelFromSource(source);
+        soundQueue.StopHardware();
+        cts.Cancel();
+        cts.Dispose();
+        cts = new CancellationTokenSource();
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)

@@ -259,10 +259,36 @@
           "Microsoft.ML.OnnxRuntime.Managed": "1.22.0"
         }
       },
+      "Microsoft.ML.OnnxRuntime.Gpu": {
+        "type": "Transitive",
+        "resolved": "1.23.2",
+        "contentHash": "4GNQUc6FHiWHvp95Yhu95SUDa6HVm+RSQxm7QCH3PIlderDhTPdU98fHHKXmLy4xIQikkEraMcGe+KXEQU5tew==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Gpu.Linux": "1.23.2",
+          "Microsoft.ML.OnnxRuntime.Gpu.Windows": "1.23.2",
+          "Microsoft.ML.OnnxRuntime.Managed": "1.23.2"
+        }
+      },
+      "Microsoft.ML.OnnxRuntime.Gpu.Linux": {
+        "type": "Transitive",
+        "resolved": "1.23.2",
+        "contentHash": "bcv2zpP8GNnfdUCkOjE9lzIoslAOCuY0T9QHpI5+Qm6qUcehRPtGC8wF4nvySwyfTe0g3rVINP3SSj1zinkE7Q==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.23.2"
+        }
+      },
+      "Microsoft.ML.OnnxRuntime.Gpu.Windows": {
+        "type": "Transitive",
+        "resolved": "1.23.2",
+        "contentHash": "qOU3DVcxq4XalFV3wlrNrdatYWufIqvg8FZqVC3LS2rFPoTfl++xpMC2nnaxB2Wc5jrpDb2izrcDsQatCyjVnA==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.23.2"
+        }
+      },
       "Microsoft.ML.OnnxRuntime.Managed": {
         "type": "Transitive",
-        "resolved": "1.22.0",
-        "contentHash": "zlG3eY5mJnx1BhYAxRwpuHCGHzl3B+cY5/se0RmlVBw6Yh6QTGjPAXdjhlBIcw6BPFhgMn9lxWPE/U3Fvis+BQ==",
+        "resolved": "1.23.2",
+        "contentHash": "HtlQuzmVrqhnkmwfmkQ+2re8xPxtVmeLRQaYSJ3pXfzKs4b36+yBfa/LnDuzfX1bGcyWn/McKxmbY87TCAmo1Q==",
         "dependencies": {
           "System.Numerics.Tensors": "9.0.0"
         }
@@ -510,6 +536,7 @@
           "Google.Cloud.TextToSpeech.V1": "[3.17.0, )",
           "KokoroSharp.CPU": "[0.6.1, )",
           "Microsoft.CognitiveServices.Speech": "[1.41.1, )",
+          "Microsoft.ML.OnnxRuntime.Gpu": "[1.23.2, )",
           "NAudio": "[2.2.1, )",
           "OpenAI": "[2.8.0, )",
           "PiperSharp": "[1.0.6, )",

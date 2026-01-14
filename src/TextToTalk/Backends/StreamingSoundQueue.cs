@@ -144,12 +144,13 @@ namespace TextToTalk.Backends
 
         private void ProcessRawPcmStream(StreamingSoundQueueItem nextItem)
         {
-            // Resolve format
             WaveFormat chunkFormat = nextItem.Format switch
             {
                 StreamFormat.Wave => Wave,
                 StreamFormat.Azure => Azure,
-                StreamFormat.Piper => Wave,
+                StreamFormat.Piper => Uberduck,
+                StreamFormat.PiperLow => Azure,
+                StreamFormat.PiperHigh => Wave,
                 _ => throw new NotSupportedException($"Format {nextItem.Format} requires a decompressor."),
             };
 
@@ -167,10 +168,8 @@ namespace TextToTalk.Backends
                     ApplyVolumeToPcmBuffer(chunkBuffer, bytesRead, nextItem.Volume);
                     this.bufferedProvider.AddSamples(chunkBuffer, 0, bytesRead);
 
-                    // 2. Start hardware if it's not already playing
                     if (this.bufferedProvider.BufferedBytes > 16384 && this.soundOut.PlaybackState != PlaybackState.Playing)
                     {
-                        // 1. Log latency immediately when we start processing the item
                         if (nextItem.StartTime.HasValue)
                         {
                             var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
@@ -181,28 +180,7 @@ namespace TextToTalk.Backends
                         latencyLogged = true;
                     }
                 }
-
-
-                // 3. WAIT AND STOP: Release the hardware lock once this item (and any previous) is finished
-                // This is critical to ensure the NEXT item sees the state as 'Not Playing'
-                // This is necessary because of some weirdness with the Piper backend.  This code is not compatible with Azure
-                if (nextItem.Format == StreamFormat.Piper)
-                {
-                    while (this.bufferedProvider.BufferedBytes > 0)
-                    {
-                        // Small sleep to prevent CPU spiking while waiting for hardware to finish the buffer
-                        Thread.Sleep(10);
-                    }
-
-                    if (this.soundOut.PlaybackState == PlaybackState.Playing)
-                    {
-                        this.soundOut.Stop(); // This resets the state to Stopped/NotPlaying
-                        Log.Debug("Playback finished, hardware stopped and lock released.");
-                    }
-                }
             }
-
-            // 4. Dispose the stream after playback is complete
             nextItem.Data.Dispose();
         }
 

@@ -1,8 +1,10 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Utility;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using TextToTalk.UI;
 
 namespace TextToTalk.Backends.Piper;
@@ -13,6 +15,41 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
     private string[] modelDisplayNames;
     private int selectedModelIndex = -1;
 
+    public class PiperModelInfo
+    {
+        public string FullPath { get; set; }
+        public string DisplayName { get; set; }
+        public string Quality { get; set; } // low, medium, high
+
+        public static PiperModelInfo FromPath(string onnxPath)
+        {
+            var jsonPath = onnxPath + ".json";
+            if (!File.Exists(jsonPath)) return null;
+
+            try
+            {
+                var json = File.ReadAllText(jsonPath);
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                var lang = root.GetProperty("language").GetProperty("code").GetString();
+                var dataset = root.GetProperty("dataset").GetString();
+                var quality = root.GetProperty("audio").GetProperty("quality").GetString();
+
+                return new PiperModelInfo
+                {
+                    FullPath = onnxPath,
+                    DisplayName = $"{lang}: {dataset} ({quality})",
+                    Quality = quality?.ToLower() ?? "medium"
+                };
+            }
+            catch { return null; }
+        }
+    }
+
+    private List<PiperModelInfo> sortedModels = new();
+    private string[] sortedDisplayNames = Array.Empty<string>();
+    
     public void DrawVoicePresetOptions()
     {
         ImGui.TextColored(ImColor.HintColor, "Piper is a local neural TTS engine. Ensure you have downloaded models.");
@@ -58,36 +95,63 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
             config.Save();
         }
 
-        // --- Model Selection ---
-        var piperDir = Path.Combine(config.GetPluginConfigDirectory(), "piper");
-        var voicesDir = Path.Combine(piperDir, "voices");
+        // Model Selection
+        var voicesDir = Path.Combine(config.GetPluginConfigDirectory(), "piper", "voices");
+        if (!Directory.Exists(voicesDir)) Directory.CreateDirectory(voicesDir);
 
-        if (!Directory.Exists(voicesDir))
-            Directory.CreateDirectory(voicesDir);
+        var files = Directory.GetFiles(voicesDir, "*.onnx", SearchOption.AllDirectories);
+        var allModels = files.Select(PiperModelInfo.FromPath).Where(m => m != null).ToList();
 
-        availableModelPaths = Directory.GetFiles(voicesDir, "*.onnx", SearchOption.AllDirectories);
-        modelDisplayNames = availableModelPaths.Select(Path.GetFileName).ToArray();
-
-        if (availableModelPaths.Length > 0)
+        if (allModels.Count > 0)
         {
-            if (selectedModelIndex == -1 ||
-                selectedModelIndex >= availableModelPaths.Length ||
-                availableModelPaths[selectedModelIndex] != currentVoicePreset.ModelPath)
-            {
-                selectedModelIndex = Array.IndexOf(availableModelPaths, currentVoicePreset.ModelPath ?? "");
-                if (selectedModelIndex == -1) selectedModelIndex = 0;
-            }
+            ImGui.Text("Voice Model Selection");
 
-            if (ImGui.Combo($"Voice Model (.onnx)##{MemoizedId.Create()}", ref selectedModelIndex, modelDisplayNames, modelDisplayNames.Length))
+            var currentModel = allModels.FirstOrDefault(m => m.FullPath == currentVoicePreset.ModelPath);
+            string previewValue = currentModel?.DisplayName ?? "Select a model...";
+
+            if (ImGui.BeginCombo($"##ModelSelect{MemoizedId.Create()}", previewValue))
             {
-                currentVoicePreset.ModelPath = availableModelPaths[selectedModelIndex];
-                currentVoicePreset.InternalName = modelDisplayNames[selectedModelIndex].Replace(".onnx", "");
-                config.Save();
+                var qualities = new[] { "high", "medium", "low" };
+
+                foreach (var quality in qualities)
+                {
+                    var modelsInSection = allModels.Where(m => m.Quality == quality).OrderBy(m => m.DisplayName).ToList();
+
+                    if (modelsInSection.Count > 0)
+                    {
+                        string headerText = quality switch
+                        {
+                            "high" => "HIGH Quality - 24khz - higher latency",
+                            "medium" => "MEDIUM Quality - 22.5khz - mid latency",
+                            "low" => "LOW Quality - 16khz - lower latency",
+                            _ => quality.ToUpper()
+                        };
+
+                        ImGui.Spacing();
+                        ImGui.TextDisabled(headerText);
+                        ImGui.Separator();
+
+                        foreach (var model in modelsInSection)
+                        {
+                            bool isSelected = currentVoicePreset.ModelPath == model.FullPath;
+
+                            if (ImGui.Selectable($"{model.DisplayName}##{model.FullPath}", isSelected))
+                            {
+                                currentVoicePreset.ModelPath = model.FullPath;
+                                currentVoicePreset.InternalName = Path.GetFileNameWithoutExtension(model.FullPath);
+                                config.Save();
+                            }
+
+                            if (isSelected) ImGui.SetItemDefaultFocus();
+                        }
+                    }
+                }
+                ImGui.EndCombo();
             }
         }
         else
         {
-            ImGui.TextColored(ImColor.Red, $"No .onnx models found in subdirectories of: {voicesDir}");
+            ImGui.TextColored(ImColor.Red, "No voice models found.");
         }
 
         if (ImGui.Button($"Download Models##{MemoizedId.Create()}"))
