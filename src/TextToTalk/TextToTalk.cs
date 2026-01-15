@@ -44,6 +44,8 @@ using TextToTalk.Utils;
 using static System.Net.Mime.MediaTypeNames;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.IGameObject;
 
+using Serilog;
+
 namespace TextToTalk
 {
     public partial class TextToTalk : IDalamudPlugin

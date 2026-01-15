@@ -25,6 +25,8 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
     private DateTime lastScan = DateTime.MinValue;
     private bool isScanning = false;
 
+    private HashSet<string> activeDownloads = new HashSet<string>();
+
     public class PiperModelInfo
     {
         public string FullPath { get; set; }
@@ -62,6 +64,38 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
     private List<PiperModelInfo> sortedModels = new();
     private string[] sortedDisplayNames = Array.Empty<string>();
     private string voicesFolderSize = "0 MB";
+
+    private void DrawLoadingSpinner(string label, float radius, float thickness, uint color)
+    {
+        // 1. Get current cursor position to draw
+        var pos = ImGui.GetCursorScreenPos();
+        var size = new global::System.Numerics.Vector2(radius * 2, radius * 2);
+
+        // 2. Reserve space in the ImGui layout so other elements don't overlap
+        ImGui.Dummy(size);
+
+        // 3. Define the center of our circle
+        var center = new global::System.Numerics.Vector2(pos.X + radius, pos.Y + radius);
+        var drawList = ImGui.GetWindowDrawList();
+
+        // 4. Calculate animation timing
+        float time = (float)ImGui.GetTime();
+        int numSegments = 30;
+        float startAngle = time * 8.0f; // Rotation speed
+
+        // 5. Build the arc path (approx. 270 degrees)
+        drawList.PathClear();
+        for (int i = 0; i <= numSegments; i++)
+        {
+            float a = startAngle + ((float)i / numSegments) * (MathF.PI * 1.5f);
+            drawList.PathLineTo(new global::System.Numerics.Vector2(
+                center.X + MathF.Cos(a) * radius,
+                center.Y + MathF.Sin(a) * radius));
+        }
+
+        // 6. Draw the stroke
+        drawList.PathStroke(color, ImDrawFlags.None, thickness);
+    }
 
     public void DrawVoicePresetOptions()
     {
@@ -262,6 +296,7 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
     }
     private void DrawVoiceDownloader()
     {
+
         ImGui.SetNextWindowSize(new global::System.Numerics.Vector2(500, 600), ImGuiCond.FirstUseEver);
         if (ImGui.Begin("Piper Voice Downloader", ref showDownloader))
         {
@@ -279,14 +314,26 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
             {
 
                 var entry = model.Value;
-                var langName = entry.Language?.Name ?? "Unknown";
+                var langCode = entry.Language?.Code ?? "unknown";
+
+                var langName = langCode.ToLower().Replace("-", "_") switch
+                {
+                    "en_gb" => "English - UK",
+                    "en_us" => "English - US",
+                    "es_ar" => "Spanish - AR",
+                    "es_es" => "Spanish - ES",
+                    "es_mx" => "Spanish - MX",
+                    "nl_be" => "Dutch - BE",
+                    "nl_nl" => "Dutch - NL",
+                    _ => entry.Language?.Name ?? "Unknown" // Fallback to original name
+                };
                 var dataset = entry.Name ?? "Standard";
                 var parts = (entry.Key ?? "unknown").Split(new[] { '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
                 string quality = parts.Last().ToLower();
 
                 string formattedName = $"{langName} : {dataset} ({quality})";
 
-                if (!string.IsNullOrEmpty(searchQuery) && !model.Key.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(searchQuery) && !formattedName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 // Check if installed
@@ -318,9 +365,32 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
                 }
                 else
                 {
-                    if (ImGui.Button("Download"))
+                    // CHECK: Is this specific model currently downloading?
+                    if (activeDownloads.Contains(model.Key))
                     {
-                        _ = piperBackend.DownloadSpecificModel(model.Key, (VoiceModel)model.Value);
+                        // Place the spinner where the button would normally be
+                        DrawLoadingSpinner($"##spinner_{model.Key}", 10.0f, 3.0f, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
+                        ImGui.SameLine();
+                        ImGui.Text("Downloading...");
+                    }
+                    else
+                    {
+                        if (ImGui.Button("Download"))
+                        {
+                            activeDownloads.Add(model.Key);
+
+                            // Use a Task.Run or Ensure the continuation happens correctly
+                            _ = piperBackend.DownloadSpecificModel(model.Key, (VoiceModel)model.Value)
+                                .ContinueWith(t =>
+                                {
+                                    // 1. Force your scanner to see the new files immediately
+                                    // Assuming 'lastScan' is what triggers your cachedModels update loop
+                                    lastScan = DateTime.MinValue;
+
+                                    // 2. Remove from active downloads AFTER the scan is flagged
+                                    activeDownloads.Remove(model.Key);
+                                });
+                        }
                     }
                 }
                 ImGui.Separator();

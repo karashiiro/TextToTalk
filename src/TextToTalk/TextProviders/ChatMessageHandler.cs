@@ -127,12 +127,14 @@ public class ChatMessageHandler : IChatMessageHandler
         if (!this.filters.OnlyMessagesFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
+        
+        else if (type == XivChatType.TellOutgoing && config.SkipMessagesFromYou == true) return;
 
-        OnTextEmit.Invoke(new ChatTextEmitEvent(
-            GetCleanSpeakerName(speaker, sender),
-            textValue,
-            speaker,
-            type));
+            OnTextEmit.Invoke(new ChatTextEmitEvent(
+                GetCleanSpeakerName(speaker, sender),
+                textValue,
+                speaker,
+                type));
     }
 
     private static SeString GetCleanSpeakerName(IGameObject? speaker, SeString sender)
