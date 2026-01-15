@@ -30,10 +30,9 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
     public class PiperModelInfo
     {
         public string FullPath { get; set; }
-        public string DisplayName { get; set; }
-        public string Quality { get; set; } // low, medium, high
-
-        
+        public string DisplayName { get; set; } // The dataset name (e.g., "Lessac")
+        public string Quality { get; set; }
+        public string LanguageName { get; set; } // The pretty name (e.g., "English - US")
 
         public static PiperModelInfo FromPath(string onnxPath)
         {
@@ -46,15 +45,19 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
-                var lang = root.GetProperty("language").GetProperty("code").GetString();
+                var langCode = root.GetProperty("language").GetProperty("code").GetString();
+                var langPlain = root.GetProperty("language").GetProperty("name_english").GetString();
+
+                // Pass both code and plain name to your disambiguation helper
+                var prettyLang = GetPrettyLanguageName(langCode, langPlain);
                 var dataset = root.GetProperty("dataset").GetString();
-                var quality = root.GetProperty("audio").GetProperty("quality").GetString();
 
                 return new PiperModelInfo
                 {
                     FullPath = onnxPath,
-                    DisplayName = $"{lang}: {dataset} ({quality})",
-                    Quality = quality?.ToLower() ?? "medium"
+                    LanguageName = prettyLang,
+                    DisplayName = dataset ?? "Unknown",
+                    Quality = root.GetProperty("audio").GetProperty("quality").GetString()?.ToLower() ?? "medium"
                 };
             }
             catch { return null; }
@@ -64,6 +67,23 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
     private List<PiperModelInfo> sortedModels = new();
     private string[] sortedDisplayNames = Array.Empty<string>();
     private string voicesFolderSize = "0 MB";
+
+    public static string GetPrettyLanguageName(string code, string fallbackName)
+    {
+        if (string.IsNullOrEmpty(code)) return fallbackName ?? "Unknown";
+
+        return code.ToLower().Replace("-", "_") switch
+        {
+            "en_gb" => "English - UK",
+            "en_us" => "English - US",
+            "es_ar" => "Spanish - AR",
+            "es_es" => "Spanish - ES",
+            "es_mx" => "Spanish - MX",
+            "nl_be" => "Dutch - BE",
+            "nl_nl" => "Dutch - NL",
+            _ => fallbackName // Use "English", "French", etc. from JSON
+        };
+    }
 
     private void DrawLoadingSpinner(string label, float radius, float thickness, uint color)
     {
@@ -178,48 +198,44 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
 
         var files = Directory.GetFiles(voicesDir, "*.onnx", SearchOption.AllDirectories);
         var allModels = files.Select(PiperModelInfo.FromPath).Where(m => m != null).ToList();
-        if (cachedModels.Count > 0)
+
+        if (allModels.Count > 0)
         {
-
-
             var currentModel = allModels.FirstOrDefault(m => m.FullPath == currentVoicePreset.ModelPath);
-            string previewValue = currentModel?.DisplayName ?? "Select a model...";
+
+            // PREVIEW: Uses the pre-parsed properties
+            string previewValue = currentModel != null
+                ? $"{currentModel.LanguageName} : {currentModel.DisplayName} ({currentModel.Quality})"
+                : "Select a model...";
 
             if (ImGui.BeginCombo($"##ModelSelect{MemoizedId.Create()}", previewValue))
             {
-                var qualities = new[] { "high", "medium", "low" };
+                // Group by the LanguageName property we parsed from JSON
+                var languageGroups = allModels
+                    .GroupBy(m => m.LanguageName)
+                    .OrderBy(g => g.Key);
 
-                foreach (var quality in qualities)
+                foreach (var group in languageGroups)
                 {
-                    var modelsInSection = allModels.Where(m => m.Quality == quality).OrderBy(m => m.DisplayName).ToList();
+                    ImGui.Spacing();
+                    ImGui.TextDisabled($"--- {group.Key.ToUpper()} ---");
+                    ImGui.Separator();
 
-                    if (modelsInSection.Count > 0)
+                    foreach (var model in group.OrderBy(m => m.DisplayName))
                     {
-                        string headerText = quality switch
+                        bool isSelected = currentVoicePreset.ModelPath == model.FullPath;
+
+                        // Content: "Lessac (medium)"
+                        string itemLabel = $"{model.LanguageName} : {model.DisplayName} ({model.Quality})";
+
+                        if (ImGui.Selectable($"{itemLabel}##{model.FullPath}", isSelected))
                         {
-                            "high" => "HIGH Quality - 24khz - higher latency",
-                            "medium" => "MEDIUM Quality - 22.5khz - mid latency",
-                            "low" => "LOW Quality - 16khz - lower latency",
-                            _ => quality.ToUpper()
-                        };
-
-                        ImGui.Spacing();
-                        ImGui.TextDisabled(headerText);
-                        ImGui.Separator();
-
-                        foreach (var model in modelsInSection)
-                        {
-                            bool isSelected = currentVoicePreset.ModelPath == model.FullPath;
-
-                            if (ImGui.Selectable($"{model.DisplayName}##{model.FullPath}", isSelected))
-                            {
-                                currentVoicePreset.ModelPath = model.FullPath;
-                                currentVoicePreset.InternalName = Path.GetFileNameWithoutExtension(model.FullPath);
-                                config.Save();
-                            }
-
-                            if (isSelected) ImGui.SetItemDefaultFocus();
+                            currentVoicePreset.ModelPath = model.FullPath;
+                            currentVoicePreset.InternalName = Path.GetFileNameWithoutExtension(model.FullPath);
+                            config.Save();
                         }
+
+                        if (isSelected) ImGui.SetItemDefaultFocus();
                     }
                 }
                 ImGui.EndCombo();
