@@ -150,18 +150,21 @@ public class ElevenLabsBackendUI
             var modelDescriptionsList = modelDescriptions.Values.Select(v => v.Items.First()).ToList();
             var selectedItemIndex = modelIdList.IndexOf(currentVoicePreset.ModelId);
 
-            string modelPreviewName = "";
-            if (selectedItemIndex != -1)
+            string modelPreviewName = "Select a model...";
+            bool previewHasStyles = false;
+
+            if (selectedItemIndex >= 0 && selectedItemIndex < modelDescriptionsList.Count)
             {
                 var selectedItem = modelDescriptionsList[selectedItemIndex];
                 modelPreviewName = $"{selectedItem.ModelId} || Cost Multiplier: {selectedItem.ModelRates["character_cost_multiplier"]}";
+
                 if (currentVoicePreset.ModelId == "eleven_v3")
                 {
                     modelPreviewName += " [Styles Available]";
+                    previewHasStyles = true;
                 }
             }
 
-            bool previewHasStyles = modelIdList[selectedItemIndex] == "eleven_v3";
             string previewName = voiceIndex >= 0 ? $"{modelIdList[selectedItemIndex]} || Cost Multiplier: {modelDescriptionsList[selectedItemIndex].ModelRates["character_cost_multiplier"]}" : "Select a model...";
 
             if (ImGui.BeginCombo($"Models##{MemoizedId.Create()}", "", ImGuiComboFlags.HeightLarge))

@@ -59,7 +59,7 @@ public class PiperBackend : VoiceBackend
     }
     public static bool IsModelFileDownloaded(PluginConfiguration config)
     {
-        var piperExePath = Path.Combine(config.GetPluginConfigDirectory(), "piper", "piper.exe");
+        var piperExePath = Path.Combine(config.GetPluginConfigDirectory(), "piper", "piper", "piper.exe");
         return File.Exists(piperExePath);
     }
 
