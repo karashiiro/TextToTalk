@@ -128,6 +128,9 @@ public class ChatMessageHandler : IChatMessageHandler
 
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
+        // Edge case: Recipient is internally represented as the speaker
+        if (type == XivChatType.TellOutgoing && config.SkipMessagesFromYou) return;
+
         OnTextEmit.Invoke(new ChatTextEmitEvent(
             GetCleanSpeakerName(speaker, sender),
             textValue,
