@@ -37,12 +37,15 @@ public class StatsWindow : Window
 
         if (ImGui.TreeNode("View Raw History"))
         {
-            if (ImGui.BeginChild("RawDataList", new System.Numerics.Vector2(0, 150)))
+            // *** REFACTORED: Use the boolean 'true' for drawing a border ***
+            // The signature now accepts a boolean instead of ImGuiChildFlags
+            if (ImGui.BeginChild("RawDataList", new System.Numerics.Vector2(0, 150), true)) // The 'true' draws the border
             {
                 for (int i = 0; i < fullDataArray.Length; i++)
                 {
                     ImGui.Text($"[{i:000}] {fullDataArray[i]:F2} ms");
                 }
+
                 ImGui.EndChild();
             }
             ImGui.TreePop();
