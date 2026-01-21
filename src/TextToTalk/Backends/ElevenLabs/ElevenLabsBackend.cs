@@ -13,10 +13,11 @@ public class ElevenLabsBackend : VoiceBackend
     private readonly ElevenLabsBackendUIModel uiModel;
     private readonly INotificationService notificationService;
     private readonly PluginConfiguration config;
+    private readonly LatencyTracker latencyTracker;
 
-    public ElevenLabsBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
+    public ElevenLabsBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService, LatencyTracker latencyTracker)
     {
-        this.uiModel = new ElevenLabsBackendUIModel(config, http);
+        this.uiModel = new ElevenLabsBackendUIModel(config, http, latencyTracker);
         this.ui = new ElevenLabsBackendUI(uiModel, config, this);
         this.notificationService = notificationService;
         this.config = config;

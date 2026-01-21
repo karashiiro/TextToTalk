@@ -9,17 +9,18 @@ namespace TextToTalk.Backends.Polly
     {
         private readonly PollyBackendUI ui;
         private readonly PollyBackendUIModel uiModel;
+        private readonly LatencyTracker latencyTracker;
 
-        public PollyBackend(PluginConfiguration config, HttpClient http)
+        public PollyBackend(PluginConfiguration config, HttpClient http, LatencyTracker latencyTracker)
         {
             TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFF0099FF);
 
             var lexiconManager = new DalamudLexiconManager();
-            this.uiModel = new PollyBackendUIModel(config, lexiconManager);
+            this.uiModel = new PollyBackendUIModel(config, lexiconManager, latencyTracker);
 
             LexiconUtils.LoadFromConfigPolly(lexiconManager, config);
 
-            this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http, this);
+            this.ui = new PollyBackendUI(this.uiModel, config, lexiconManager, http, this, latencyTracker);
         }
 
         public override void DrawStyles(IConfigUIDelegates helpers)

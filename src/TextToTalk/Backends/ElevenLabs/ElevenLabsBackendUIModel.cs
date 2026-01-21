@@ -44,9 +44,9 @@ public class ElevenLabsBackendUIModel : IDisposable
     public IReadOnlyDictionary<string, IReadOnlyList<ElevenLabsVoice>> Voices { get; private set; }
 
     public IReadOnlyDictionary<string, (IReadOnlyList<ElevenLabsModel> Items, Dictionary<string, double>? Rates)> Models { get; private set; }
-    public ElevenLabsBackendUIModel(PluginConfiguration config, HttpClient http)
+    public ElevenLabsBackendUIModel(PluginConfiguration config, HttpClient http, LatencyTracker latencyTracker)
     {
-        SoundQueue = new StreamingSoundQueue(config);
+        SoundQueue = new StreamingSoundQueue(config, latencyTracker);
         ElevenLabs = new ElevenLabsClient(SoundQueue, http);
         this.config = config;
         this.getUserSubscriptionInfoImmediately = new ReactiveProperty<long>(0);

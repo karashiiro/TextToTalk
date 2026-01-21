@@ -39,9 +39,9 @@ public class OpenAiBackendUIModel
     /// </summary>
     // public IReadOnlyDictionary<string, IReadOnlyList<string>> Voices { get; private set; }
 
-    public OpenAiBackendUIModel(PluginConfiguration config, HttpClient http)
+    public OpenAiBackendUIModel(PluginConfiguration config, HttpClient http, LatencyTracker latencyTracker)
     {
-        SoundQueue = new StreamingSoundQueue(config);
+        SoundQueue = new StreamingSoundQueue(config, latencyTracker);
         var credentials = OpenAiCredentialManager.LoadCredentials();
         if (credentials != null)
         {

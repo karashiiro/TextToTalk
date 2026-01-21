@@ -46,7 +46,7 @@ public class PollyBackendUIModel : IDisposable
     /// </summary>
     public string[] Engines { get; } = { Engine.Neural, Engine.Standard, Engine.Generative, Engine.LongForm };
 
-    public PollyBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager)
+    public PollyBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager, LatencyTracker latencyTracker)
     {
         this.config = config;
         this.lexiconManager = lexiconManager;
@@ -59,7 +59,7 @@ public class PollyBackendUIModel : IDisposable
             this.keyPair.AccessKey = credentials.UserName;
             this.keyPair.SecretKey = credentials.Password;
 
-            TryPollyLogin(GetCurrentRegion());
+            TryPollyLogin(GetCurrentRegion(), latencyTracker);
         }
     }
 
@@ -75,13 +75,13 @@ public class PollyBackendUIModel : IDisposable
     /// </summary>
     /// <param name="accessKey">The client's access key.</param>
     /// <param name="secretKey">The client's secret access key.</param>
-    public void LoginWith(string accessKey, string secretKey)
+    public void LoginWith(string accessKey, string secretKey, LatencyTracker latencyTracker)
     {
         var username = Whitespace.Replace(accessKey, "");
         var password = Whitespace.Replace(secretKey, "");
         this.keyPair = new PollyKeyPair { AccessKey = username, SecretKey = password };
 
-        if (TryPollyLogin(GetCurrentRegion()))
+        if (TryPollyLogin(GetCurrentRegion(), latencyTracker))
         {
             // Only save the user's new credentials if the login succeeded
             PollyCredentialManager.SaveCredentials(username, password);
@@ -173,7 +173,7 @@ public class PollyBackendUIModel : IDisposable
         this.config.Save();
     }
 
-    private bool TryPollyLogin(RegionEndpoint regionEndpoint)
+    private bool TryPollyLogin(RegionEndpoint regionEndpoint, LatencyTracker latencyTracker)
     {
         PollyLoginException = null;
         Polly?.Dispose();
@@ -181,7 +181,7 @@ public class PollyBackendUIModel : IDisposable
         {
             DetailedLog.Info($"Logging into AWS region {regionEndpoint}");
             Polly = new PollyClient(this.keyPair.AccessKey, this.keyPair.SecretKey, regionEndpoint,
-                this.lexiconManager, this.config);
+                this.lexiconManager, this.config, latencyTracker);
             var currentVoicePreset = this.config.GetCurrentVoicePreset<PollyVoicePreset>();
             // This should throw an exception if the login credentials were incorrect
             this.voices = Polly.GetVoicesForEngine(currentVoicePreset?.VoiceEngine ?? Engine.Neural);

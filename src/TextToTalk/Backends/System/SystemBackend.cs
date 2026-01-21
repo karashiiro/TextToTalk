@@ -12,9 +12,10 @@ namespace TextToTalk.Backends.System
         private readonly SystemBackendUI ui;
         private readonly SystemSoundQueue soundQueue;
         private readonly IDisposable voiceExceptions;
+        private readonly LatencyTracker latencyTracker;
 
 
-        public SystemBackend(PluginConfiguration config, HttpClient http)
+        public SystemBackend(PluginConfiguration config, HttpClient http, LatencyTracker latencyTracker)
         {
             var lexiconManager = new DalamudLexiconManager();
             LexiconUtils.LoadFromConfigSystem(lexiconManager, config);
@@ -22,8 +23,9 @@ namespace TextToTalk.Backends.System
             this.uiModel = new SystemBackendUIModel();
             this.ui = new SystemBackendUI(this.uiModel, config, lexiconManager, http, this);
 
-            this.soundQueue = new SystemSoundQueue(lexiconManager, config);
+            this.soundQueue = new SystemSoundQueue(lexiconManager, config, latencyTracker);
             this.voiceExceptions = this.uiModel.SubscribeToVoiceExceptions(this.soundQueue.SelectVoiceFailed);
+            this.latencyTracker = latencyTracker;
         }
 
         public override void DrawStyles(IConfigUIDelegates helpers)

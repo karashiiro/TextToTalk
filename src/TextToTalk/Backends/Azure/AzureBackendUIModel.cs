@@ -16,6 +16,8 @@ public class AzureBackendUIModel
     public List<VoiceDetails> voices;
     private AzureLoginInfo loginInfo;
 
+    private readonly LatencyTracker latencyTracker;
+
     /// <summary>
     /// Gets the currently-instantiated Azure client instance.
     /// </summary>
@@ -31,13 +33,14 @@ public class AzureBackendUIModel
     /// </summary>
     public IReadOnlyList<VoiceDetails> Voices => this.voices;
 
-    public AzureBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager)
+    public AzureBackendUIModel(PluginConfiguration config, LexiconManager lexiconManager, LatencyTracker latencyTracker)
     {
         this.config = config;
         this.lexiconManager = lexiconManager;
         this.voices = new List<VoiceDetails>();
 
         this.loginInfo = new AzureLoginInfo();
+        this.latencyTracker = latencyTracker;
         var credentials = AzureCredentialManager.LoadCredentials();
         if (credentials != null)
         {
@@ -97,7 +100,7 @@ public class AzureBackendUIModel
         try
         {
             DetailedLog.Info($"Logging into Azure region {this.loginInfo.Region}");
-            Azure = new AzureClient(this.loginInfo.SubscriptionKey, this.loginInfo.Region, this.lexiconManager, this.config);
+            Azure = new AzureClient(this.loginInfo.SubscriptionKey, this.loginInfo.Region, this.lexiconManager, this.config, this.latencyTracker);
             // This should throw an exception if the login failed
             this.voices = Azure.GetVoicesWithStyles();
             return true;

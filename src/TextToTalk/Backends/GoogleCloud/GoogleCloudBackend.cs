@@ -8,10 +8,11 @@ public class GoogleCloudBackend : VoiceBackend
     private readonly GoogleCloudClient client;
     private readonly StreamingSoundQueue soundQueue;
     private readonly GoogleCloudBackendUI ui;
+    private readonly LatencyTracker latencyTracker;
 
-    public GoogleCloudBackend(PluginConfiguration config)
+    public GoogleCloudBackend(PluginConfiguration config, LatencyTracker latencyTracker)
     {
-        soundQueue = new StreamingSoundQueue(config);
+        soundQueue = new StreamingSoundQueue(config, latencyTracker);
         client = new GoogleCloudClient(soundQueue, config.GoogleCreds);
         ui = new GoogleCloudBackendUI(config, client, this);
     }

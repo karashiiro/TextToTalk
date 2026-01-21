@@ -29,11 +29,12 @@ public class PiperBackend : VoiceBackend
 
     private Process? piperServerProcess;
     private readonly object processLock = new();
+    private readonly LatencyTracker latencyTracker;
 
     public string GetVoicesDir(PluginConfiguration config) =>
         Path.Combine(config.GetPluginConfigDirectory(), "piper", "voices");
 
-    public PiperBackend(PluginConfiguration config)
+    public PiperBackend(PluginConfiguration config, LatencyTracker latencyTracker)
     {
         this.ui = new PiperBackendUI(config, this);
 
@@ -48,8 +49,9 @@ public class PiperBackend : VoiceBackend
         });
 
         this.modelTask = LoadOrDownloadModelAsync(config);
-        this.soundQueue = new StreamingSoundQueue(config);
+        this.soundQueue = new StreamingSoundQueue(config, latencyTracker);
         this.config = config;
+        this.latencyTracker = latencyTracker;
     }
 
     public async Task<IDictionary<string, VoiceModel>> GetAvailableModels()

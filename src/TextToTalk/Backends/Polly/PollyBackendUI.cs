@@ -2,6 +2,7 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game;
 using Dalamud.Game.Text;
+using FFXIVClientStructs;
 using System;
 using System.IO;
 using System.Linq;
@@ -19,12 +20,13 @@ public class PollyBackendUI
     private readonly LexiconComponent lexiconComponent;
     private readonly PollyBackendUIModel model;
     private readonly PollyBackend backend;
+    private readonly LatencyTracker latencyTracker;
 
     private string accessKey;
     private string secretKey;
 
     public PollyBackendUI(PollyBackendUIModel model, PluginConfiguration config, LexiconManager lexiconManager,
-        HttpClient http, PollyBackend backend)
+        HttpClient http, PollyBackend backend, LatencyTracker latencyTracker)
     {
         this.model = model;
 
@@ -39,7 +41,9 @@ public class PollyBackendUI
             new LexiconComponent(lexiconManager, lexiconRepository, config, () => config.PollyLexiconFiles);
 
         (this.accessKey, this.secretKey) = this.model.GetKeyPair();
+        this.latencyTracker = latencyTracker;
     }
+    
 
     public void DrawSettings(IConfigUIDelegates helpers)
     {
@@ -58,7 +62,7 @@ public class PollyBackendUI
 
         if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
-            this.model.LoginWith(this.accessKey, this.secretKey);
+            this.model.LoginWith(this.accessKey, this.secretKey, this.latencyTracker);
         }
 
         ImGui.SameLine();

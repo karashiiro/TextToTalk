@@ -25,6 +25,7 @@ namespace TextToTalk.Backends.System
         private readonly SpeechSynthesizer _speechSynthesizer;
         private readonly LexiconManager _lexiconManager;
         private readonly PluginConfiguration _config;
+        private readonly LatencyTracker _latencyTracker;
 
 
         private readonly Subject<SelectVoiceFailedException> _selectVoiceFailed = new();
@@ -55,12 +56,12 @@ namespace TextToTalk.Backends.System
             });
         }
 
-        public SystemSoundQueue(LexiconManager lexiconManager, PluginConfiguration config)
+        public SystemSoundQueue(LexiconManager lexiconManager, PluginConfiguration config, LatencyTracker latencyTracker)
         {
             _lexiconManager = lexiconManager;
             _config = config;
             _speechSynthesizer = new SpeechSynthesizer();
-
+            _latencyTracker = latencyTracker;
         }
 
 
@@ -135,7 +136,8 @@ namespace TextToTalk.Backends.System
                         if (nextItem.StartTime.HasValue)
                         {
                             var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
-                            Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
+                            _latencyTracker.AddLatency(elapsed.TotalMilliseconds);
+                            Log.Debug("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
                         }
                         this.soundOut?.Play();
                     }

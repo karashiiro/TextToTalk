@@ -21,18 +21,20 @@ public class KokoroBackend : VoiceBackend
     private readonly KokoroBackendUI ui;
     private readonly Task<KokoroModel> modelTask;
     private readonly CancellationTokenSource cts = new();
+    private readonly LatencyTracker latencyTracker;
 
-    public KokoroBackend(PluginConfiguration config)
+    public KokoroBackend(PluginConfiguration config, LatencyTracker latencyTracker)
     {
         ui = new KokoroBackendUI(config, this);
 
         Tokenizer.eSpeakNGPath = Path.Join(config.GetPluginAssemblyDirectory(), "espeak");
 
         modelTask = GetModelAsync(config);
-        soundQueue = new KokoroSoundQueue(config, modelTask);
+        soundQueue = new KokoroSoundQueue(config, modelTask, latencyTracker);
 
         KokoroVoiceManager.LoadVoicesFromPath(Path.Join(config.GetPluginAssemblyDirectory(), "voices"));
         DetailedLog.Info($"Kokoro voices loaded: {KokoroVoiceManager.Voices.Count} voices available.");
+        this.latencyTracker = latencyTracker;
     }
 
     /// <summary>

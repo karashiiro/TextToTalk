@@ -15,10 +15,11 @@ public class OpenAiBackend : VoiceBackend
     private readonly OpenAiBackendUI ui;
     private readonly OpenAiBackendUIModel uiModel;
     private readonly INotificationService notificationService;
+    private readonly LatencyTracker latencyTracker;
 
-    public OpenAiBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService)
+    public OpenAiBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService, LatencyTracker latencyTracker)
     {
-        this.uiModel = new OpenAiBackendUIModel(config, http);
+        this.uiModel = new OpenAiBackendUIModel(config, http, latencyTracker);
         this.ui = new OpenAiBackendUI(uiModel, config, this);
         this.notificationService = notificationService;
     }

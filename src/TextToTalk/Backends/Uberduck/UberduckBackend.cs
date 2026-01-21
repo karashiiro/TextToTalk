@@ -14,16 +14,18 @@ public class UberduckBackend : VoiceBackend
     private readonly StreamingSoundQueue soundQueue;
     private readonly UberduckBackendUI ui;
     private readonly UberduckClient? uberduck;
+    private readonly LatencyTracker latencyTracker;
 
-    public UberduckBackend(PluginConfiguration config, HttpClient http)
+    public UberduckBackend(PluginConfiguration config, HttpClient http, LatencyTracker latencyTracker)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFDE7312);
 
-        this.soundQueue = new StreamingSoundQueue(config);
+        this.soundQueue = new StreamingSoundQueue(config, latencyTracker);
         this.uberduck = new UberduckClient(this.soundQueue, http);
 
         var voices = this.uberduck.UpdateVoices().GetAwaiter().GetResult();
         this.ui = new UberduckBackendUI(config, this.uberduck, () => voices, this);
+        this.latencyTracker = latencyTracker;
     }
 
     public override void DrawStyles(IConfigUIDelegates helpers)

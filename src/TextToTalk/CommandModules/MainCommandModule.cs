@@ -14,9 +14,10 @@ public class MainCommandModule : CommandModule
     private readonly ConfigurationWindow configurationWindow;
     private readonly IConfigUIDelegates configUIDelegates;
     private readonly VoiceStyles StylesWindow;
+    private readonly StatsWindow StatsWindow;
 
     public MainCommandModule(ICommandManager commandManager, IChatGui chat, PluginConfiguration config,
-        VoiceBackendManager backendManager, ConfigurationWindow configurationWindow, IConfigUIDelegates configUIDelegates, VoiceStyles StylesWindow) : base(commandManager) //ElevenLabsStylesWindow elevenLabsStylesWindow)
+        VoiceBackendManager backendManager, ConfigurationWindow configurationWindow, IConfigUIDelegates configUIDelegates, VoiceStyles StylesWindow, StatsWindow statsWindow) : base(commandManager) //ElevenLabsStylesWindow elevenLabsStylesWindow)
     {
         this.chat = chat;
 
@@ -25,6 +26,7 @@ public class MainCommandModule : CommandModule
         this.configurationWindow = configurationWindow;
         this.configUIDelegates = configUIDelegates;
         this.StylesWindow = StylesWindow;
+        this.StatsWindow = statsWindow;
 
         AddCommand("/canceltts", CancelTts, "Cancel all queued TTS messages.");
         AddCommand("/toggletts", ToggleTts, "Toggle TextToTalk's text-to-speech.");
@@ -32,6 +34,8 @@ public class MainCommandModule : CommandModule
         AddCommand("/enabletts", EnableTts, "Enable TextToTalk's text-to-speech.");
         AddCommand("/tttconfig", ToggleConfig, "Toggle TextToTalk's configuration window.");
         AddCommand("/tttstyles", ToggleStyles, "Toggle TextToTalk's styles window.");
+        AddCommand("/tttstats", ToggleStats, "Toggle TextToTalk's latency stats window.");
+        
     }
 
     public void CancelTts(string command = "", string args = "")
@@ -69,5 +73,10 @@ public class MainCommandModule : CommandModule
     public void ToggleStyles(string command = "", string args = "")
     {
         this.StylesWindow.Toggle();
+    }
+
+    public void ToggleStats(string command = "", string args = "")
+    {
+        this.StatsWindow.Toggle();
     }
 }

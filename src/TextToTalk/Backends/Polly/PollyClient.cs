@@ -22,11 +22,11 @@ namespace TextToTalk.Backends.Polly
 
         public CancellationTokenSource? _TtsCts;
 
-        public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager, PluginConfiguration config)
+        public PollyClient(string accessKey, string secretKey, RegionEndpoint region, LexiconManager lexiconManager, PluginConfiguration config, LatencyTracker latencyTracker)
         {
             var credentials = new BasicAWSCredentials(accessKey, secretKey);
             this.client = new AmazonPollyClient(credentials, region);
-            this.soundQueue = new StreamingSoundQueue(config);
+            this.soundQueue = new StreamingSoundQueue(config, latencyTracker);
             this.lexiconManager = lexiconManager;
         }
 

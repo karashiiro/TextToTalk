@@ -23,7 +23,9 @@ public class WebsocketBackend : VoiceBackend
     private bool dirtyConfig;
     private Exception? lastException;
 
-    public WebsocketBackend(PluginConfiguration config, INotificationService notificationService)
+    private readonly LatencyTracker latencyTracker;
+
+    public WebsocketBackend(PluginConfiguration config, INotificationService notificationService, LatencyTracker latencyTracker)
     {
         this.config = config;
 
@@ -40,6 +42,7 @@ public class WebsocketBackend : VoiceBackend
         }
 
         this.wsServer.Start();
+        this.latencyTracker = latencyTracker;
     }
 
     public override void DrawStyles(IConfigUIDelegates helpers)

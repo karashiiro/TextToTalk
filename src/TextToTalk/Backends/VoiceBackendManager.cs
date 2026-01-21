@@ -24,17 +24,20 @@ namespace TextToTalk.Backends
         private readonly PluginConfiguration config;
         private readonly IUiBuilder uiBuilder;
         private readonly INotificationService notificationService;
+        private readonly LatencyTracker latencyTracker;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
 
         public VoiceBackendManager(PluginConfiguration config, HttpClient http, IUiBuilder uiBuilder,
-            INotificationService notificationService)
+            INotificationService notificationService, LatencyTracker tracker)
         {
             this.config = config;
             this.http = http;
             this.uiBuilder = uiBuilder;
             this.notificationService = notificationService;
+            this.latencyTracker = tracker;
+
 
             SetBackend(this.config.Backend);           
         }
@@ -105,16 +108,16 @@ namespace TextToTalk.Backends
         {
             return backendKind switch
             {
-                TTSBackend.System => new SystemBackend(this.config, this.http),
-                TTSBackend.Websocket => new WebsocketBackend(this.config, this.notificationService),
-                TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http),
-                TTSBackend.Uberduck => new UberduckBackend(this.config, this.http),
-                TTSBackend.Azure => new AzureBackend(this.config, this.http),
-                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http, this.notificationService),
-                TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http, this.notificationService),
-                TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config),
-                TTSBackend.Kokoro => new KokoroBackend(this.config),
-                TTSBackend.Piper => new PiperBackend(this.config),
+                TTSBackend.System => new SystemBackend(this.config, this.http, this.latencyTracker),
+                TTSBackend.Websocket => new WebsocketBackend(this.config, this.notificationService, this.latencyTracker),
+                TTSBackend.AmazonPolly => new PollyBackend(this.config, this.http, this.latencyTracker),
+                TTSBackend.Uberduck => new UberduckBackend(this.config, this.http, this.latencyTracker),
+                TTSBackend.Azure => new AzureBackend(this.config, this.http, this.latencyTracker),
+                TTSBackend.ElevenLabs => new ElevenLabsBackend(this.config, this.http, this.notificationService, this.latencyTracker),
+                TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http, this.notificationService, this.latencyTracker),
+                TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config, this.latencyTracker),
+                TTSBackend.Kokoro => new KokoroBackend(this.config, this.latencyTracker),
+                TTSBackend.Piper => new PiperBackend(this.config, this.latencyTracker),
                 _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };
         }

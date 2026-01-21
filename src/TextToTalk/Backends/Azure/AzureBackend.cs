@@ -1,9 +1,7 @@
 ﻿using Dalamud.Bindings.ImGui;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using TextToTalk.Backends.ElevenLabs;
 using static TextToTalk.Backends.Azure.AzureClient;
 
 namespace TextToTalk.Backends.Azure;
@@ -13,18 +11,19 @@ public class AzureBackend : VoiceBackend
     private readonly AzureBackendUI ui;
     private readonly AzureBackendUIModel uiModel;
     public List<VoiceDetails> voices;
+    private readonly LatencyTracker latencyTracker;
 
-    public AzureBackend(PluginConfiguration config, HttpClient http)
+    public AzureBackend(PluginConfiguration config, HttpClient http, LatencyTracker latencyTracker)
     {
         TitleBarColor = ImGui.ColorConvertU32ToFloat4(0xFFF96800);
 
         var lexiconManager = new DalamudLexiconManager();
         LexiconUtils.LoadFromConfigAzure(lexiconManager, config);
 
-        this.uiModel = new AzureBackendUIModel(config, lexiconManager);
+        this.uiModel = new AzureBackendUIModel(config, lexiconManager, latencyTracker);
         this.voices = this.uiModel.voices;
         this.ui = new AzureBackendUI(this.uiModel, config, lexiconManager, http, this);
-
+        this.latencyTracker = latencyTracker;
     }
 
     public override void DrawStyles(IConfigUIDelegates helpers)

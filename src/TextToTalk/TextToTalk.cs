@@ -92,6 +92,9 @@ namespace TextToTalk
         private readonly IConfigUIDelegates configUIDelegates;
         private readonly VoiceStyles StylesWindow;
 
+        private readonly LatencyTracker tracker;
+        private readonly StatsWindow statsWindow;
+
         public string Name => "TextToTalk";
 
 
@@ -120,6 +123,10 @@ namespace TextToTalk
             this.framework = framework;
             this.data = data;
 
+            this.tracker = new LatencyTracker();
+            this.statsWindow = new StatsWindow(this.tracker);
+            
+
             CreateDatabasePath();
             CreateEventLogDatabase();
             this.database = new LiteDatabase(GetDatabasePath("TextToTalk.db"));
@@ -141,7 +148,7 @@ namespace TextToTalk
             var sharedState = new SharedState();
 
             this.http = new HttpClient();
-            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService);
+            this.backendManager = new VoiceBackendManager(this.config, this.http, pi.UiBuilder, this.notificationService, this.tracker);
             this.StylesWindow = new VoiceStyles(this.backendManager, this.configUIDelegates, this.config);
             this.playerService = new PlayerService(playerCollection, this.config.GetVoiceConfig().VoicePresets);
             this.npcService = new NpcService(npcCollection, this.config.GetVoiceConfig().VoicePresets);
@@ -169,6 +176,7 @@ namespace TextToTalk
             this.windows.AddWindow(this.configurationWindow);
             this.windows.AddWindow(channelPresetModificationWindow);
             this.windows.AddWindow(this.StylesWindow);
+            this.windows.AddWindow(this.statsWindow);
 
             var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
             this.addonTalkHandler =
@@ -187,10 +195,10 @@ namespace TextToTalk
 
             
             this.commandModule = new MainCommandModule(commandManager, chat, this.config, this.backendManager,
-                this.configurationWindow, this.configUIDelegates, this.StylesWindow);
+                this.configurationWindow, this.configUIDelegates, this.StylesWindow, this.statsWindow);
             this.debugCommandModule = new DebugCommandModule(commandManager, chat, gui, framework);
 
-
+            
             RegisterCallbacks();
 
             var handleTextCancel = HandleTextCancel();
@@ -603,5 +611,46 @@ namespace TextToTalk
         }
 
         #endregion
+    }
+    public class LatencyTracker
+    {
+        private readonly List<double> history = new();
+        private readonly object historyLock = new();
+
+
+        public double AverageLatency
+        {
+            get
+            {
+                lock (historyLock)
+                {
+                    return history.Count == 0 ? 0 : history.Average();
+                }
+            }
+        }
+        public float[] GetHistoryArray()
+        {
+            lock (historyLock)
+            {
+                return history.Select(d => (float)d).ToArray();
+            }
+        }
+
+        public void AddLatency(double ms)
+        {
+            lock (historyLock)
+            {
+                history.Add(ms);
+                if (history.Count > 100) history.RemoveAt(0); // Keep last 100 requests
+            }
+        }
+
+        public void Clear()
+        {
+            lock (historyLock)
+            {
+                history.Clear();
+            }
+        }
     }
 }

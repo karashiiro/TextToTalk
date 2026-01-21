@@ -27,7 +27,7 @@ public class AzureClient : IDisposable
     private readonly PluginConfiguration config;
     private CancellationTokenSource? _ttsCts;
 
-    public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager, PluginConfiguration config)
+    public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager, PluginConfiguration config, LatencyTracker latencyTracker)
     {
         _apiKey = subscriptionKey;
         _endpoint = $"https://{region}.tts.speech.microsoft.com/cognitiveservices/v1";
@@ -36,7 +36,7 @@ public class AzureClient : IDisposable
         _httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", _apiKey);
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "TextToTalkApp");
 
-        soundQueue = new StreamingSoundQueue(config);
+        soundQueue = new StreamingSoundQueue(config, latencyTracker);
         _lexiconManager = lexiconManager;
         speechConfig = SpeechConfig.FromSubscription(subscriptionKey, region);
         speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm);

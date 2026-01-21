@@ -20,14 +20,16 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
     private readonly object soundLock = new();
     private readonly PluginConfiguration config;
     private readonly Task<KokoroModel> modelTask;
+    private readonly LatencyTracker latencyTracker;
 
     private WasapiOut? soundOut;
     private BufferedWaveProvider? bufferedProvider;
 
-    public KokoroSoundQueue(PluginConfiguration config, Task<KokoroModel> modelTask)
+    public KokoroSoundQueue(PluginConfiguration config, Task<KokoroModel> modelTask, LatencyTracker latencyTracker)
     {
         this.config = config;
         this.modelTask = modelTask;
+        this.latencyTracker = latencyTracker;
     }
 
     private bool TryGetModel([NotNullWhen(true)] out KokoroModel? model)
@@ -92,6 +94,7 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
                         if (nextItem.StartTime.HasValue)
                         {
                             var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
+                            this.latencyTracker.AddLatency(elapsed.TotalMilliseconds);
                             Log.Debug("Total Latency (Say -> Play): {Ms}", elapsed.TotalMilliseconds);
                         }
                         this.soundOut.Play();

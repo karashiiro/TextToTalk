@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Speech.Synthesis;
@@ -19,7 +20,7 @@ using static TextToTalk.Backends.StreamSoundQueueItem;
 namespace TextToTalk.Backends
 {
 
-    public class StreamingSoundQueue(PluginConfiguration config) : SoundQueue<StreamingSoundQueueItem>
+    public class StreamingSoundQueue(PluginConfiguration config, LatencyTracker latencyTracker) : SoundQueue<StreamingSoundQueueItem>
     {
         // WASAPI Hardware Members
         private WasapiOut? soundOut;
@@ -35,6 +36,8 @@ namespace TextToTalk.Backends
 
         private bool _isDisposed;
         public CancellationTokenSource? _ttsCts;
+
+        private LatencyTracker latencyTracker = latencyTracker;
 
         public void EnqueueSound(Stream data, TextSource source, float volume, StreamFormat format, HttpResponseMessage? response, long? timeStamp)
         {
@@ -123,7 +126,8 @@ namespace TextToTalk.Backends
                                     if (nextItem.StartTime.HasValue)
                                     {
                                         var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
-                                        Log.Information("Total Latency (Say -> PlayMp3): {Ms}", elapsed.TotalMilliseconds);
+                                        latencyTracker.AddLatency(elapsed.TotalMilliseconds);
+                                        Log.Debug("Total Latency (Say -> PlayMp3): {Ms}", elapsed.TotalMilliseconds);
                                     }
                                     this.soundOut.Play();
                                 }
@@ -176,7 +180,8 @@ namespace TextToTalk.Backends
                         if (nextItem.StartTime.HasValue)
                         {
                             var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
-                            Log.Information("Total Latency (Say -> PlayPCM): {Ms}", elapsed.TotalMilliseconds);
+                            latencyTracker.AddLatency(elapsed.TotalMilliseconds);
+                            Log.Debug("Total Latency (Say -> PlayPCM): {Ms}", elapsed.TotalMilliseconds);
                         }
 
                         this.soundOut.Play();
@@ -186,6 +191,7 @@ namespace TextToTalk.Backends
             }
             nextItem.Data.Dispose();
         }
+
 
         private void EnsureHardwareInitialized(WaveFormat format)
         {
