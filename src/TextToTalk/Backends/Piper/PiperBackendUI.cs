@@ -30,9 +30,9 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
     public class PiperModelInfo
     {
         public string FullPath { get; set; }
-        public string DisplayName { get; set; } // The dataset name (e.g., "Lessac")
+        public string DisplayName { get; set; } 
         public string Quality { get; set; }
-        public string LanguageName { get; set; } // The pretty name (e.g., "English - US")
+        public string LanguageName { get; set; } 
 
         public static PiperModelInfo FromPath(string onnxPath)
         {
@@ -48,7 +48,6 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
                 var langCode = root.GetProperty("language").GetProperty("code").GetString();
                 var langPlain = root.GetProperty("language").GetProperty("name_english").GetString();
 
-                // Pass both code and plain name to your disambiguation helper
                 var prettyLang = GetPrettyLanguageName(langCode, langPlain);
                 var dataset = root.GetProperty("dataset").GetString();
 
@@ -81,7 +80,7 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
             "es_mx" => "Spanish - MX",
             "nl_be" => "Dutch - BE",
             "nl_nl" => "Dutch - NL",
-            _ => fallbackName // Use "English", "French", etc. from JSON
+            _ => fallbackName 
         };
     }
 
@@ -162,7 +161,6 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
             config.Save();
         }
 
-        // 1. REFACTORED MODEL SCANNING (Async polling for new downloads)
         if (!isScanning && (DateTime.Now - lastScan).TotalSeconds > 3)
         {
             lastScan = DateTime.Now;
@@ -175,17 +173,13 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
                     var voicesDir = Path.Combine(config.GetPluginConfigDirectory(), "piper", "voices");
                     if (Directory.Exists(voicesDir))
                     {
-                        // 1. Existing Model Scanning logic
                         var files = Directory.GetFiles(voicesDir, "*.onnx", SearchOption.AllDirectories);
                         cachedModels = files.Select(PiperModelInfo.FromPath).Where(m => m != null).ToList();
 
-                        // 2. NEW: Calculate Folder Size
                         var dirInfo = new DirectoryInfo(voicesDir);
-                        // Sum all files in all subdirectories
                         long totalBytes = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories).Sum(fi => fi.Length);
 
-                        // Convert to MB and format
-                        voicesFolderSize = $"{(totalBytes / 1024f / 1024f):N0} MB";
+                        voicesFolderSize = $"{(totalBytes / 1024f / 1024f):N0} MB"; // Display current size of Piper Voice Directory
                     }
                 }
                 finally { isScanning = false; }
@@ -203,14 +197,13 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
         {
             var currentModel = allModels.FirstOrDefault(m => m.FullPath == currentVoicePreset.ModelPath);
 
-            // PREVIEW: Uses the pre-parsed properties
             string previewValue = currentModel != null
                 ? $"{currentModel.LanguageName} : {currentModel.DisplayName} ({currentModel.Quality})"
                 : "Select a model...";
 
             if (ImGui.BeginCombo($"##ModelSelect{MemoizedId.Create()}", previewValue))
             {
-                // Group by the LanguageName property we parsed from JSON
+
                 var languageGroups = allModels
                     .GroupBy(m => m.LanguageName)
                     .OrderBy(g => g.Key);
@@ -225,7 +218,6 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
                     {
                         bool isSelected = currentVoicePreset.ModelPath == model.FullPath;
 
-                        // Content: "Lessac (medium)"
                         string itemLabel = $"{model.LanguageName} : {model.DisplayName} ({model.Quality})";
 
                         if (ImGui.Selectable($"{itemLabel}##{model.FullPath}", isSelected))
@@ -276,14 +268,11 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
         if (ImGui.Button($"Open Voice Downloader##{MemoizedId.Create()}"))
         {
             showDownloader = true;
-            // 2026 Best Practice: Fetch manifest on a background thread to prevent FFXIV frame drops
             Task.Run(async () =>
             {
                 try
                 {
-                    // Ensure this returns IDictionary<string, PiperModel> or similar
                     var models = await piperBackend.GetAvailableModels();
-                    // Cast or assign to your IDictionary<string, VoiceModel> field
                     remoteModels = models.ToDictionary(k => k.Key, v => (VoiceModel)v.Value);
                 }
                 catch (Exception ex)
@@ -299,7 +288,6 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
         {
             ImGui.SetTooltip("Total disk space used by downloaded Piper voice models.");
         }
-        // Render the window if active
         if (showDownloader) DrawVoiceDownloader();
 
         ImGui.Separator();
@@ -366,13 +354,11 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
 
                     // Add a small delete button to the right of the "Installed" text
                     ImGui.SameLine(ImGui.GetWindowWidth() - 40);
-                    ImGui.PushStyleColor(ImGuiCol.Button, new global::System.Numerics.Vector4(0.6f, 0.2f, 0.2f, 1f)); // Reddish
+                    ImGui.PushStyleColor(ImGuiCol.Button, new global::System.Numerics.Vector4(0.6f, 0.2f, 0.2f, 1f)); 
                     if (ImGui.Button("X##Delete"))
                     {
-                        // Trigger deletion
                         if (piperBackend.DeleteVoiceModel(model.Key))
                         {
-                            // Force a re-scan of the local files immediately so the UI updates
                             lastScan = DateTime.MinValue;
                         }
                     }
@@ -395,15 +381,10 @@ public class PiperBackendUI(PluginConfiguration config, PiperBackend piperBacken
                         {
                             activeDownloads.Add(model.Key);
 
-                            // Use a Task.Run or Ensure the continuation happens correctly
                             _ = piperBackend.DownloadSpecificModel(model.Key, (VoiceModel)model.Value)
                                 .ContinueWith(t =>
                                 {
-                                    // 1. Force your scanner to see the new files immediately
-                                    // Assuming 'lastScan' is what triggers your cachedModels update loop
                                     lastScan = DateTime.MinValue;
-
-                                    // 2. Remove from active downloads AFTER the scan is flagged
                                     activeDownloads.Remove(model.Key);
                                 });
                         }

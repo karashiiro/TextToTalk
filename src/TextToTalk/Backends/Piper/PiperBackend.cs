@@ -44,7 +44,6 @@ public class PiperBackend : VoiceBackend
         this.piper = new PiperProvider(new PiperConfiguration()
         {
             ExecutableLocation = piperExe,
-            // 2. Set the working directory to the folder containing the .exe
             WorkingDirectory = piperBaseDir
         });
 
@@ -74,10 +73,8 @@ public class PiperBackend : VoiceBackend
         try
         {
             DetailedLog.Info($"Downloading voice: {modelKey}");
-            // Downloads into voicesDir/modelKey/
             await entry.DownloadModel(voicesDir);
 
-            // Prepare the model.json for PiperSharp
             string onnxPath = Path.Combine(modelTargetDir, $"{modelKey}.onnx");
             await LoadSpecificVoiceModel(onnxPath);
 
@@ -101,7 +98,6 @@ public class PiperBackend : VoiceBackend
 
             if (Directory.Exists(modelTargetDir))
             {
-                // Delete the folder and all contents (.onnx, .json)
                 Directory.Delete(modelTargetDir, true);
                 DetailedLog.Info($"Deleted voice model: {modelKey}");
                 return true;
@@ -120,10 +116,8 @@ public class PiperBackend : VoiceBackend
         string configDir = config.GetPluginConfigDirectory();
         string voicesDir = GetVoicesDir(config);
 
-        // Ensure the executable is downloaded first
         await EnsureExecutableDownloaded(config);
 
-        // Fetch all available models from Hugging Face
         var allModels = await PiperDownloader.GetHuggingFaceModelList();
 
         // TARGET: Only download "en_US-lessac-medium" initially
@@ -140,12 +134,10 @@ public class PiperBackend : VoiceBackend
                 {
                     DetailedLog.Info($"Downloading starter English voice: {starterModelKey}");
 
-                    // Downloads the model to voicesDir/en_US-lessac-medium/
                     await modelEntry.DownloadModel(voicesDir);
 
                     string onnxPath = Path.Combine(modelTargetDir, $"{starterModelKey}.onnx");
 
-                    // Initialize the model config and directory
                     await LoadSpecificVoiceModel(onnxPath);
                 }
                 catch (Exception ex)

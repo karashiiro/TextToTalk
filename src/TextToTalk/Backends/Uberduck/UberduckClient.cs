@@ -1,4 +1,5 @@
-﻿using Dalamud.Interface.Windowing;
+﻿using Dalamud.Game.ClientState.Fates;
+using Dalamud.Interface.Windowing;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using WindowsSystem = System.Net;
 
@@ -21,6 +23,7 @@ public partial class UberduckClient
 
     private readonly HttpClient http;
     private readonly StreamingSoundQueue soundQueue;
+    public CancellationTokenSource? _ttsCts;
 
     public string? ApiKey { private get; set; }
     public string? ApiSecret { private get; set; }
@@ -44,45 +47,46 @@ public partial class UberduckClient
         Voices = new List<UberduckVoice>();
     }
 
+    // Uberduck TTS API call.  They have moved to a versioned API so this section needed a pretty extensive re-work
     public async Task Say(string voice, int playbackRate, float volume, TextSource source, string text)
     {
+
         long methodStart = Stopwatch.GetTimestamp();
+        _ttsCts?.Cancel();
+        _ttsCts = new CancellationTokenSource();
+        var token = _ttsCts.Token;
         var url = "https://api.uberduck.ai/v1/text-to-speech";
 
         var payload = new
         {
             text = text,
             voice = voice,
-            output_format = "wav" // CRITICAL: Forces the API to return a WAV file instead of MP3
+            output_format = "wav" 
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Post, url);
         request.Headers.Authorization = new WindowsSystem.Http.Headers.AuthenticationHeaderValue("Bearer", ApiKey);
         request.Content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
 
-        var response = await this.http.SendAsync(request);
+        var response = await this.http.SendAsync(request, token);
 
         if (response.IsSuccessStatusCode)
         {
-            var json = await response.Content.ReadAsStringAsync();
+            var json = await response.Content.ReadAsStringAsync(token);
             var result = JsonConvert.DeserializeObject<UberduckTtsResponse>(json);
 
-            if (result?.AudioUrl != null)
+            if (result?.AudioUrl != null && !token.IsCancellationRequested)
             {
-                // Download the actual audio data
+
                 var audioBytes = await this.http.GetByteArrayAsync(result.AudioUrl);
 
-                // Use a MemoryStream to hold the downloaded data
                 var waveStream = new MemoryStream(audioBytes);
                 long? timestampToPass = methodStart;
-                // Pass the stream to your queue. Ensure the consumer uses WaveFileReader 
-                // to correctly handle the WAV container.
+
                 this.soundQueue.EnqueueSound(waveStream, source, volume, StreamFormat.Uberduck, null, timestampToPass);
             }
         }
     }
-
-    // 2026 Response Model
     public class UberduckTtsResponse
     {
         [JsonProperty("audio_url")]
@@ -109,7 +113,6 @@ public partial class UberduckClient
         return voiceInfo.VoiceModelUuid;
     }
 
-    // 1. Change return type to Task<IDictionary<string, IList<UberduckVoice>>>
     public async Task<IDictionary<string, IList<UberduckVoice>>> UpdateVoices()
     {
         Log.Information("Updating Voices...");
@@ -125,10 +128,8 @@ public partial class UberduckClient
                 var json = await response.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<UberduckVoiceResponse>(json);
 
-                // Update local state if needed
                 this.Voices = result?.Voices ?? new List<UberduckVoice>();
 
-                // Update the cached variable before returning
                 this.CachedVoices = this.Voices
                     .OrderBy(v => v.DisplayName)
                     .GroupBy(v => v.Category ?? "Uncategorized")
@@ -144,7 +145,6 @@ public partial class UberduckClient
             }
         }
 
-        // Return empty dictionary if authorization fails or request fails
         return new Dictionary<string, IList<UberduckVoice>>();
     }
 
@@ -199,8 +199,6 @@ public partial class UberduckClient
 
     private void AddAuthorization(HttpRequestMessage req)
     {
-        // 2026 standard uses Bearer token with the API Key
-        // Ensure your ApiKey is the "Public Key" or "API Key" from the Uberduck dashboard
         req.Headers.Authorization = new global::System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", ApiKey);
     }
 

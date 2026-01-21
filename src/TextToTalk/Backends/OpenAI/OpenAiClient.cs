@@ -27,7 +27,6 @@ public class OpenAiClient
 
     private readonly HttpClient _httpClient = new();
 
-    // --- Provided Definitions ---
     public record ModelConfig(
         string ModelName,
         IReadOnlyDictionary<string, string> Voices,
@@ -60,7 +59,6 @@ public class OpenAiClient
 
     public string? ApiKey { get; set; }
 
-    // --- Implementation ---
     public OpenAiClient(StreamingSoundQueue soundQueue, string apiKey)
     {
         _soundQueue = soundQueue;
@@ -83,7 +81,6 @@ public class OpenAiClient
 
         try
         {
-            // 1. Prepare the JSON Payload
             var requestBody = new Dictionary<string, object>
         {
             { "model", modelName },
@@ -100,20 +97,15 @@ public class OpenAiClient
                 requestBody["instructions"] = instructions;
             }
 
-            // 2. Configure the Request
             using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/audio/speech");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
             request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
-            // 3. Send and Stream Response
-            // HttpCompletionOption.ResponseHeadersRead is the "magic" for low latency
             var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();
 
             var responseStream = await response.Content.ReadAsStreamAsync(token);
 
-            // 4. Pass the live stream directly to the sound queue
-            // The queue will handle the background reading/decoding
             _soundQueue.EnqueueSound(responseStream, source, volume, StreamFormat.Wave, null, methodStart);
         }
         catch (OperationCanceledException)

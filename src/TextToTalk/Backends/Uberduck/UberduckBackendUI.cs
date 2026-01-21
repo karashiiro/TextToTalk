@@ -52,10 +52,8 @@ public class UberduckBackendUI
         if (ImGui.Button($"Save and Login##{MemoizedId.Create()}"))
         {
             var apiKey = Whitespace.Replace(this.apiKey, "");
-            //var password = Whitespace.Replace(this.apiSecret, "");
             UberduckCredentialManager.SaveCredentials(apiKey);
             this.uberduck.ApiKey = apiKey;
-            //this.uberduck.ApiSecret = password;
         }
 
         ImGui.SameLine();

@@ -69,27 +69,22 @@ public class OpenAiBackend : VoiceBackend
 
     public override void CancelAllSpeech()
     {
-        //Cancel at the queue
         this.uiModel.SoundQueue.CancelAllSounds();
 
-        //Cancel at Speech Generation
         if (uiModel.OpenAi._ttsCts != null)
         {
             uiModel.OpenAi._ttsCts.Cancel();
             uiModel.OpenAi._ttsCts.Dispose();
             uiModel.OpenAi._ttsCts = null;
         }
-        //Cancel at Playback
         this.uiModel.SoundQueue.StopHardware();
         
     }
 
     public override void CancelSay(TextSource source)
     {
-        //Cancel at the queue
         this.uiModel.SoundQueue.CancelFromSource(source);
 
-        //Cancel at Speech Generation
         if (uiModel.OpenAi._ttsCts != null)
         {
             uiModel.OpenAi._ttsCts.Cancel();
@@ -97,7 +92,6 @@ public class OpenAiBackend : VoiceBackend
             uiModel.OpenAi._ttsCts = null;
         }
 
-        //Cancel at Playback
         if (uiModel.SoundQueue._ttsCts != null)
         {
             uiModel.OpenAi._ttsCts.Cancel();

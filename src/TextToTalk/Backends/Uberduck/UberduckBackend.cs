@@ -67,11 +67,21 @@ public class UberduckBackend : VoiceBackend
 
     public override void CancelAllSpeech()
     {
+        if (uberduck._ttsCts != null)
+        {
+            uberduck._ttsCts.Cancel();
+        }
+        this.soundQueue.StopHardware();
         this.soundQueue.CancelAllSounds();
     }
 
     public override void CancelSay(TextSource source)
     {
+        if (uberduck._ttsCts != null)
+        {
+            uberduck._ttsCts.Cancel();
+        }
+        this.soundQueue.StopHardware();
         this.soundQueue.CancelFromSource(source);
     }
 

@@ -122,33 +122,25 @@ public class OpenAiBackendUI
         if (currentVoicePreset.Model == null) return;
 
         var currentModel = OpenAiClient.Models.First(x => x.ModelName == currentVoicePreset.Model);
-        // 1. Determine what to display in the preview (the value corresponding to the current key)
         if (!currentModel.Voices.TryGetValue(currentVoicePreset.VoiceName ?? "", out var currentPreviewName))
         {
-            // Fallback if current key is invalid or null
             currentVoicePreset.VoiceName = currentModel.Voices.Keys.First();
             currentPreviewName = currentModel.Voices[currentVoicePreset.VoiceName];
             config.Save();
         }
 
-        // 2. Start the Combo Box with the Descriptive Value as the preview
         if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", currentPreviewName))
         {
             foreach (var voice in currentModel.Voices)
             {
-                // voice.Key is "alloy", "ash", etc.
-                // voice.Value is "Alloy (Neutral & Balanced)", etc.
                 bool isSelected = (currentVoicePreset.VoiceName == voice.Key);
 
-                // 3. Display the descriptive Value to the user
                 if (ImGui.Selectable(voice.Value, isSelected))
                 {
-                    // 4. Update config with the underlying Key
                     currentVoicePreset.VoiceName = voice.Key;
                     config.Save();
                 }
 
-                // Standard ImGui accessibility: set focus to the selected item
                 if (isSelected)
                 {
                     ImGui.SetItemDefaultFocus();
@@ -189,17 +181,14 @@ public class OpenAiBackendUI
             }
             else
             {
-                // 1. Generate the preview text directly from the set
                 string previewText = currentVoicePreset.Styles.Count > 0
                     ? string.Join(", ", currentVoicePreset.Styles)
                     : "None selected";
 
-                // 2. Open the Combo
                 if (ImGui.BeginCombo($"Voice Style##{MemoizedId.Create()}", previewText))
                 {
                     foreach (var styleName in config.CustomVoiceStyles)
                     {
-                        // Check if this style is currently in our preset's set
                         bool isSelected = currentVoicePreset.Styles.Contains(styleName);
 
                         if (ImGui.Selectable(styleName, isSelected, ImGuiSelectableFlags.DontClosePopups))
@@ -209,9 +198,6 @@ public class OpenAiBackendUI
                             else
                                 currentVoicePreset.Styles.Add(styleName);
 
-                            // 3. Save immediately
-                            // Because 'Styles' is a reference type inside the preset, 
-                            // the save/reload won't "wipe" your local UI state anymore.
                             currentVoicePreset.SyncStringFromSet();
                             this.config.Save();
                         }

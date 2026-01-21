@@ -74,7 +74,6 @@ public class ElevenLabsClient
 
             var uriBuilder = new UriBuilder(UrlBase) { Path = $"/v1/text-to-speech/{voice}/stream" };
 
-            // Use HttpCompletionOption.ResponseHeadersRead to begin processing before the body is fully downloaded
             using var req = new HttpRequestMessage(HttpMethod.Post, uriBuilder.Uri);
             AddAuthorization(req);
             req.Headers.Add("accept", "audio/mpeg");
@@ -82,22 +81,17 @@ public class ElevenLabsClient
             using var content = new StringContent(JsonConvert.SerializeObject(args), Encoding.UTF8, "application/json");
             req.Content = content;
 
-            // SendAsync with ResponseHeadersRead is the key for streaming
-            var res = await this.http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
+            var res = await this.http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct); // Using ResponseHeadersRead in order to stream as synth completes
             EnsureSuccessStatusCode(res);
 
-            // Get the stream directly from the response
             var responseStream = await res.Content.ReadAsStreamAsync(ct);
             long? timestampToPass = methodStart;
-            // Enqueue the live stream. 
-            // IMPORTANT: Your soundQueue must be able to process the stream as bytes arrive.
+
             this.soundQueue.EnqueueSound(responseStream, source, volume, StreamFormat.Mp3, res, timestampToPass);
         }
         catch (OperationCanceledException)
         {
-            // 2026 Best Practice: Catch the cancellation exception to prevent it 
-            // from bubbling up as a generic error.
-            Log.Information("TTS generation was cancelled.");
+            Log.Information("TTS generation was cancelled."); // Catching cancellation
         }
     }
 

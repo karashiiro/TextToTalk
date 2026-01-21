@@ -85,20 +85,15 @@ namespace TextToTalk.Backends.Polly
             bool isFirstChunk = true;
             try
             {
-                // Using 'using' ensures the response (and its stream) is disposed after the queue handles it
                 var res = await this.client.SynthesizeSpeechAsync(req, ct);
 
-                // Pass the live AudioStream directly to the queue.
-                // Ensure EnqueueSound is updated to process the stream as it arrives.
                 long? timestampToPass = isFirstChunk ? methodStart : null;
                 this.soundQueue.EnqueueSound(res.AudioStream, source, volume, StreamFormat.Mp3, null, timestampToPass);
                 isFirstChunk = false;
             }
             catch (OperationCanceledException)
             {
-                // 2026 Best Practice: Catch the cancellation exception to prevent it 
-                // from bubbling up as a generic error.
-                Log.Information("TTS generation was cancelled.");
+                // Silently ignore cancellations
             }
             catch (Exception e)
             {

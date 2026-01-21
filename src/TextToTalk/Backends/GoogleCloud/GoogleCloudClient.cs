@@ -38,16 +38,13 @@ public class GoogleCloudClient
     {
         if (client == null) return new Dictionary<string, dynamic>();
 
-        // Fetch all available voices
         var response = client.ListVoices("");
 
         var fetchedVoices = new Dictionary<string, dynamic>();
 
         foreach (var voice in response.Voices)
         {
-            // Filter: Only include voices with "Chirp3" or "Chirp-HD" in their name
-            // Rebranded "Journey" voices also now fall under "Chirp-HD"
-            if (voice.Name.Contains("Chirp3") || voice.Name.Contains("Chirp-HD"))
+            if (voice.Name.Contains("Chirp3") || voice.Name.Contains("Chirp-HD")) // Focusing on Chirp 3 and Chirp HD voices as these are the only ones enabled for streaming.  From what I can tell, this actually reduces duplicates of the same voice under different formats.
             {
                 fetchedVoices.Add(voice.Name, new
                 {
@@ -92,10 +89,8 @@ public class GoogleCloudClient
 
         try
         {
-            // 1. Open the stream with the cancellation token
-            using var streamingCall = client.StreamingSynthesize();
+            using var streamingCall = client.StreamingSynthesize(); // One request to open the stream
 
-            // 2. FIRST request: Configuration ONLY
             var configRequest = new StreamingSynthesizeRequest
             {
                 StreamingConfig = new StreamingSynthesizeConfig
@@ -107,35 +102,26 @@ public class GoogleCloudClient
                     },
                     StreamingAudioConfig = new StreamingAudioConfig
                     {
-                        // Linear16 is the 2026 standard for Chirp 3 HD PCM streaming
                         AudioEncoding = AudioEncoding.Pcm,
                         SampleRateHertz = 24000,
                         SpeakingRate = speed ?? 1.0f,
                     }
                 }
             };
-
-            // Pass token to WriteAsync to stop sending if cancelled
             await streamingCall.WriteAsync(configRequest);
 
-            // 3. SECOND request: Input Text ONLY
-            await streamingCall.WriteAsync(new StreamingSynthesizeRequest
+            await streamingCall.WriteAsync(new StreamingSynthesizeRequest  // One request to send the text and write back the chunks
             {
                 Input = new StreamingSynthesisInput { Text = text }
             });
 
             await streamingCall.WriteCompleteAsync();
 
-            // 4. Process the response stream with the cancellation token
-
             await foreach (var response in streamingCall.GetResponseStream().WithCancellation(ct))
             {
                 if (response.AudioContent.Length > 0)
                 {
                     var chunkStream = new MemoryStream(response.AudioContent.ToByteArray());
-
-                    // Note: Linear16 audio is typically handled as StreamFormat.Pcm 
-                    // but matches Wave if your queue expects raw headerless bytes.
                     long? timestampToPass = methodStart;
                     soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Wave, null, timestampToPass);
                 }
@@ -143,7 +129,7 @@ public class GoogleCloudClient
         }
         catch (OperationCanceledException)
         {
-            // Handle normal cancellation (e.g., stopping the voice)
+            // Silent Cancellation if token is set to Cancelled
         }
         catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.Cancelled)
         {

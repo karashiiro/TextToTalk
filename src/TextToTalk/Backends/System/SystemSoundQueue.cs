@@ -16,13 +16,11 @@ namespace TextToTalk.Backends.System
 {
     public class SystemSoundQueue : SoundQueue<SystemSoundQueueItem>
     {
-        // WASAPI Hardware Members
         private WasapiOut? soundOut;
         private BufferedWaveProvider? bufferedProvider;
         private VolumeSampleProvider? volumeProvider;
         private readonly object soundLock = new();
 
-        // 1. Unified Audio Configuration
         private static readonly WaveFormat SystemFormat = new(22050, 16, 1);
         private readonly SpeechSynthesizer _speechSynthesizer;
         private readonly LexiconManager _lexiconManager;
@@ -87,16 +85,15 @@ namespace TextToTalk.Backends.System
         {
             if (nextItem.Preset is not SystemVoicePreset preset || nextItem.Aborted) return;
 
-            // 1. Mimic Kokoro: Shared Hardware Setup
             lock (this.soundLock)
             {
                 if (this.soundOut == null)
                 {
                     var mmDevice = GetWasapiDeviceFromGuid(_config.SelectedAudioDeviceGuid);
-                    // Match the voice's expected format (SAPI default is 22050Hz, 16-bit, Mono)
+
                     this.bufferedProvider = new BufferedWaveProvider(new WaveFormat(22050, 16, 1))
                     {
-                        ReadFully = true, // Prevents WASAPI from stopping on empty buffer
+                        ReadFully = true, 
                         BufferDuration = TimeSpan.FromSeconds(30)
                     };
                     this.soundOut = new WasapiOut(mmDevice, AudioClientShareMode.Shared, false, 50);
@@ -104,7 +101,6 @@ namespace TextToTalk.Backends.System
                 }
             }
 
-            // 1.5 Instant Voice Switching via Pool
             if (!_synthPool.TryGetValue(preset.VoiceName, out var synth))
             {
                 synth = new SpeechSynthesizer();
@@ -115,7 +111,6 @@ namespace TextToTalk.Backends.System
             synth.Volume = preset.Volume;
             synth.Rate = preset.Rate;
 
-            // 2. Prepare Synthesis
             if (_speechSynthesizer.Voice.Name != preset.VoiceName)
             {
                 _speechSynthesizer.SelectVoice(preset.VoiceName);
@@ -125,14 +120,12 @@ namespace TextToTalk.Backends.System
 
             var ssml = _lexiconManager.MakeSsml(nextItem.Text, langCode: _speechSynthesizer.Voice.Culture.IetfLanguageTag);
 
-            // 3. Start Synthesis in Background (Feeding the buffer via bridge)
+            // Start Synthesis in Background (Feeding the buffer via bridge)
             using var bridge = new SynthesisBridgeStream(this.bufferedProvider!);
             _speechSynthesizer.SetOutputToWaveStream(bridge);
 
-            // Use SpeakAsync to avoid blocking the loop
             var synthPrompt = _speechSynthesizer.SpeakSsmlAsync(ssml);
 
-            // 4. This loop remains active as long as synthesis is running or audio is playing
             while (!nextItem.Aborted && (!synthPrompt.IsCompleted || this.bufferedProvider?.BufferedBytes > 44))
             {
                 if (this.bufferedProvider?.BufferedBytes > 512) // Pre-roll threshold
@@ -149,8 +142,6 @@ namespace TextToTalk.Backends.System
                 }
             }
 
-            // 5. Cleanup current item
-
             this.StopHardware();
         }
 
@@ -158,7 +149,7 @@ namespace TextToTalk.Backends.System
         private class SynthesisBridgeStream : Stream
         {
             private readonly BufferedWaveProvider _target;
-            private int _bytesToSkip = 0;
+            private int _bytesToSkip = 44;
             private bool _headerSkipped = false;
             private long _position = 0;
 
@@ -194,29 +185,25 @@ namespace TextToTalk.Backends.System
 
         protected override void OnSoundCancelled()
         {
-            // 1. Flag the current item to stop the inference loop
             GetCurrentItem()?.Cancel();
 
             _speechSynthesizer.SpeakAsyncCancelAll();
 
-            // 2. Hard Stop the WASAPI hardware session immediately
             StopHardware();
         }
 
         public override void CancelAllSounds()
         {
-            // Check if disposed before accessing the synthesizer
             if (_isDisposed) return;
 
             try
             {
                 _speechSynthesizer?.SpeakAsyncCancelAll();
             }
-            catch (ObjectDisposedException) { /* Already gone, safe to ignore */ }
+            catch (ObjectDisposedException) { }
 
             StopHardware();
 
-            // Call base after local cancellation logic
             base.CancelAllSounds();
         }
 
@@ -242,28 +229,24 @@ namespace TextToTalk.Backends.System
         protected override void Dispose(bool disposing)
         {
             if (_isDisposed) return;
-            _isDisposed = true; // Signal all loops to stop immediately
+            _isDisposed = true;
 
             if (disposing)
             {
                 try
                 {
-                    // Stop hardware first to release the audio device
                     soundOut?.Stop();
 
-                    // Abort the synthesizer BEFORE calling base.Dispose
                     _speechSynthesizer?.SpeakAsyncCancelAll();
                     _speechSynthesizer?.SetOutputToNull();
 
-                    // Give the background thread a very short window to exit gracefully
-                    // rather than joining it indefinitely.
                 }
                 catch (Exception ex)
                 {
                     DetailedLog.Error(ex, "Error during early shutdown phase");
                 }
 
-                base.Dispose(disposing); // Clean up the queue thread
+                base.Dispose(disposing); 
 
                 _speechSynthesizer?.Dispose();
                 soundOut?.Dispose();

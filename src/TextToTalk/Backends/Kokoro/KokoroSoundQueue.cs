@@ -21,7 +21,6 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
     private readonly PluginConfiguration config;
     private readonly Task<KokoroModel> modelTask;
 
-    // WASAPI Hardware Members
     private WasapiOut? soundOut;
     private BufferedWaveProvider? bufferedProvider;
 
@@ -46,7 +45,6 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
     {
         if (!TryGetModel(out var model) || nextItem.Aborted) return;
 
-        // 1. Setup WASAPI Hardware Session
         lock (this.soundLock)
         {
             if (this.soundOut == null)
@@ -63,7 +61,6 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
             }
         }
 
-        // 2. Prepare Language & Tokens
         string langCode = nextItem.Language switch
         {
             ClientLanguage.Japanese => "ja",
@@ -75,12 +72,10 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
         int[] tokens = Tokenizer.Tokenize(nextItem.Text, langCode, preprocess: true);
         var segments = SegmentationSystem.SplitToSegments(tokens, new() { MaxFirstSegmentLength = 200 });
 
-        // 3. Inference & Playback Loop
         foreach (var chunk in segments)
         {
             if (nextItem.Aborted) break;
 
-            // CPU Inference
             var samples = model.Infer(chunk, nextItem.Voice.Features, nextItem.Speed);
             byte[] bytes = KokoroPlayback.GetBytes(samples);
 
@@ -97,7 +92,7 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
                         if (nextItem.StartTime.HasValue)
                         {
                             var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
-                            Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
+                            Log.Debug("Total Latency (Say -> Play): {Ms}", elapsed.TotalMilliseconds);
                         }
                         this.soundOut.Play();
                     }
@@ -114,10 +109,8 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
 
     protected override void OnSoundCancelled()
     {
-        // 1. Flag the current item to stop the inference loop
         GetCurrentItem()?.Cancel();
 
-        // 2. Hard Stop the WASAPI hardware session immediately
         StopHardware();
     }
 
@@ -163,7 +156,6 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
 
     public void EnqueueSound(KokoroSourceQueueItem item)
     {
-        // Add the item to the internal SoundQueue<T> processing loop
         this.AddQueueItem(item);
     }
 }

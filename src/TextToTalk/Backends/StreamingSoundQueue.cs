@@ -114,19 +114,22 @@ namespace TextToTalk.Backends
                     {
                         lock (this.soundLock)
                         {
-                            
-                            this.bufferedProvider.AddSamples(decompressedBuffer, 0, decompressedBytes);
-
-                            if (this.bufferedProvider.BufferedBytes > 4096 &&
-                                this.soundOut.PlaybackState != PlaybackState.Playing)
+                            if (this.bufferedProvider != null && this.soundOut != null)
                             {
-                                if (nextItem.StartTime.HasValue)
+                                this.bufferedProvider.AddSamples(decompressedBuffer, 0, decompressedBytes);
+                                if (this.bufferedProvider.BufferedBytes > 4096 &&
+                                    this.soundOut.PlaybackState != PlaybackState.Playing)
                                 {
-                                    var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
-                                    Log.Information("Total Latency (Say -> Play): {Ms}ms", elapsed.TotalMilliseconds);
+                                    if (nextItem.StartTime.HasValue)
+                                    {
+                                        var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
+                                        Log.Information("Total Latency (Say -> PlayMp3): {Ms}", elapsed.TotalMilliseconds);
+                                    }
+                                    this.soundOut.Play();
                                 }
-                                this.soundOut.Play();
                             }
+
+
                         }
                     }
                 }
@@ -173,7 +176,7 @@ namespace TextToTalk.Backends
                         if (nextItem.StartTime.HasValue)
                         {
                             var elapsed = Stopwatch.GetElapsedTime(nextItem.StartTime.Value);
-                            Log.Information("Total Latency (Say -> Processing): {Ms}ms", elapsed.TotalMilliseconds);
+                            Log.Information("Total Latency (Say -> PlayPCM): {Ms}", elapsed.TotalMilliseconds);
                         }
 
                         this.soundOut.Play();

@@ -49,16 +49,14 @@ public class AzureClient : IDisposable
     }
     public List<VoiceDetails> GetVoicesWithStyles()
     {
-        // Fetches the voice result asynchronously and waits for completion
         var res = this.synthesizer.GetVoicesAsync().GetAwaiter().GetResult();
         HandleResult(res);
 
-        // Maps each voice to a custom object containing Name and StyleList
         return res.Voices.Select(voice => new VoiceDetails
         {
             Name = voice.Name,
             ShortName = voice.ShortName,
-            Styles = voice.StyleList.ToList() // StyleList is a string[]
+            Styles = voice.StyleList.ToList()
         }).ToList();
     }
 
@@ -91,8 +89,7 @@ public class AzureClient : IDisposable
             Content = new StringContent(ssml, global::System.Text.Encoding.UTF8, "application/ssml+xml")
         };
 
-        // 2026 Low Latency Format: 'raw' is better for direct streaming than 'riff'
-        request.Headers.Add("X-Microsoft-OutputFormat", "raw-16khz-16bit-mono-pcm");
+        request.Headers.Add("X-Microsoft-OutputFormat", "raw-16khz-16bit-mono-pcm"); //Raw for lower latency
 
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
         response.EnsureSuccessStatusCode();
@@ -114,25 +111,30 @@ public class AzureClient : IDisposable
             soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Azure, null, timestampToPass);
 
         }
-
-        // Implicitly returns Task.CompletedTask because it is 'async Task'
     }
 
 
     public Task CancelAllSounds()
     {
-        //this.synthesizer.Dispose();
+        if (this._ttsCts != null)
+        {
+            this._ttsCts.Cancel(); //signal cancellation if in progress
+        }
+        this.synthesizer.StopSpeakingAsync();
         this.soundQueue.CancelAllSounds();
         this.soundQueue.StopHardware();
-        this.soundQueue.CancelAllSounds();
         return Task.CompletedTask;
     }
 
     public Task CancelFromSource(TextSource source)
     {
+        if (this._ttsCts != null)
+        {
+            this._ttsCts.Cancel(); //signal cancellation if in progress
+        }
         this.synthesizer.StopSpeakingAsync();
-        this.soundQueue.StopHardware();
         this.soundQueue.CancelFromSource(source);
+        this.soundQueue.StopHardware();
         return Task.CompletedTask;
     }
 
@@ -141,29 +143,6 @@ public class AzureClient : IDisposable
         if (!string.IsNullOrEmpty(res.ErrorDetails))
         {
             DetailedLog.Error($"Azure request error: ({res.Reason}) \"{res.ErrorDetails}\"");
-        }
-    }
-
-    private static void HandleResult(SpeechSynthesisResult res)
-    {
-        if (res.Reason == ResultReason.Canceled)
-        {
-            var cancellation = SpeechSynthesisCancellationDetails.FromResult(res);
-            if (cancellation.Reason == CancellationReason.Error)
-            {
-                DetailedLog.Error($"Azure request error: ({cancellation.ErrorCode}) \"{cancellation.ErrorDetails}\"");
-            }
-            else
-            {
-                DetailedLog.Warn($"Azure request failed in state \"{cancellation.Reason}\"");
-            }
-
-            return;
-        }
-
-        if (res.Reason != ResultReason.SynthesizingAudioCompleted)
-        {
-            DetailedLog.Warn($"Speech synthesis request completed in incomplete state \"{res.Reason}\"");
         }
     }
 
