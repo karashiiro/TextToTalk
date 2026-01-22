@@ -4,17 +4,14 @@ using System;
 using System.Linq;
 using TextToTalk;
 using TextToTalk.Backends;
+using TextToTalk.UI.Windows;
 
 public class StatsWindow : Window
 {
     private float[] dataArray = Array.Empty<float>();
     private DateTime lastUpdateTime = DateTime.MinValue;
     private readonly object updateLock = new();
-
-    public interface IWindowController
-    {
-        void ToggleStats();
-    }
+    public static StatsWindow? Instance { get; private set; }
 
     private readonly LatencyTracker tracker;
     public bool IsVisible = false;
@@ -22,6 +19,12 @@ public class StatsWindow : Window
     public StatsWindow(TextToTalk.LatencyTracker tracker) : base("TTS Statistics")
     {
         this.tracker = tracker;
+        Instance = this;
+    }
+
+    public void ToggleStats()
+    {
+        this.IsOpen = !this.IsOpen;
     }
 
     public override void Draw()
@@ -37,9 +40,7 @@ public class StatsWindow : Window
 
         if (ImGui.TreeNode("View Raw History"))
         {
-            // *** REFACTORED: Use the boolean 'true' for drawing a border ***
-            // The signature now accepts a boolean instead of ImGuiChildFlags
-            if (ImGui.BeginChild("RawDataList", new System.Numerics.Vector2(0, 150), true)) // The 'true' draws the border
+            if (ImGui.BeginChild("RawDataList", new System.Numerics.Vector2(0, 150), true))
             {
                 for (int i = 0; i < fullDataArray.Length; i++)
                 {

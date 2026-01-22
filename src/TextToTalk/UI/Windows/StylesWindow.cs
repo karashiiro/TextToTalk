@@ -29,11 +29,6 @@ namespace TextToTalk.UI.Windows
         void Draw(IConfigUIDelegates helpers);
     }
 
-    public interface IWindowController
-    {
-        void ToggleStyle();
-    }
-
     public class VoiceStyles : Window
     {
         private readonly VoiceBackendManager backendManager;

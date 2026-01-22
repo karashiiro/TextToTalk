@@ -1,19 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
+﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Text;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using R3;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
 using TextToTalk.Backends;
 using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
 using TextToTalk.Services;
+using TextToTalk.UI.Windows;
 
 namespace TextToTalk.UI
 {
@@ -295,6 +296,12 @@ namespace TextToTalk.UI
                     this.config);
                 Components.Tooltip(
                     "Removes \"stuttering\" from NPC dialogue such as \"H-hello, nice to m-meet you...\"");
+
+                
+                if (ImGui.Button($"Show Latency Data##{MemoizedId.Create()}"))
+                {
+                    StatsWindow.Instance?.ToggleStats();
+                }
             }
         }
 
