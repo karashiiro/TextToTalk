@@ -14,14 +14,24 @@ public class OpenAiBackend : VoiceBackend
 {
     private readonly OpenAiBackendUI ui;
     private readonly OpenAiBackendUIModel uiModel;
+    private readonly OpenAiClient openAiClient;
     private readonly INotificationService notificationService;
     private readonly LatencyTracker latencyTracker;
+    private readonly StreamingSoundQueue soundQueue;
+    private string apiKey;
 
     public OpenAiBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService, LatencyTracker latencyTracker)
     {
+        var credentials = OpenAiCredentialManager.LoadCredentials();
+        if (credentials != null)
+        {
+            apiKey = (credentials.Password);
+        }
+        this.soundQueue = new StreamingSoundQueue(config, latencyTracker);
         this.uiModel = new OpenAiBackendUIModel(config, http, latencyTracker);
         this.ui = new OpenAiBackendUI(uiModel, config, this);
         this.notificationService = notificationService;
+        this.openAiClient = new OpenAiClient(soundQueue, apiKey);
     }
 
     public override void DrawStyles(IConfigUIDelegates helpers)
@@ -38,7 +48,7 @@ public class OpenAiBackend : VoiceBackend
         {
             try
             {
-                await this.uiModel.OpenAi.Say(request.Text, voicePreset.Model, request.Source, voicePreset.VoiceName, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (voicePreset.Style ?? string.Empty), 1.0f, voicePreset.Volume);
+                await this.openAiClient.Say(request.Text, voicePreset.Model, request.Source, voicePreset.VoiceName, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (voicePreset.Style ?? string.Empty), 1.0f, voicePreset.Volume);
             }
             catch (OpenAiUnauthorizedException e)
             {
@@ -70,36 +80,36 @@ public class OpenAiBackend : VoiceBackend
 
     public override void CancelAllSpeech()
     {
-        this.uiModel.SoundQueue.CancelAllSounds();
+        this.soundQueue.CancelAllSounds();
 
-        if (uiModel.OpenAi._ttsCts != null)
+        if (this.openAiClient._ttsCts != null)
         {
-            uiModel.OpenAi._ttsCts.Cancel();
-            uiModel.OpenAi._ttsCts.Dispose();
-            uiModel.OpenAi._ttsCts = null;
+            this.openAiClient._ttsCts.Cancel();
+            this.openAiClient._ttsCts.Dispose();
+            this.openAiClient._ttsCts = null;
         }
-        this.uiModel.SoundQueue.StopHardware();
+        this.soundQueue.StopHardware();
         
     }
 
     public override void CancelSay(TextSource source)
     {
-        this.uiModel.SoundQueue.CancelFromSource(source);
+        this.soundQueue.CancelFromSource(source);
 
-        if (uiModel.OpenAi._ttsCts != null)
+        if (this.openAiClient._ttsCts != null)
         {
-            uiModel.OpenAi._ttsCts.Cancel();
-            uiModel.OpenAi._ttsCts.Dispose();
-            uiModel.OpenAi._ttsCts = null;
+            this.openAiClient._ttsCts.Cancel();
+            this.openAiClient._ttsCts.Dispose();
+            this.openAiClient._ttsCts = null;
         }
 
-        if (uiModel.SoundQueue._ttsCts != null)
+        if (this.openAiClient._ttsCts != null)
         {
-            uiModel.OpenAi._ttsCts.Cancel();
-            uiModel.OpenAi._ttsCts.Dispose();
-            uiModel.OpenAi._ttsCts = null;
+            this.openAiClient._ttsCts.Cancel();
+            this.openAiClient._ttsCts.Dispose();
+            this.openAiClient._ttsCts = null;
         }
-        this.uiModel.SoundQueue.StopHardware();
+        this.soundQueue.StopHardware();
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)
@@ -118,7 +128,7 @@ public class OpenAiBackend : VoiceBackend
     {
         if (disposing)
         {
-            this.uiModel.SoundQueue.Dispose(); 
+            this.soundQueue.Dispose(); 
         }
     }
 }

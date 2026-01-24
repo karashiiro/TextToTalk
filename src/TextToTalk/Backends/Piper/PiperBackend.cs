@@ -279,9 +279,9 @@ public class PiperBackend : VoiceBackend
             // 8. Determine Audio Format
             var format = voicePreset.InternalName switch
             {
-                string name when name.EndsWith("low") => StreamFormat.PiperLow,
-                string name when name.EndsWith("high") => StreamFormat.PiperHigh,
-                _ => StreamFormat.Piper // Defaults to Medium/Standard
+                string name when name.EndsWith("low") => StreamFormat.Wave16K,
+                string name when name.EndsWith("high") => StreamFormat.Wave,
+                _ => StreamFormat.Wave22K // Defaults to Medium/Standard
             };
 
             // 9. Enqueue Stream

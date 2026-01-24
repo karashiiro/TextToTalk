@@ -116,21 +116,32 @@ public class UberduckBackendUI
             var voiceCategoriesFlat = voiceCategories.SelectMany(vc => vc.Value).ToList();
             var voiceDisplayNames = voiceCategoriesFlat.Select(v => v.DisplayName).ToArray();
             var voiceIds = voiceCategoriesFlat.Select(v => v.Name).ToArray();
+            // 1. Get the index
             var voiceIndex = Array.IndexOf(voiceIds, currentVoicePreset.VoiceName);
-            if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", voiceDisplayNames[voiceIndex]))
+
+            // 2. Validate the index and determine the text to show in the combo box
+            // If -1, we show a placeholder or the raw name instead of crashing
+            string previewValue = (voiceIndex >= 0 && voiceIndex < voiceDisplayNames.Length)
+                ? voiceDisplayNames[voiceIndex]
+                : "Select a voice..."; // Fallback text
+
+            if (ImGui.BeginCombo($"Voice##{MemoizedId.Create()}", previewValue))
             {
                 foreach (var (category, voices) in voiceCategories)
                 {
                     ImGui.Selectable(category, false, ImGuiSelectableFlags.Disabled);
                     foreach (var voice in voices)
                     {
-                        if (ImGui.Selectable($"  {voice.DisplayName}"))
+                        // Highlight the currently selected item
+                        bool isSelected = voice.Name == currentVoicePreset.VoiceName;
+
+                        if (ImGui.Selectable($"  {voice.DisplayName}##{voice.Name}", isSelected))
                         {
                             currentVoicePreset.VoiceName = voice.Name;
                             this.config.Save();
                         }
 
-                        if (voice.Name == currentVoicePreset.VoiceName)
+                        if (isSelected)
                         {
                             ImGui.SetItemDefaultFocus();
                         }

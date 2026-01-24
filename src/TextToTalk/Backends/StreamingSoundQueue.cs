@@ -29,10 +29,10 @@ namespace TextToTalk.Backends
         private readonly object soundLock = new();
 
         // 1. Unified Audio Configuration
-        private static readonly WaveFormat Uberduck = new(22050, 16, 1);
+        private static readonly WaveFormat Wave8k = new(8000, 16, 1);
+        private static readonly WaveFormat Wave16k = new(16000, 16, 1);
+        private static readonly WaveFormat Wave22k = new(22050, 16, 1);
         private static readonly WaveFormat Wave = new(24000, 16, 1);
-        private static readonly WaveFormat Mp3 = new(24000, 16, 1);
-        private static readonly WaveFormat Azure = new(16000, 16, 1);
 
         private bool _isDisposed;
         public CancellationTokenSource? _ttsCts;
@@ -61,7 +61,7 @@ namespace TextToTalk.Backends
             }
 
             // 2. Branch logic based on format (Encoded vs Raw)
-            if (nextItem.Format == StreamFormat.Mp3 || nextItem.Format == StreamFormat.Uberduck)
+            if (nextItem.Format == StreamFormat.Mp3)
             {
                 ProcessMp3Stream(nextItem);
             }
@@ -84,14 +84,8 @@ namespace TextToTalk.Backends
                 {
 
                     Mp3Frame frame;
-                    try
-                    {
-                        frame = Mp3Frame.LoadFromStream(readFullyStream);
-                    }
-                    catch (Exception) // Catching interruptions here
-                    {
-                        break;
-                    }
+                    frame = Mp3Frame.LoadFromStream(readFullyStream);
+
 
                     if (frame == null) break;
 
@@ -154,10 +148,9 @@ namespace TextToTalk.Backends
             WaveFormat chunkFormat = nextItem.Format switch
             {
                 StreamFormat.Wave => Wave,
-                StreamFormat.Azure => Azure,
-                StreamFormat.Piper => Uberduck,
-                StreamFormat.PiperLow => Azure,
-                StreamFormat.PiperHigh => Wave,
+                StreamFormat.Wave8K => Wave8k,
+                StreamFormat.Wave16K => Wave16k,
+                StreamFormat.Wave22K => Wave22k,
                 _ => throw new NotSupportedException($"Format {nextItem.Format} requires a decompressor."),
             };
 

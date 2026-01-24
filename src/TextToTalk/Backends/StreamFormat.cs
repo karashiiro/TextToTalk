@@ -4,11 +4,9 @@ public enum StreamFormat
 {
     Mp3,
     Wave,
+    Wave8K,
+    Wave16K,
+    Wave22K,
     Raw,
-    Azure,
     System,
-    Uberduck,
-    Piper,
-    PiperLow,
-    PiperHigh,
 }

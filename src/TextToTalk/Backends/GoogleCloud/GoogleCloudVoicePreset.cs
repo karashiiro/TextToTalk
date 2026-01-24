@@ -6,6 +6,8 @@ public class GoogleCloudVoicePreset : VoicePreset
 {
     public float Volume { get; set; }
 
+    public int? SampleRate { get; set; }
+
     // 0.25 - 2.0 (default 1.0)
     public float? PlaybackRate { get; set; }
 
@@ -19,6 +21,7 @@ public class GoogleCloudVoicePreset : VoicePreset
     {
         Volume = 1.0f;
         PlaybackRate = 1.0f;
+        SampleRate = 22050;
         Locale = "en-US";
         VoiceName = "en-US-Chirp-HD-D";
         Gender = "Male";

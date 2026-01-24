@@ -83,7 +83,7 @@ public partial class UberduckClient
                 var waveStream = new MemoryStream(audioBytes);
                 long? timestampToPass = methodStart;
 
-                this.soundQueue.EnqueueSound(waveStream, source, volume, StreamFormat.Uberduck, null, timestampToPass);
+                this.soundQueue.EnqueueSound(waveStream, source, volume, StreamFormat.Mp3, null, timestampToPass);
             }
         }
     }
@@ -143,6 +143,8 @@ public partial class UberduckClient
             {
                 Log.Information($"Response = {response.StatusCode}");
             }
+        }
+        else {             Log.Information("Authorization not set, cannot update voices.");
         }
 
         return new Dictionary<string, IList<UberduckVoice>>();

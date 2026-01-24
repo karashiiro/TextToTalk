@@ -108,7 +108,7 @@ public class AzureClient : IDisposable
 
             var chunkStream = new MemoryStream(chunk);
             long? timestampToPass = methodStart;
-            soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Azure, null, timestampToPass);
+            soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Wave16K, null, timestampToPass);
 
         }
     }
@@ -149,7 +149,6 @@ public class AzureClient : IDisposable
     public void Dispose()
     {
         this.synthesizer?.Dispose();
-        this.soundQueue?.Dispose();
         this.soundQueue?.Dispose();
     }
 }

@@ -26,7 +26,7 @@ public class GoogleCloudBackend : VoiceBackend
         if (request.Voice is not GoogleCloudVoicePreset voicePreset)
             throw new InvalidOperationException("Invalid voice preset provided.");
 
-        _ = client.Say(voicePreset.Locale, voicePreset.VoiceName, voicePreset.PlaybackRate, voicePreset.Volume, request.Source,
+        _ = client.Say(voicePreset.Locale, voicePreset.VoiceName, voicePreset.SampleRate, voicePreset.PlaybackRate, voicePreset.Volume, request.Source,
             request.Text);
     }
 

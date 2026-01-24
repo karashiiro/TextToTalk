@@ -9,18 +9,22 @@ namespace TextToTalk.Backends.ElevenLabs;
 
 public class ElevenLabsBackend : VoiceBackend
 {
+    private readonly ElevenLabsClient client;
     private readonly ElevenLabsBackendUI ui;
     private readonly ElevenLabsBackendUIModel uiModel;
     private readonly INotificationService notificationService;
     private readonly PluginConfiguration config;
     private readonly LatencyTracker latencyTracker;
+    private readonly StreamingSoundQueue soundQueue;
 
     public ElevenLabsBackend(PluginConfiguration config, HttpClient http, INotificationService notificationService, LatencyTracker latencyTracker)
     {
+        this.soundQueue = new StreamingSoundQueue(config, latencyTracker);
         this.uiModel = new ElevenLabsBackendUIModel(config, http, latencyTracker);
         this.ui = new ElevenLabsBackendUI(uiModel, config, this);
         this.notificationService = notificationService;
         this.config = config;
+        this.client = new ElevenLabsClient(soundQueue, http);
     }
 
     public override void DrawStyles(IConfigUIDelegates helpers)
@@ -68,9 +72,9 @@ public class ElevenLabsBackend : VoiceBackend
     public override void CancelAllSpeech()
     {
         this.uiModel.SoundQueue.CancelAllSounds();
-        if (this.uiModel.ElevenLabs._TtsCts != null)
+        if (this.client._TtsCts != null)
         {
-            this.uiModel.ElevenLabs._TtsCts.Cancel();
+            this.client._TtsCts.Cancel();
         }
         this.uiModel.SoundQueue.StopHardware();
     }
@@ -78,9 +82,9 @@ public class ElevenLabsBackend : VoiceBackend
     public override void CancelSay(TextSource source)
     {
         this.uiModel.SoundQueue.CancelFromSource(source);
-        if (this.uiModel.ElevenLabs._TtsCts != null)
+        if (this.client._TtsCts != null)
         {
-            this.uiModel.ElevenLabs._TtsCts.Cancel();
+            this.client._TtsCts.Cancel();
         }
         this.uiModel.SoundQueue.StopHardware();
     }

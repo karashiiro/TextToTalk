@@ -44,14 +44,11 @@ public class GoogleCloudClient
 
         foreach (var voice in response.Voices)
         {
-            if (voice.Name.Contains("Chirp3") || voice.Name.Contains("Chirp-HD")) // Focusing on Chirp 3 and Chirp HD voices as these are the only ones enabled for streaming.  From what I can tell, this actually reduces duplicates of the same voice under different formats.
+            fetchedVoices.Add(voice.Name, new
             {
-                fetchedVoices.Add(voice.Name, new
-                {
-                    Name = voice.Name,
-                    Gender = voice.SsmlGender,
-                });
-            }
+                Name = voice.Name,
+                Gender = voice.SsmlGender,
+            });
         }
 
         return fetchedVoices;
@@ -73,10 +70,14 @@ public class GoogleCloudClient
         return uniqueLocales.ToList().OrderBy(lang => lang).ToList();
     }
 
-    public async Task Say(string? locale, string? voice, float? speed, float volume, TextSource source, string text)
+    public async Task Say(string? locale, string? voice, int? rate, float? speed, float volume, TextSource source, string text)
     {
         long methodStart = Stopwatch.GetTimestamp();
         if (client == null || soundQueue == null || locale == null) return;
+
+        bool isStreamingSupported = voice != null &&
+    (voice.Contains("Chirp3-HD", StringComparison.OrdinalIgnoreCase) ||
+     voice.Contains("Chirp-HD", StringComparison.OrdinalIgnoreCase));
 
         if (_TtsCts != null)
         {
@@ -86,54 +87,71 @@ public class GoogleCloudClient
 
         _TtsCts = new CancellationTokenSource();
         var ct = _TtsCts.Token;
+        
+        var sampleRate = rate switch
+        {
+            24000 => StreamFormat.Wave,
+            22050 => StreamFormat.Wave22K,
+            16000 => StreamFormat.Wave16K,
+            8000 => StreamFormat.Wave8K,
+            _ => StreamFormat.Wave22K
+        };
 
         try
         {
-            using var streamingCall = client.StreamingSynthesize(); // One request to open the stream
-
-            var configRequest = new StreamingSynthesizeRequest
+            if (isStreamingSupported)
             {
-                StreamingConfig = new StreamingSynthesizeConfig
+                using var streamingCall = client.StreamingSynthesize();
+
+                await streamingCall.WriteAsync(new StreamingSynthesizeRequest
                 {
-                    Voice = new VoiceSelectionParams
+                    StreamingConfig = new StreamingSynthesizeConfig
                     {
-                        LanguageCode = locale,
-                        Name = voice ?? "en-US-Chirp3-HD-Puff-A"
-                    },
-                    StreamingAudioConfig = new StreamingAudioConfig
+                        Voice = new VoiceSelectionParams { LanguageCode = locale, Name = voice },
+                        StreamingAudioConfig = new StreamingAudioConfig
+                        {
+                            AudioEncoding = AudioEncoding.Pcm,
+                            SampleRateHertz = rate ?? 22050,
+                            SpeakingRate = speed ?? 1.0f,
+                        }
+                    }
+                });
+
+                await streamingCall.WriteAsync(new StreamingSynthesizeRequest { Input = new StreamingSynthesisInput { Text = text } });
+                await streamingCall.WriteCompleteAsync();
+
+                await foreach (var response in streamingCall.GetResponseStream().WithCancellation(ct))
+                {
+                    if (response.AudioContent.Length > 0)
                     {
-                        AudioEncoding = AudioEncoding.Pcm,
-                        SampleRateHertz = 24000,
-                        SpeakingRate = speed ?? 1.0f,
+                        var chunkStream = new MemoryStream(response.AudioContent.ToByteArray());
+                        soundQueue.EnqueueSound(chunkStream, source, volume, sampleRate, null, methodStart);
                     }
                 }
-            };
-            await streamingCall.WriteAsync(configRequest);
-
-            await streamingCall.WriteAsync(new StreamingSynthesizeRequest  // One request to send the text and write back the chunks
+            }
+            else
             {
-                Input = new StreamingSynthesisInput { Text = text }
-            });
+                
+                var response = await client.SynthesizeSpeechAsync(new SynthesizeSpeechRequest
+                {
+                    Input = new SynthesisInput { Text = text },
+                    Voice = new VoiceSelectionParams { LanguageCode = locale, Name = voice },
+                    AudioConfig = new AudioConfig
+                    {
+                        AudioEncoding = AudioEncoding.Linear16,
+                        SampleRateHertz = rate ?? 22050,
+                        SpeakingRate = speed ?? 1.0f,
+                    }
+                }, ct);
 
-            await streamingCall.WriteCompleteAsync();
-
-            await foreach (var response in streamingCall.GetResponseStream().WithCancellation(ct))
-            {
                 if (response.AudioContent.Length > 0)
                 {
-                    var chunkStream = new MemoryStream(response.AudioContent.ToByteArray());
-                    long? timestampToPass = methodStart;
-                    soundQueue.EnqueueSound(chunkStream, source, volume, StreamFormat.Wave, null, timestampToPass);
+                    var audioStream = new MemoryStream(response.AudioContent.ToByteArray());
+                    soundQueue.EnqueueSound(audioStream, source, volume, sampleRate, null, methodStart);
                 }
             }
         }
-        catch (OperationCanceledException)
-        {
-            // Silent Cancellation if token is set to Cancelled
-        }
-        catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.Cancelled)
-        {
-            // Handle gRPC specific cancellation
-        }
+        catch (OperationCanceledException) { /* Silent */ }
+        catch (Grpc.Core.RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.Cancelled) { /* Silent */ }
     }
 }
