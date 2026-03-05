@@ -159,59 +159,59 @@ public class ElevenLabsBackendUI
                 {
                     modelPreviewName += " [Styles Available]";
                 }
-            }
 
-            bool previewHasStyles = modelIdList[selectedItemIndex] == "eleven_v3";
-            string previewName = voiceIndex >= 0 ? $"{modelIdList[selectedItemIndex]} || Cost Multiplier: {modelDescriptionsList[selectedItemIndex].ModelRates["character_cost_multiplier"]}" : "Select a model...";
+                bool previewHasStyles = modelIdList[selectedItemIndex] == "eleven_v3";
+                string previewName = voiceIndex >= 0 ? $"{modelIdList[selectedItemIndex]} || Cost Multiplier: {modelDescriptionsList[selectedItemIndex].ModelRates["character_cost_multiplier"]}" : "Select a model...";
 
-            if (ImGui.BeginCombo($"Models##{MemoizedId.Create()}", "", ImGuiComboFlags.HeightLarge))
-            {
-                for (int i = 0; i < modelDescriptionsList.Count; i++)
+                if (ImGui.BeginCombo($"Models##{MemoizedId.Create()}", "", ImGuiComboFlags.HeightLarge))
                 {
-                    var item = modelDescriptionsList[i];
-                    bool isSelected = (selectedItemIndex == i);
-
-                    ImGui.Selectable(item.ModelDescription, false, ImGuiSelectableFlags.Disabled);
-
-                    string baseText = $"  {item.ModelId} || Cost Multiplier: {item.ModelRates["character_cost_multiplier"]}";
-
-                    // 3. Use a Group to keep the Selectable and the extra text on the same line behaviorally
-                    if (ImGui.Selectable($"{baseText}##{i}", isSelected))
+                    for (int i = 0; i < modelDescriptionsList.Count; i++)
                     {
-                        currentVoicePreset.ModelId = item.ModelId;
-                        currentVoicePreset.Stability = (float)Math.Round(currentVoicePreset.Stability / 0.5f) * 0.5f;
-                        this.config.Save();
-                    }
+                        var item = modelDescriptionsList[i];
+                        bool isSelected = (selectedItemIndex == i);
 
-                    // 4. Overlay the Yellow Text if applicable
-                    if (item.ModelId == "eleven_v3")
-                    {
-                        ImGui.SameLine();
-                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 1.0f, 0.6f, 1.0f));
-                        ImGui.Text(" [Styles Available]");
-                        ImGui.PopStyleColor();
-                    }
+                        ImGui.Selectable(item.ModelDescription, false, ImGuiSelectableFlags.Disabled);
 
-                    if (isSelected) ImGui.SetItemDefaultFocus();
+                        string baseText = $"  {item.ModelId} || Cost Multiplier: {item.ModelRates["character_cost_multiplier"]}";
+
+                        // 3. Use a Group to keep the Selectable and the extra text on the same line behaviorally
+                        if (ImGui.Selectable($"{baseText}##{i}", isSelected))
+                        {
+                            currentVoicePreset.ModelId = item.ModelId;
+                            currentVoicePreset.Stability = (float)Math.Round(currentVoicePreset.Stability / 0.5f) * 0.5f;
+                            this.config.Save();
+                        }
+
+                        // 4. Overlay the Yellow Text if applicable
+                        if (item.ModelId == "eleven_v3")
+                        {
+                            ImGui.SameLine();
+                            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 1.0f, 0.6f, 1.0f));
+                            ImGui.Text(" [Styles Available]");
+                            ImGui.PopStyleColor();
+                        }
+
+                        if (isSelected) ImGui.SetItemDefaultFocus();
+                    }
+                    ImGui.EndCombo();
                 }
-                ImGui.EndCombo();
-            }
-            ImGui.SameLine();
-            float comboRectMinX = ImGui.GetItemRectMin().X;
-            float comboRectMinY = ImGui.GetItemRectMin().Y;
-            float stylePadding = ImGui.GetStyle().FramePadding.X;
-
-            // Move cursor to inside the combo box frame
-            ImGui.SetCursorScreenPos(new Vector2(comboRectMinX + stylePadding, comboRectMinY + ImGui.GetStyle().FramePadding.Y - 3.0f));
-
-            // Draw the Name
-            ImGui.Text(previewName);
-            
-            // Draw the Tag if applicable
-            if (previewHasStyles)
-            {
                 ImGui.SameLine();
-                ImGui.TextColored(new Vector4(1.0f, 1.0f, 0.6f, 1.0f), "[Styles Available]");
+                float comboRectMinX = ImGui.GetItemRectMin().X;
+                float comboRectMinY = ImGui.GetItemRectMin().Y;
+                float stylePadding = ImGui.GetStyle().FramePadding.X;
+
+                // Move cursor to inside the combo box frame
+                ImGui.SetCursorScreenPos(new Vector2(comboRectMinX + stylePadding, comboRectMinY + ImGui.GetStyle().FramePadding.Y - 3.0f));
+
+                // Draw the Name
+                ImGui.Text(previewName);
+                
+                // Draw the Tag if applicable
+                if (previewHasStyles)
+                {
+                    ImGui.SameLine();
+                    ImGui.TextColored(new Vector4(1.0f, 1.0f, 0.6f, 1.0f), "[Styles Available]");
+                }
             }
         }
 
