@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing.Text;
 using System.Reflection.Metadata.Ecma335;
+using Dalamud.Game.Chat;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -27,7 +28,6 @@ public class ChatMessageHandler : IChatMessageHandler
     private readonly PluginConfiguration config;
     private readonly IChatGui chat;
     private readonly IDisposable subscription;
-    private readonly IClientState clientState;
 
     public Action<ChatTextEmitEvent> OnTextEmit { get; set; }
 
@@ -49,18 +49,16 @@ public class ChatMessageHandler : IChatMessageHandler
 
     private Observable<ChatMessage> OnChatMessage()
     {
-        return Observable.Create(this, static (Observer<ChatMessage> observer, ChatMessageHandler cmh) =>
+        return Observable.Create(this, (Observer<ChatMessage> observer, ChatMessageHandler cmh) =>
         {
-            var handler = new IChatGui.OnMessageDelegate(HandleMessage);
-            cmh.chat.ChatMessage += handler;
-            return Disposable.Create(() => { cmh.chat.ChatMessage -= handler; });
-
-            void HandleMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message,
-                ref bool handled)
+            IChatGui.OnHandleableChatMessageDelegate handler = message =>
             {
                 if (!cmh.config.Enabled) return;
-                observer.OnNext(new ChatMessage(type, sender, message));
-            }
+                observer.OnNext(new ChatMessage(message.LogKind, message.Sender, message.Message));
+            };
+
+            cmh.chat.ChatMessage += handler;
+            return Disposable.Create(() => { cmh.chat.ChatMessage -= handler; });
         });
     }
 
