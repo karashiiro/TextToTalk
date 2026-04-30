@@ -22,7 +22,7 @@ public static class CharacterGenderUtils
         var actorGender = (Gender)charaStruct->DrawData.CustomizeData.Sex;
 
         // Player gender overrides will be handled by a different system.
-        if (gObj.ObjectKind is ObjectKind.Player)
+        if (gObj.ObjectKind is ObjectKind.Pc)
         {
             return actorGender;
         }

@@ -12,7 +12,7 @@ public class ConfiguredRateLimiter(IRateLimiterConfigProvider config) : RateLimi
 {
     public bool TryRateLimit(IGameObject speaker)
     {
-        return config.ShouldRateLimit() && speaker.ObjectKind is ObjectKind.Player &&
+        return config.ShouldRateLimit() && speaker.ObjectKind is ObjectKind.Pc &&
                TryRateLimit(speaker.Name.TextValue);
     }
 
