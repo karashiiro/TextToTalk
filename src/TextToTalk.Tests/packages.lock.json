@@ -91,8 +91,8 @@
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "14.0.2",
-        "contentHash": "dQJeq+8eyHzra4Cg5eZ/3LAeS3/UpvvLriYJGSncMK9LqJ7Q4B6jwcOsxo3PfxVd15xj+IzVFxkPqIBmPQu8/w=="
+        "resolved": "15.0.0",
+        "contentHash": "411vwC8/X8Z/sQ2TI6v3SvOn66xFPeOjFn3Zn+h0d3Ox2t1kFm66AhDvmx/qcMwVrR+Hidxj0dadpQ2dgyXMBQ=="
       },
       "Google.Api.CommonProtos": {
         "type": "Transitive",
@@ -511,7 +511,7 @@
         "dependencies": {
           "AWSSDK.Polly": "[3.7.401.37, )",
           "AdysTech.CredentialManager": "[2.6.0, )",
-          "DalamudPackager": "[14.0.2, )",
+          "DalamudPackager": "[15.0.0, )",
           "Google.Cloud.TextToSpeech.V1": "[3.9.0, )",
           "KokoroSharp.CPU": "[0.6.1, )",
           "Microsoft.CognitiveServices.Speech": "[1.41.1, )",
