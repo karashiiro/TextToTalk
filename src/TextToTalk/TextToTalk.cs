@@ -60,6 +60,7 @@ namespace TextToTalk
         private readonly IChatGui chat;
         private readonly IFramework framework;
         private readonly IClientState clientState;
+        private readonly IObjectTable objects;
 
         private readonly PluginConfiguration config;
         private readonly AddonTalkManager addonTalkManager;
@@ -112,6 +113,7 @@ namespace TextToTalk
 
             this.pluginInterface = pi;
             this.clientState = clientState;
+            this.objects = objects;
             this.keys = keyState;
             this.chat = chat;
             this.framework = framework;
@@ -167,7 +169,7 @@ namespace TextToTalk
             this.windows.AddWindow(channelPresetModificationWindow);
             this.windows.AddWindow(this.StylesWindow);
 
-            var filters = new MessageHandlerFilters(sharedState, this.config, this.clientState);
+            var filters = new MessageHandlerFilters(sharedState, this.config, this.objects);
             this.addonTalkHandler =
                 new AddonTalkHandler(this.addonTalkManager, framework, filters, objects, this.config);
             this.addonBattleTalkHandler =
@@ -350,9 +352,9 @@ namespace TextToTalk
             // Build a template for the text payload
             var textTemplate = TalkUtils.ExtractTokens(cleanText, new Dictionary<string, string?>
             {
-                { "{{FULL_NAME}}", this.clientState.LocalPlayer?.GetFullName() },
-                { "{{FIRST_NAME}}", this.clientState.LocalPlayer?.GetFirstName() },
-                { "{{LAST_NAME}}", this.clientState.LocalPlayer?.GetLastName() },
+                { "{{FULL_NAME}}", this.objects.LocalPlayer?.GetFullName() },
+                { "{{FIRST_NAME}}", this.objects.LocalPlayer?.GetFirstName() },
+                { "{{LAST_NAME}}", this.objects.LocalPlayer?.GetLastName() },
             });
 
             // Some characters have emdashes in their names, which should be treated

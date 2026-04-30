@@ -8,13 +8,13 @@ public class MessageHandlerFilters
 {
     private readonly PluginConfiguration config;
     private readonly SharedState sharedState;
-    private readonly IClientState clientState;
+    private readonly IObjectTable objects;
 
-    public MessageHandlerFilters(SharedState sharedState, PluginConfiguration config, IClientState clientState)
+    public MessageHandlerFilters(SharedState sharedState, PluginConfiguration config, IObjectTable objects)
     {
         this.sharedState = sharedState;
         this.config = config;
-        this.clientState = clientState;
+        this.objects = objects;
     }
 
     public bool IsSameSpeaker(string? speaker)
@@ -61,7 +61,7 @@ public class MessageHandlerFilters
         }
 
         return !this.config.SkipMessagesFromYou ||
-               !speaker.Contains(this.clientState.LocalPlayer?.Name.TextValue ?? "");
+               !speaker.Contains(this.objects.LocalPlayer?.Name.TextValue ?? "");
     }
 
     public bool OnlyMessagesFromYou(string? speaker)
@@ -72,6 +72,6 @@ public class MessageHandlerFilters
         }
 
         return !this.config.OnlyMessagesFromYou ||
-               speaker.Contains(this.clientState.LocalPlayer?.Name.TextValue ?? "");
+               speaker.Contains(this.objects.LocalPlayer?.Name.TextValue ?? "");
     }
 }
