@@ -19,6 +19,12 @@ public class LexiconManager
 
     public int Count => this.lexicons.Values.SelectMany(l => l.Lexemes).Count();
 
+    public IEnumerable<MicroLexeme> Lexemes(string lexiconId)
+    {
+        var lexicon = this.lexicons[lexiconId];
+        return lexicon.Lexemes;
+    }
+
     public bool HasLexicon(string lexiconId)
     {
         return this.lexicons.ContainsKey(lexiconId);
@@ -62,18 +68,24 @@ public class LexiconManager
                     {
                         Grapheme = grapheme.Value,
                         // https://github.com/karashiiro/TextToTalk/issues/37#issuecomment-899733701
-                        // There are some weird incompatibilities in the SSML reader that this helps to fix.
+                        // There are some weird incompatibilities in the SAPI5 SSML reader that this helps to fix.
                         Phoneme = el.Element($"{nsPrefix}phoneme")?.Value
                             .Replace(":", "ː")
                             .Replace(" ", "")
                             .Replace("-", "")
-                            .Replace("ʤ", "d͡ʒ"),
+                            .Replace("ʤ", "d͡ʒ") // IPA ligature for /d͡ʒ/ (deprecated)
+                            .Replace("ʧ", "t͡ʃ") // IPA ligature for /tʃ/ (deprecated)
+                            .Replace("ɡ", "g") // IPA script-g
+                            .Replace("ɚ", "ər") // IPA rhotacized schwa
+                            .Replace("ɝ", "ɜr") // IPA rhotacized stressed vowel
+                            .Replace("‖", "ˌ"), // IPA prosodic boundary marker
                         Alias = el.Element($"{nsPrefix}alias")?.Value,
                     })
                 )
                 .ToList(),
         };
 
+        // Sort to match on longer grapheme replacements before shorter ones in MakeSsml
         lexicon.Lexemes.Sort((a, b) => b.Grapheme.Length - a.Grapheme.Length);
 
         this.lexicons[lexicon.Id] = lexicon;
@@ -228,7 +240,7 @@ public class LexiconManager
         return text[..xIdx] + newValue + ReplaceGrapheme(text[(xIdx + oldValue.Length)..], oldValue, newValue);
     }
 
-    private class MicroLexeme
+    public class MicroLexeme
     {
         public required string Grapheme { get; init; }
 

@@ -82,9 +82,12 @@ namespace TextToTalk.Backends.System
             }
             catch (OperationCanceledException)
             {
-
+                // ignored
             }
-
+            catch (Exception e)
+            {
+                DetailedLog.Error(e, "TTS playback failed: {0}", ssml);
+            }
             finally
             {
                 isSynthesizing = false;
