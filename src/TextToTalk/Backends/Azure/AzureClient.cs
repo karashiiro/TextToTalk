@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
@@ -15,7 +16,12 @@ public class AzureClient : IDisposable
     private readonly SpeechSynthesizer synthesizer;
     private readonly StreamSoundQueue soundQueue;
     private readonly LexiconManager lexiconManager;
-    private readonly PluginConfiguration config;
+
+    private readonly Lock synthesisLock = new();
+
+    // Dispose signals this counter so the countdown can complete once the last in-flight synthesis request finishes.
+    private readonly CountdownEvent synthesisCountdown = new(initialCount: 1);
+    private bool disposed;
 
     public AzureClient(string subscriptionKey, string region, LexiconManager lexiconManager, PluginConfiguration config)
     {
@@ -41,7 +47,7 @@ public class AzureClient : IDisposable
         {
             Name = voice.Name,
             ShortName = voice.ShortName,
-            Styles = voice.StyleList.ToList() // StyleList is a string[]
+            Styles = voice.StyleList.ToList(), // StyleList is a string[]
         }).ToList();
     }
 
@@ -61,23 +67,59 @@ public class AzureClient : IDisposable
 
     public async Task Say(string? voice, int playbackRate, float volume, TextSource source, string text, string style)
     {
-        var ssml = this.lexiconManager.MakeSsml(
-            text,
-            style,
-            voice: voice,
-            langCode: "en-US",
-            playbackRate: playbackRate,
-            includeSpeakAttributes: true);
-        DetailedLog.Verbose(ssml);
+        if (!TryBeginSynthesis())
+        {
+            DetailedLog.Verbose("Azure client is disposed; dropping synthesis request.");
+            return;
+        }
 
-        var res = await this.synthesizer.SpeakSsmlAsync(ssml);
+        try
+        {
+            var ssml = this.lexiconManager.MakeSsml(
+                text,
+                style,
+                voice: voice,
+                langCode: "en-US",
+                playbackRate: playbackRate,
+                includeSpeakAttributes: true);
+            DetailedLog.Verbose(ssml);
 
-        HandleResult(res);
+            // ConfigureAwait(false) keeps the continuation off any captured context so a
+            // blocking Dispose cannot deadlock against this operation's completion.
+            var res = await this.synthesizer.SpeakSsmlAsync(ssml).ConfigureAwait(false);
 
-        var soundStream = new MemoryStream(res.AudioData);
-        soundStream.Seek(0, SeekOrigin.Begin);
+            HandleResult(res);
 
-        this.soundQueue.EnqueueSound(soundStream, source, StreamFormat.Wave, volume);
+            var soundStream = new MemoryStream(res.AudioData);
+            soundStream.Seek(0, SeekOrigin.Begin);
+
+            this.soundQueue.EnqueueSound(soundStream, source, StreamFormat.Wave, volume);
+        }
+        finally
+        {
+            EndSynthesis();
+        }
+    }
+
+    private bool TryBeginSynthesis()
+    {
+        lock (this.synthesisLock)
+        {
+            if (this.disposed)
+            {
+                return false;
+            }
+
+            // While not disposed, the count never drops below the initial token,
+            // so AddCount cannot race the countdown to zero (which throws).
+            this.synthesisCountdown.AddCount();
+            return true;
+        }
+    }
+
+    private void EndSynthesis()
+    {
+        this.synthesisCountdown.Signal();
     }
 
     public Task CancelAllSounds()
@@ -125,7 +167,25 @@ public class AzureClient : IDisposable
 
     public void Dispose()
     {
-        this.synthesizer?.Dispose();
-        this.soundQueue?.Dispose();
+        lock (this.synthesisLock)
+        {
+            if (this.disposed)
+            {
+                return;
+            }
+
+            // Blocks new synthesis requests so the in-flight ones can drain
+            this.disposed = true;
+        }
+
+        // Release the initial token, then wait for in-flight SpeakSsmlAsync calls to finish
+        // before freeing the synthesizer handle. Disposing mid-synthesis frees a
+        // handle the SDK is still using on a background thread, causing an access violation.
+        this.synthesisCountdown.Signal();
+        this.synthesisCountdown.Wait();
+
+        this.synthesizer.Dispose();
+        this.soundQueue.Dispose();
+        this.synthesisCountdown.Dispose();
     }
 }

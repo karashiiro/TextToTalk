@@ -1,9 +1,7 @@
 ﻿using Dalamud.Bindings.ImGui;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using TextToTalk.Backends.ElevenLabs;
 using static TextToTalk.Backends.Azure.AzureClient;
 
 namespace TextToTalk.Backends.Azure;
@@ -94,5 +92,4 @@ public class AzureBackend : VoiceBackend
             this.uiModel.Azure?.Dispose();
         }
     }
-
 }
