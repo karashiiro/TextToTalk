@@ -44,6 +44,8 @@ namespace TextToTalk.Backends
                     DetailedLog.Error(e, "Error occurred during sound loop.");
                 }
 
+                WaitForSoundLoopComplete();
+
                 this.currentItem.Dispose();
                 this.currentItem = null;
             }
@@ -109,6 +111,16 @@ namespace TextToTalk.Backends
         /// Called whenever the current item playback is cancelled.
         /// </summary>
         protected abstract void OnSoundCancelled();
+
+        /// <summary>
+        /// Called after <see cref="OnSoundLoop"/> returns. Async subclasses override this
+        /// to block until their asynchronous work completes, keeping
+        /// <see cref="currentItem"/> valid so that <see cref="CancelFromSource"/> can
+        /// match the currently-spoken item. Synchronous subclasses do not need to override.
+        /// </summary>
+        protected virtual void WaitForSoundLoopComplete()
+        {
+        }
 
         private TQueueItem? TryDequeue()
         {

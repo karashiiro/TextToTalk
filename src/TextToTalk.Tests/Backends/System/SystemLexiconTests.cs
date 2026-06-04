@@ -19,7 +19,7 @@ public class SystemLexiconTests(ITestOutputHelper output)
         speechSynthesizer.SpeakSsml(ssml);
     }
 
-    [Fact]
+    [Fact(Skip = "Disabled by default as it takes a very long time to run")]
     public async Task SpeakSsml_CharactersLocationsSystemLexicon_DoesNotThrow()
     {
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;

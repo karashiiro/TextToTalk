@@ -20,7 +20,9 @@ namespace TextToTalk.Backends.System
             this.uiModel = new SystemBackendUIModel();
             this.ui = new SystemBackendUI(this.uiModel, config, lexiconManager, http, this);
 
-            this.soundQueue = new SystemSoundQueue(lexiconManager, config);
+            var speechSynthesizer = new SystemSpeechSynthesizer();
+            this.soundQueue = new SystemSoundQueue(lexiconManager, config, speechSynthesizer,
+                synthesizerFactory: () => new SystemSpeechSynthesizer());
             this.voiceExceptions = this.uiModel.SubscribeToVoiceExceptions(this.soundQueue.SelectVoiceFailed);
         }
 

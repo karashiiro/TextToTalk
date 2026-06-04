@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <RuntimeFrameworkVersion>10.0.0</RuntimeFrameworkVersion>
-        <Version>1.38.1.0</Version>
+        <Version>1.38.2.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
@@ -78,5 +78,9 @@
             <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.String]::new('%(ReferenceCopyLocalPaths.RuntimeIdentifier)').EndsWith('-x86'))" />
         </ItemGroup>
     </Target>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="TextToTalk.Tests" />
+    </ItemGroup>
 
 </Project>

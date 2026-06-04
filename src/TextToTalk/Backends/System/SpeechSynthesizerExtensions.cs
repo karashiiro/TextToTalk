@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Speech.Synthesis;
 
 namespace TextToTalk.Backends.System
 {
     public static class SpeechSynthesizerExtensions
     {
-        public static void UseVoicePreset(this SpeechSynthesizer synthesizer, VoicePreset preset)
+        public static void UseVoicePreset(this ISpeechSynthesizer synthesizer, VoicePreset preset)
         {
             if (preset is not SystemVoicePreset systemVoicePreset)
             {
@@ -14,7 +13,7 @@ namespace TextToTalk.Backends.System
 
             synthesizer.Rate = systemVoicePreset.Rate;
             synthesizer.Volume = systemVoicePreset.Volume;
-            if (synthesizer.Voice.Name != systemVoicePreset.VoiceName)
+            if (synthesizer.VoiceName != systemVoicePreset.VoiceName)
             {
                 try
                 {
