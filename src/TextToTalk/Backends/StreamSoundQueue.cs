@@ -1,4 +1,4 @@
-﻿using NAudio.Wave;
+using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using System;
 using System.IO;
@@ -13,6 +13,7 @@ namespace TextToTalk.Backends
         private readonly AutoResetEvent speechCompleted = new(false);
         private readonly object soundLock = true;
         private DirectSoundOut? soundOut;
+        private volatile bool cancelled;
 
         protected override void OnSoundLoop(StreamSoundQueueItem nextItem)
         {
@@ -33,6 +34,8 @@ namespace TextToTalk.Backends
             var volumeSampleProvider = new VolumeSampleProvider(sampleProvider) { Volume = effectiveVolume };
             var playbackDeviceId = config.SelectedAudioDeviceGuid;
 
+            this.cancelled = false;
+
             // Play the sound
             lock (this.soundLock)
             {
@@ -47,8 +50,13 @@ namespace TextToTalk.Backends
             // Cleanup
             lock (this.soundLock)
             {
-                this.soundOut.Dispose();
+                this.soundOut?.Dispose();
                 this.soundOut = null;
+            }
+
+            if (!this.cancelled)
+            {
+                SpeechFinishedNotifier.Trigger(nextItem.Source, nextItem.Text);
             }
         }
 
@@ -57,7 +65,7 @@ namespace TextToTalk.Backends
             StopWaveOut();
         }
 
-        public void EnqueueSound(MemoryStream data, TextSource source, StreamFormat format, float volume)
+        public void EnqueueSound(MemoryStream data, TextSource source, StreamFormat format, float volume, string? text = null)
         {
             AddQueueItem(new StreamSoundQueueItem
             {
@@ -65,6 +73,7 @@ namespace TextToTalk.Backends
                 Volume = volume,
                 Source = source,
                 Format = format,
+                Text = text,
             });
         }
 
@@ -74,6 +83,7 @@ namespace TextToTalk.Backends
             {
                 lock (this.soundLock)
                 {
+                    this.cancelled = true;
                     this.soundOut?.Stop();
                 }
             }

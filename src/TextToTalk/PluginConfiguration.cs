@@ -1,4 +1,4 @@
-﻿using Amazon.Polly;
+using Amazon.Polly;
 using Dalamud.Configuration;
 using Dalamud.Game.Text;
 using Dalamud.Plugin;
@@ -160,6 +160,7 @@ namespace TextToTalk
         public bool ReadFromQuestTalkAddon { get; set; } = true;
         public bool CancelSpeechOnTextAdvance { get; set; }
         public bool SkipVoicedQuestText { get; set; } = true;
+        public bool AutoAdvanceDialogue { get; set; }
 
         public bool ReadFromBattleTalkAddon { get; set; } = true;
         public bool SkipVoicedBattleText { get; set; } = true;

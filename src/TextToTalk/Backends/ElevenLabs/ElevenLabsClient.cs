@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -78,7 +78,7 @@ public class ElevenLabsClient
         await responseStream.CopyToAsync(mp3Stream);
         mp3Stream.Seek(0, SeekOrigin.Begin);
 
-        this.soundQueue.EnqueueSound(mp3Stream, source, StreamFormat.Mp3, volume);
+        this.soundQueue.EnqueueSound(mp3Stream, source, StreamFormat.Mp3, volume, text);
     }
 
     public async Task<ElevenLabsUserSubscriptionInfo> GetUserSubscriptionInfo()

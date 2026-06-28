@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -93,7 +93,7 @@ public class AzureClient : IDisposable
             var soundStream = new MemoryStream(res.AudioData);
             soundStream.Seek(0, SeekOrigin.Begin);
 
-            this.soundQueue.EnqueueSound(soundStream, source, StreamFormat.Wave, volume);
+            this.soundQueue.EnqueueSound(soundStream, source, StreamFormat.Wave, volume, text);
         }
         finally
         {

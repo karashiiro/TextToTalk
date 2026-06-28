@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -103,7 +103,7 @@ public partial class UberduckClient
         await responseStream.CopyToAsync(waveStream);
         waveStream.Seek(0, SeekOrigin.Begin);
 
-        this.soundQueue.EnqueueSound(waveStream, source, StreamFormat.Wave, volume);
+        this.soundQueue.EnqueueSound(waveStream, source, StreamFormat.Wave, volume, text);
     }
 
     private Task<UberduckSpeechStatusResponse?> GetSpeechStatus(string uuid)

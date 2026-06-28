@@ -96,6 +96,6 @@ public class GoogleCloudClient
         MemoryStream mp3Stream = new MemoryStream(response.AudioContent.ToByteArray());
         mp3Stream.Seek(0, SeekOrigin.Begin);
 
-        soundQueue.EnqueueSound(mp3Stream, source, StreamFormat.Mp3, volume);
+        soundQueue.EnqueueSound(mp3Stream, source, StreamFormat.Mp3, volume, text);
     }
 }

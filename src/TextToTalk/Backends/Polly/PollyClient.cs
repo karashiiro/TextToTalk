@@ -1,4 +1,4 @@
-﻿using Amazon;
+using Amazon;
 using Amazon.Polly;
 using Amazon.Polly.Model;
 using Amazon.Runtime;
@@ -86,7 +86,7 @@ namespace TextToTalk.Backends.Polly
             await res.AudioStream.CopyToAsync(responseStream);
             responseStream.Seek(0, SeekOrigin.Begin);
 
-            this.soundQueue.EnqueueSound(responseStream, source, StreamFormat.Mp3, volume);
+            this.soundQueue.EnqueueSound(responseStream, source, StreamFormat.Mp3, volume, text);
         }
 
         public Task CancelAllSounds()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -226,7 +226,7 @@ public class OpenAiClient(StreamSoundQueue soundQueue, HttpClient http)
         await responseStream.CopyToAsync(mp3Stream);
         mp3Stream.Seek(0, SeekOrigin.Begin);
 
-        soundQueue.EnqueueSound(mp3Stream, request.Source, StreamFormat.Mp3, preset.Volume);
+        soundQueue.EnqueueSound(mp3Stream, request.Source, StreamFormat.Mp3, preset.Volume, request.Text);
     }
 
     private static async Task EnsureSuccessStatusCode(HttpResponseMessage res)

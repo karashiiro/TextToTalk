@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -193,6 +193,9 @@ namespace TextToTalk.UI
                         this.config);
                     ConfigComponents.ToggleSkipVoicedQuestText(
                         "Skip reading voice-acted NPC dialogue",
+                        this.config);
+                    ConfigComponents.ToggleAutoAdvanceDialogue(
+                        "Automatically advance dialogue when speech finishes",
                         this.config);
 
                     ImGui.Unindent();

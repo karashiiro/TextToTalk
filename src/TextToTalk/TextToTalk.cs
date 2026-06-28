@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface.Windowing;
@@ -547,10 +547,14 @@ namespace TextToTalk
 
             this.framework.Update += this.notificationService.ProcessNotifications;
             this.framework.Update += CheckKeybindPressed;
+
+            SpeechFinishedNotifier.SpeechFinished += OnSpeechFinished;
         }
 
         private void UnregisterCallbacks()
         {
+            SpeechFinishedNotifier.SpeechFinished -= OnSpeechFinished;
+
             this.framework.Update -= CheckKeybindPressed;
             this.framework.Update -= this.notificationService.ProcessNotifications;
 
@@ -558,6 +562,48 @@ namespace TextToTalk
             this.pluginInterface.UiBuilder.OpenMainUi -= this.configurationWindow.Open;
 
             this.pluginInterface.UiBuilder.Draw -= this.windows.Draw;
+        }
+
+        private void OnSpeechFinished(TextSource source, string? spokenText)
+        {
+            if (source == TextSource.AddonTalk && this.config.Enabled && this.config.AutoAdvanceDialogue)
+            {
+                _ = this.framework.RunOnFrameworkThread(() =>
+                {
+                    if (this.addonTalkManager.IsVisible())
+                    {
+                        var currentTalkText = this.addonTalkManager.ReadText()?.Text;
+                        if (IsDialogueTextMatching(currentTalkText, spokenText))
+                        {
+                            DetailedLog.Debug("TTS finished reading dialogue. Automatically advancing dialogue.");
+                            this.addonTalkManager.Advance();
+                        }
+                        else
+                        {
+                            DetailedLog.Debug("TTS finished reading, but dialogue text has already changed or closed. Skipping auto-advance.");
+                        }
+                    }
+                });
+            }
+        }
+
+        private bool IsDialogueTextMatching(string? text1, string? text2)
+        {
+            if (text1 == null || text2 == null) return false;
+            return NormalizeForComparison(text1) == NormalizeForComparison(text2);
+        }
+
+        private string NormalizeForComparison(string text)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var c in text)
+            {
+                if (char.IsLetterOrDigit(c))
+                {
+                    sb.Append(char.ToLowerInvariant(c));
+                }
+            }
+            return sb.ToString();
         }
 
         #region IDisposable Support

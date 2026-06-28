@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using Dalamud.Game;
@@ -104,7 +104,7 @@ public class KokoroSoundQueue : SoundQueue<KokoroSourceQueueItem>
 
             var bytes = KokoroPlayback.GetBytes(samples);
             var ms = new MemoryStream(bytes);
-            streamSoundQueue.EnqueueSound(ms, nextItem.Source, StreamFormat.Raw, nextItem.Volume);
+            streamSoundQueue.EnqueueSound(ms, nextItem.Source, StreamFormat.Raw, nextItem.Volume, nextItem.Text);
         }
     }
 }

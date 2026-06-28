@@ -1,4 +1,4 @@
-﻿using R3;
+using R3;
 using System;
 using System.IO;
 using System.Threading;
@@ -108,7 +108,7 @@ namespace TextToTalk.Backends.System
             {
                 this.consecutiveFailures = 0;
                 synthesisStream.Seek(0, SeekOrigin.Begin);
-                this.streamSoundQueue.EnqueueSound(synthesisStream, nextItem.Source, StreamFormat.Wave, 1f);
+                this.streamSoundQueue.EnqueueSound(synthesisStream, nextItem.Source, StreamFormat.Wave, 1f, nextItem.Text);
             }
         }
 
