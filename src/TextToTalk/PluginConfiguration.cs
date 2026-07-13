@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using TextToTalk.Backends;
+using TextToTalk.Backends.Megaphone;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.Data.Services;
@@ -149,16 +150,17 @@ namespace TextToTalk
 
         public int WebsocketPort { get; set; }
         public string? WebsocketAddress { get; set; }
+        public int MegaphonePort { get; set; } = 57575;
 
-        public bool NameNpcWithSay { get; set; } = true;
-        public bool EnableNameWithSay { get; set; } = true;
+        public bool NameNpcWithSay { get; set; } = false;
+        public bool EnableNameWithSay { get; set; } = false;
         public bool DisallowMultipleSay { get; set; }
-        public bool SayPlayerWorldName { get; set; } = true;
+        public bool SayPlayerWorldName { get; set; } = false;
         public bool SayPartialName { get; set; }
         public FirstOrLastName OnlySayFirstOrLastName { get; set; } = FirstOrLastName.First;
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;
-        public bool CancelSpeechOnTextAdvance { get; set; }
+        public bool CancelSpeechOnTextAdvance { get; set; } = true;
         public bool SkipVoicedQuestText { get; set; } = true;
 
         public bool ReadFromBattleTalkAddon { get; set; } = true;
@@ -170,7 +172,7 @@ namespace TextToTalk
         public bool UsePlayerVoicePresets { get; set; } = true;
         public bool UseNpcVoicePresets { get; set; } = true;
 
-        public TTSBackend Backend { get; set; }
+        public TTSBackend Backend { get; set; } = TTSBackend.Megaphone;
 
         public IList<string> Lexicons { get; set; }
 
@@ -263,10 +265,6 @@ namespace TextToTalk
                     Id = 0,
                     EnabledChatTypes = new List<int>
                     {
-                        (int)XivChatType.Say,
-                        (int)XivChatType.Yell,
-                        (int)XivChatType.Shout,
-                        (int)XivChatType.Party,
                         (int)XivChatType.NPCDialogue,
                     },
                     Name = DefaultPreset,
@@ -275,28 +273,8 @@ namespace TextToTalk
                     MajorKey = VirtualKey.Enum.Vk0,
                 });
 
-                try
-                {
-                    var defaultPreset = new SystemVoicePreset
-                    {
-                        Id = 0,
-                        Name = DefaultPreset,
-                        EnabledBackend = TTSBackend.System,
-                    };
-
-                    if (defaultPreset.TrySetDefaultValues())
-                    {
-                        GetVoiceConfig().VoicePresets.Add(defaultPreset);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Failed to set values for default preset.");
-                    }
-                }
-                catch (Exception e)
-                {
-                    DetailedLog.Error(e, "Failed to create default voice preset.");
-                }
+                TryCreateMegaphonePreset();
+                TryCreateSystemPreset();
 
                 InitializedEver = true;
                 MigratedTo1_5 = true;
@@ -326,6 +304,55 @@ namespace TextToTalk
             }
 
             Save();
+        }
+
+        private void TryCreateMegaphonePreset()
+        {
+            try
+            {
+                var megaphonePreset = new MegaphoneVoicePreset
+                {
+                    Id = 1,
+                    Name = DefaultPreset,
+                    EnabledBackend = TTSBackend.Megaphone,
+                };
+
+                if (megaphonePreset.TrySetDefaultValues())
+                {
+                    GetVoiceConfig().VoicePresets.Add(megaphonePreset);
+                }
+            }
+            catch (Exception e)
+            {
+                DetailedLog.Error(e, "Failed to create default Megaphone voice preset.");
+            }
+
+        }
+
+        private void TryCreateSystemPreset()
+        {
+             try
+            {
+                var defaultPreset = new SystemVoicePreset
+                {
+                    Id = 0,
+                    Name = DefaultPreset,
+                    EnabledBackend = TTSBackend.System,
+                };
+
+                if (defaultPreset.TrySetDefaultValues())
+                {
+                    GetVoiceConfig().VoicePresets.Add(defaultPreset);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Failed to set values for default preset.");
+                }
+            }
+            catch (Exception e)
+            {
+                DetailedLog.Error(e, "Failed to create default voice preset.");
+            }
         }
 
         public VoicePresetConfiguration GetVoiceConfig()

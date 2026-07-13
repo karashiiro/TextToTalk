@@ -1,15 +1,16 @@
-﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
+using TextToTalk.Backends.Websocket;
 using TextToTalk.Services;
 using TextToTalk.UI;
 
-namespace TextToTalk.Backends.Websocket;
+namespace TextToTalk.Backends.Megaphone;
 
-public class WebsocketBackend : VoiceBackend
+public class MegaphoneBackend : VoiceBackend
 {
     private static readonly Vector4 Red = new(1, 0, 0, 1);
     private static readonly Vector4 Hint = new(1.0f, 1.0f, 1.0f, 0.6f);
@@ -17,26 +18,27 @@ public class WebsocketBackend : VoiceBackend
     private static readonly Vector4 AzureHovered = new(0.21f, 0.49f, 0.7f, 1.0f);
     private static readonly Vector4 AzureActive = new(0.16f, 0.52f, 0.8f, 1.0f);
 
+    private const string InstallUrl = "https://github.com/barrcodes/xiv-megaphone";
+
     private readonly WSServer wsServer;
     private readonly PluginConfiguration config;
 
     private bool dirtyConfig;
     private Exception? lastException;
 
-    public WebsocketBackend(PluginConfiguration config, INotificationService notificationService)
+    public MegaphoneBackend(PluginConfiguration config, INotificationService notificationService)
     {
         this.config = config;
-
         try
         {
-            this.wsServer = new WSServer(config);
+            this.wsServer = new WSServer(new MegaphoneConfigProvider(config));
         }
-        catch (Exception e) when (e is SocketException or ArgumentOutOfRangeException)
+        catch (Exception e)
         {
             notificationService.NotifyError(
-                $"TextToTalk failed to bind the WebSocket server to port {config.WebsocketPort}.",
-                "Please close the owner of that port and reload the Websocket server, or select a different port.");
-            this.wsServer = new WSServer(config, 0);
+                $"TextToTalk failed to bind the Megaphone server to port {config.MegaphonePort}.",
+                "Please close the owner of that port and reload the Megaphone server, or select a different port.");
+            this.wsServer = new WSServer(new MegaphoneConfigProvider(config), 0);
         }
     }
 
@@ -61,16 +63,17 @@ public class WebsocketBackend : VoiceBackend
     {
         helpers.OpenVoiceStylesConfig();
     }
+
     public override void Say(SayRequest request)
     {
         try
         {
             this.wsServer.Broadcast(request);
-            DetailedLog.Debug($"Sent message \"{request.Text}\" on WebSocket server.");
+            DetailedLog.Debug($"Sent message \"{request.Text}\" on Megaphone server.");
         }
         catch (Exception e)
         {
-            DetailedLog.Error(e, "Failed to send message over Websocket.");
+            DetailedLog.Error(e, "Failed to send message over Megaphone.");
         }
     }
 
@@ -86,19 +89,23 @@ public class WebsocketBackend : VoiceBackend
 
     public override void DrawSettings(IConfigUIDelegates helpers)
     {
+        DrawInstallLink();
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
         DrawPortConfig();
-        DrawAddressConfig();
-
         ImGui.Spacing();
-        DrawServerStatus();
 
-        ImGui.Spacing();
         DrawServerRestart();
+        ImGui.Spacing();
+
+        DrawServerStatus();
     }
 
     private void DrawPortConfig()
     {
-        var port = this.config.WebsocketPort;
+        var port = this.config.MegaphonePort;
         var portStr = port.ToString();
 
         var didUpdate = ImGui.InputText("Port", ref portStr, 5, ImGuiInputTextFlags.CharsDecimal);
@@ -111,7 +118,7 @@ public class WebsocketBackend : VoiceBackend
             }
             else if (didUpdate)
             {
-                this.config.WebsocketPort = newPort;
+                this.config.MegaphonePort = newPort;
                 this.dirtyConfig = true;
                 this.config.Save();
             }
@@ -122,30 +129,13 @@ public class WebsocketBackend : VoiceBackend
         }
     }
 
-    private void DrawAddressConfig()
+    private void DrawInstallLink()
     {
-        var address = this.config.WebsocketAddress ?? "";
-        if (ImGui.InputTextWithHint($"Address##{MemoizedId.Create()}", "localhost", ref address, 40))
+        ImGui.TextColored(Hint, "Install the Megaphone Dalamud plugin:");
+        if (ImGui.Button($"Open Install Guide##{MemoizedId.Create()}"))
         {
-            if (string.IsNullOrWhiteSpace(address))
-            {
-                this.config.WebsocketAddress = null;
-                this.dirtyConfig = true;
-                this.config.Save();
-            }
-            else if (IPAddress.TryParse(address, out _))
-            {
-                this.config.WebsocketAddress = address;
-                this.dirtyConfig = true;
-                this.config.Save();
-            }
-            else
-            {
-                ImGui.TextColored(Red, "Failed to parse address!");
-            }
+            Dalamud.Utility.Util.OpenLink(InstallUrl);
         }
-
-        ImGui.TextColored(Hint, "IPv6 address formats are not currently supported.");
     }
 
     private void DrawServerStatus()
@@ -163,9 +153,7 @@ public class WebsocketBackend : VoiceBackend
         {
             ImCatchServerRestart(() =>
             {
-                this.wsServer.RestartWithConnection(
-                    IPAddress.TryParse(this.config.WebsocketAddress, out var ip) ? ip : null,
-                    this.config.WebsocketPort);
+                this.wsServer.RestartWithConnection(null, this.config.MegaphonePort);
                 this.dirtyConfig = false;
             });
         }
@@ -211,7 +199,6 @@ public class WebsocketBackend : VoiceBackend
 
     public override TextSource GetCurrentlySpokenTextSource()
     {
-        // It's not possible to implement this correctly here.
         return TextSource.None;
     }
 
@@ -221,5 +208,19 @@ public class WebsocketBackend : VoiceBackend
         {
             this.wsServer.Dispose();
         }
+    }
+
+    private class MegaphoneConfigProvider : Websocket.IWebsocketConfigProvider
+    {
+        private readonly PluginConfiguration config;
+
+        public MegaphoneConfigProvider(PluginConfiguration config)
+        {
+            this.config = config;
+        }
+
+        public int GetPort() => config.MegaphonePort;
+
+        public IPAddress? GetAddress() => null;
     }
 }

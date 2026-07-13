@@ -83,8 +83,8 @@ public class WSServer : IDisposable
     public void Start()
     {
         if (Active) return;
-        Active = true;
         this.server.Start();
+        Active = true;
     }
 
     public void Stop()

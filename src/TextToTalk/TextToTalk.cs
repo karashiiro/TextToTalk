@@ -22,6 +22,7 @@ using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.Kokoro;
+using TextToTalk.Backends.Megaphone;
 using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -484,7 +485,7 @@ namespace TextToTalk
             }
 
             // Get the speaker's gender, if possible
-            var gender = this.config.Backend == TTSBackend.Websocket || this.config.UseGenderedVoicePresets
+            var gender = this.config.Backend.IsRelayBackend() || this.config.UseGenderedVoicePresets
                 ? CharacterGenderUtils.GetCharacterGender(speaker, this.ungenderedOverrides)
                 : Gender.None;
 
@@ -508,6 +509,12 @@ namespace TextToTalk
                 ElevenLabsBackend => GetVoiceForSpeaker<ElevenLabsVoicePreset>(name, gender),
                 OpenAiBackend => GetVoiceForSpeaker<OpenAiVoicePreset>(name, gender),
                 GoogleCloudBackend => GetVoiceForSpeaker<GoogleCloudVoicePreset>(name, gender),
+                MegaphoneBackend => new MegaphoneVoicePreset
+                {
+                    EnabledBackend = TTSBackend.Megaphone,
+                    Id = -1,
+                    Name = gender.ToString(),
+                },
                 KokoroBackend => GetVoiceForSpeaker<KokoroVoicePreset>(name, gender),
                 _ => throw new InvalidOperationException("Failed to get voice preset for backend."),
             };
