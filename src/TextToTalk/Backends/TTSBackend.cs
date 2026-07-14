@@ -40,8 +40,8 @@ namespace TextToTalk.Backends
 
         public static int GetDisplayOrder(this TTSBackend backend) => backend switch
         {
-            TTSBackend.Megaphone => 0,
-            TTSBackend.System => 1,
+            TTSBackend.System => 0,
+            TTSBackend.Megaphone => 1,
             TTSBackend.Websocket => 2,
             TTSBackend.AmazonPolly => 3,
             TTSBackend.Azure => 4,

@@ -172,7 +172,7 @@ namespace TextToTalk
         public bool UsePlayerVoicePresets { get; set; } = true;
         public bool UseNpcVoicePresets { get; set; } = true;
 
-        public TTSBackend Backend { get; set; } = TTSBackend.Megaphone;
+        public TTSBackend Backend { get; set; }
 
         public IList<string> Lexicons { get; set; }
 
@@ -273,8 +273,28 @@ namespace TextToTalk
                     MajorKey = VirtualKey.Enum.Vk0,
                 });
 
-                TryCreateMegaphonePreset();
-                TryCreateSystemPreset();
+                try
+                {
+                    var defaultPreset = new SystemVoicePreset
+                    {
+                        Id = 0,
+                        Name = DefaultPreset,
+                        EnabledBackend = TTSBackend.System,
+                    };
+
+                    if (defaultPreset.TrySetDefaultValues())
+                    {
+                        GetVoiceConfig().VoicePresets.Add(defaultPreset);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Failed to set values for default preset.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    DetailedLog.Error(e, "Failed to create default voice preset.");
+                }
 
                 InitializedEver = true;
                 MigratedTo1_5 = true;
@@ -304,55 +324,6 @@ namespace TextToTalk
             }
 
             Save();
-        }
-
-        private void TryCreateMegaphonePreset()
-        {
-            try
-            {
-                var megaphonePreset = new MegaphoneVoicePreset
-                {
-                    Id = 1,
-                    Name = DefaultPreset,
-                    EnabledBackend = TTSBackend.Megaphone,
-                };
-
-                if (megaphonePreset.TrySetDefaultValues())
-                {
-                    GetVoiceConfig().VoicePresets.Add(megaphonePreset);
-                }
-            }
-            catch (Exception e)
-            {
-                DetailedLog.Error(e, "Failed to create default Megaphone voice preset.");
-            }
-
-        }
-
-        private void TryCreateSystemPreset()
-        {
-             try
-            {
-                var defaultPreset = new SystemVoicePreset
-                {
-                    Id = 0,
-                    Name = DefaultPreset,
-                    EnabledBackend = TTSBackend.System,
-                };
-
-                if (defaultPreset.TrySetDefaultValues())
-                {
-                    GetVoiceConfig().VoicePresets.Add(defaultPreset);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Failed to set values for default preset.");
-                }
-            }
-            catch (Exception e)
-            {
-                DetailedLog.Error(e, "Failed to create default voice preset.");
-            }
         }
 
         public VoicePresetConfiguration GetVoiceConfig()
