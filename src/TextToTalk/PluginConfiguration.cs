@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using TextToTalk.Backends;
+using TextToTalk.Backends.Megaphone;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
 using TextToTalk.Data.Services;
@@ -149,16 +150,17 @@ namespace TextToTalk
 
         public int WebsocketPort { get; set; }
         public string? WebsocketAddress { get; set; }
+        public int MegaphonePort { get; set; } = 57575;
 
-        public bool NameNpcWithSay { get; set; } = true;
-        public bool EnableNameWithSay { get; set; } = true;
+        public bool NameNpcWithSay { get; set; } = false;
+        public bool EnableNameWithSay { get; set; } = false;
         public bool DisallowMultipleSay { get; set; }
-        public bool SayPlayerWorldName { get; set; } = true;
+        public bool SayPlayerWorldName { get; set; } = false;
         public bool SayPartialName { get; set; }
         public FirstOrLastName OnlySayFirstOrLastName { get; set; } = FirstOrLastName.First;
 
         public bool ReadFromQuestTalkAddon { get; set; } = true;
-        public bool CancelSpeechOnTextAdvance { get; set; }
+        public bool CancelSpeechOnTextAdvance { get; set; } = true;
         public bool SkipVoicedQuestText { get; set; } = true;
 
         public bool ReadFromBattleTalkAddon { get; set; } = true;
@@ -263,10 +265,6 @@ namespace TextToTalk
                     Id = 0,
                     EnabledChatTypes = new List<int>
                     {
-                        (int)XivChatType.Say,
-                        (int)XivChatType.Yell,
-                        (int)XivChatType.Shout,
-                        (int)XivChatType.Party,
                         (int)XivChatType.NPCDialogue,
                     },
                     Name = DefaultPreset,

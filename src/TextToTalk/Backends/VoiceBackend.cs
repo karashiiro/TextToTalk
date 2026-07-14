@@ -19,6 +19,14 @@ namespace TextToTalk.Backends
 
         public abstract TextSource GetCurrentlySpokenTextSource();
 
+        public virtual void Start()
+        {
+        }
+
+        public virtual void Stop()
+        {
+        }
+
         protected abstract void Dispose(bool disposing);
 
         public void Dispose()

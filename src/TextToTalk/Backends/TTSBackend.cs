@@ -14,6 +14,7 @@ namespace TextToTalk.Backends
         OpenAi,
         GoogleCloud,
         Kokoro,
+        Megaphone,
     }
 
     public static class TTSBackendExtensions
@@ -32,9 +33,28 @@ namespace TextToTalk.Backends
                 TTSBackend.GoogleCloud => "Google Cloud",
                 TTSBackend.Kokoro when config != null && KokoroBackend.IsModelFileDownloaded(config) => "Kokoro",
                 TTSBackend.Kokoro => "Kokoro (169MB download required)",
+                TTSBackend.Megaphone => "Megaphone",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
+
+        public static int GetDisplayOrder(this TTSBackend backend) => backend switch
+        {
+            TTSBackend.System => 0,
+            TTSBackend.Megaphone => 1,
+            TTSBackend.Websocket => 2,
+            TTSBackend.AmazonPolly => 3,
+            TTSBackend.Azure => 4,
+            TTSBackend.ElevenLabs => 5,
+            TTSBackend.OpenAi => 6,
+            TTSBackend.GoogleCloud => 7,
+            TTSBackend.Kokoro => 8,
+            TTSBackend.Uberduck => 9,
+            _ => int.MaxValue,
+        };
+
+        public static bool IsRelayBackend(this TTSBackend backend) =>
+            backend is TTSBackend.Websocket or TTSBackend.Megaphone;
 
         public static bool AreLexiconsEnabled(this TTSBackend backend)
         {
@@ -49,6 +69,7 @@ namespace TextToTalk.Backends
                 TTSBackend.OpenAi => false,
                 TTSBackend.GoogleCloud => false,
                 TTSBackend.Kokoro => false,
+                TTSBackend.Megaphone => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }

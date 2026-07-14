@@ -8,6 +8,7 @@ using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.Kokoro;
+using TextToTalk.Backends.Megaphone;
 using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -23,6 +24,8 @@ namespace TextToTalk.Backends
         private readonly PluginConfiguration config;
         private readonly IUiBuilder uiBuilder;
         private readonly INotificationService notificationService;
+
+        private Task backendTask = Task.CompletedTask;
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
@@ -69,22 +72,43 @@ namespace TextToTalk.Backends
 
         public void SetBackend(TTSBackend backendKind)
         {
-            _ = Task.Run(() =>
+            var kind = backendKind;
+            backendTask = backendTask.ContinueWith(_ =>
             {
                 BackendLoading = true;
-                var newBackend = CreateBackendFor(backendKind);
-                var oldBackend = Backend;
-                Backend = newBackend;
-                BackendLoading = false;
-                oldBackend?.Dispose();
-                WarnIfNoPresetsConfiguredForBackend();
-            });
+                try
+                {
+                    var oldBackend = Backend;
+                    if (oldBackend != null)
+                    {
+                        oldBackend.Stop();
+                        oldBackend.Dispose();
+                        Backend = null;
+                    }
+
+                    var newBackend = CreateBackendFor(kind);
+                    newBackend.Start();
+
+                    Backend = newBackend;
+                    WarnIfNoPresetsConfiguredForBackend();
+                }
+                catch (Exception e)
+                {
+                    this.notificationService.NotifyError(
+                        $"Failed to switch to {kind.GetFormattedName()} backend.",
+                        e.Message);
+                }
+                finally
+                {
+                    BackendLoading = false;
+                }
+            }, TaskContinuationOptions.ExecuteSynchronously);
         }
 
         private void WarnIfNoPresetsConfiguredForBackend()
         {
             if (!this.config.Enabled ||
-                this.config.Backend == TTSBackend.Websocket ||
+                this.config.Backend.IsRelayBackend() ||
                 this.config.GetVoiceConfig().VoicePresets.Any(vp => vp.EnabledBackend == this.config.Backend))
             {
                 return;
@@ -113,6 +137,7 @@ namespace TextToTalk.Backends
                 TTSBackend.OpenAi => new OpenAiBackend(this.config, this.http, this.notificationService),
                 TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config),
                 TTSBackend.Kokoro => new KokoroBackend(this.config),
+                TTSBackend.Megaphone => new MegaphoneBackend(this.config, this.notificationService),
                 _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };
         }

@@ -8,6 +8,7 @@ using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.Kokoro;
+using TextToTalk.Backends.Megaphone;
 using TextToTalk.Backends.OpenAI;
 using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
@@ -215,6 +216,12 @@ public class VoicePresetConfiguration
                 Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
                 Name = GetNullableValue<string?>(corrupted, "Name"),
                 EnabledBackend = TTSBackend.Websocket,
+            },
+            TTSBackend.Megaphone => new MegaphoneVoicePreset
+            {
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                EnabledBackend = TTSBackend.Megaphone,
             },
             TTSBackend.Azure => new AzureVoicePreset
             {
