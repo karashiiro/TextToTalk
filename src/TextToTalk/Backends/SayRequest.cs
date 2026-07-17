@@ -42,6 +42,11 @@ public record SayRequest
     public required BodyType BodyType { get; init; }
 
     /// <summary>
+    /// The speaker's gender.
+    /// </summary>
+    public required Gender Gender { get; init; }
+
+    /// <summary>
     /// The spoken text.
     /// </summary>
     public required string Text { get; init; }

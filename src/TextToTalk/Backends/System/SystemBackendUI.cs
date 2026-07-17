@@ -143,6 +143,7 @@ public class SystemBackendUI
                     TextTemplate = "Hello from Windows Narrator, this is a test message",
                     Race = "Hyur",
                     BodyType = GameEnums.BodyType.Adult,
+                    Gender = GameEnums.Gender.None,
                     ChatType = XivChatType.Say,
                     Language = ClientLanguage.English,
                 };

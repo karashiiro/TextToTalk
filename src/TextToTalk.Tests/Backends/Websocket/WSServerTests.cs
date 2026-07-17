@@ -167,6 +167,7 @@ public class WSServerTests
             TextTemplate = "Hello, world!",
             Race = "Hyur",
             BodyType = GameEnums.BodyType.Adult,
+            Gender = GameEnums.Gender.None,
             ChatType = XivChatType.Say,
             Language = ClientLanguage.English,
         });
@@ -218,6 +219,7 @@ public class WSServerTests
                 TextTemplate = "Hello, world!",
                 Race = "Hyur",
                 BodyType = GameEnums.BodyType.Adult,
+                Gender = GameEnums.Gender.None,
                 Language = ClientLanguage.English,
             }));
     }

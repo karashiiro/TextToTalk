@@ -255,6 +255,7 @@ public class AzureBackendUI
                     TextTemplate = "Hello from Azure Cognitive Services, this is a test message",
                     Race = "Hyur",
                     BodyType = GameEnums.BodyType.Adult,
+                    Gender = GameEnums.Gender.None,
                     ChatType = XivChatType.Say,
                     Language = ClientLanguage.English,
                 };

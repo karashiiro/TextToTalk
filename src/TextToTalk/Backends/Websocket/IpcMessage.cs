@@ -36,6 +36,12 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public string? BodyType { get; init; }
 
     /// <summary>
+    /// The speaker's gender, which can be one of the following:
+    /// "None", "Male", "Female".
+    /// </summary>
+    public string? Gender { get; init; }
+
+    /// <summary>
     /// The message parameter - the spoken text for speech requests, and an empty string for cancellations.
     /// </summary>
     public string Payload { get; init; } = "";
