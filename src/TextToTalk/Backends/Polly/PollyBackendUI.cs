@@ -205,6 +205,7 @@ public class PollyBackendUI
                     TextTemplate = "Hello from Amazon Polly, this is a test message",
                     Race = "Hyur",
                     BodyType = GameEnums.BodyType.Adult,
+                    Gender = GameEnums.Gender.None,
                     ChatType = XivChatType.Say,
                     Language = ClientLanguage.English,
                 };

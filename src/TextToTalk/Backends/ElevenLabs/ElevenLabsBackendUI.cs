@@ -290,6 +290,7 @@ public class ElevenLabsBackendUI
                     TextTemplate = "Hello from ElevenLabs, this is a test message",
                     Race = "Hyur",
                     BodyType = GameEnums.BodyType.Adult,
+                    Gender = GameEnums.Gender.None,
                     ChatType = XivChatType.Say,
                     Language = ClientLanguage.English,
                 };

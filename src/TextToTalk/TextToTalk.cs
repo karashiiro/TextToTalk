@@ -303,7 +303,7 @@ namespace TextToTalk
             return false;
         }
 
-        private void Say(GameObject? speaker, SeString speakerName, XivChatType? chatType, string textValue,
+        private unsafe void Say(GameObject? speaker, SeString speakerName, XivChatType? chatType, string textValue,
             TextSource source)
         {
             // Check if this speaker should be skipped
@@ -371,6 +371,13 @@ namespace TextToTalk
             // Get the speaker's age if it exists.
             var bodyType = GetSpeakerBodyType(speaker);
 
+            // Get the speaker's gender if it exists.
+            var gender = Gender.None;
+            if(TryGetCharacter(speaker, out var charaStruct))
+            {
+                gender = (Gender)charaStruct->Sex;
+            }
+
             // Get the speaker's voice preset
             var preset = GetVoicePreset(speaker, cleanSpeakerName);
             if (preset is null)
@@ -393,6 +400,7 @@ namespace TextToTalk
                 NpcId = npcId,
                 Race = race,
                 BodyType = bodyType,
+                Gender = gender,
                 StuttersRemoved = this.config.RemoveStutterEnabled,
             });
         }
@@ -411,7 +419,6 @@ namespace TextToTalk
 
         private unsafe string GetSpeakerRace(GameObject? speaker)
         {
-            var race = this.data.GetExcelSheet<Race>();
             if (!TryGetCharacter(speaker, out var charaStruct))
             {
                 return "Unknown";
@@ -419,6 +426,7 @@ namespace TextToTalk
 
             var speakerRace = charaStruct->DrawData.CustomizeData.Race;
 
+            var race = this.data.GetExcelSheet<Race>();
             if (!race.TryGetRow(speakerRace, out var row))
             {
                 return "Unknown";

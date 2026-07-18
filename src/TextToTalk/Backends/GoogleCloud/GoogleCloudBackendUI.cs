@@ -146,6 +146,7 @@ public class GoogleCloudBackendUI
                     TextTemplate = "Hello from Google Cloud, this is a test message",
                     Race = "Hyur",
                     BodyType = GameEnums.BodyType.Adult,
+                    Gender = GameEnums.Gender.None,
                     ChatType = XivChatType.Say,
                     Language = ClientLanguage.English,
                 };
