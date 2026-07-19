@@ -54,7 +54,7 @@ namespace TextToTalk
         private const bool InitiallyVisible = false;
 #endif
 
-        private readonly IDalamudPluginInterface pluginInterface;
+private readonly IDalamudPluginInterface pluginInterface;
         private readonly MainCommandModule commandModule;
         private readonly DebugCommandModule debugCommandModule;
         private readonly IKeyState keys;
@@ -62,6 +62,7 @@ namespace TextToTalk
         private readonly IFramework framework;
         private readonly IClientState clientState;
         private readonly IObjectTable objects;
+        private readonly IGameConfig gameConfig;
 
         private readonly PluginConfiguration config;
         private readonly AddonTalkManager addonTalkManager;
@@ -108,7 +109,8 @@ namespace TextToTalk
             ISigScanner sigScanner,
             IGameInteropProvider gameInterop,
             INotificationManager notificationManager,
-            IPluginLog pluginLog)
+            IPluginLog pluginLog,
+            IGameConfig gameConfig)
         {
             DetailedLog.SetLogger(pluginLog);
 
@@ -119,6 +121,7 @@ namespace TextToTalk
             this.chat = chat;
             this.framework = framework;
             this.data = data;
+            this.gameConfig = gameConfig;
 
             CreateDatabasePath();
             CreateEventLogDatabase();
@@ -386,7 +389,7 @@ namespace TextToTalk
                 return;
             }
 
-            // Say the thing
+// Say the thing
             BackendSay(new SayRequest
             {
                 Source = source,
@@ -402,6 +405,7 @@ namespace TextToTalk
                 BodyType = bodyType,
                 Gender = gender,
                 StuttersRemoved = this.config.RemoveStutterEnabled,
+                Volume = SoundSettingsUtils.GetEffectiveVoiceVolume(this.gameConfig),
             });
         }
 

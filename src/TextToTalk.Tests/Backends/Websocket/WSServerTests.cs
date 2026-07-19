@@ -131,6 +131,55 @@ public class WSServerTests
         await Assert.ThrowsAsync<ArgumentException>(() => RunStandardBroadcastTest(IPAddress.IPv6Any, TextSource.Chat));
     }
 
+    [Fact]
+    public async Task Broadcast_SendsVolumeInMessage()
+    {
+        // Set up the server
+        var configProvider = Mock.Of<IWebsocketConfigProvider>();
+        using var server = new WSServer(configProvider, 0);
+        server.Start();
+
+        // Set up the client
+        using var client = CreateClient(server);
+
+        // Filter for say messages only
+        using var list = OnIpcMessage(client)
+            .Where(m => m?.Type == IpcMessageType.Say.ToString())
+            .Select(m => m!)
+            .Take(1)
+            .ToLiveList();
+
+        // Send the message with a specific volume
+        var preset = new VoicePreset
+        {
+            Id = 0,
+            EnabledBackend = TTSBackend.Websocket,
+            Name = "Some Body",
+        };
+
+        server.Broadcast(new SayRequest
+        {
+            Source = TextSource.Chat,
+            Voice = preset,
+            Speaker = "Speaker",
+            Text = "Hello, world!",
+            TextTemplate = "Hello, world!",
+            Race = "Hyur",
+            BodyType = GameEnums.BodyType.Adult,
+            Gender = GameEnums.Gender.None,
+            ChatType = XivChatType.Say,
+            Language = ClientLanguage.English,
+            Volume = 0.75f,
+        });
+
+        // Wait a bit
+        await Task.Delay(100);
+
+        // Assert that the volume was included in the message
+        Assert.True(list.IsCompleted);
+        Assert.Equal(0.75f, list[0].Volume);
+    }
+
     private static async Task RunStandardBroadcastTest(IPAddress? address, TextSource source)
     {
         // Set up the server
