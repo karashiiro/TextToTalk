@@ -81,13 +81,18 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     /// </summary>
     public string? Language { get; init; }
 
+    /// <summary>
+    /// The current game sound level (master * voice, 0-1). 0 when muted.
+    /// </summary>
+    public float Volume { get; init; }
+
     public bool Equals(IpcMessage? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
         return Speaker == other.Speaker && Type == other.Type && Payload == other.Payload &&
                Equals(Voice, other.Voice) && StuttersRemoved == other.StuttersRemoved && Source == other.Source &&
-               NpcId == other.NpcId && ChatType == other.ChatType;
+               NpcId == other.NpcId && ChatType == other.ChatType && Volume.Equals(other.Volume);
     }
 
     public override bool Equals(object? obj)
@@ -99,6 +104,8 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source, NpcId, ChatType);
+        return HashCode.Combine(
+            HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source, NpcId, ChatType),
+            Volume);
     }
 }

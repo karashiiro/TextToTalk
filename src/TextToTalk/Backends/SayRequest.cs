@@ -82,6 +82,11 @@ public record SayRequest
     public required ClientLanguage Language { get; init; }
 
     /// <summary>
+    /// The current game sound level (master * voice, 0-1), to be included in IPC messages.
+    /// </summary>
+    public float Volume { get; init; }
+
+    /// <summary>
     /// The intended IPC message type for this object, only to be used for object mapping.
     /// </summary>
     public IpcMessageType MessageType => IpcMessageType.Say;
