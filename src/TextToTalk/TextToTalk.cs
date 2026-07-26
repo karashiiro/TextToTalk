@@ -28,6 +28,7 @@ using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
+using TextToTalk.Backends.FishAudio;
 using TextToTalk.CommandModules;
 using TextToTalk.Data.Services;
 using TextToTalk.Events;

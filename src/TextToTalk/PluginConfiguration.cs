@@ -12,6 +12,7 @@ using TextToTalk.Backends;
 using TextToTalk.Backends.Megaphone;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Websocket;
+using TextToTalk.Backends.FishAudio;
 using TextToTalk.Data.Services;
 using TextToTalk.Middleware;
 using TextToTalk.Migrations;

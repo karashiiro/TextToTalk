@@ -15,6 +15,7 @@ namespace TextToTalk.Backends
         GoogleCloud,
         Kokoro,
         Megaphone,
+        FishAudio,
     }
 
     public static class TTSBackendExtensions
@@ -34,6 +35,7 @@ namespace TextToTalk.Backends
                 TTSBackend.Kokoro when config != null && KokoroBackend.IsModelFileDownloaded(config) => "Kokoro",
                 TTSBackend.Kokoro => "Kokoro (169MB download required)",
                 TTSBackend.Megaphone => "Megaphone",
+                TTSBackend.FishAudio => "Fish Audio",
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }
@@ -45,11 +47,12 @@ namespace TextToTalk.Backends
             TTSBackend.Websocket => 2,
             TTSBackend.AmazonPolly => 3,
             TTSBackend.Azure => 4,
-            TTSBackend.ElevenLabs => 5,
-            TTSBackend.OpenAi => 6,
-            TTSBackend.GoogleCloud => 7,
-            TTSBackend.Kokoro => 8,
-            TTSBackend.Uberduck => 9,
+            TTSBackend.GoogleCloud => 5,
+            TTSBackend.ElevenLabs => 6,
+            TTSBackend.OpenAi => 7,
+            TTSBackend.FishAudio => 8,
+            TTSBackend.Kokoro => 9,
+            TTSBackend.Uberduck => 10,
             _ => int.MaxValue,
         };
 
@@ -70,6 +73,7 @@ namespace TextToTalk.Backends
                 TTSBackend.GoogleCloud => false,
                 TTSBackend.Kokoro => false,
                 TTSBackend.Megaphone => false,
+                TTSBackend.FishAudio => false,
                 _ => throw new ArgumentOutOfRangeException(nameof(backend)),
             };
         }

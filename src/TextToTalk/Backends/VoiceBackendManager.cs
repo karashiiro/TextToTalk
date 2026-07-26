@@ -14,6 +14,7 @@ using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
+using TextToTalk.Backends.FishAudio;
 using TextToTalk.Services;
 
 namespace TextToTalk.Backends
@@ -138,6 +139,7 @@ namespace TextToTalk.Backends
                 TTSBackend.GoogleCloud => new GoogleCloudBackend(this.config),
                 TTSBackend.Kokoro => new KokoroBackend(this.config),
                 TTSBackend.Megaphone => new MegaphoneBackend(this.config, this.notificationService),
+                TTSBackend.FishAudio => new FishAudioBackend(this.config, this.http, this.notificationService),
                 _ => throw new ArgumentOutOfRangeException(nameof(backendKind)),
             };
         }

@@ -14,6 +14,7 @@ using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
+using TextToTalk.Backends.FishAudio;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
@@ -277,6 +278,19 @@ public class VoicePresetConfiguration
                 Name = GetNullableValue<string?>(corrupted, "Name"),
                 InternalName = GetNullableValue<string?>(corrupted, "InternalName"),
                 EnabledBackend = TTSBackend.Kokoro
+            },
+            TTSBackend.FishAudio => new FishAudioVoicePreset
+            {
+                Id = Convert.ToInt32(GetNullableValue<long?>(corrupted, "Id")),
+                Name = GetNullableValue<string?>(corrupted, "Name"),
+                PlaybackRate = Convert.ToInt32(GetNullableValue<long?>(corrupted, "PlaybackRate")),
+                Volume = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Volume")),
+                VoiceId = GetNullableValue<string?>(corrupted, "VoiceId"),
+                Temperature = Convert.ToSingle(GetNullableValue<double?>(corrupted, "Temperature")),
+                TopP = Convert.ToSingle(GetNullableValue<double?>(corrupted, "TopP")),
+                ModelId = GetNullableValue<string?>(corrupted, "ModelId"),
+                Latency = GetNullableValue<string?>(corrupted, "Latency"),
+                EnabledBackend = TTSBackend.FishAudio,
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),
         };
