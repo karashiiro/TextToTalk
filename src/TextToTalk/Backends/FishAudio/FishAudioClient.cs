@@ -27,7 +27,7 @@ public class FishAudioClient
     }
 
     public async Task Say(string? voiceId, int playbackRate, float volume, float temperature, float topP,
-        string? model, string? latency, TextSource source, string text)
+        string? model, string? latency, TextSource source, string text, string? style)
     {
         if (!IsAuthorizationSet())
         {
@@ -37,7 +37,7 @@ public class FishAudioClient
         var speed = playbackRate / 100.0f;
         var args = new FishAudioTtsRequest
         {
-            Text = text,
+            Text = InjectStyle(text, style, model),
             ReferenceId = voiceId,
             Format = "mp3",
             Latency = latency ?? "normal",
@@ -137,6 +137,15 @@ public class FishAudioClient
     private void AddAuthorization(HttpRequestMessage req)
     {
         req.Headers.Add("Authorization", $"Bearer {ApiKey}");
+    }
+
+    private static string InjectStyle(string text, string? style, string? model)
+    {
+        if (string.IsNullOrWhiteSpace(style))
+            return text;
+
+        var isS1 = model == "s1";
+        return isS1 ? $"({style}) {text}" : $"[{style}] {text}";
     }
 
     private bool IsAuthorizationSet()

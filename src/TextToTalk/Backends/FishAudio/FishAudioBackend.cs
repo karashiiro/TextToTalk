@@ -39,7 +39,7 @@ public class FishAudioBackend : VoiceBackend
             {
                 await this.uiModel.FishAudio.Say(fishAudioVoicePreset.VoiceId, fishAudioVoicePreset.PlaybackRate,
                     fishAudioVoicePreset.Volume, fishAudioVoicePreset.Temperature, fishAudioVoicePreset.TopP,
-                    fishAudioVoicePreset.ModelId, fishAudioVoicePreset.Latency, request.Source, request.Text);
+                    fishAudioVoicePreset.ModelId, fishAudioVoicePreset.Latency, request.Source, request.Text, !string.IsNullOrWhiteSpace(request.Style) ? request.Style : (fishAudioVoicePreset.Style ?? string.Empty));
                 this.uiModel.UpdateApiCreditInfo();
             }
             catch (FishAudioUnauthorizedException e)

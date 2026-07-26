@@ -203,6 +203,27 @@ public class FishAudioBackendUI
             this.config.Save();
         }
 
+        var voiceStyles = config.CustomVoiceStyles.ToList();
+        if (voiceStyles.Count == 0)
+        {
+            ImGui.BeginDisabled();
+            if (ImGui.BeginCombo("Style", "No styles have been configured"))
+            {
+                ImGui.EndCombo();
+            }
+            ImGui.EndDisabled();
+        }
+        else
+        {
+            voiceStyles.Insert(0, "");
+            var styleIndex = voiceStyles.IndexOf(currentVoicePreset.Style ?? "");
+            if (ImGui.Combo($"Voice Style##{MemoizedId.Create()}", ref styleIndex, voiceStyles, voiceStyles.Count))
+            {
+                currentVoicePreset.Style = voiceStyles[styleIndex];
+                this.config.Save();
+            }
+        }
+
         if (ImGui.Button($"Test##{MemoizedId.Create()}"))
         {
             if (currentVoicePreset is not null)
@@ -223,6 +244,16 @@ public class FishAudioBackendUI
                 backend.CancelSay(TextSource.Chat);
                 backend.Say(request);
             }
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button($"Configure Voice Styles##{MemoizedId.Create()}"))
+        {
+            VoiceStyles.Instance?.ToggleStyle();
+        }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Use emotion tags like \"happy\" or \"whispering\" to direct your voices");
         }
 
         {

@@ -18,6 +18,8 @@ public class FishAudioVoicePreset : VoicePreset
 
     public string? Latency { get; set; }
 
+    public string? Style { get; set; }
+
     public override bool TrySetDefaultValues()
     {
         Volume = 1.0f;
@@ -27,6 +29,7 @@ public class FishAudioVoicePreset : VoicePreset
         TopP = 0.7f;
         ModelId = "s2.1-pro-free";
         Latency = "normal";
+        Style = string.Empty;
         EnabledBackend = TTSBackend.FishAudio;
         return true;
     }

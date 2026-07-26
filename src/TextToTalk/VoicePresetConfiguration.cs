@@ -290,6 +290,7 @@ public class VoicePresetConfiguration
                 TopP = Convert.ToSingle(GetNullableValue<double?>(corrupted, "TopP")),
                 ModelId = GetNullableValue<string?>(corrupted, "ModelId"),
                 Latency = GetNullableValue<string?>(corrupted, "Latency"),
+                Style = GetNullableValue<string?>(corrupted, "Style"),
                 EnabledBackend = TTSBackend.FishAudio,
             },
             _ => throw new ArgumentOutOfRangeException($"{backendCorrupt}"),

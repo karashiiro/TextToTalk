@@ -16,6 +16,7 @@ using TextToTalk.Backends;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
 using TextToTalk.Backends.OpenAI;
+using TextToTalk.Backends.FishAudio;
 using TextToTalk.Data.Model;
 using TextToTalk.GameEnums;
 using TextToTalk.Services;
@@ -125,6 +126,7 @@ namespace TextToTalk.UI.Windows
                 AzureBackend azure => new AzureVoiceStyles(azure, config, this),
                 ElevenLabsBackend eleven => new ElevenLabsVoiceStyles(eleven, config),
                 OpenAiBackend openai => new OpenAIVoiceStyles(openai, config),
+                FishAudioBackend fish => new FishAudioVoiceStyles(fish, config),
                 _ => null
             };
 
