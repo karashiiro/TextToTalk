@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using TextToTalk.Backends.Azure;
 using TextToTalk.Backends.ElevenLabs;
+using TextToTalk.Backends.FishAudio;
 using TextToTalk.Backends.GoogleCloud;
 using TextToTalk.Backends.Kokoro;
 using TextToTalk.Backends.Megaphone;
@@ -14,7 +15,7 @@ using TextToTalk.Backends.Polly;
 using TextToTalk.Backends.System;
 using TextToTalk.Backends.Uberduck;
 using TextToTalk.Backends.Websocket;
-using TextToTalk.Backends.FishAudio;
+using TextToTalk.Events;
 using TextToTalk.Services;
 
 namespace TextToTalk.Backends
@@ -69,6 +70,11 @@ namespace TextToTalk.Backends
         public override TextSource GetCurrentlySpokenTextSource()
         {
             return Backend?.GetCurrentlySpokenTextSource() ?? TextSource.None;
+        }
+
+        public override void OnNpcDialogueSessionEvent(NpcDialogueSessionEvent ev)
+        {
+            Backend?.OnNpcDialogueSessionEvent(ev);
         }
 
         public void SetBackend(TTSBackend backendKind)

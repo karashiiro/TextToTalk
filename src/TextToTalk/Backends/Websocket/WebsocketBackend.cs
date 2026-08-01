@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using Dalamud.Interface.Utility.Raii;
+using TextToTalk.Events;
 using TextToTalk.Services;
 using TextToTalk.UI;
 
@@ -82,6 +83,29 @@ public class WebsocketBackend : VoiceBackend
     public override void CancelSay(TextSource source)
     {
         this.wsServer.Cancel(source);
+    }
+
+    public override void OnNpcDialogueSessionEvent(NpcDialogueSessionEvent ev)
+    {
+        try
+        {
+            var ipcMsg = MapEventToIpcMessage(ev);
+            this.wsServer.Broadcast(ipcMsg);
+        }
+        catch (Exception e)
+        {
+            DetailedLog.Error(e, "Failed to send NPC dialogue session event over Websocket.");
+        }
+    }
+
+    private static IpcMessage MapEventToIpcMessage(NpcDialogueSessionEvent ev)
+    {
+        return new IpcMessage(IpcMessageType.Event, ev.Source)
+        {
+            EventType = ev.EventType,
+            EventSessionId = ev.SessionId,
+            EventReason = ev.Reason,
+        };
     }
 
     public override void DrawSettings(IConfigUIDelegates helpers)
