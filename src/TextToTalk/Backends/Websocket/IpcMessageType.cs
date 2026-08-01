@@ -4,4 +4,5 @@ public enum IpcMessageType
 {
     Say,
     Cancel,
+    Event,
 }

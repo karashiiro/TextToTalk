@@ -1,6 +1,7 @@
 ﻿using System;
 using Dalamud;
 using Dalamud.Game.Text;
+using TextToTalk.Events;
 using TextToTalk.GameEnums;
 
 namespace TextToTalk.Backends.Websocket;
@@ -86,13 +87,29 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     /// </summary>
     public float Volume { get; init; }
 
+    /// <summary>
+    /// The NPC dialogue session event type, for event messages.
+    /// </summary>
+    public IpcEventType? EventType { get; init; }
+
+    /// <summary>
+    /// The unique session ID, for event messages.
+    /// </summary>
+    public Guid? EventSessionId { get; init; }
+
+    /// <summary>
+    /// The reason for the session event, for event messages.
+    /// </summary>
+    public DialogueEventReason? EventReason { get; init; }
+
     public bool Equals(IpcMessage? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
         return Speaker == other.Speaker && Type == other.Type && Payload == other.Payload &&
                Equals(Voice, other.Voice) && StuttersRemoved == other.StuttersRemoved && Source == other.Source &&
-               NpcId == other.NpcId && ChatType == other.ChatType && Volume.Equals(other.Volume);
+               NpcId == other.NpcId && ChatType == other.ChatType && Volume.Equals(other.Volume) &&
+               EventType == other.EventType && EventSessionId == other.EventSessionId && EventReason == other.EventReason;
     }
 
     public override bool Equals(object? obj)
@@ -106,6 +123,6 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     {
         return HashCode.Combine(
             HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source, NpcId, ChatType),
-            Volume);
+            HashCode.Combine(EventType, EventSessionId, EventReason, Volume));
     }
 }

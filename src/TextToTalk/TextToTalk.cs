@@ -78,6 +78,7 @@ private readonly IDalamudPluginInterface pluginInterface;
         private readonly ILiteDatabase database;
         private readonly PlayerService playerService;
         private readonly NpcService npcService;
+        private readonly DialogueSessionService dialogueSessionService;
         private readonly WindowSystem windows;
         private readonly IDataManager data;
         private readonly NotificationService notificationService;
@@ -139,6 +140,8 @@ private readonly IDalamudPluginInterface pluginInterface;
 
             this.addonTalkManager = new AddonTalkManager(framework, clientState, condition, gui);
             this.addonBattleTalkManager = new AddonBattleTalkManager(framework, clientState, condition, gui);
+            var addonSelectStringManager = new AddonSelectStringManager(framework, clientState, condition, gui);
+            var addonSelectIconStringManager = new AddonSelectIconStringManager(framework, clientState, condition, gui);
             this.configUIDelegates = new ConfigUIDelegates();
             
 
@@ -185,6 +188,10 @@ private readonly IDalamudPluginInterface pluginInterface;
             this.soundHandler =
                 new SoundHandler(this.addonTalkHandler, this.addonBattleTalkHandler, sigScanner, gameInterop);
 
+            this.dialogueSessionService = new DialogueSessionService(framework, clientState, condition,
+                addonSelectStringManager, addonSelectIconStringManager,
+                this.addonTalkManager, this.addonBattleTalkManager);
+
             this.rateLimiter = new ConfiguredRateLimiter(this.config);
 
             this.ungenderedOverrides = new UngenderedOverrideManager();
@@ -199,10 +206,13 @@ private readonly IDalamudPluginInterface pluginInterface;
 
             var handleTextCancel = HandleTextCancel();
             var handleTextEmit = HandleTextEmit();
-
+            var handleDialogueSessions = this.dialogueSessionService.OnEvent
+                .Subscribe(ev => FunctionalUtils.RunSafely(
+                    () => this.backendManager.OnNpcDialogueSessionEvent(ev),
+                    ex => DetailedLog.Error(ex, "Failed to handle dialogue session event")));
 
             this.unsubscribeAll = Disposable.Combine(handleTextCancel, handleTextEmit, handleUnlockerResult,
-                handlePresetOpenRequested);
+                handlePresetOpenRequested, handleDialogueSessions);
         }
 
 
@@ -245,7 +255,11 @@ private readonly IDalamudPluginInterface pluginInterface;
                 .SubscribeOnThreadPool()
                 .Subscribe(
                     ev => FunctionalUtils.RunSafely(
-                        () => Say(ev.Speaker, ev.SpeakerName, ev.GetChatType(), ev.Text.TextValue, ev.Source),
+                        () =>
+                        {
+                            Say(ev.Speaker, ev.SpeakerName, ev.GetChatType(), ev.Text.TextValue, ev.Source);
+                            this.dialogueSessionService.NotifyDialogue(ev.Source);
+                        },
                         ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
                     ex => DetailedLog.Error(ex, "Text emit event sequence has faulted"),
                     _ => { });
@@ -597,6 +611,8 @@ private readonly IDalamudPluginInterface pluginInterface;
             this.commandModule.Dispose();
 
             this.soundHandler.Dispose();
+
+            this.dialogueSessionService.Dispose();
 
             this.configurationWindow.Dispose();
 

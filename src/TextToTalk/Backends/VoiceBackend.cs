@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using TextToTalk.Events;
 
 namespace TextToTalk.Backends
 {
@@ -24,6 +25,10 @@ namespace TextToTalk.Backends
         }
 
         public virtual void Stop()
+        {
+        }
+
+        public virtual void OnNpcDialogueSessionEvent(NpcDialogueSessionEvent ev)
         {
         }
 

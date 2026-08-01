@@ -67,6 +67,16 @@ public class WSServer : IDisposable
         }
     }
 
+    public void Broadcast(IpcMessage message)
+    {
+        if (!Active) throw new InvalidOperationException("Server is not active!");
+
+        foreach (var behavior in this.behaviors)
+        {
+            behavior.SendMessage(JsonConvert.SerializeObject(message));
+        }
+    }
+
     public void CancelAll() => Cancel(TextSource.None);
 
     public void Cancel(TextSource source)

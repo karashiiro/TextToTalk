@@ -4,7 +4,7 @@ using TextToTalk.Utils;
 
 namespace TextToTalk.Talk;
 
-public class AddonTalkManager : AddonManager
+public class AddonTalkManager : AddonManager, IAddonTalkManager
 {
     public AddonTalkManager(IFramework framework, IClientState clientState, ICondition condition, IGameGui gui) : base(
         framework, clientState, condition, gui, "Talk")

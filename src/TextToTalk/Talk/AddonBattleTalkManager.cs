@@ -3,7 +3,7 @@ using TextToTalk.Utils;
 
 namespace TextToTalk.Talk;
 
-public class AddonBattleTalkManager : AddonManager
+public class AddonBattleTalkManager : AddonManager, IAddonBattleTalkManager
 {
     public AddonBattleTalkManager(IFramework framework, IClientState clientState, ICondition condition, IGameGui gui) :
         base(framework, clientState, condition, gui, "_BattleTalk")
