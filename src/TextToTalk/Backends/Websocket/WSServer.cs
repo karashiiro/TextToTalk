@@ -58,13 +58,8 @@ public class WSServer : IDisposable
 
     public void Broadcast(SayRequest request)
     {
-        if (!Active) throw new InvalidOperationException("Server is not active!");
-
         var ipcMessage = this.mapper.MapSayRequest(request);
-        foreach (var behavior in this.behaviors)
-        {
-            behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
-        }
+        Broadcast(ipcMessage);
     }
 
     public void Broadcast(IpcMessage message)
@@ -81,13 +76,8 @@ public class WSServer : IDisposable
 
     public void Cancel(TextSource source)
     {
-        if (!Active) throw new InvalidOperationException("Server is not active!");
-
         var ipcMessage = new IpcMessage(IpcMessageType.Cancel, source);
-        foreach (var behavior in this.behaviors)
-        {
-            behavior.SendMessage(JsonConvert.SerializeObject(ipcMessage));
-        }
+        Broadcast(ipcMessage);
     }
 
     public void Start()
