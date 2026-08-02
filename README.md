@@ -17,14 +17,20 @@ Direct links to information will be added here eventually.
 
 ## Supported TTS providers
 * System (Windows)
+* Megaphone
+* Websocket
 * AWS Polly
 * Azure (Microsoft Cognitive Services)
+* Google Cloud
+* ElevenLabs
+* OpenAI
+* Fish Audio
+* Kokoro
 * Uberduck
-* Websocket
 
 ## WebSocket interfacing
 TextToTalk can optionally open a WebSocket server to serve messages over.
-There are currently two JSON-format messages that can be sent (see
+There are currently three JSON-format messages that can be sent (see
 [`IpcMessage`](https://github.com/karashiiro/TextToTalk/blob/main/src/TextToTalk/Backends/Websocket/IpcMessage.cs)):
 
 TTS prompt:
@@ -44,10 +50,18 @@ TTS prompt:
   "StuttersRemoved": false,
   // or null, for non-NPCs
   "NpcId": 1000115,
+  // "Hyur", "Elezen", "Lalafell", "Miqo'te", "Roegadyn", "Au Ra", "Hrothgar", "Viera", or null
+  "Race": null,
+  // "Unknown", "Youth", "Adult", "Elder", or null
+  "BodyType": null,
+  // "None", "Male", "Female", or null
+  "Gender": null,
   // Refer to https://dalamud.dev/api/Dalamud.Game.Text/Enums/XivChatType
   "ChatType": 10,
   // Refer to https://dalamud.dev/api/Dalamud/Enums/ClientLanguage
-  "Language": "English"
+  "Language": "English",
+  // Game voice volume level (0.0-1.0)
+  "Volume": 1.0
 }
 ```
 
@@ -67,6 +81,25 @@ TTS cancel:
   "Language": null
 }
 ```
+
+### Dialogue event:
+
+```json5
+{
+  "Type": "Event",
+  // or "Chat", "AddonTalk", or "AddonBattleTalk"
+  "Source": "AddonTalk",
+  // "NpcDialogueSessionStarted" or "NpcDialogueSessionEnded"
+  "EventType": "NpcDialogueSessionStarted",
+  // Unique identifier for the session
+  "EventSessionId": "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+  // Reason for the event: "TextReceived", "AddonShown", "DialogueContextEnded",
+  // "TerritoryChanged", "LoggedOut", or "PluginStopped"
+  "EventReason": "TextReceived"
+}
+```
+
+A dialogue session starts when NPC or battle dialogue text arrives (or the Talk/BattleTalk addon becomes visible) and ends when all dialogue signals are absent for 3 consecutive frames, or immediately on territory change/logout/plugin shutdown.
 
 ## Screenshots
 ![image](https://user-images.githubusercontent.com/49822414/126075774-a97d7a11-98c6-40e4-9937-711a8da96926.png)
