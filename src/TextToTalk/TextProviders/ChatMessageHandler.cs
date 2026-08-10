@@ -4,6 +4,7 @@ using System.ComponentModel.Design;
 using System.Drawing.Text;
 using System.Reflection.Metadata.Ecma335;
 using Dalamud.Game.Chat;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
@@ -122,6 +123,14 @@ public class ChatMessageHandler : IChatMessageHandler
         // Find the game object this speaker represents
         var speaker = ObjectTableUtils.GetGameObjectByName(this.objects, sender);
 
+        // Player links contain the speaker's world even when the character is not
+        // present in the object table, such as cross-world linkshell messages.
+        var speakerWorld = TalkUtils.GetPlayerWorldName(sender);
+        if (speakerWorld is null && speaker is IPlayerCharacter player)
+        {
+            speakerWorld = player.HomeWorld.Value.Name.ToString();
+        }
+
         if (!this.filters.OnlyMessagesFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
 
         if (!this.filters.ShouldSayFromYou(speaker?.Name.TextValue ?? sender.TextValue)) return;
@@ -133,7 +142,8 @@ public class ChatMessageHandler : IChatMessageHandler
             GetCleanSpeakerName(speaker, sender),
             textValue,
             speaker,
-            type));
+            type,
+            speakerWorld));
     }
 
     private static SeString GetCleanSpeakerName(IGameObject? speaker, SeString sender)

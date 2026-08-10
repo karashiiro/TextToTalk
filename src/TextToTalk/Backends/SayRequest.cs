@@ -25,6 +25,11 @@ public record SayRequest
     public required string Speaker { get; init; }
 
     /// <summary>
+    /// The speaker's home world name, when available.
+    /// </summary>
+    public string? SpeakerWorld { get; init; }
+
+    /// <summary>
     /// The speaker's data ID, in the case of NPCs. For most NPCs, their name can
     /// be retrieved from the ENpcResident table, if needed.
     /// </summary>

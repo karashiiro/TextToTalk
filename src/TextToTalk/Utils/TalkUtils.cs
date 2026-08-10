@@ -156,6 +156,16 @@ namespace TextToTalk.Utils
             return playerName.TextValue;
         }
 
+        public static string? GetPlayerWorldName(SeString playerName)
+        {
+            if (playerName.Payloads.FirstOrDefault(p => p is PlayerPayload) is PlayerPayload player)
+            {
+                return player.World.Value.Name.ToString();
+            }
+
+            return null;
+        }
+
         public static string? GetPartialName(string? name, FirstOrLastName part)
         {
             if (string.IsNullOrWhiteSpace(name))

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using TextToTalk.Utils;
 using Xunit;
 
@@ -128,6 +130,14 @@ public class TalkUtilsTests
         });
 
         Assert.Equal("This TOKEN3.", actual);
+    }
+
+    [Fact]
+    public void GetPlayerWorldName_WithoutPlayerPayload_ReturnsNull()
+    {
+        var actual = TalkUtils.GetPlayerWorldName(new SeStringBuilder().AddText("Speaker").Build());
+
+        Assert.Null(actual);
     }
 
     private static void TestRemoveStutters(string input, string expected)
