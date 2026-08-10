@@ -20,6 +20,11 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public string? Speaker { get; init; }
 
     /// <summary>
+    /// The speaker's home world name, when available.
+    /// </summary>
+    public string? SpeakerWorld { get; init; }
+
+    /// <summary>
     /// The speaker's data ID, in the case of NPCs. For most NPCs, their name can
     /// be retrieved from the ENpcResident table, if needed.
     /// </summary>
@@ -106,7 +111,7 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Speaker == other.Speaker && Type == other.Type && Payload == other.Payload &&
+        return Speaker == other.Speaker && SpeakerWorld == other.SpeakerWorld && Type == other.Type && Payload == other.Payload &&
                Equals(Voice, other.Voice) && StuttersRemoved == other.StuttersRemoved && Source == other.Source &&
                NpcId == other.NpcId && ChatType == other.ChatType && Volume.Equals(other.Volume) &&
                EventType == other.EventType && EventSessionId == other.EventSessionId && EventReason == other.EventReason;
@@ -122,7 +127,8 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public override int GetHashCode()
     {
         return HashCode.Combine(
-            HashCode.Combine(Speaker, Type, Payload, Voice, StuttersRemoved, Source, NpcId, ChatType),
+            HashCode.Combine(Speaker, SpeakerWorld, Type, Payload),
+            HashCode.Combine(Voice, StuttersRemoved, Source, NpcId, ChatType),
             HashCode.Combine(EventType, EventSessionId, EventReason, Volume));
     }
 }

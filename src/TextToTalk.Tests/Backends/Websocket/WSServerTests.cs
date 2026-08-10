@@ -212,6 +212,7 @@ public class WSServerTests
             Source = source,
             Voice = preset,
             Speaker = "Speaker",
+            SpeakerWorld = "Cactuar",
             Text = "Hello, world!",
             TextTemplate = "Hello, world!",
             Race = "Hyur",
@@ -232,6 +233,8 @@ public class WSServerTests
             {
                 Voice = preset,
                 Speaker = "Speaker",
+                SpeakerWorld = "Cactuar",
+                BodyType = "Adult",
                 Payload = "Hello, world!",
                 PayloadTemplate = "Hello, world!",
                 ChatType = (int)XivChatType.Say,
