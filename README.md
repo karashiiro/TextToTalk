@@ -44,10 +44,10 @@ TTS prompt:
   "Voice": {
     "Name": "Gender"
   },
-   "Speaker": "Firstname Lastname",
-   // Speaker's home world row ID and display name, or null when unavailable.
-   "SpeakerWorld": "Cactuar",
-   // or "AddonTalk", or "AddonBattleTalk"
+  "Speaker": "Firstname Lastname",
+  // Speaker's home world display name, or null when unavailable.
+  "SpeakerWorld": "Cactuar",
+  // or "AddonTalk", or "AddonBattleTalk"
   "Source": "Chat",
   "StuttersRemoved": false,
   // or null, for non-NPCs
