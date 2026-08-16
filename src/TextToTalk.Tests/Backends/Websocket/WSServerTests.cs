@@ -218,6 +218,7 @@ public class WSServerTests
             Race = "Hyur",
             BodyType = GameEnums.BodyType.Adult,
             Gender = GameEnums.Gender.None,
+            ModelCharaId = 1234,
             ChatType = XivChatType.Say,
             Language = ClientLanguage.English,
         });
@@ -234,6 +235,7 @@ public class WSServerTests
                 Voice = preset,
                 Speaker = "Speaker",
                 SpeakerWorld = "Cactuar",
+                ModelCharaId = 1234,
                 BodyType = "Adult",
                 Payload = "Hello, world!",
                 PayloadTemplate = "Hello, world!",

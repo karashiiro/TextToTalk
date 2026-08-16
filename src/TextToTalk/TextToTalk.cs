@@ -397,9 +397,14 @@ private readonly IDalamudPluginInterface pluginInterface;
 
             // Get the speaker's gender if it exists.
             var gender = Gender.None;
+            int? modelCharaId = null;
             if(TryGetCharacter(speaker, out var charaStruct))
             {
                 gender = (Gender)charaStruct->Sex;
+                if (npcId is not null)
+                {
+                    modelCharaId = charaStruct->ModelContainer.ModelCharaId;
+                }
             }
 
             // Get the speaker's voice preset
@@ -423,6 +428,7 @@ private readonly IDalamudPluginInterface pluginInterface;
                 ChatType = chatType,
                 Language = this.clientState.ClientLanguage,
                 NpcId = npcId,
+                ModelCharaId = modelCharaId,
                 Race = race,
                 BodyType = bodyType,
                 Gender = gender,
