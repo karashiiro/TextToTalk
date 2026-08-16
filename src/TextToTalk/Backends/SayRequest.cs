@@ -36,6 +36,11 @@ public record SayRequest
     public uint? NpcId { get; init; }
 
     /// <summary>
+    /// The speaker's ModelChara ID, in the case of NPCs.
+    /// </summary>
+    public int? ModelCharaId { get; init; }
+
+    /// <summary>
     /// The speaker's race in the Race table (e.g. "Hyur", "Elezen", etc.).
     /// </summary>
     public required string Race { get; init; }

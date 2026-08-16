@@ -54,6 +54,8 @@ TTS prompt:
   "NpcId": 1000115,
   // "Hyur", "Elezen", "Lalafell", "Miqo'te", "Roegadyn", "Au Ra", "Hrothgar", "Viera", or null
   "Race": null,
+  // The speaker's ModelChara ID, or null when unavailable/non-NPC.
+  "ModelCharaId": null,
   // "Unknown", "Youth", "Adult", "Elder", or null
   "BodyType": null,
   // "None", "Male", "Female", or null

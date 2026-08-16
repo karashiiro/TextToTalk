@@ -31,6 +31,11 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public long? NpcId { get; init; }
 
     /// <summary>
+    /// The speaker's ModelChara ID, in the case of NPCs.
+    /// </summary>
+    public int? ModelCharaId { get; init; }
+
+    /// <summary>
     /// The speaker's race in the Race table (e.g. "Hyur", "Elezen", etc.).
     /// </summary>
     public string? Race { get; init; }
@@ -113,7 +118,7 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
         if (ReferenceEquals(this, other)) return true;
         return Speaker == other.Speaker && SpeakerWorld == other.SpeakerWorld && Type == other.Type && Payload == other.Payload &&
                Equals(Voice, other.Voice) && StuttersRemoved == other.StuttersRemoved && Source == other.Source &&
-               NpcId == other.NpcId && ChatType == other.ChatType && Volume.Equals(other.Volume) &&
+               NpcId == other.NpcId && ModelCharaId == other.ModelCharaId && ChatType == other.ChatType && Volume.Equals(other.Volume) &&
                EventType == other.EventType && EventSessionId == other.EventSessionId && EventReason == other.EventReason;
     }
 
@@ -128,7 +133,7 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     {
         return HashCode.Combine(
             HashCode.Combine(Speaker, SpeakerWorld, Type, Payload),
-            HashCode.Combine(Voice, StuttersRemoved, Source, NpcId, ChatType),
+            HashCode.Combine(Voice, StuttersRemoved, Source, NpcId, ModelCharaId, ChatType),
             HashCode.Combine(EventType, EventSessionId, EventReason, Volume));
     }
 }
