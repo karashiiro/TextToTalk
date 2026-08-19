@@ -73,6 +73,7 @@ public class ChatMessageHandler : IChatMessageHandler
     {
         var (type, sender, message) = chatMessage;
         var textValue = message.TextValue;
+        var rawText = textValue;
 
 
         if (!this.config.SayPlayerWorldName)
@@ -143,7 +144,8 @@ public class ChatMessageHandler : IChatMessageHandler
             textValue,
             speaker,
             type,
-            speakerWorld));
+            speakerWorld,
+            rawText));
     }
 
     private static SeString GetCleanSpeakerName(IGameObject? speaker, SeString sender)

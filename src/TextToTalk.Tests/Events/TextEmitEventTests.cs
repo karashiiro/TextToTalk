@@ -20,4 +20,18 @@ public class TextEmitEventTests
         var e = new ChatTextEmitEvent("Somebody", "Something", null, XivChatType.Debug);
         Assert.False(e.IsEquivalent(null));
     }
+
+    [Fact]
+    public void RawPayload_PreservesExplicitRawText()
+    {
+        var e = new ChatTextEmitEvent(
+            "Somebody",
+            "Normalized text",
+            null,
+            XivChatType.Debug,
+            rawText: "Original text");
+
+        Assert.Equal("Original text", e.RawText);
+        Assert.Equal("Normalized text", e.Text.TextValue);
+    }
 }

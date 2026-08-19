@@ -84,6 +84,8 @@ public class AddonTalkHandler : IAddonTalkHandler
             return;
         }
 
+        var rawText = text;
+
         // Notify observers that the addon state was advanced
         OnAdvance.Invoke(new AddonTalkAdvanceEvent());
 
@@ -129,8 +131,8 @@ public class AddonTalkHandler : IAddonTalkHandler
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
         OnTextEmit.Invoke(speakerObj != null
-            ? new AddonTalkEmitEvent(speakerObj.Name, text, speakerObj)
-            : new AddonTalkEmitEvent(state.Speaker ?? "", text, null));
+            ? new AddonTalkEmitEvent(speakerObj.Name, text, speakerObj, rawText)
+            : new AddonTalkEmitEvent(state.Speaker ?? "", text, null, rawText));
     }
 
     private AddonTalkState GetTalkAddonState(AddonPollSource pollSource)

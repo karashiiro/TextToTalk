@@ -37,6 +37,9 @@ TTS prompt:
 ```json5
 {
   "Type": "Say",
+  // Expanded SeString text before TextToTalk normalization or text replacement.
+  "RawPayload": "F-F-Firstname L-Lastname says s-something",
+  // Expanded SeString text after TextToTalk normalization and text replacement.
   "Payload": "Firstname Lastname says something",
   // Will replace the logged-in player's name with {{FULL_NAME}}, {{FIRST_NAME}}, or {{LAST_NAME}} as appropriate.
   // Does not currently apply to players other than the logged-in player.

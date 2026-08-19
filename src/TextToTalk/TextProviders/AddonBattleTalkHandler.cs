@@ -80,6 +80,8 @@ public class AddonBattleTalkHandler : IAddonBattleTalkHandler
             return;
         }
 
+        var rawText = text;
+
         text = TalkUtils.NormalizePunctuation(text);
 
         DetailedLog.Debug($"AddonBattleTalk ({pollSource}): [{speaker}] \"{text}\"");
@@ -122,8 +124,8 @@ public class AddonBattleTalkHandler : IAddonBattleTalkHandler
         if (!this.filters.ShouldSayFromYou(speaker)) return;
 
         OnTextEmit.Invoke(speakerObj != null
-            ? new AddonBattleTalkEmitEvent(speakerObj.Name, text, speakerObj)
-            : new AddonBattleTalkEmitEvent(state.Speaker ?? "", text, null));
+            ? new AddonBattleTalkEmitEvent(speakerObj.Name, text, speakerObj, rawText)
+            : new AddonBattleTalkEmitEvent(state.Speaker ?? "", text, null, rawText));
     }
 
     private AddonBattleTalkState GetTalkAddonState(AddonPollSource pollSource)

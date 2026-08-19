@@ -53,6 +53,11 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public string? Gender { get; init; }
 
     /// <summary>
+    /// The expanded text from the game before TextToTalk normalization or text replacement.
+    /// </summary>
+    public string RawPayload { get; init; } = "";
+
+    /// <summary>
     /// The message parameter - the spoken text for speech requests, and an empty string for cancellations.
     /// </summary>
     public string Payload { get; init; } = "";
@@ -117,6 +122,7 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
         return Speaker == other.Speaker && SpeakerWorld == other.SpeakerWorld && Type == other.Type && Payload == other.Payload &&
+               RawPayload == other.RawPayload &&
                Equals(Voice, other.Voice) && StuttersRemoved == other.StuttersRemoved && Source == other.Source &&
                NpcId == other.NpcId && ModelCharaId == other.ModelCharaId && ChatType == other.ChatType && Volume.Equals(other.Volume) &&
                EventType == other.EventType && EventSessionId == other.EventSessionId && EventReason == other.EventReason;
@@ -132,7 +138,7 @@ public class IpcMessage(IpcMessageType type, TextSource source) : IEquatable<Ipc
     public override int GetHashCode()
     {
         return HashCode.Combine(
-            HashCode.Combine(Speaker, SpeakerWorld, Type, Payload),
+            HashCode.Combine(Speaker, SpeakerWorld, Type, Payload, RawPayload),
             HashCode.Combine(Voice, StuttersRemoved, Source, NpcId, ModelCharaId, ChatType),
             HashCode.Combine(EventType, EventSessionId, EventReason, Volume));
     }
