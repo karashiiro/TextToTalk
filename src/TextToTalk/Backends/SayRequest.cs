@@ -57,6 +57,11 @@ public record SayRequest
     public required Gender Gender { get; init; }
 
     /// <summary>
+    /// The expanded text from the game before TextToTalk normalization or text replacement.
+    /// </summary>
+    public string RawText { get; init; } = "";
+
+    /// <summary>
     /// The spoken text.
     /// </summary>
     public required string Text { get; init; }

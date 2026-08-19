@@ -9,8 +9,9 @@ public class ChatTextEmitEvent(
     SeString text,
     IGameObject? obj,
     XivChatType chatType,
-    string? speakerWorld = null)
-    : TextEmitEvent(TextSource.Chat, speaker, text, obj)
+    string? speakerWorld = null,
+    string? rawText = null)
+    : TextEmitEvent(TextSource.Chat, speaker, text, obj, rawText)
 {
     /// <summary>
     /// The chat type of the message.

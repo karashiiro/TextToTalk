@@ -3,7 +3,12 @@ using Dalamud.Game.Text.SeStringHandling;
 
 namespace TextToTalk.Events;
 
-public abstract class TextEmitEvent(TextSource source, SeString speaker, SeString text, IGameObject? speakerObj)
+public abstract class TextEmitEvent(
+    TextSource source,
+    SeString speaker,
+    SeString text,
+    IGameObject? speakerObj,
+    string? rawText = null)
     : SourcedTextEvent(source)
 {
     /// <summary>
@@ -11,6 +16,11 @@ public abstract class TextEmitEvent(TextSource source, SeString speaker, SeStrin
     /// portable comparison.
     /// </summary>
     public SeString SpeakerName { get; } = speaker;
+
+    /// <summary>
+    /// The expanded text from the game before TextToTalk normalization or text replacement.
+    /// </summary>
+    public string RawText { get; } = rawText ?? text.TextValue;
 
     /// <summary>
     /// The text being emitted.

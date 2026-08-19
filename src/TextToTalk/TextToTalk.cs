@@ -257,8 +257,8 @@ private readonly IDalamudPluginInterface pluginInterface;
                     ev => FunctionalUtils.RunSafely(
                         () =>
                         {
-                            Say(ev.Speaker, ev.SpeakerName, ev.GetChatType(), ev.Text.TextValue, ev.Source,
-                                ev is ChatTextEmitEvent chatEvent ? chatEvent.SpeakerWorld : null);
+                            Say(ev.Speaker, ev.SpeakerName, ev.GetChatType(), ev.Text.TextValue, ev.RawText,
+                                ev.Source, ev is ChatTextEmitEvent chatEvent ? chatEvent.SpeakerWorld : null);
                             this.dialogueSessionService.NotifyDialogue(ev.Source);
                         },
                         ex => DetailedLog.Error(ex, "Failed to handle text emit event")),
@@ -323,7 +323,7 @@ private readonly IDalamudPluginInterface pluginInterface;
         }
 
         private unsafe void Say(GameObject? speaker, SeString speakerName, XivChatType? chatType, string textValue,
-            TextSource source, string? speakerWorld)
+            string rawText, TextSource source, string? speakerWorld)
         {
             // Check if this speaker should be skipped
             if (speaker != null && this.rateLimiter.TryRateLimit(speaker))
@@ -421,6 +421,7 @@ private readonly IDalamudPluginInterface pluginInterface;
                 Source = source,
                 Speaker = cleanSpeakerName,
                 SpeakerWorld = speakerWorld,
+                RawText = rawText,
                 Text = cleanText,
                 Style = textStyle,
                 TextTemplate = textTemplate,

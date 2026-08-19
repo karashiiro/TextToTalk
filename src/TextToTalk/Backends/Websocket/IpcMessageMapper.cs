@@ -6,6 +6,7 @@ namespace TextToTalk.Backends.Websocket;
 public partial class IpcMessageMapper
 {
     [MapProperty(nameof(SayRequest.Text), nameof(IpcMessage.Payload))]
+    [MapProperty(nameof(SayRequest.RawText), nameof(IpcMessage.RawPayload))]
     [MapProperty(nameof(SayRequest.TextTemplate), nameof(IpcMessage.PayloadTemplate))]
     [MapProperty(nameof(SayRequest.MessageType), "type")]
     public partial IpcMessage MapSayRequest(SayRequest request);
