@@ -50,8 +50,8 @@ namespace TextToTalk.Utils
             var seString = textNode->NodeText.StringPtr.AsDalamudSeString();
             return seString.TextValue
                 .Trim()
-                .Replace("\n", "")
-                .Replace("\r", "");
+                .Replace("\r\n", "\n")
+                .Replace("\r", "\n");
         }
 
         public static string StripAngleBracketedText(string text)
