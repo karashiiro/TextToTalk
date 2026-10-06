@@ -35,6 +35,27 @@ public class TalkUtilsTests
     }
 
     [Theory]
+    [InlineData("A simple sentence.", "A simple sentence.")]
+    [InlineData("The stronghold contains immense manufacturing and storage facilities, and it \nis the primary supplier of materiel for imperial forces stationed throughout \nEorzea.", "The stronghold contains immense manufacturing and storage facilities, and it is the primary supplier of materiel for imperial forces stationed throughout Eorzea.")]
+    public void NormalizeAddonTextWhitespace_CollapsesWrappedSentence(string input, string expected)
+    {
+        var actual = TalkUtils.NormalizeAddonTextWhitespace(input);
+        Assert.Equal(expected, actual);
+    }
+
+    [Theory]
+    [InlineData("\r\nFirst\r\n\r\nSecond\r\n", "First Second")]
+    [InlineData("\rFirst\r\rSecond\r", "First Second")]
+    [InlineData("\nFirst\n\nSecond\n", "First Second")]
+    [InlineData("\t  First\t\tSecond  \t", "First Second")]
+    [InlineData(" \r\n\tFirst \t\r\n Second\n ", "First Second")]
+    public void NormalizeAddonTextWhitespace_CollapsesNewlineAndRepeatedWhitespace(string input, string expected)
+    {
+        var actual = TalkUtils.NormalizeAddonTextWhitespace(input);
+        Assert.Equal(expected, actual);
+    }
+
+    [Theory]
     [InlineData("—", " - ")]
     public void NormalizePunctuation_ReplacesHyphens(string input, string expected)
     {
