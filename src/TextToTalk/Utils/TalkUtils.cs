@@ -22,9 +22,13 @@ namespace TextToTalk.Utils
         [GeneratedRegex("<[^<]*>", RegexOptions.Compiled)]
         private static partial Regex BracketedRegex();
 
+        [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
+        private static partial Regex WhitespaceRegex();
+
         private static readonly Regex Speakable = SpeakableRegex();
         private static readonly Regex Stutter = StutterRegex();
         private static readonly Regex Bracketed = BracketedRegex();
+        private static readonly Regex Whitespace = WhitespaceRegex();
 
         public static unsafe AddonTalkText ReadTalkAddon(AddonTalk* talkAddon)
         {
@@ -48,10 +52,12 @@ namespace TextToTalk.Utils
         {
             if (textNode == null) return "";
             var seString = textNode->NodeText.StringPtr.AsDalamudSeString();
-            return seString.TextValue
-                .Trim()
-                .Replace("\r\n", "\n")
-                .Replace("\r", "\n");
+            return NormalizeAddonTextWhitespace(seString.TextValue);
+        }
+
+        public static string NormalizeAddonTextWhitespace(string text)
+        {
+            return Whitespace.Replace(text, " ").Trim();
         }
 
         public static string StripAngleBracketedText(string text)
