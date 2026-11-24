@@ -14,6 +14,11 @@ namespace TextToTalk.Backends.Megaphone;
 
 public class MegaphoneBackend : VoiceBackend
 {
+    public override BackendConfiguration Configuration { get; } = new()
+    {
+        PreserveAngleBracketedText = true,
+    };
+
     private static readonly Vector4 Red = new(1, 0, 0, 1);
     private static readonly Vector4 Hint = new(1.0f, 1.0f, 1.0f, 0.6f);
     private static readonly Vector4 Azure = new(0.24f, 0.44f, 0.6f, 1.0f);

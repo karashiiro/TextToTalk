@@ -66,6 +66,17 @@ namespace TextToTalk.Utils
             return Bracketed.Replace(text, "").Trim();
         }
 
+        public static string PreprocessSpeechText(string text, bool preserveAngleBracketedText, bool removeStutters)
+        {
+            return FunctionalUtils.Pipe(
+                text,
+                t => preserveAngleBracketedText ? t : StripAngleBracketedText(t),
+                ReplaceSsmlTokens,
+                NormalizePunctuation,
+                t => removeStutters ? RemoveStutters(t) : t,
+                t => t.Trim());
+        }
+
         public static string ReplaceSsmlTokens(string text)
         {
             return text.Replace("&", "and");

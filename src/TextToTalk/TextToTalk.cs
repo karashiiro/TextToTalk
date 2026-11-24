@@ -374,14 +374,10 @@ private readonly IDalamudPluginInterface pluginInterface;
                 textContent = textValue; 
             }
 
-                // Run a preprocessing pipeline to clean the text for the speech synthesizer
-                var cleanText = FunctionalUtils.Pipe(
-                        textContent,
-                        TalkUtils.StripAngleBracketedText,
-                        TalkUtils.ReplaceSsmlTokens,
-                        TalkUtils.NormalizePunctuation,
-                        t => this.config.RemoveStutterEnabled ? TalkUtils.RemoveStutters(t) : t,
-                        x => x.Trim());
+            // Run a preprocessing pipeline to clean the text for the speech synthesizer
+            var preserveAngleBracketedText = this.backendManager.Configuration.PreserveAngleBracketedText;
+            var cleanText = TalkUtils.PreprocessSpeechText(
+                textContent, preserveAngleBracketedText, this.config.RemoveStutterEnabled);
 
             // Ensure that the result is clean; ignore it otherwise
             if (!cleanText.Any() || !TalkUtils.IsSpeakable(cleanText))

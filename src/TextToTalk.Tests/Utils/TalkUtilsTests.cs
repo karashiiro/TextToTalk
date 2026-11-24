@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
+using TextToTalk.Backends;
+using TextToTalk.Events;
 using TextToTalk.Utils;
 using Xunit;
 
@@ -69,6 +71,37 @@ public class TalkUtilsTests
     {
         var actual = TalkUtils.StripAngleBracketedText(input);
         Assert.Equal(expected, actual);
+    }
+
+    [Theory]
+    [InlineData("<start>Hello", "<start>Hello", "Hello")]
+    [InlineData("Hello<middle> there", "Hello<middle> there", "Hello there")]
+    [InlineData("Hello<end>", "Hello<end>", "Hello")]
+    [InlineData("<one>Hello<two> there<three>", "<one>Hello<two> there<three>", "Hello there")]
+    [InlineData("<cough>", "<cough>", "")]
+    [InlineData("Ordinary text", "Ordinary text", "Ordinary text")]
+    public void PreprocessSpeechText_UsesBackendTagPolicy(string input, string expectedPreserved, string expectedStripped)
+    {
+        Assert.Equal(expectedPreserved, TalkUtils.PreprocessSpeechText(input, preserveAngleBracketedText: true, removeStutters: false));
+        Assert.Equal(expectedStripped, TalkUtils.PreprocessSpeechText(input, preserveAngleBracketedText: false, removeStutters: false));
+    }
+
+    [Fact]
+    public void PreprocessSpeechText_PreservesSpeakableTagOnlyText()
+    {
+        var preserved = TalkUtils.PreprocessSpeechText("<cough>", preserveAngleBracketedText: true, removeStutters: false);
+        var stripped = TalkUtils.PreprocessSpeechText("<cough>", preserveAngleBracketedText: false, removeStutters: false);
+
+        Assert.True(TalkUtils.IsSpeakable(preserved));
+        Assert.Equal(string.Empty, stripped);
+    }
+
+    [Fact]
+    public void VoiceBackend_DoesNotPreserveAngleBracketedTextByDefault()
+    {
+        using var backend = new DefaultPolicyBackend();
+
+        Assert.False(backend.Configuration.PreserveAngleBracketedText);
     }
 
     [Theory]
@@ -165,5 +198,16 @@ public class TalkUtilsTests
     {
         var actual = TalkUtils.RemoveStutters(input);
         Assert.Equal(expected, actual);
+    }
+
+    private sealed class DefaultPolicyBackend : VoiceBackend
+    {
+        public override void Say(SayRequest request) { }
+        public override void CancelAllSpeech() { }
+        public override void CancelSay(TextSource source) { }
+        public override void DrawSettings(IConfigUIDelegates helpers) { }
+        public override void DrawStyles(IConfigUIDelegates helpers) { }
+        public override TextSource GetCurrentlySpokenTextSource() => TextSource.None;
+        protected override void Dispose(bool disposing) { }
     }
 }
