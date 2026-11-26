@@ -32,6 +32,7 @@ namespace TextToTalk.Backends
 
         public VoiceBackend? Backend { get; private set; }
         public bool BackendLoading { get; private set; }
+        public override BackendConfiguration Configuration => Backend?.Configuration ?? base.Configuration;
 
         public VoiceBackendManager(PluginConfiguration config, HttpClient http, IUiBuilder uiBuilder,
             INotificationService notificationService)

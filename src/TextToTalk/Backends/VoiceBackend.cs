@@ -8,6 +8,8 @@ namespace TextToTalk.Backends
     {
         public Vector4 TitleBarColor { get; protected init; }
 
+        public virtual BackendConfiguration Configuration { get; } = new();
+
         public abstract void Say(SayRequest request);
 
         public abstract void CancelAllSpeech();
